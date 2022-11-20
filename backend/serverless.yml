@@ -7,7 +7,7 @@ provider:
 
 functions:
   hello:
-    handler: handler.hello
+    handler: app/dist/handler.hello
     events:
       - httpApi:
           path: /
