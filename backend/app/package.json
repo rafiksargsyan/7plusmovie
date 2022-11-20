@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean"
+  },
   "devDependencies": {
     "@types/node": "^18.11.9",
     "typescript": "^4.9.3"
