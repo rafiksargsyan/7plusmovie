@@ -1,3 +1,5 @@
+org: rsargsyan
+app: backend
 service: backend
 frameworkVersion: '3'
 
@@ -6,9 +8,13 @@ provider:
   runtime: nodejs14.x
 
 functions:
-  hello:
-    handler: app/dist/handler.hello
+  main:
+    handler: src/main.main
     events:
       - httpApi:
           path: /
           method: get
+
+plugins:
+  - serverless-plugin-typescript
+
