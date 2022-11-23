@@ -5,15 +5,24 @@ frameworkVersion: '3'
 
 provider:
   name: aws
+  region: eu-west-3
   runtime: nodejs14.x
+  iam:
+    role:
+      managedPolicies:
+        - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 
 functions:
   main:
-    handler: src/main.main
+    handler: src/createMovie.handler
     events:
-      - httpApi:
-          path: /
-          method: get
+      - http:
+          integration: lambda
+          path: /movies
+          method: post
+          request:
+            template:
+              application/json: '{ "originalLocale" : $input.json(''$.originalLocale'') }'
 
 plugins:
   - serverless-plugin-typescript
