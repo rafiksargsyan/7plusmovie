@@ -12,6 +12,7 @@ interface CreateMovieParam {
 }
 
 export const handler = async (event: CreateMovieParam): Promise<string> => {
+  throw new MyError("MY error");
   let movie = new Movie(event.originalLocale, event.originalTitle, event.webUIGridViewPosterImageCloudfrontURL,
     event.subtitles, event.mpdFileCloudfrontURL);
   console.log(movie); 
@@ -19,3 +20,12 @@ export const handler = async (event: CreateMovieParam): Promise<string> => {
 
   return movie.id;
 };
+
+class MyError extends Error {
+  foo: string;
+
+  constructor(foo: string) {
+    super();
+    this.foo = foo;
+  }
+}
