@@ -1,21 +1,64 @@
-import {v4 as uuid} from 'uuid';
+import { v4 as uuid } from 'uuid';
+import { L8nLangCode } from './L8nLangCodes';
+
+type RelativePath = string;
 
 export class Movie {
-    id: string;
-    originalLocale: string;
-    originalTitle: string;
-    webUIGridViewPosterImageCloudfrontURL: string;
-    subtitles: { [key: string]: string };
-    mpdFileCloudfrontURL: string;
+  public readonly id: string;
+  private creationTime: number;
+  private lastUpdatetime: number;
+  private originalLocale: L8nLangCode;
+  private originalTitle: string;
+  private posterImagesPortrait: { [key: string]: RelativePath };
+  private posterImagesLandscape: { [key: string]: RelativePath };
+  private subtitles: { [key: string]: RelativePath };
+  private mpdFile: RelativePath;
+  private releaseYear: number;
 
-    constructor(originalLocale: string, originalTitle: string, posterURL: string,
-        subtitles : { [key: string]: string }, mpdFileURL: string) {
-        
-        this.id = uuid();
-        this.originalLocale = originalLocale;
-        this.originalTitle = originalTitle;
-        this.webUIGridViewPosterImageCloudfrontURL = posterURL;
-        this.subtitles = subtitles;
-        this.mpdFileCloudfrontURL = mpdFileURL;
+  public constructor(originalLocale: L8nLangCode, originalTitle: string, releaseYear: number) {
+    this.id = uuid();
+    this.originalLocale = originalLocale;
+    this.originalTitle = this.validateTitle(originalTitle);
+    this.releaseYear = this.validateReleaseYear(releaseYear);
+    this.creationTime = Date.now();
+    this.lastUpdatetime = this.creationTime;
+  }
+
+  private validateTitle(title: string) {
+    if (! /\S/.test(title)) {
+      throw new InvalidTitleError();
     }
+    return title.trim();
+  }
+
+  private validateReleaseYear(releaseYear: number) {
+    if (!Number.isInteger(releaseYear) || releaseYear < 1895 || releaseYear > new Date().getFullYear()) {
+        throw new InvalidReleaseYearError();
+    }
+    return releaseYear;
+  }
+
+  public addPosterImagePortrait(locale: L8nLangCode, relativePath: RelativePath) {
+    if (! /\S/.test(relativePath)) {
+      throw new InvalidPosterImageRelativePath();
+    }
+    this.posterImagesPortrait[locale.code] = relativePath;
+    this.lastUpdatetime = Date.now();
+  }
+
+  public addMpdFile(relativePath: RelativePath) {
+    if (! /\S/.test(relativePath)) {
+        throw new InvalidMpdFileRelativePath();
+      }
+    this.mpdFile = relativePath;
+    this.lastUpdatetime = Date.now();
+  }
 }
+
+class InvalidTitleError extends Error {}
+
+class InvalidReleaseYearError extends Error {}
+
+class InvalidPosterImageRelativePath extends Error {}
+
+class InvalidMpdFileRelativePath extends Error {}
