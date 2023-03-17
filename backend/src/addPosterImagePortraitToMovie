@@ -9,7 +9,7 @@ const marshaller = new Marshaller();
 
 interface AddPosterImagePortraitParam {
   movieId: string;
-  locale: L8nLangCode;
+  locale: string;
   relativePath: string;
 }
 
@@ -26,7 +26,7 @@ export const handler = async (event: AddPosterImagePortraitParam): Promise<void>
       movie = marshaller.unmarshallItem(data.Item as AttributeMap) as unknown as Movie;
     }
   })
-  movie.addPosterImagePortrait(event.locale, event.relativePath)
+  movie.addPosterImagePortrait(new L8nLangCode(event.locale), event.relativePath);
   await docClient.put({ TableName: 'movies', Item: movie }).promise();
 };
 
