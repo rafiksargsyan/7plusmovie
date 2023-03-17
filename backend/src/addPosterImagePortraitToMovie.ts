@@ -14,8 +14,9 @@ interface AddPosterImagePortraitParam {
 }
 
 export const handler = async (event: AddPosterImagePortraitParam): Promise<void> => {
+  const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
   const queryParams = {
-    TableName: 'movies',
+    TableName: dynamodbMovieTableName,
     Key: { 'id': event.movieId }
   } as const;
   let movie!: Movie;
@@ -27,7 +28,7 @@ export const handler = async (event: AddPosterImagePortraitParam): Promise<void>
     }
   })
   movie.addPosterImagePortrait(new L8nLangCode(event.locale), event.relativePath);
-  await docClient.put({ TableName: 'movies', Item: movie }).promise();
+  await docClient.put({ TableName: dynamodbMovieTableName, Item: movie }).promise();
 };
 
 class FailedToGetMovieError extends Error {}

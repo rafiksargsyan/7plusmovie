@@ -6,7 +6,7 @@ type RelativePath = string;
 export class Movie {
   public readonly id: string;
   private creationTime: number;
-  private lastUpdatetime: number;
+  private lastUpdateTime: number;
   private originalLocale: L8nLangCode;
   private originalTitle: string;
   private posterImagesPortrait: { [key: string]: RelativePath };
@@ -21,7 +21,7 @@ export class Movie {
     this.originalTitle = this.validateTitle(originalTitle);
     this.releaseYear = this.validateReleaseYear(releaseYear);
     this.creationTime = Date.now();
-    this.lastUpdatetime = this.creationTime;
+    this.lastUpdateTime = this.creationTime;
   }
 
   private validateTitle(title: string) {
@@ -43,7 +43,7 @@ export class Movie {
       throw new InvalidPosterImageRelativePath();
     }
     this.posterImagesPortrait[locale.code] = relativePath;
-    this.lastUpdatetime = Date.now();
+    this.lastUpdateTime = Date.now();
   }
 
   public addMpdFile(relativePath: RelativePath) {
@@ -51,7 +51,7 @@ export class Movie {
         throw new InvalidMpdFileRelativePath();
       }
     this.mpdFile = relativePath;
-    this.lastUpdatetime = Date.now();
+    this.lastUpdateTime = Date.now();
   }
 }
 

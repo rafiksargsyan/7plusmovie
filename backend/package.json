@@ -4,7 +4,8 @@
   "dependencies": {
     "@aws/dynamodb-auto-marshaller": "^0.7.1",
     "@types/uuid": "^8.3.4",
-    "aws-sdk": "^2.1260.0"
+    "aws-sdk": "^2.1260.0",
+    "cloudinary": "^1.35.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.101",
