@@ -4,6 +4,7 @@
   "dependencies": {
     "@aws/dynamodb-auto-marshaller": "^0.7.1",
     "@types/uuid": "^8.3.4",
+    "algoliasearch": "^4.15.0",
     "aws-sdk": "^2.1260.0",
     "cloudinary": "^1.35.0"
   },
