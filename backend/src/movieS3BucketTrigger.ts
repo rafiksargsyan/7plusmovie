@@ -15,7 +15,7 @@ export const handler = async (event: S3Event): Promise<void> => {
   const { ContentType } = await s3.headObject(params).promise();
   if (ContentType != undefined && ContentType.startsWith('image')) {
     const url = s3.getSignedUrl('getObject', params);
-    const folder = key.substring(0, key.lastIndexOf("\\")+1);
+    const folder = key.substring(0, key.lastIndexOf("/")+1);
     const uploadOptions = { use_filename: true, unique_filename: false, folder: folder };
     await cloudinary.uploader.upload(url, uploadOptions);
   }

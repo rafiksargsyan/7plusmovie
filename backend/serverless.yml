@@ -11,10 +11,13 @@ provider:
     role:
       managedPolicies:
         - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 
 functions:
   main:
     handler: src/createMovie.handler
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: movies
     events:
       - http:
           integration: lambda
@@ -22,8 +25,22 @@ functions:
           method: post
           request:
             template:
-              application/json: '{ "originalLocale" : $input.json(''$.originalLocale'') }'
+              application/json: '{ "originalLocale" : $input.json(''$.originalLocale''),
+                                   "originalTitle" : $input.json(''$.originalTitle''),
+                                   "releaseYear" : $input.json(''$.releaseYear'') }'
               application/x-www-form-urlencoded: null
+
+  movieS3BucketTrigger:
+    handler: src/movieS3BucketTrigger.handler
+    environment:
+      CLOUDINARY_CLOUD_NAME: donx7lsrj
+      CLOUDINARY_API_KEY: 772652458475781
+      CLOUDINARY_API_SECRET: MaMSYko9RE5bFWg9p2fWSkpAxFU
+    events:
+      - s3:
+          bucket: test.rsargsyan.com
+          event: s3:ObjectCreated:*
+          existing: true
 
 plugins:
   - serverless-plugin-typescript
