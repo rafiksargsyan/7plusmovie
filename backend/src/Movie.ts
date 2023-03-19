@@ -63,6 +63,15 @@ export class Movie {
     this.mpdFile = relativePath;
     this.lastUpdateTime = Date.now();
   }
+
+  public addTitleL8n(locale: L8nLangCode, title: string) {
+    if (! /\S/.test(title)) {
+      throw new InvalidTitleL8nError();
+    }
+    // TODO: validate that title is in provided locale
+    this.titleL8ns[locale.code] = title;
+    this.lastUpdateTime = Date.now();
+  }
 }
 
 class InvalidTitleError extends Error {}
@@ -74,3 +83,5 @@ class InvalidPosterImageRelativePathError extends Error {}
 class InvalidMpdFileRelativePathError extends Error {}
 
 class InvalidOriginalLocaleError extends Error {}
+
+class InvalidTitleL8nError extends Error {}
