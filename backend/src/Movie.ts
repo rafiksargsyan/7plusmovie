@@ -9,6 +9,7 @@ export class Movie {
   private lastUpdateTime: number;
   private originalLocale: L8nLangCode;
   private originalTitle: string;
+  private titleL8ns: { [key: string]: string } = {};
   private posterImagesPortrait: { [key: string]: RelativePath } = {};
   private posterImagesLandscape: { [key: string]: RelativePath } = {};
   private subtitles: { [key: string]: RelativePath } = {};
