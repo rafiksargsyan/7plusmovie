@@ -42,6 +42,37 @@ functions:
           event: s3:ObjectCreated:*
           existing: true
 
+  addPosterImagePortraitToMovie:
+    handler: src/addPosterImagePortraitToMovie.handler
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: movies
+    events:
+      - http:
+          integration: lambda
+          path: /addPosterImagePortraitToMovie
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : $input.json(''$.movieId''),
+                                   "locale" : $input.json(''$.locale''),
+                                   "relativePath" : $input.json(''$.relativePath'') }'
+              application/x-www-form-urlencoded: null
+
+  addMpdFileToMovie:
+    handler: src/addMpdFileToMovie.handler
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: movies
+    events:
+      - http:
+          integration: lambda
+          path: /addMpdFileToMovie
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : $input.json(''$.movieId''),
+                                   "relativePath" : $input.json(''$.relativePath'') }'
+              application/x-www-form-urlencoded: null                      
+
 plugins:
   - serverless-plugin-typescript
 

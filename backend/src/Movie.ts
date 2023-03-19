@@ -9,30 +9,39 @@ export class Movie {
   private lastUpdateTime: number;
   private originalLocale: L8nLangCode;
   private originalTitle: string;
-  private posterImagesPortrait: { [key: string]: RelativePath };
-  private posterImagesLandscape: { [key: string]: RelativePath };
-  private subtitles: { [key: string]: RelativePath };
+  private posterImagesPortrait: { [key: string]: RelativePath } = {};
+  private posterImagesLandscape: { [key: string]: RelativePath } = {};
+  private subtitles: { [key: string]: RelativePath } = {};
   private mpdFile: RelativePath;
   private releaseYear: number;
 
-  public constructor(originalLocale: L8nLangCode, originalTitle: string, releaseYear: number) {
-    this.id = uuid();
-    this.originalLocale = originalLocale;
-    this.originalTitle = this.validateTitle(originalTitle);
-    this.releaseYear = this.validateReleaseYear(releaseYear);
-    this.creationTime = Date.now();
-    this.lastUpdateTime = this.creationTime;
+  public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
+    if (!createEmptyObject) {
+      this.id = uuid();
+      this.originalLocale = this.validateOriginalLocale(originalLocale);
+      this.originalTitle = this.validateTitle(originalTitle);
+      this.releaseYear = this.validateReleaseYear(releaseYear);
+      this.creationTime = Date.now();
+      this.lastUpdateTime = this.creationTime;
+    }
   }
 
-  private validateTitle(title: string) {
-    if (! /\S/.test(title)) {
+  private validateOriginalLocale(origianlLocale: L8nLangCode | undefined) {
+    if (origianlLocale === undefined) {
+      throw new InvalidOriginalLocaleError();
+    }
+    return origianlLocale;
+  }
+
+  private validateTitle(title: string | undefined) {
+    if (title === undefined || ! /\S/.test(title)) {
       throw new InvalidTitleError();
     }
     return title.trim();
   }
 
-  private validateReleaseYear(releaseYear: number) {
-    if (!Number.isInteger(releaseYear) || releaseYear < 1895 || releaseYear > new Date().getFullYear()) {
+  private validateReleaseYear(releaseYear: number | undefined) {
+    if (releaseYear === undefined || !Number.isInteger(releaseYear) || releaseYear < 1895 || releaseYear > new Date().getFullYear()) {
         throw new InvalidReleaseYearError();
     }
     return releaseYear;
@@ -40,7 +49,7 @@ export class Movie {
 
   public addPosterImagePortrait(locale: L8nLangCode, relativePath: RelativePath) {
     if (! /\S/.test(relativePath)) {
-      throw new InvalidPosterImageRelativePath();
+      throw new InvalidPosterImageRelativePathError();
     }
     this.posterImagesPortrait[locale.code] = relativePath;
     this.lastUpdateTime = Date.now();
@@ -48,7 +57,7 @@ export class Movie {
 
   public addMpdFile(relativePath: RelativePath) {
     if (! /\S/.test(relativePath)) {
-        throw new InvalidMpdFileRelativePath();
+        throw new InvalidMpdFileRelativePathError();
       }
     this.mpdFile = relativePath;
     this.lastUpdateTime = Date.now();
@@ -59,6 +68,8 @@ class InvalidTitleError extends Error {}
 
 class InvalidReleaseYearError extends Error {}
 
-class InvalidPosterImageRelativePath extends Error {}
+class InvalidPosterImageRelativePathError extends Error {}
 
-class InvalidMpdFileRelativePath extends Error {}
+class InvalidMpdFileRelativePathError extends Error {}
+
+class InvalidOriginalLocaleError extends Error {}
