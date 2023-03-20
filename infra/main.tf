@@ -21,5 +21,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "media_assets_lifecycle_config"
     transition {
         storage_class = "INTELLIGENT_TIERING"
     }
+
+    status = "Enabled"
   }
 }
