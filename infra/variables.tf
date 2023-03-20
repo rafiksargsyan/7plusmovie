@@ -10,3 +10,7 @@ variable "aws_workloads_access_key" {
 variable "aws_workloads_secret_key" {
     type = string
 }
+
+variable "deployment_name" {
+    type = string
+}
