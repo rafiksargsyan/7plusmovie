@@ -7,7 +7,7 @@ resource "aws_cloudfront_distribution" "chalkhalting" {
   enabled = true
   default_cache_behavior {
     allowed_methods        = ["HEAD", "GET"]
-    cached_methods         = ["GET"]
+    cached_methods         = ["HEAD", "GET"]
     target_origin_id       = data.aws_s3_bucket.media_assets_bucket.bucket
     viewer_protocol_policy = "allow-all"
     forwarded_values {
