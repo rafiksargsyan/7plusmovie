@@ -47,10 +47,8 @@ data "aws_iam_policy_document" "allow_access_from_cloudfront" {
     ]
 
     condition {
-      test = "StringEquals"
-
-      values = var.cloudfront_distro_arns
-
+      test     = "StringEquals"
+      values   = var.cloudfront_distro_arns
       variable = "aws:SourceArn"
     }
   }
