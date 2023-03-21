@@ -9,7 +9,7 @@ locals {
 }
 
 resource "aws_s3_bucket" "media_assets" {
-    bucket = "media-assets-${local.deployment_id}"
+  bucket = "media-assets-${local.deployment_id}"
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "media_assets_lifecycle_config" {
@@ -47,13 +47,11 @@ data "aws_iam_policy_document" "allow_access_from_cloudfront" {
     ]
 
     condition {
-    test = "StringEquals"
+      test = "StringEquals"
 
-    values = [
-      module.chalkhalting.cloudfront_distro_arn
-    ]
+      values = var.cloudfront_distro_arns
 
-    variable = "aws:SourceArn"
+      variable = "aws:SourceArn"
     }
   }
 }
