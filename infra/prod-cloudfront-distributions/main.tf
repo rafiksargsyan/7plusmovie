@@ -27,5 +27,7 @@ resource "aws_cloudfront_distribution" "chalkhalting" {
       restriction_type = "none"
     }
   }
-  viewer_certificate {}
+  viewer_certificate {
+    cloudfront_default_certificate = true
+  }
 }
