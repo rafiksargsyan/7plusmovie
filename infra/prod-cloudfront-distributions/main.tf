@@ -9,7 +9,7 @@ resource "aws_cloudfront_distribution" "chalkhalting" {
     allowed_methods        = []
     cached_methods         = []
     target_origin_id       = ""
-    viewer_protocol_policy = ""
+    viewer_protocol_policy = "allow-all"
   }
   origin {
     domain_name = data.aws_s3_bucket.media_assets_bucket.bucket_regional_domain_name
@@ -17,7 +17,7 @@ resource "aws_cloudfront_distribution" "chalkhalting" {
   }
   restrictions {
     geo_restriction {
-      restriction_type = ""
+      restriction_type = "none"
     }
   }
   viewer_certificate {}
