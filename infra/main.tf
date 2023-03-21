@@ -25,3 +25,35 @@ resource "aws_s3_bucket_lifecycle_configuration" "media_assets_lifecycle_config"
     status = "Enabled"
   }
 }
+
+resource "aws_s3_bucket_policy" "allow_access_from_cloudfront" {
+  bucket = aws_s3_bucket.media_assets.id
+  policy = data.aws_iam_policy_document.allow_access_from_cloudfront.json
+}
+
+data "aws_iam_policy_document" "allow_access_from_cloudfront" {
+  statement {
+    principals {
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+
+    actions = [
+      "s3:GetObject"
+    ]
+
+    resources = [
+      "${aws_s3_bucket.media_assets.arn}/*"
+    ]
+
+    condition {
+    test = "StringEquals"
+
+    values = [
+      module.chalkhalting.cloudfront_distro_arn
+    ]
+
+    variable = "aws:SourceArn"
+    }
+  }
+}
