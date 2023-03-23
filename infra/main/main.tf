@@ -43,7 +43,8 @@ data "aws_iam_policy_document" "allow_access_from_cloudfront" {
     ]
 
     resources = [
-      "${aws_s3_bucket.media_assets.arn}/*"
+      "${aws_s3_bucket.media_assets.arn}/*",
+      "${aws_s3_bucket.media_assets.arn}"
     ]
 
     condition {
