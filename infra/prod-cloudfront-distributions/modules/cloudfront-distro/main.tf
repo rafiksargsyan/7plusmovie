@@ -34,6 +34,7 @@ resource "aws_cloudfront_distribution" "cf_distro" {
 }
 
 resource "aws_cloudfront_origin_access_control" "oac" {
+  provider                          = aws.cf_account
   name                              = "s3-origin-access-control"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
