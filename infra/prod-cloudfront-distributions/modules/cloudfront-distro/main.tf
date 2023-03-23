@@ -3,6 +3,7 @@ data "aws_s3_bucket" "media_assets_bucket" {
 }
 
 resource "aws_cloudfront_distribution" "cf_distro" {
+  provider = "aws.cf_account"
   enabled = true
   default_cache_behavior {
     allowed_methods        = ["HEAD", "GET"]
