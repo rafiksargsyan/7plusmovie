@@ -1,3 +1,6 @@
-output "chalkhalting_cf_arn" {
-  value = module.cf_distro_chalkhalting.cf_arn
+output "chalkhalting" {
+  value = map(
+    "cf_domain", module.cf_distro_chalkhalting.cf_domain,
+    "signer_key_id", module.cf_distro_chalkhalting.signer_key_id
+  )
 }
