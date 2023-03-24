@@ -54,3 +54,10 @@ data "aws_iam_policy_document" "allow_access_from_cloudfront" {
     }
   }
 }
+
+resource "aws_s3_object" "test_object" {
+  bucket = aws_s3_bucket.media_assets.bucket
+  key    = "test-file.txt"
+  source = "./resource/test-file.txt"
+  etag   = filemd5("./resources/test-file.txt")
+}
