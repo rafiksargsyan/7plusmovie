@@ -17,6 +17,7 @@ resource "aws_cloudfront_distribution" "cf_distro" {
         forward = "none"
       }
     }
+    trusted_key_groups = [ aws_cloudfront_key_group.signers_key_group.id ]
   }
   origin {
     domain_name              = data.aws_s3_bucket.media_assets_bucket.bucket_regional_domain_name
@@ -39,4 +40,16 @@ resource "aws_cloudfront_origin_access_control" "oac" {
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
+}
+
+resource "aws_cloudfront_public_key" "signing_verification_public_key" {
+  provider    = aws.cf_account
+  encoded_key = file("./resources/public_key.pem")
+  name        = "signing-verification-public-key"
+}
+
+resource "aws_cloudfront_key_group" "signers_key_group" {
+  provider = aws.cf_account
+  name     = "signers-key-group"
+  items    = [ aws_cloudfront_public_key.signing_verification_public_key.id ]
 }
