@@ -44,7 +44,7 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 
 resource "aws_cloudfront_public_key" "signing_verification_public_key" {
   provider    = aws.cf_account
-  encoded_key = file("./resources/public_key.pem")
+  encoded_key = file("./resources/public-key.pem")
   name        = "signing-verification-public-key"
 }
 
