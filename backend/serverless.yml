@@ -97,6 +97,26 @@ functions:
                                    "locale" : $input.json(''$.locale''),
                                    "title" : $input.json(''$.title'') }'
               application/x-www-form-urlencoded: null
+    
+  createCloudFrontDistroMetadata:
+    handler: src/createCloudFrontDistroMetadata.handler
+    environment:
+      DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME: cloudfront_distro_metadata
+      TEST_FILE_PATH: test-file.txt
+    events:
+      - http:
+          integration: lambda
+          path: /createCloudFrontDistroMetadata
+          method: post
+          request:
+            template:
+              application/json: '{ "domain" : $input.json(''$.domain''),
+                                   "arn" : $input.json(''$.arn''),
+                                   "assumeRoleArnForMainAccount" : $input.json(''$.assumeRoleArnForMainAccount''),
+                                   "awsAccountNumber" : $input.json(''$.awsAccountNumber''),
+                                   "signerKeyId" : $input.json(''$.signerKeyId'') }'
+              application/x-www-form-urlencoded: null
+            
 plugins:
   - serverless-plugin-typescript
 
