@@ -1,0 +1,19 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "dependencies": {
+    "@aws/dynamodb-auto-marshaller": "^0.7.1",
+    "@types/uuid": "^8.3.4",
+    "algoliasearch": "^4.15.0",
+    "aws-sdk": "^2.1260.0",
+    "cloudinary": "^1.35.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.101",
+    "serverless": "^3.21.0",
+    "serverless-offline": "^9.1.6",
+    "serverless-plugin-typescript": "^2.1.2",
+    "typescript": "^4.7.4"
+  },
+  "type": "commonjs"
+}
