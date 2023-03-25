@@ -1,9 +1,10 @@
 import { DynamoDB } from 'aws-sdk';
-import { CloudFrontDistroMetadata } from "./CloudFrontDistroMetadata";
+import { CloudFrontDistroMetadata } from "../domain/CloudFrontDistroMetadata";
+
+const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
+const testFilePath = process.env.TEST_FILE_PATH!;
 
 const docClient = new DynamoDB.DocumentClient();
-const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!
-const testFilePath = process.env.TEST_FILE_PATH!
 
 interface CreateCFDistroParam {
   domain: string;
@@ -14,7 +15,6 @@ interface CreateCFDistroParam {
 }
 
 export const handler = async (event: CreateCFDistroParam): Promise<string> => {
-
   // TODO: 1. Actually create presigned url or cookies using testFilePath and make http call to the url
   //       2. Also check that assume role works   
   let cfDistro = new CloudFrontDistroMetadata(false, event.domain, event.arn,

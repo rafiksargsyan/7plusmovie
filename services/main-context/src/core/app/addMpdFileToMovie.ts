@@ -1,5 +1,7 @@
-import { Movie } from "./Movie";
+import { Movie } from "../domain/Movie";
 import { DynamoDB } from 'aws-sdk';
+
+const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 
 const docClient = new DynamoDB.DocumentClient();
 
@@ -8,8 +10,7 @@ interface AddMpdFileParam {
   relativePath: string;
 }
 
-export const handler = async (event: AddMpdFileParam): Promise<void> => {
-  const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
+export const handler = async (event: AddMpdFileParam): Promise<void> => { 
   const queryParams = {
     TableName: dynamodbMovieTableName,
     Key: { 'id': event.movieId }

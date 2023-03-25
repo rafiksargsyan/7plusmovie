@@ -1,7 +1,8 @@
 org: rsargsyan
-app: backend
-service: backend
+app: 7plusmovie
+service: main-context
 frameworkVersion: '3'
+useDotenv: true
 
 provider:
   name: aws
@@ -14,10 +15,8 @@ provider:
         - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 
 functions:
-  main:
+  createMovie:
     handler: src/createMovie.handler
-    environment:
-      DYNAMODB_MOVIE_TABLE_NAME: movies
     events:
       - http:
           integration: lambda
@@ -32,10 +31,6 @@ functions:
 
   movieS3BucketTrigger:
     handler: src/movieS3BucketTrigger.handler
-    environment:
-      CLOUDINARY_CLOUD_NAME: donx7lsrj
-      CLOUDINARY_API_KEY: 772652458475781
-      CLOUDINARY_API_SECRET: MaMSYko9RE5bFWg9p2fWSkpAxFU
     events:
       - s3:
           bucket: test.rsargsyan.com
@@ -44,8 +39,6 @@ functions:
 
   addPosterImagePortraitToMovie:
     handler: src/addPosterImagePortraitToMovie.handler
-    environment:
-      DYNAMODB_MOVIE_TABLE_NAME: movies
     events:
       - http:
           integration: lambda
@@ -60,8 +53,6 @@ functions:
 
   addMpdFileToMovie:
     handler: src/addMpdFileToMovie.handler
-    environment:
-      DYNAMODB_MOVIE_TABLE_NAME: movies
     events:
       - http:
           integration: lambda
@@ -75,12 +66,8 @@ functions:
   
   movieUpdateHandler:
     handler: src/movieUpdateHandler.handler
-    environment:
-      ALGOLIA_APP_ID: DIM5E3ER59
-      ALGOLIA_ADMIN_KEY: a152669420260423bce5d3a05402e764
-      ALGOLIA_ALL_INDEX: prod_ALL
     events:
-      - stream: arn:aws:dynamodb:eu-west-3:192331707131:table/movies/stream/2023-03-19T15:47:21.903
+      - stream: ${file(./.env.${sls:stage}):DYNAMODB_MOVIE_STREAM_ARN}
   
   addTitleL8nToMovie:
     handler: src/addTitleL8nToMovie.handler
@@ -100,9 +87,6 @@ functions:
     
   createCloudFrontDistroMetadata:
     handler: src/createCloudFrontDistroMetadata.handler
-    environment:
-      DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME: cloudfront_distro_metadata
-      TEST_FILE_PATH: test-file.txt
     events:
       - http:
           integration: lambda

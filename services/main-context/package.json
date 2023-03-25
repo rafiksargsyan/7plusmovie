@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "main-context",
   "version": "1.0.0",
   "dependencies": {
     "@aws/dynamodb-auto-marshaller": "^0.7.1",

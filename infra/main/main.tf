@@ -61,3 +61,27 @@ resource "aws_s3_object" "test_object" {
   source = "./resources/test-file.txt"
   etag   = filemd5("./resources/test-file.txt")
 }
+
+resource "aws_dynamodb_table" "movie" {
+  name     = "${local.deployment_id}-movie"
+  hash_key = "id"
+  attribute {
+    name = "id"
+    type = "S"
+  }
+  stream_enabled   = true
+  stream_view_type = "NEW_IMAGE"
+  billing_mode     = "PAY_PER_REQUEST"
+  deletion_protection_enabled = var.dynamodb_deletion_protection_enabled
+}
+
+resource "aws_dynamodb_table" "cloudfront_distro_metadata" {
+  name     = "${local.deployment_id}-cloudfront_distro_metadata"
+  hash_key = "id"
+  attribute {
+    name = "id"
+    type = "S"
+  }
+  billing_mode = "PAY_PER_REQUEST"
+  deletion_protection_enabled = var.dynamodb_deletion_protection_enabled
+}

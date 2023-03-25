@@ -1,6 +1,8 @@
-import { Movie } from "./Movie";
+import { Movie } from "../domain/Movie";
 import { DynamoDB } from 'aws-sdk';
-import { L8nLangCode } from "./L8nLangCodes";
+import { L8nLangCode } from "../domain/L8nLangCodes";
+
+const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 
 const docClient = new DynamoDB.DocumentClient();
 
@@ -14,7 +16,7 @@ export const handler = async (event: CreateMovieParam): Promise<string> => {
 
   let movie = new Movie(false, new L8nLangCode(event.originalLocale), event.originalTitle, event.releaseYear);
 
-  await docClient.put({TableName: process.env.DYNAMODB_MOVIE_TABLE_NAME!, Item: movie}).promise();
+  await docClient.put({TableName: dynamodbMovieTableName, Item: movie}).promise();
 
   return movie.id;
 };

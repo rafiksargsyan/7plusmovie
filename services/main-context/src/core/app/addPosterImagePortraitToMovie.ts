@@ -1,6 +1,8 @@
-import { Movie } from "./Movie";
+import { Movie } from "../domain/Movie";
 import { DynamoDB } from 'aws-sdk';
-import { L8nLangCode } from "./L8nLangCodes";
+import { L8nLangCode } from "../domain/L8nLangCodes";
+
+const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 
 const docClient = new DynamoDB.DocumentClient();
 
@@ -11,7 +13,6 @@ interface AddPosterImagePortraitParam {
 }
 
 export const handler = async (event: AddPosterImagePortraitParam): Promise<void> => {
-  const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
   const queryParams = {
     TableName: dynamodbMovieTableName,
     Key: { 'id': event.movieId }
