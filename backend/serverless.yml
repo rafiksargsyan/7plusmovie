@@ -119,4 +119,3 @@ functions:
             
 plugins:
   - serverless-plugin-typescript
-
