@@ -16,7 +16,8 @@ interface CreateCFDistroParam {
 
 export const handler = async (event: CreateCFDistroParam): Promise<string> => {
   // TODO: 1. Actually create presigned url or cookies using testFilePath and make http call to the url
-  //       2. Also check that assume role works   
+  //       2. Also check that assume role works
+  //       3. Check if CloudFront distro with the same aws account already exists
   let cfDistro = new CloudFrontDistroMetadata(false, event.domain, event.arn,
     event.assumeRoleArnForMainAccount, event.awsAccountNumber, event.signerKeyId);
 
