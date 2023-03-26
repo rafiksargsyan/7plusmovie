@@ -85,3 +85,17 @@ resource "aws_dynamodb_table" "cloudfront_distro_metadata" {
   billing_mode = "PAY_PER_REQUEST"
   deletion_protection_enabled = var.dynamodb_deletion_protection_enabled
 }
+
+resource "aws_secretsmanager_secret" "secrets" {
+  name = "${local.deployment_id}-secrets"
+}
+
+resource "aws_secretsmanager_secret_version" "secrets_version" {
+  secret_id     = aws_secretsmanager_secret.secrets.id
+  secret_string = jsonencode(
+    tomap({
+      CLOUDINARY_API_SECRET: var.cloudinary_api_secret
+      ALGOLIA_ADMIN_KEY: var.algolia_admin_key
+    })
+  )
+}

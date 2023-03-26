@@ -13,3 +13,7 @@ output "ddb_movie_table_stream_arn" {
 output "ddb_cf_distro_metadata_table_name" {
   value = aws_dynamodb_table.cloudfront_distro_metadata.name
 }
+
+output "secret_manager_secret_id" {
+  value = aws_secretsmanager_secret.secrets.name
+}

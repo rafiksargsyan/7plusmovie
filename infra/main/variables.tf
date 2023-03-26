@@ -23,3 +23,11 @@ variable "dynamodb_deletion_protection_enabled" {
   type    = bool
   default = false
 }
+
+variable "cloudinary_api_secret" {
+  type = string
+}
+
+variable "algolia_admin_key" {
+  type = string
+}
