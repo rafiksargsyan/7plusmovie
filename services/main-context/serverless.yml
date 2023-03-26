@@ -1,4 +1,4 @@
-org: rsargsyan
+org: 7plusmovie
 app: 7plusmovie
 service: main-context
 frameworkVersion: '3'
@@ -17,7 +17,7 @@ provider:
 
 functions:
   createMovie:
-    handler: src/createMovie.handler
+    handler: src/core/app/createMovie.handler
     events:
       - http:
           integration: lambda
@@ -31,15 +31,15 @@ functions:
               application/x-www-form-urlencoded: null
 
   movieS3BucketTrigger:
-    handler: src/movieS3BucketTrigger.handler
+    handler: src/core/app/movieS3BucketTrigger.handler
     events:
       - s3:
-          bucket: ${file(./.env.${sls:stage}):MEDIA_ASSETS_S3_BUCKET}
+          bucket: ${file(./.env.${sls:stage}.yml):MEDIA_ASSETS_S3_BUCKET}
           event: s3:ObjectCreated:*
           existing: true
 
   addPosterImagePortraitToMovie:
-    handler: src/addPosterImagePortraitToMovie.handler
+    handler: src/core/app/addPosterImagePortraitToMovie.handler
     events:
       - http:
           integration: lambda
@@ -53,7 +53,7 @@ functions:
               application/x-www-form-urlencoded: null
 
   addMpdFileToMovie:
-    handler: src/addMpdFileToMovie.handler
+    handler: src/core/app/addMpdFileToMovie.handler
     events:
       - http:
           integration: lambda
@@ -66,12 +66,12 @@ functions:
               application/x-www-form-urlencoded: null                      
   
   movieUpdateHandler:
-    handler: src/movieUpdateHandler.handler
+    handler: src/core/app/movieUpdateHandler.handler
     events:
-      - stream: ${file(./.env.${sls:stage}):DYNAMODB_MOVIE_STREAM_ARN}
+      - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_MOVIE_STREAM_ARN}
   
   addTitleL8nToMovie:
-    handler: src/addTitleL8nToMovie.handler
+    handler: src/core/app/addTitleL8nToMovie.handler
     environment:
       DYNAMODB_MOVIE_TABLE_NAME: movies
     events:
@@ -87,7 +87,7 @@ functions:
               application/x-www-form-urlencoded: null
     
   createCloudFrontDistroMetadata:
-    handler: src/createCloudFrontDistroMetadata.handler
+    handler: src/core/app/createCloudFrontDistroMetadata.handler
     events:
       - http:
           integration: lambda
