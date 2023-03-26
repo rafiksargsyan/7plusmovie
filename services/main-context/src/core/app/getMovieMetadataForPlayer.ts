@@ -43,7 +43,7 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   
   let signedCookies = getSignedCookies({
     url: `https://${cfDistro.domain}/${movie.id}/*`,
-    privateKey: secret.COOKIE_SIGNING_PRIVATE_KEY,
+    privateKey: Buffer.from(secret.COOKIE_SIGNING_PRIVATE_KEY_BASE64_ENCODED, 'base64'),
     keyPairId: cfDistro.signerKeyId,
     dateLessThan: new Date(Date.now() + (1000 * 60 * 60 * 24 * 1)).toISOString()
   });
