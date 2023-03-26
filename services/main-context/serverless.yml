@@ -101,6 +101,25 @@ functions:
                                    "awsAccountNumber" : $input.json(''$.awsAccountNumber''),
                                    "signerKeyId" : $input.json(''$.signerKeyId'') }'
               application/x-www-form-urlencoded: null
-            
+
+  createMovie:
+    handler: src/core/app/getMovieMetadataForPlayer.handler
+    events:
+      - http:
+          integration: lambda
+          path: /getMovieMetadataForPlayer/{id}
+          method: get
+          request:
+            template:
+              application/json: '{ "movieId" : $input.params(''id'') }'
+              application/x-www-form-urlencoded: null
+          response:
+            headers:
+              Set-Cookie: integration.response.cloudFrontExpiresSetCookie
+              Set-Cookie: integration.response.cloudFrontSignatureSetCookie
+              Set-Cookie: integration.response.cloudFrontKeyPairIdSetCookie
+            template: '{ "subtitles" : $input.json(''$.subtitles''),
+                         "mpdFile" : $input.json(''$.mpdFile'') }'
+     
 plugins:
   - serverless-plugin-typescript

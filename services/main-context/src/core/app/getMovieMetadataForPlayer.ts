@@ -18,11 +18,9 @@ interface GetMovieParam {
 interface GetMovieMetadataResponse {
   subtitles: { [key: string]: string };
   mpdFile: string;
-  cloudFrontSignedCookieDomain: string;
-  cloudFrontSignedCookieExpires: number;
-  cloudFrontSignedCookieSignature: string;
-  cloudFrontSignedCookiePath: string;
-  cloudFrontSignedCookiePublicKeyId: string;
+  cloudFrontExpiresSetCookie: string;
+  cloudFrontSignatureSetCookie: string;
+  cloudFrontKeyPairIdSetCookie: string;
 }
 
 interface Movie {
@@ -51,11 +49,9 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   return {
     subtitles: movie.subtitles,
     mpdFile: movie.mpdFile,
-    cloudFrontSignedCookieDomain: cfDistro.domain,
-    cloudFrontSignedCookieExpires: signedCookies['CloudFront-Expires']!,
-    cloudFrontSignedCookieSignature: signedCookies['CloudFront-Signature'],
-    cloudFrontSignedCookiePath: `/${movie.id}/*`,
-    cloudFrontSignedCookiePublicKeyId: cfDistro.signerKeyId
+    cloudFrontExpiresSetCookie: `CloudFront-Expires=${signedCookies['CloudFront-Expires']}; Domain=${cfDistro.domain}; Path=/${movie.id}/*; Secure; HttpOnly`,
+    cloudFrontSignatureSetCookie: `CloudFront-Signature=${signedCookies['CloudFront-Signature']}; Domain=${cfDistro.domain}; Path=/${movie.id}/*; Secure; HttpOnly`,
+    cloudFrontKeyPairIdSetCookie: `CloudFront-Key-Pair-Id=${cfDistro.signerKeyId}; Domain=${cfDistro.domain}; Path=/${movie.id}/*; Secure; HttpOnly`
   };
 };
 
