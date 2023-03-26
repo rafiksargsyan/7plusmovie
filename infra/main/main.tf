@@ -96,6 +96,7 @@ resource "aws_secretsmanager_secret_version" "secrets_version" {
     tomap({
       CLOUDINARY_API_SECRET: var.cloudinary_api_secret
       ALGOLIA_ADMIN_KEY: var.algolia_admin_key
+      COOKIE_SIGNING_PRIVATE_KEY_BASE64_ENCODED: var.cookie_signing_private_key_base64_encoded
     })
   )
 }

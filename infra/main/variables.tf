@@ -31,3 +31,7 @@ variable "cloudinary_api_secret" {
 variable "algolia_admin_key" {
   type = string
 }
+
+variable "cookie_signing_private_key_base64_encoded" {
+  type = string
+}
