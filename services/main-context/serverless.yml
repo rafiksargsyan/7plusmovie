@@ -7,12 +7,13 @@ useDotenv: true
 provider:
   name: aws
   region: eu-west-3
-  runtime: nodejs14.x
+  runtime: nodejs18.x
   iam:
     role:
       managedPolicies:
         - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
         - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+  stage: ${opt:stage}
 
 functions:
   createMovie:
@@ -20,7 +21,7 @@ functions:
     events:
       - http:
           integration: lambda
-          path: /movies
+          path: /createMovie
           method: post
           request:
             template:
@@ -33,7 +34,7 @@ functions:
     handler: src/movieS3BucketTrigger.handler
     events:
       - s3:
-          bucket: test.rsargsyan.com
+          bucket: ${file(./.env.${sls:stage}):MEDIA_ASSETS_S3_BUCKET}
           event: s3:ObjectCreated:*
           existing: true
 

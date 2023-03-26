@@ -3,8 +3,9 @@
     "preserveConstEnums": true,
     "strictNullChecks": true,
     "sourceMap": true,
-    "target": "ES6",
-    "lib": ["ES6"],
-    "moduleResolution": "node"
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "moduleResolution": "node",
+    "module": "ES2022"
   }
 }

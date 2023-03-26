@@ -1,12 +1,19 @@
 import { S3Event } from 'aws-lambda';
 import { S3 } from 'aws-sdk';
+import { SecretsManager } from "aws-sdk";
 import { v2 as cloudinary } from 'cloudinary';
 
+const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
+
+const secretsManager = new SecretsManager();
 const s3 = new S3();
+
+const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId}).promise();
+const secret = JSON.parse(secretStr.SecretString!);
 
 cloudinary.config({ cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
                     api_key: process.env.CLOUDINARY_API_KEY,
-                    api_secret: process.env.CLOUDINARY_API_SECRET });
+                    api_secret: secret.CLOUDINARY_API_SECRET });
 
 export const handler = async (event: S3Event): Promise<void> => {
   const bucket = event.Records[0].s3.bucket.name;

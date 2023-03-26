@@ -1,9 +1,17 @@
 import { Marshaller } from '@aws/dynamodb-auto-marshaller';
 import { DynamoDBStreamEvent } from 'aws-lambda';
 import algoliasearch from 'algoliasearch';
+import { SecretsManager } from "aws-sdk";
+
+const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
+
+const secretsManager = new SecretsManager();
+
+const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId}).promise();
+const secret = JSON.parse(secretStr.SecretString!);
 
 const marshaller = new Marshaller();
-const algoliaClient = algoliasearch(process.env.ALGOLIA_APP_ID!, process.env.ALGOLIA_ADMIN_KEY!);
+const algoliaClient = algoliasearch(process.env.ALGOLIA_APP_ID!, secret.ALGOLIA_ADMIN_KEY!);
 const algoliaIndex = algoliaClient.initIndex(process.env.ALGOLIA_ALL_INDEX!);
 
 interface Movie {
