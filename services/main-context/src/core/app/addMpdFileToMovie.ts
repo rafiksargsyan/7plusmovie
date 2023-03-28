@@ -1,9 +1,10 @@
 import { Movie } from "../domain/Movie";
-import { DynamoDB } from 'aws-sdk';
+import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
+import { DynamoDB } from '@aws-sdk/client-dynamodb';
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 
-const docClient = new DynamoDB.DocumentClient();
+const docClient = DynamoDBDocument.from(new DynamoDB({}));
 
 interface AddMpdFileParam {
   movieId: string;
@@ -15,14 +16,14 @@ export const handler = async (event: AddMpdFileParam): Promise<void> => {
     TableName: dynamodbMovieTableName,
     Key: { 'id': event.movieId }
   } as const;
-  let data = await docClient.get(queryParams).promise();
+  let data = await docClient.get(queryParams);
   if (data === undefined || data.Item === undefined) {
     throw new FailedToGetMovieError();
   }
   let movie = new Movie(true);
   Object.assign(movie, data.Item);  
   movie.addMpdFile(event.relativePath);
-  await docClient.put({ TableName: dynamodbMovieTableName, Item: movie }).promise();
+  await docClient.put({ TableName: dynamodbMovieTableName, Item: movie });
 };
 
 class FailedToGetMovieError extends Error {}

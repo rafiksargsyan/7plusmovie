@@ -1,10 +1,11 @@
-import { DynamoDB } from 'aws-sdk';
+import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
+import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { CloudFrontDistroMetadata } from "../domain/CloudFrontDistroMetadata";
 
 const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
 const testFilePath = process.env.TEST_FILE_PATH!;
 
-const docClient = new DynamoDB.DocumentClient();
+const docClient = DynamoDBDocument.from(new DynamoDB({}));
 
 interface CreateCFDistroParam {
   domain: string;
@@ -21,7 +22,7 @@ export const handler = async (event: CreateCFDistroParam): Promise<string> => {
   let cfDistro = new CloudFrontDistroMetadata(false, event.domain, event.arn,
     event.assumeRoleArnForMainAccount, event.awsAccountNumber, event.signerKeyId);
 
-  await docClient.put({TableName: dynamodbCFDistroMetadataTableName, Item: cfDistro}).promise();
+  await docClient.put({TableName: dynamodbCFDistroMetadataTableName, Item: cfDistro});
 
   return cfDistro.id;
 };

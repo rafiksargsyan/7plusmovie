@@ -4,6 +4,11 @@ service: main-context
 frameworkVersion: '3'
 useDotenv: true
 
+package:
+  individually: true
+  patterns:
+    - '!node_modules/@aws-sdk/**'
+
 provider:
   name: aws
   region: eu-west-3
@@ -14,6 +19,7 @@ provider:
         - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
         - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
   stage: ${opt:stage}
+  logRetentionInDays: 1
 
 functions:
   createMovie:
@@ -102,7 +108,7 @@ functions:
                                    "signerKeyId" : $input.json(''$.signerKeyId'') }'
               application/x-www-form-urlencoded: null
 
-  createMovie:
+  getMovieMetadataForPlayer:
     handler: src/core/app/getMovieMetadataForPlayer.handler
     events:
       - http:
@@ -111,15 +117,20 @@ functions:
           method: get
           request:
             template:
-              application/json: '{ "movieId" : $input.params(''id'') }'
+              application/json: '{ "movieId" : "$input.params(''id'')" }'
               application/x-www-form-urlencoded: null
           response:
             headers:
-              Set-Cookie: integration.response.cloudFrontExpiresSetCookie
-              Set-Cookie: integration.response.cloudFrontSignatureSetCookie
-              Set-Cookie: integration.response.cloudFrontKeyPairIdSetCookie
+              Set-Cookie: integration.response.body.cloudFrontExpiresSetCookie
+              sEt-Cookie: integration.response.body.cloudFrontSignatureSetCookie
+              seT-Cookie: integration.response.body.cloudFrontKeyPairIdSetCookie
             template: '{ "subtitles" : $input.json(''$.subtitles''),
                          "mpdFile" : $input.json(''$.mpdFile'') }'
-     
+
 plugins:
-  - serverless-plugin-typescript
+  - serverless-esbuild
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false

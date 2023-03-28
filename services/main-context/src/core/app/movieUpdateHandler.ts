@@ -1,18 +1,13 @@
 import { Marshaller } from '@aws/dynamodb-auto-marshaller';
 import { DynamoDBStreamEvent } from 'aws-lambda';
 import algoliasearch from 'algoliasearch';
-import { SecretsManager } from "aws-sdk";
+import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
-const secretsManager = new SecretsManager();
-
-const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId}).promise();
-const secret = JSON.parse(secretStr.SecretString!);
+const secretsManager = new SecretsManager({});
 
 const marshaller = new Marshaller();
-const algoliaClient = algoliasearch(process.env.ALGOLIA_APP_ID!, secret.ALGOLIA_ADMIN_KEY!);
-const algoliaIndex = algoliaClient.initIndex(process.env.ALGOLIA_ALL_INDEX!);
 
 interface Movie {
   id: string;
@@ -24,6 +19,11 @@ interface Movie {
 }
 
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
+  const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
+  const secret = JSON.parse(secretStr.SecretString!);
+  const algoliaClient = algoliasearch(process.env.ALGOLIA_APP_ID!, secret.ALGOLIA_ADMIN_KEY!);
+  const algoliaIndex = algoliaClient.initIndex(process.env.ALGOLIA_ALL_INDEX!);
+  
   for (const record of event.Records) {
     let movie: Movie = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as Movie;
     await algoliaIndex.saveObject({ objectID: movie.id,
