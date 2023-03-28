@@ -121,6 +121,9 @@ functions:
               application/x-www-form-urlencoded: null
           response:
             headers:
+              # We need 3 Set-Cookie headers, but serverless (or even yaml) doesn't allow
+              # duplicate keys. HTML headers are treated case insensitive, which allows
+              # us to workaround the above mentioned limitation.
               Set-Cookie: integration.response.body.cloudFrontExpiresSetCookie
               sEt-Cookie: integration.response.body.cloudFrontSignatureSetCookie
               seT-Cookie: integration.response.body.cloudFrontKeyPairIdSetCookie
