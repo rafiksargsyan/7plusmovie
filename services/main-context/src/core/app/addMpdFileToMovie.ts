@@ -4,7 +4,13 @@ import { DynamoDB } from '@aws-sdk/client-dynamodb';
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 
-const docClient = DynamoDBDocument.from(new DynamoDB({}));
+const marshallOptions = {
+  convertClassInstanceToMap: true
+};
+
+const translateConfig = { marshallOptions };
+
+const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 
 interface AddMpdFileParam {
   movieId: string;
