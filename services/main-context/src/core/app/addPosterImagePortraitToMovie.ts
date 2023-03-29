@@ -5,7 +5,13 @@ import { L8nLangCode } from "../domain/L8nLangCodes";
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 
-const docClient = DynamoDBDocument.from(new DynamoDB({}));
+const marshallOptions = {
+  convertClassInstanceToMap: true
+};
+
+const translateConfig = { marshallOptions };
+
+const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 
 interface AddPosterImagePortraitParam {
   movieId: string;

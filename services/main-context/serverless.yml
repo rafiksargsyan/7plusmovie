@@ -43,6 +43,10 @@ functions:
               application/x-www-form-urlencoded: null
 
   movieS3BucketTrigger:
+    environment:
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      CLOUDINARY_CLOUD_NAME: ${env:CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${env:CLOUDINARY_API_KEY}
     handler: src/core/app/movieS3BucketTrigger.handler
     events:
       - s3:
@@ -51,6 +55,8 @@ functions:
           existing: true
 
   addPosterImagePortraitToMovie:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
     handler: src/core/app/addPosterImagePortraitToMovie.handler
     events:
       - http:
@@ -103,6 +109,8 @@ functions:
               application/x-www-form-urlencoded: null
     
   createCloudFrontDistroMetadata:
+    environment:
+      DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME: ${env:DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME}
     handler: src/core/app/createCloudFrontDistroMetadata.handler
     events:
       - http:

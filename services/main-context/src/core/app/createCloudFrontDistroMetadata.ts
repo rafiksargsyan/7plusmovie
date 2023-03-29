@@ -5,7 +5,13 @@ import { CloudFrontDistroMetadata } from "../domain/CloudFrontDistroMetadata";
 const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
 const testFilePath = process.env.TEST_FILE_PATH!;
 
-const docClient = DynamoDBDocument.from(new DynamoDB({}));
+const marshallOptions = {
+  convertClassInstanceToMap: true
+};
+
+const translateConfig = { marshallOptions };
+
+const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 
 interface CreateCFDistroParam {
   domain: string;
