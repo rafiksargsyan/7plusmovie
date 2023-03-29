@@ -27,18 +27,20 @@ export const handler = async (event: CreateMovieParam): Promise<string> => {
   // TODO: Check if a movie with the same title and year already exists. Actually
   //       there have been few cases when two movies with same title had been released
   //       in the same year, but most likely we will not have such case with our movies.
-  //       Currently just looking in Algolia. Yeah, now I miss about SQL ).
+  //       Currently just looking in Algolia. Yeah, now I miss about SQL ). Best solution
+  //       would be to create secondary index, but to handle ignore case we will need to
+  //       keep originalTitle also in all lower case or all upper case format.
   let movie = new Movie(false, new L8nLangCode(event.originalLocale), event.originalTitle, event.releaseYear);
-  algoliaIndex.search(event.originalTitle).then(({ hits }) => {
-    hits.forEach((x) => {
-      const xOriginalTitle = x['originalTitle'] as string;
-      const xReleaseYear = x['releaseYear'] as number;
-      if (xOriginalTitle.toUpperCase() === event.originalTitle.toUpperCase() &&
-        xReleaseYear === event.releaseYear) {
-          throw new MovieAlreadyExistsError();
-      }
-    })
-  })
+  let searchResult = await algoliaIndex.search(event.originalTitle);
+  let hits = searchResult.hits;
+  for (const i in hits) {
+    const xOriginalTitle = hits[i]['originalTitle'] as string;
+    const xReleaseYear = hits[i]['releaseYear'] as number;
+    if (xOriginalTitle.toUpperCase() === event.originalTitle.toUpperCase() &&
+      xReleaseYear === event.releaseYear) {
+        throw new MovieAlreadyExistsError();
+    }
+  }
   await docClient.put({TableName: dynamodbMovieTableName, Item: movie});
 
   return movie.id;

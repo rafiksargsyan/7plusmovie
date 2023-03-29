@@ -25,12 +25,16 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
   const algoliaIndex = algoliaClient.initIndex(process.env.ALGOLIA_ALL_INDEX!);
   
   for (const record of event.Records) {
-    let movie: Movie = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as Movie;
-    await algoliaIndex.saveObject({ objectID: movie.id,
-                                    category: "MOVIE",
-                                    originalTitle: movie.originalTitle,
-                                    posterImagesPortrait: movie.posterImagesPortrait,
-                                    titleL8ns: movie.titleL8ns,
-                                    releaseYear: movie.releaseYear });
+    if (record.eventName === 'REMOVE') {
+      await algoliaIndex.deleteBy({filters: `objectID: ${record.dynamodb?.Keys?.id.S}`});
+    } else {
+      let movie: Movie = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as Movie;
+      await algoliaIndex.saveObject({ objectID: movie.id,
+                                      category: "MOVIE",
+                                      originalTitle: movie.originalTitle,
+                                      posterImagesPortrait: movie.posterImagesPortrait,
+                                      titleL8ns: movie.titleL8ns,
+                                      releaseYear: movie.releaseYear });
+    }
   }
 };
