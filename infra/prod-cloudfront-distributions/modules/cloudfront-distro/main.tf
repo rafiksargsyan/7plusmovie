@@ -53,3 +53,7 @@ resource "aws_cloudfront_key_group" "signers_key_group" {
   name     = "signers-key-group"
   items    = [ aws_cloudfront_public_key.signing_verification_public_key.id ]
 }
+
+data "aws_caller_identity" "cf_caller_identity" {
+  provider = aws.cf_account
+}
