@@ -27,6 +27,9 @@ functions:
     handler: src/core/app/createMovie.handler
     environment:
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      ALGOLIA_APP_ID: ${env:ALGOLIA_APP_ID}
+      ALGOLIA_ALL_INDEX: ${env:ALGOLIA_ALL_INDEX}
+      ALGOLIA_SEARCH_ONLY_KEY: ${env:ALGOLIA_SEARCH_ONLY_KEY}
     events:
       - http:
           integration: lambda
