@@ -127,6 +127,10 @@ functions:
               application/x-www-form-urlencoded: null
 
   getMovieMetadataForPlayer:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME: ${env:DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
     handler: src/core/app/getMovieMetadataForPlayer.handler
     events:
       - http:
