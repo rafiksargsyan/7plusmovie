@@ -87,6 +87,8 @@ functions:
       - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_MOVIE_STREAM_ARN}
   
   addTitleL8nToMovie:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
     handler: src/core/app/addTitleL8nToMovie.handler
     events:
       - http:
