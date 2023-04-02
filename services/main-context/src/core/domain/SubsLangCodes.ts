@@ -4,4 +4,3 @@ export const SubsLangCodes = {
   EN_GB : { lang : "en", langTag : "en-GB" },
   RU : { lang : "ru", langTag : "ru" }    
 } as const;
-
