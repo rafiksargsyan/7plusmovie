@@ -1,7 +1,7 @@
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
-import { getSignedCookies } from '@aws-sdk/cloudfront-signer';
+import { getSignedUrl } from '@aws-sdk/cloudfront-signer';
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
@@ -17,15 +17,13 @@ interface GetMovieParam {
 interface GetMovieMetadataResponse {
   subtitles: { [key: string]: string };
   mpdFile: string;
-  cloudFrontExpiresSetCookie: string;
-  cloudFrontSignatureSetCookie: string;
-  cloudFrontKeyPairIdSetCookie: string;
+  cloudFrontSignedUrlParams: string;
 }
 
 interface Movie {
   id: string
   subtitles: { [key: string]: string };
-  mpdFile: string;
+  mpdFile: string;  
 }
 
 interface CloudFrontDistro {
@@ -40,19 +38,26 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   let movie = await getMovie(event.movieId);
   let cfDistro = await getRandomCloudFrontDistro();
   
-  let signedCookies = getSignedCookies({
+  const policy = JSON.stringify({
+    'Statement': [{
+       'Resource': `https://${cfDistro.domain}/${movie.id}/*`,
+       'Condition': {
+          'DateLessThan': {'AWS:EpochTime': `${Date.now() + (1000 * 60 * 60 * 24 * 1)}`},
+       }
+    }]
+ });
+
+  let signedUrl = getSignedUrl({
     url: `https://${cfDistro.domain}/${movie.id}/*`,
     privateKey: Buffer.from(secret.COOKIE_SIGNING_PRIVATE_KEY_BASE64_ENCODED, 'base64'),
     keyPairId: cfDistro.signerKeyId,
-    dateLessThan: new Date(Date.now() + (1000 * 60 * 60 * 24 * 1)).toISOString()
+    policy: policy
   });
   
   return {
     subtitles: movie.subtitles,
     mpdFile: movie.mpdFile,
-    cloudFrontExpiresSetCookie: `CloudFront-Expires=${signedCookies['CloudFront-Expires']}; Domain=${cfDistro.domain}; Path=/${movie.id}/*; Secure; HttpOnly`,
-    cloudFrontSignatureSetCookie: `CloudFront-Signature=${signedCookies['CloudFront-Signature']}; Domain=${cfDistro.domain}; Path=/${movie.id}/*; Secure; HttpOnly`,
-    cloudFrontKeyPairIdSetCookie: `CloudFront-Key-Pair-Id=${cfDistro.signerKeyId}; Domain=${cfDistro.domain}; Path=/${movie.id}/*; Secure; HttpOnly`
+    cloudFrontSignedUrlParams: signedUrl.substring(signedUrl.lastIndexOf('?') + 1)
   };
 };
 

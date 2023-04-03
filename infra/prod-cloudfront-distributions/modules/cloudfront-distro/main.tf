@@ -18,6 +18,7 @@ resource "aws_cloudfront_distribution" "cf_distro" {
       }
     }
     trusted_key_groups = [ aws_cloudfront_key_group.signers_key_group.id ]
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.cors_policy.id
   }
   origin {
     domain_name              = data.aws_s3_bucket.media_assets_bucket.bucket_regional_domain_name
@@ -56,4 +57,23 @@ resource "aws_cloudfront_key_group" "signers_key_group" {
 
 data "aws_caller_identity" "cf_caller_identity" {
   provider = aws.cf_account
+}
+
+resource "aws_cloudfront_response_headers_policy" "cors_policy" {
+  name = "cors-policy"
+  cors_config {
+
+    access_control_allow_methods {
+      items = ["GET"]
+    }
+
+    access_control_allow_origins {
+      items = ["*"]
+    }
+
+    origin_override = true
+
+    access_control_allow_credentials = false
+    access_control_allow_headers {}
+  }
 }
