@@ -60,7 +60,8 @@ data "aws_caller_identity" "cf_caller_identity" {
 }
 
 resource "aws_cloudfront_response_headers_policy" "cors_policy" {
-  name = "cors-policy"
+  provider = aws.cf_account
+  name     = "cors-policy"
   cors_config {
 
     access_control_allow_methods {
