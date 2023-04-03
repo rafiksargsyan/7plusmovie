@@ -75,6 +75,8 @@ resource "aws_cloudfront_response_headers_policy" "cors_policy" {
     origin_override = true
 
     access_control_allow_credentials = false
-    access_control_allow_headers {}
+    access_control_allow_headers {
+      items = ["*"]
+    }
   }
 }
