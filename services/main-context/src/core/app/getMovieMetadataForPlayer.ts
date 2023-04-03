@@ -55,7 +55,7 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   
   return {
     subtitles: movie.subtitles,
-    mpdFile: movie.mpdFile,
+    mpdFile: `https://${cfDistro.domain}/${movie.id}/${movie.mpdFile}`,
     cloudFrontSignedUrlParams: signedUrl.substring(signedUrl.indexOf("?") + 1)
   };
 };
