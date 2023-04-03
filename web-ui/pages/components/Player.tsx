@@ -39,7 +39,7 @@ class VideoPlayer extends React.PureComponent {
         player.getNetworkingEngine()?.registerRequestFilter(function(type, request) {
           if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST ||
 			type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
-				request.uris[0] += "?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kM2V6Ymg3dHR5cHdtei5jbG91ZGZyb250Lm5ldC81NjBmZmQ3Ni05ZGM1LTQ5NWQtYjAzMC03ZTg1NWMzZGU1MTcvKiIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6IjE2ODA1NjYxMDczMTEifX19XX0_&Key-Pair-Id=K3HCOMKE3RPI6V&Signature=dLfGZVU0gteofo3IQ6CYTiSnLqufablQIYRHcMJ11zQERSfMekATyw89lOZPJ3oWg-pbB6f0FNdYBe7x-5EuNyGlQv1A1LxC7SrHxbko4ddePknHqf4JxkivwcCpvx90rAlRHwt1bno~eak3~wf5IgYoVi126Xm32UTHeOXhZpzh9arfIMoc7ZziRec6Ig3yzvHajWPPPyZ05-KyphdFMQDCc4ZYD~06Brso485U1fmbhRiECscYYtegt5LwTq6U~AWCNfj8oZGmDwjKShGcPKa4qCHl~XMpguCZxdCRKoLpg7LP5eQq6sq3LRM6oumMn8818txr0WaPbFn4y6xRsQ__"
+				request.uris[0] += "?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9kM2V6Ymg3dHR5cHdtei5jbG91ZGZyb250Lm5ldC81NjBmZmQ3Ni05ZGM1LTQ5NWQtYjAzMC03ZTg1NWMzZGU1MTcvKiIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTY4MDYzNjgyM319fV19&Key-Pair-Id=K4TSNEKDNQM66&Signature=yQy8DL1SUYqNx42zEr71yzlWj4xLwOxs~WRk7NrfTZdrT4-DvUsEgCbaZgCWIh6Ur0-ZCV5njCO9P02ga4z3rlefRxUzb9G9fWj-qazYcMCaBKlcn7elqanu1kW2hpKwPU8rgX0ZnGnX2dbedfMirVe3RhMYfeLBciQuIc7CjbNis79aK8LZtmMtLHOtiSzvzU-8mzMTunqhl64OtJOAhBO1cHfpvy5ScT-ntSrebbYoGjJ~~~R2jHgD-rQNxjd5s~jzD7ljqdArgX94pv-mZLgqk6ml2EfzRXcUdJzQEiw57KNJER5kYkFGJ7FLDHP0kDZPuy2ZYObSbKik10RRiA__"
 			}
 		});
 

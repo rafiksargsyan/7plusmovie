@@ -38,26 +38,25 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   let movie = await getMovie(event.movieId);
   let cfDistro = await getRandomCloudFrontDistro();
   
+  const url = `https://${cfDistro.domain}/${movie.id}/*`; 
   const policy = JSON.stringify({
-    'Statement': [{
-       'Resource': `https://${cfDistro.domain}/${movie.id}/*`,
-       'Condition': {
-          'DateLessThan': {'AWS:EpochTime': `${Date.now() + (1000 * 60 * 60 * 24 * 1)}`},
+    "Statement": [{
+       "Resource": url,
+       "Condition": {
+          "DateLessThan": {
+            "AWS:EpochTime": Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 1)
+          }
        }
     }]
- });
-
-  let signedUrl = getSignedUrl({
-    url: `https://${cfDistro.domain}/${movie.id}/*`,
-    privateKey: Buffer.from(secret.COOKIE_SIGNING_PRIVATE_KEY_BASE64_ENCODED, 'base64'),
-    keyPairId: cfDistro.signerKeyId,
-    policy: policy
   });
+  const privateKey = Buffer.from(secret.COOKIE_SIGNING_PRIVATE_KEY_BASE64_ENCODED, 'base64').toString();
+  const keyPairId = cfDistro.signerKeyId;
+  const signedUrl = getSignedUrl({url, privateKey, keyPairId, policy});
   
   return {
     subtitles: movie.subtitles,
     mpdFile: movie.mpdFile,
-    cloudFrontSignedUrlParams: signedUrl.substring(signedUrl.lastIndexOf('?') + 1)
+    cloudFrontSignedUrlParams: signedUrl.substring(signedUrl.indexOf("?") + 1)
   };
 };
 
