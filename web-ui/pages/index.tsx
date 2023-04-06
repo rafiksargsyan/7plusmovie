@@ -1,7 +1,5 @@
-import dynamic from 'next/dynamic';
+import Catalog from '../components/Catalog';
 
-const Player = dynamic(import ("./components/Player"), { ssr: false });
+const catalog = () => <Catalog />
 
-const PlayerComponent = () => <Player />
-
-export default PlayerComponent
+export default catalog
