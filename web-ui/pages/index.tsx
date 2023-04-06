@@ -1,9 +1,7 @@
 import dynamic from 'next/dynamic';
 
-const Player=dynamic(import ("./components/Player"),{ssr:false});
+const Player = dynamic(import ("./components/Player"), { ssr: false });
 
-export default function Home() {
-  return (
-    <Player />
-  )
-}
+const PlayerComponent = () => <Player />
+
+export default PlayerComponent

@@ -48,7 +48,7 @@ function MyAppBar() {
         <Box sx={{ flexGrow: 1 }}>
           <AppBar position='fixed'>
             <Toolbar sx={{ justifyContent: "space-between" }}>
-              <Stack direction="row" sx={{mr: 0}}>
+              {/* <Stack direction="row" sx={{mr: 0}}>
                 <Typography
                   variant="h6"
                   noWrap
@@ -67,7 +67,7 @@ function MyAppBar() {
                 >
                   MOVIE
                 </Typography>
-              </Stack>
+              </Stack> */}
               <ThemeProvider theme={searchBoxTheme}>
                 <Autocomplete
                   sx={{ flex: 'auto', maxWidth: 700, "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": { border: 'none', "&:hover": { border: 'none'}}}}
@@ -80,7 +80,7 @@ function MyAppBar() {
                   ListboxProps={{ style: { maxHeight: 400, transform: 'none' } }}
                 />
               </ThemeProvider>
-              <Stack direction="row">
+              {/* <Stack direction="row">
                 <Typography
                   variant="h6"
                   noWrap
@@ -99,7 +99,7 @@ function MyAppBar() {
                 >
                   Movie
                 </Typography>
-              </Stack>
+              </Stack> */}
             </Toolbar>
           </AppBar>
           <Toolbar />
@@ -110,7 +110,7 @@ function MyAppBar() {
 function GridView() {
   return (
     <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 2, sm: 3, md: 4, lg: 5, xl: 6 }}>
-      {Array.from(Array(1000)).map((_, index) => (
+      {Array.from(Array(100)).map((_, index) => (
         <Grid item xs={1} sm={1} md={1} lg={1} xl={1} key={index}>
           <Card>
       <CardActionArea>
