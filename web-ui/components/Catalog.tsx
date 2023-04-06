@@ -1,20 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { yellow, indigo } from '@mui/material/colors';
-import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
 import Popper from '@mui/material/Popper';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardMedia from '@mui/material/CardMedia';
-
+import algoliasearch from 'algoliasearch';
+import { isConstructorDeclaration } from 'typescript';
 
 const darkTheme = createTheme({
   palette: {
@@ -43,63 +42,35 @@ const searchBoxTheme = createTheme({
   }
 });
 
+const algoliaClient = algoliasearch(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!, process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!);
+const algoliaIndex = algoliaClient.initIndex(process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!);
+
 function MyAppBar() {
+    const [state, setState] = useState({options: []});
+    
+    let onInputChange = (event: React.SyntheticEvent<Element, Event>, value: string) => {
+      algoliaIndex.search<{originalTitle: string}>(value.trim() != '' ? value.trim() : 'random string').then((x) => {
+        setState({options: x.hits.map(x => x.originalTitle) as never[]});
+      });
+    }
+    
     return (
         <Box sx={{ flexGrow: 1 }}>
           <AppBar position='fixed'>
             <Toolbar sx={{ justifyContent: "space-between" }}>
-              {/* <Stack direction="row" sx={{mr: 0}}>
-                <Typography
-                  variant="h6"
-                  noWrap
-                  component="div"
-                  sx={{ display: { xs: 'none', sm: 'block' } }}
-                  color="primary.main"
-                >
-                  7+
-                </Typography>
-                <Typography
-                  variant="h6"
-                  noWrap
-                  component="div"
-                  sx={{ display: { xs: 'none', sm: 'block' }, backgroundColor: 'primary.main', borderRadius: 2, pl: 0.5, pr: 0.5, ml: 0.5}}
-                  color='primary.contrastText'  
-                >
-                  MOVIE
-                </Typography>
-              </Stack> */}
               <ThemeProvider theme={searchBoxTheme}>
                 <Autocomplete
+                  onInputChange={onInputChange}
                   sx={{ flex: 'auto', maxWidth: 700, "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": { border: 'none', "&:hover": { border: 'none'}}}}
                   componentsProps={{ paper: {sx: {mt: 0.5}}}}
                   PopperComponent={(props: any) => <Popper {...props} popperOptions={{strategy: 'fixed'}}/>}
                   freeSolo
-                  options={top100Films.slice(0, 10).map((option) => option.title)}
+                  options={state.options}
                   filterOptions={(options, state) => options}
                   renderInput={(params) => <TextField {...params} variant='outlined' placeholder="Search titles, actors and genres"/>}
                   ListboxProps={{ style: { maxHeight: 400, transform: 'none' } }}
                 />
               </ThemeProvider>
-              {/* <Stack direction="row">
-                <Typography
-                  variant="h6"
-                  noWrap
-                  component="div"
-                  sx={{ display: { xs: 'none', sm: 'block' } }}
-                  color="primary.main"
-                >
-                  7Plus
-                </Typography>
-                <Typography
-                  variant="h6"
-                  noWrap
-                  component="div"
-                  sx={{ display: { xs: 'none', sm: 'block' }, backgroundColor: 'primary.main', borderRadius: 3, pl: 0.5, pr: 0.5, ml: 0.5}}
-                  color='primary.contrastText'
-                >
-                  Movie
-                </Typography>
-              </Stack> */}
             </Toolbar>
           </AppBar>
           <Toolbar />
