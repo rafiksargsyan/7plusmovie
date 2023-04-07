@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -14,6 +14,7 @@ import CardActionArea from '@mui/material/CardActionArea';
 import CardMedia from '@mui/material/CardMedia';
 import algoliasearch from 'algoliasearch';
 import { isConstructorDeclaration } from 'typescript';
+import { stringify } from 'querystring';
 
 const darkTheme = createTheme({
   palette: {
@@ -79,16 +80,28 @@ function MyAppBar() {
 }
 
 function GridView() {
+  const [state, setState] = useState({movies: []});
+
+  useEffect(() => {
+    algoliaIndex.search<{objectID: string, originalTitle: string, releaseYear: number, posterImagesPortrait: {string: string}}>("").then((x) => {
+      setState({movies: x.hits.map(x => ({id: x.objectID, ot: x.originalTitle, ry: x.releaseYear, pi: x.posterImagesPortrait})) as never[]});
+    });
+  })
+
+  const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
+
   return (
     <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 2, sm: 3, md: 4, lg: 5, xl: 6 }}>
-      {Array.from(Array(100)).map((_, index) => (
+      {state.movies.map((_: {id: string, ot: string, ry: number, pi: {[key: string]: string}}, index) => (
         <Grid item xs={1} sm={1} md={1} lg={1} xl={1} key={index}>
           <Card>
       <CardActionArea>
         <CardMedia
           component="img"
-          image={"https://picsum.photos/300/400?random" + Math.floor(Math.random() * 10000)}
-          alt="green iguana"
+          src={`${imageBaseUrl}w_160/${_.pi['EN_US']}`}
+          srcSet={`${imageBaseUrl}w_240/${_.pi['EN_US']} 240w, ${imageBaseUrl}w_160/${_.pi['EN_US']} 160w`}  
+          alt={`${_.ot} (${_.ry})`}
+          sizes="(max-width: 1200px) 160px, 240px"
         />
       </CardActionArea>
     </Card>
