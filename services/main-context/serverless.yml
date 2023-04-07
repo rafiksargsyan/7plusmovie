@@ -144,6 +144,8 @@ functions:
               application/json: '{ "movieId" : "$input.params(''id'')" }'
               application/x-www-form-urlencoded: null
           response:
+            headers:
+              Access-Control-Allow-Origin: "'*'"
             template: '{ "subtitles" : $input.json(''$.subtitles''),
                          "mpdFile" : $input.json(''$.mpdFile''),
                          "cloudFrontSignedUrlParams" :  $input.json(''$.cloudFrontSignedUrlParams'') }'
