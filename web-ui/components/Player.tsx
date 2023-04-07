@@ -2,14 +2,15 @@ import { useRouter } from 'next/router';
 import React, { RefObject, useEffect, useState } from 'react';
 import shaka from 'shaka-player';
 import axios from 'axios';
+import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { yellow } from '@mui/material/colors';
 
 function VideoPlayer () {
   const [videoComponent] = useState(React.createRef() as RefObject<HTMLVideoElement>);
 
   const router = useRouter();
   useEffect(() => {
-	console.log(JSON.stringify(router.asPath));
-	console.log(JSON.stringify(router.query));
 	axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${router.query.movieId}`)
 	.then((x) => {
 
@@ -34,11 +35,30 @@ function VideoPlayer () {
 	
   return (
 	<video
-	  style={{width: '100vw', height: '100vh', objectFit: 'cover', maxWidth: '100%', maxHeight: '100%'}}
+	  style={{width: '100vw', height: '100vh', objectFit: 'contain', maxWidth: '100%', maxHeight: '100%', position: 'absolute'}}
 	  ref={videoComponent}
 	  poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
-	  controls />
+      controls
+	  />
   );
 }
 
-export default VideoPlayer;
+const darkTheme = createTheme({
+  palette: {
+	mode: 'dark',
+	primary: {
+	  main: yellow[600],
+	}
+  },
+});
+
+function VideoPlayerWrapper() {
+  return (
+	<ThemeProvider theme={darkTheme}>
+	  <CssBaseline />
+	  <VideoPlayer />
+	</ThemeProvider>
+  ); 
+}
+
+export default VideoPlayerWrapper;
