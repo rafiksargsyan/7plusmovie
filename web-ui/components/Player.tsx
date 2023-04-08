@@ -8,11 +8,12 @@ import { yellow } from '@mui/material/colors';
 
 function VideoPlayer () {
   const [videoComponent] = useState(React.createRef() as RefObject<HTMLVideoElement>);
-
+  const [backdropImage, setBackdropImage] = useState();
   const router = useRouter();
   useEffect(() => {
 	axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${router.query.movieId}`)
 	.then((x) => {
+        setBackdropImage(x.data.backdropImage);
 
 		var manifestUri = x.data.mpdFile;
 
@@ -32,12 +33,14 @@ function VideoPlayer () {
 		player.load(manifestUri);
 	})           
   }, []);
-	
+
+  const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
+
   return (
 	<video
 	  style={{width: '100vw', height: '100vh', objectFit: 'contain', maxWidth: '100%', maxHeight: '100%', position: 'absolute'}}
 	  ref={videoComponent}
-	  poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
+	  poster={`${imageBaseUrl}h_720/${backdropImage}`}
       controls
 	  />
   );

@@ -148,7 +148,23 @@ functions:
               Access-Control-Allow-Origin: "'*'"
             template: '{ "subtitles" : $input.json(''$.subtitles''),
                          "mpdFile" : $input.json(''$.mpdFile''),
-                         "cloudFrontSignedUrlParams" :  $input.json(''$.cloudFrontSignedUrlParams'') }'
+                         "cloudFrontSignedUrlParams" :  $input.json(''$.cloudFrontSignedUrlParams''),
+                         "backdropImage": $input.json(''$.backdropImage'') }'
+
+  addBackdropImageToMovie:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/addBackdropImageToMovie.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addBackdropImageToMovie
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : $input.json(''$.movieId''),
+                                   "relativePath" : $input.json(''$.relativePath'') }'
+              application/x-www-form-urlencoded: null
 
 plugins:
   - serverless-esbuild

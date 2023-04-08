@@ -12,6 +12,7 @@ export class Movie {
   private titleL8ns: { [key: string]: string } = {};
   private posterImagesPortrait: { [key: string]: RelativePath } = {};
   private posterImagesLandscape: { [key: string]: RelativePath } = {};
+  private backdropImage: RelativePath;
   private subtitles: { [key: string]: RelativePath } = {};
   private mpdFile: RelativePath;
   private releaseYear: number;
@@ -56,6 +57,14 @@ export class Movie {
     this.lastUpdateTime = Date.now();
   }
 
+  public addBackdropImage(relativePath: RelativePath) {
+    if (! /\S/.test(relativePath)) {
+      throw new InvalidBackdropImageRelativePathError();
+    }
+    this.backdropImage = relativePath;
+    this.lastUpdateTime = Date.now();
+  }
+
   public addMpdFile(relativePath: RelativePath) {
     if (! /\S/.test(relativePath)) {
         throw new InvalidMpdFileRelativePathError();
@@ -85,3 +94,5 @@ class InvalidMpdFileRelativePathError extends Error {}
 class InvalidOriginalLocaleError extends Error {}
 
 class InvalidTitleL8nError extends Error {}
+
+class InvalidBackdropImageRelativePathError extends Error {}

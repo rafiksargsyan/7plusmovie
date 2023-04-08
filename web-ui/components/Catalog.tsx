@@ -46,36 +46,36 @@ const algoliaClient = algoliasearch(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!, pro
 const algoliaIndex = algoliaClient.initIndex(process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!);
 
 function MyAppBar() {
-    const [state, setState] = useState({options: []});
-    
-    let onInputChange = (event: React.SyntheticEvent<Element, Event>, value: string) => {
-      algoliaIndex.search<{originalTitle: string}>(value.trim() != '' ? value.trim() : 'random string').then((x) => {
-        setState({options: x.hits.map(x => x.originalTitle) as never[]});
-      });
-    }
-    
-    return (
-        <Box sx={{ flexGrow: 1 }}>
-          <AppBar position='fixed'>
-            <Toolbar sx={{ justifyContent: "center" }}>
-              <ThemeProvider theme={searchBoxTheme}>
-                <Autocomplete
-                  onInputChange={onInputChange}
-                  sx={{ flex: 'auto', maxWidth: 700, "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": { border: 'none', "&:hover": { border: 'none'}}}}
-                  componentsProps={{ paper: {sx: {mt: 0.5}}}}
-                  PopperComponent={(props: any) => <Popper {...props} popperOptions={{strategy: 'fixed'}}/>}
-                  freeSolo
-                  options={state.options}
-                  filterOptions={(options, state) => options}
-                  renderInput={(params) => <TextField {...params} variant='outlined' placeholder="Search titles, actors and genres"/>}
-                  ListboxProps={{ style: { maxHeight: 400, transform: 'none' } }}
-                />
-              </ThemeProvider>
-            </Toolbar>
-          </AppBar>
-          <Toolbar />
-        </Box>
-      );
+  const [state, setState] = useState({options: []});
+  
+  let onInputChange = (event: React.SyntheticEvent<Element, Event>, value: string) => {
+    algoliaIndex.search<{originalTitle: string}>(value.trim() != '' ? value.trim() : 'random string').then((x) => {
+      setState({options: x.hits.map(x => x.originalTitle) as never[]});
+    });
+  }
+  
+  return (
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position='fixed'>
+        <Toolbar sx={{ justifyContent: "center" }}>
+          <ThemeProvider theme={searchBoxTheme}>
+            <Autocomplete
+              onInputChange={onInputChange}
+              sx={{ flex: 'auto', maxWidth: 700, "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": { border: 'none', "&:hover": { border: 'none'}}}}
+              componentsProps={{ paper: {sx: {mt: 0.5}}}}
+              PopperComponent={(props: any) => <Popper {...props} popperOptions={{strategy: 'fixed'}}/>}
+              freeSolo
+              options={state.options}
+              filterOptions={(options, state) => options}
+              renderInput={(params) => <TextField {...params} variant='outlined' placeholder="Search titles, actors and genres"/>}
+              ListboxProps={{ style: { maxHeight: 400, transform: 'none' } }}
+            />
+          </ThemeProvider>
+        </Toolbar>
+      </AppBar>
+      <Toolbar />
+    </Box>
+  );
 }
 
 function GridView() {
