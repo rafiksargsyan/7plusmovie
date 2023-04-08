@@ -57,7 +57,7 @@ function MyAppBar() {
     return (
         <Box sx={{ flexGrow: 1 }}>
           <AppBar position='fixed'>
-            <Toolbar sx={{ justifyContent: "space-between" }}>
+            <Toolbar sx={{ justifyContent: "center" }}>
               <ThemeProvider theme={searchBoxTheme}>
                 <Autocomplete
                   onInputChange={onInputChange}
