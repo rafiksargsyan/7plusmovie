@@ -100,3 +100,13 @@ resource "aws_secretsmanager_secret_version" "secrets_version" {
     })
   )
 }
+
+resource "aws_s3_bucket_cors_configuration" "media_assets_cors" {
+  bucket = aws_s3_bucket.media_assets.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "HEAD"]
+    allowed_origins = ["*"]
+  }
+}
