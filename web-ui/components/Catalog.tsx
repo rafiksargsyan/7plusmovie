@@ -14,6 +14,7 @@ import CardActionArea from '@mui/material/CardActionArea';
 import CardMedia from '@mui/material/CardMedia';
 import algoliasearch from 'algoliasearch';
 import { useRouter } from 'next/router'
+import { alpha, Typography } from '@mui/material';
 
 const darkTheme = createTheme({
   palette: {
@@ -46,16 +47,15 @@ const algoliaClient = algoliasearch(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!, pro
 const algoliaIndex = algoliaClient.initIndex(process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!);
 const algoliaQuerySuggestionsIndex = algoliaClient.initIndex(process.env.NEXT_PUBLIC_ALGOLIA_QUERY_SUGGESTIONS_ALL_INDEX!);
 
-function CustomAppBar(props: {onSearchChange: (searchString: string | null) => void}) {
+function CustomAppBar(props: {onSearchChange: (searchString: string | null) => void, onEnter: () => void}) {
   const [state, setState] = useState({options: []});
   
   const onInputChange = (event: React.SyntheticEvent<Element, Event>, value: string) => {
-    if (value == null || value == '') {
+    if (value == null || value.trim() == '') {
       setState({options: []});
       return;
     }
     algoliaQuerySuggestionsIndex.search<{query: string}>(value).then(result => {
-      console.log(JSON.stringify(result));
       setState({options: result.hits.map(_ => _.query) as never[]});
     });
   };
@@ -64,12 +64,19 @@ function CustomAppBar(props: {onSearchChange: (searchString: string | null) => v
     props.onSearchChange(value);
   };
 
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      props.onEnter();
+    }
+  }
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position='fixed'>
         <Toolbar sx={{ justifyContent: "center" }}>
           <ThemeProvider theme={searchBoxTheme}>
             <Autocomplete
+              onKeyDown={onKeyDown}
               onInputChange={onInputChange}
               onChange={onChange}
               sx={{ flex: 'auto', maxWidth: 700, "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": { border: 'none', "&:hover": { border: 'none'}}}}
@@ -89,14 +96,14 @@ function CustomAppBar(props: {onSearchChange: (searchString: string | null) => v
   );
 }
 
-function GridView(props: { searchString: string }) {
+function GridView(props: { searchString: string, counter: number }) {
   const [state, setState] = useState({movies: []});
 
   useEffect(() => {
     algoliaIndex.search<{objectID: string, originalTitle: string, releaseYear: number, posterImagesPortrait: {string: string}}>(props.searchString).then(result => {
       setState({movies: result.hits.map(_ => ({id: _.objectID, ot: _.originalTitle, ry: _.releaseYear, pi: _.posterImagesPortrait})) as never[]});
     });
-  }, [props.searchString]);
+  }, [props.searchString, props.counter]);
 
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
 
@@ -107,7 +114,7 @@ function GridView(props: { searchString: string }) {
       {state.movies.map((_: {id: string, ot: string, ry: number, pi: {[key: string]: string}}, index) => (
         <Grid item xs={1} sm={1} md={1} lg={1} xl={1} key={index}>
           <Card>
-            <CardActionArea onClick={() => {router.push(`/player?movieId=${_.id}`)}}>
+            <CardActionArea sx={{position: 'relative'}} onClick={() => {router.push(`/player?movieId=${_.id}`)}}>
               <CardMedia
                 component="img"
                 src={`${imageBaseUrl}w_160/${_.pi['EN_US']}`}
@@ -115,6 +122,11 @@ function GridView(props: { searchString: string }) {
                 alt={`${_.ot} (${_.ry})`}
                 sizes="(max-width: 1200px) 160px, 240px"
               />
+              <Typography variant='h4'
+                          sx={{ position: 'absolute',
+                                bottom: 0, right: 0, mb: 1, mr: 1, pl: 1, pr: 1,
+                                backgroundColor: alpha(darkTheme.palette.background.default, 0.7),
+                                borderRadius: 1 }}>{_.ry}</Typography>
             </CardActionArea>
           </Card>
         </Grid>
@@ -124,15 +136,17 @@ function GridView(props: { searchString: string }) {
 }
 
 function Catalog() {
-  const [state, setState] = useState<{searchString: string}>({searchString: ''});
+  const [state, setState] = useState({searchString: '', counter: 0});
 
-  const onSearchChange = (searchString: string | null) => setState({searchString: searchString != null ? searchString : ''});
+  const onSearchChange = (searchString: string | null) => setState({searchString: searchString != null ? searchString : '', counter: state.counter});
 
+  const onEnter = () => setState({searchString: state.searchString, counter: state.counter + 1});
+  
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <CustomAppBar onSearchChange={onSearchChange}/>
-      <GridView searchString={state.searchString}/>
+      <CustomAppBar onSearchChange={onSearchChange} onEnter={onEnter}/>
+      <GridView searchString={state.searchString} counter={state.counter}/>
     </ThemeProvider>
   );
 }
