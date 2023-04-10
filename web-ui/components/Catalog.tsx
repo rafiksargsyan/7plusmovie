@@ -14,7 +14,7 @@ import CardActionArea from '@mui/material/CardActionArea';
 import CardMedia from '@mui/material/CardMedia';
 import algoliasearch from 'algoliasearch';
 import { useRouter } from 'next/router'
-import { alpha, Typography } from '@mui/material';
+import { alpha, Tooltip, Typography } from '@mui/material';
 
 const darkTheme = createTheme({
   palette: {
@@ -113,22 +113,24 @@ function GridView(props: { searchString: string, counter: number }) {
     <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 2, sm: 3, md: 4, lg: 5, xl: 6 }}>
       {state.movies.map((_: {id: string, ot: string, ry: number, pi: {[key: string]: string}}, index) => (
         <Grid item xs={1} sm={1} md={1} lg={1} xl={1} key={index}>
-          <Card>
-            <CardActionArea sx={{position: 'relative'}} onClick={() => {router.push(`/player?movieId=${_.id}`)}}>
-              <CardMedia
-                component="img"
-                src={`${imageBaseUrl}w_160/${_.pi['EN_US']}`}
-                srcSet={`${imageBaseUrl}w_240/${_.pi['EN_US']} 240w, ${imageBaseUrl}w_160/${_.pi['EN_US']} 160w`}  
-                alt={`${_.ot} (${_.ry})`}
-                sizes="(max-width: 1200px) 160px, 240px"
-              />
-              <Typography variant='h4'
-                          sx={{ position: 'absolute',
-                                bottom: 0, right: 0, mb: 1, mr: 1, pl: 1, pr: 1,
-                                backgroundColor: alpha(darkTheme.palette.background.default, 0.7),
-                                borderRadius: 1 }}>{_.ry}</Typography>
-            </CardActionArea>
-          </Card>
+          <Tooltip title={`${_.ot} (${_.ry})`} followCursor>
+            <Card>
+              <CardActionArea sx={{position: 'relative'}} onClick={() => {router.push(`/player?movieId=${_.id}`)}}>
+                <CardMedia
+                  component="img"
+                  src={`${imageBaseUrl}w_160/${_.pi['EN_US']}`}
+                  srcSet={`${imageBaseUrl}w_240/${_.pi['EN_US']} 240w, ${imageBaseUrl}w_160/${_.pi['EN_US']} 160w`}  
+                  alt={`${_.ot} (${_.ry})`}
+                  sizes="(max-width: 1200px) 160px, 240px"
+                />
+                <Typography variant='h5'
+                            sx={{ position: 'absolute',
+                                  bottom: 0, right: 0, mb: 1, mr: 1, pl: 1, pr: 1,
+                                  backgroundColor: alpha(darkTheme.palette.background.default, 0.7),
+                                  borderRadius: 1 }}>{_.ry}</Typography>
+              </CardActionArea>
+            </Card>
+          </Tooltip>
         </Grid>
       ))}
     </Grid>
