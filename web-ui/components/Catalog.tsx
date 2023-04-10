@@ -44,16 +44,26 @@ const searchBoxTheme = createTheme({
 
 const algoliaClient = algoliasearch(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!, process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!);
 const algoliaIndex = algoliaClient.initIndex(process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!);
+const algoliaQuerySuggestionsIndex = algoliaClient.initIndex(process.env.NEXT_PUBLIC_ALGOLIA_QUERY_SUGGESTIONS_ALL_INDEX!);
 
-function MyAppBar() {
+function CustomAppBar(props: {onSearchChange: (searchString: string | null) => void}) {
   const [state, setState] = useState({options: []});
   
-  let onInputChange = (event: React.SyntheticEvent<Element, Event>, value: string) => {
-    algoliaIndex.search<{originalTitle: string}>(value.trim() != '' ? value.trim() : 'random string').then((x) => {
-      setState({options: x.hits.map(x => x.originalTitle) as never[]});
+  const onInputChange = (event: React.SyntheticEvent<Element, Event>, value: string) => {
+    if (value == null || value == '') {
+      setState({options: []});
+      return;
+    }
+    algoliaQuerySuggestionsIndex.search<{query: string}>(value).then(result => {
+      console.log(JSON.stringify(result));
+      setState({options: result.hits.map(_ => _.query) as never[]});
     });
-  }
+  };
   
+  const onChange = (event: React.SyntheticEvent<Element, Event>, value: string | null) => {
+    props.onSearchChange(value);
+  };
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position='fixed'>
@@ -61,31 +71,32 @@ function MyAppBar() {
           <ThemeProvider theme={searchBoxTheme}>
             <Autocomplete
               onInputChange={onInputChange}
+              onChange={onChange}
               sx={{ flex: 'auto', maxWidth: 700, "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": { border: 'none', "&:hover": { border: 'none'}}}}
               componentsProps={{ paper: {sx: {mt: 0.5}}}}
               PopperComponent={(props: any) => <Popper {...props} popperOptions={{strategy: 'fixed'}}/>}
               freeSolo
               options={state.options}
               filterOptions={(options, state) => options}
-              renderInput={(params) => <TextField {...params} variant='outlined' placeholder="Search titles, actors and genres"/>}
+              renderInput={(params) => <TextField {...params} variant='outlined' placeholder="Search titles"/>}
               ListboxProps={{ style: { maxHeight: 400, transform: 'none' } }}
             />
           </ThemeProvider>
         </Toolbar>
       </AppBar>
-      <Toolbar />
+      <Toolbar/>
     </Box>
   );
 }
 
-function GridView() {
+function GridView(props: { searchString: string }) {
   const [state, setState] = useState({movies: []});
 
   useEffect(() => {
-    algoliaIndex.search<{objectID: string, originalTitle: string, releaseYear: number, posterImagesPortrait: {string: string}}>("").then((x) => {
-      setState({movies: x.hits.map(x => ({id: x.objectID, ot: x.originalTitle, ry: x.releaseYear, pi: x.posterImagesPortrait})) as never[]});
+    algoliaIndex.search<{objectID: string, originalTitle: string, releaseYear: number, posterImagesPortrait: {string: string}}>(props.searchString).then(result => {
+      setState({movies: result.hits.map(_ => ({id: _.objectID, ot: _.originalTitle, ry: _.releaseYear, pi: _.posterImagesPortrait})) as never[]});
     });
-  })
+  }, [props.searchString]);
 
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
 
@@ -113,11 +124,15 @@ function GridView() {
 }
 
 function Catalog() {
+  const [state, setState] = useState<{searchString: string}>({searchString: ''});
+
+  const onSearchChange = (searchString: string | null) => setState({searchString: searchString != null ? searchString : ''});
+
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <MyAppBar />
-      <GridView />  
+      <CustomAppBar onSearchChange={onSearchChange}/>
+      <GridView searchString={state.searchString}/>
     </ThemeProvider>
   );
 }
