@@ -96,21 +96,21 @@ function CustomAppBar(props: {onSearchChange: (searchString: string | null) => v
   );
 }
 
-function GridView(props: { searchString: string, counter: number }) {
+function GridView(props: { searchString: string }) {
   const [state, setState] = useState({movies: []});
 
   useEffect(() => {
     algoliaIndex.search<{objectID: string, originalTitle: string, releaseYear: number, posterImagesPortrait: {string: string}}>(props.searchString).then(result => {
       setState({movies: result.hits.map(_ => ({id: _.objectID, ot: _.originalTitle, ry: _.releaseYear, pi: _.posterImagesPortrait})) as never[]});
     });
-  }, [props.searchString, props.counter]);
+  }, [props.searchString]);
 
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
 
   const router = useRouter();
 
   return (
-    <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 2, sm: 3, md: 4, lg: 5, xl: 6 }}>
+    <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 4, md: 5, lg: 6, xl: 7 }}>
       {state.movies.map((_: {id: string, ot: string, ry: number, pi: {[key: string]: string}}, index) => (
         <Grid item xs={1} sm={1} md={1} lg={1} xl={1} key={index}>
           <Tooltip title={`${_.ot} (${_.ry})`} followCursor>
@@ -123,11 +123,6 @@ function GridView(props: { searchString: string, counter: number }) {
                   alt={`${_.ot} (${_.ry})`}
                   sizes="(max-width: 1200px) 160px, 240px"
                 />
-                <Typography variant='h5'
-                            sx={{ position: 'absolute',
-                                  bottom: 0, right: 0, mb: 1, mr: 1, pl: 1, pr: 1,
-                                  backgroundColor: alpha(darkTheme.palette.background.default, 0.7),
-                                  borderRadius: 1 }}>{_.ry}</Typography>
               </CardActionArea>
             </Card>
           </Tooltip>
@@ -138,17 +133,17 @@ function GridView(props: { searchString: string, counter: number }) {
 }
 
 function Catalog() {
-  const [state, setState] = useState({searchString: '', counter: 0});
+  const [state, setState] = useState({searchString: ''});
 
-  const onSearchChange = (searchString: string | null) => setState({searchString: searchString != null ? searchString : '', counter: state.counter});
+  const onSearchChange = (searchString: string | null) => setState({searchString: searchString != null ? searchString : ''});
 
-  const onEnter = () => setState({searchString: state.searchString, counter: state.counter + 1});
+  const onEnter = () => setState({searchString: state.searchString});
   
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <CustomAppBar onSearchChange={onSearchChange} onEnter={onEnter}/>
-      <GridView searchString={state.searchString} counter={state.counter}/>
+      <GridView searchString={state.searchString}/>
     </ThemeProvider>
   );
 }
