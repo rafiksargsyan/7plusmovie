@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -14,7 +14,8 @@ import CardActionArea from '@mui/material/CardActionArea';
 import CardMedia from '@mui/material/CardMedia';
 import algoliasearch from 'algoliasearch';
 import { useRouter } from 'next/router'
-import { alpha, Tooltip, Typography } from '@mui/material';
+import { IconButton, MenuItem, Select, Tooltip } from '@mui/material';
+import { padding } from '@mui/system';
 
 const darkTheme = createTheme({
   palette: {
@@ -47,7 +48,36 @@ const algoliaClient = algoliasearch(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!, pro
 const algoliaIndex = algoliaClient.initIndex(process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!);
 const algoliaQuerySuggestionsIndex = algoliaClient.initIndex(process.env.NEXT_PUBLIC_ALGOLIA_QUERY_SUGGESTIONS_ALL_INDEX!);
 
-function CustomAppBar(props: {onSearchChange: (searchString: string | null) => void, onEnter: () => void}) {
+const L8nLangCodes = {
+  EN_US : { langTag : "en-US", countryCode: "US" },
+  RU : { langTag : "ru", countryCode: "RU" }
+} as const;
+
+const L8nTable = {
+  EN_US : {
+    SEARCH_PLACEHOLDER: "Search titles"
+  },
+  RU : {
+    SEARCH_PLACEHOLDER: "Искать фильмы"
+  }
+}
+
+function L8nSelect(props: {onLocaleChange: (locale: string) => void}) {
+  return (
+    <Select defaultValue={"RU"} inputProps={{ IconComponent: () => null, sx: { paddingRight: '14px !important'}}}
+            onChange={(e, c) => props.onLocaleChange(e.target.value)}>
+      {Object.keys(L8nLangCodes).map((_) => (
+        <MenuItem value={_} key={_}>
+          <img src={`https://flagcdn.com/w20/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}.png`}
+               srcSet={`https://flagcdn.com/w40/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}.png 2x`} alt={"todo"} />{" "}
+        </MenuItem>
+      ))}
+    </Select>
+  );
+}
+
+function CustomAppBar(props: {onSearchChange: (searchString: string | null) => void,
+                              onLocaleChange: (locale: string) => void, locale: string}) {
   const [state, setState] = useState({options: []});
   
   const onInputChange = (event: React.SyntheticEvent<Element, Event>, value: string) => {
@@ -64,19 +94,13 @@ function CustomAppBar(props: {onSearchChange: (searchString: string | null) => v
     props.onSearchChange(value);
   };
 
-  const onKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      props.onEnter();
-    }
-  }
-
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position='fixed'>
-        <Toolbar sx={{ justifyContent: "center" }}>
+        <Toolbar sx={{ justifyContent: "space-between" }}>
+          <div></div>
           <ThemeProvider theme={searchBoxTheme}>
             <Autocomplete
-              onKeyDown={onKeyDown}
               onInputChange={onInputChange}
               onChange={onChange}
               sx={{ flex: 'auto', maxWidth: 700, "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": { border: 'none', "&:hover": { border: 'none'}}}}
@@ -85,10 +109,11 @@ function CustomAppBar(props: {onSearchChange: (searchString: string | null) => v
               freeSolo
               options={state.options}
               filterOptions={(options, state) => options}
-              renderInput={(params) => <TextField {...params} variant='outlined' placeholder="Search titles"/>}
+              renderInput={(params) => <TextField {...params} variant='outlined' placeholder={L8nTable[props.locale as keyof typeof L8nTable]['SEARCH_PLACEHOLDER']} />}
               ListboxProps={{ style: { maxHeight: 400, transform: 'none' } }}
             />
           </ThemeProvider>
+          <L8nSelect onLocaleChange={props.onLocaleChange}/>
         </Toolbar>
       </AppBar>
       <Toolbar/>
@@ -96,7 +121,7 @@ function CustomAppBar(props: {onSearchChange: (searchString: string | null) => v
   );
 }
 
-function GridView(props: { searchString: string }) {
+function GridView(props: { searchString: string, locale: string }) {
   const [state, setState] = useState({movies: []});
 
   useEffect(() => {
@@ -118,8 +143,8 @@ function GridView(props: { searchString: string }) {
               <CardActionArea sx={{position: 'relative'}} onClick={() => {router.push(`/player?movieId=${_.id}`)}}>
                 <CardMedia
                   component="img"
-                  src={`${imageBaseUrl}w_160/${_.pi['EN_US']}`}
-                  srcSet={`${imageBaseUrl}w_240/${_.pi['EN_US']} 240w, ${imageBaseUrl}w_160/${_.pi['EN_US']} 160w`}  
+                  src={`${imageBaseUrl}w_160/${_.pi[props.locale]}`}
+                  srcSet={`${imageBaseUrl}w_240/${_.pi[props.locale]} 240w, ${imageBaseUrl}w_160/${_.pi[props.locale]} 160w`}
                   alt={`${_.ot} (${_.ry})`}
                   sizes="(max-width: 1200px) 160px, 240px"
                 />
@@ -133,17 +158,17 @@ function GridView(props: { searchString: string }) {
 }
 
 function Catalog() {
-  const [state, setState] = useState({searchString: ''});
+  const [state, setState] = useState({locale: 'RU', searchString: ''});
 
-  const onSearchChange = (searchString: string | null) => setState({searchString: searchString != null ? searchString : ''});
-
-  const onEnter = () => setState({searchString: state.searchString});
+  const onSearchChange = (searchString: string | null) => setState({...state, searchString: searchString != null ? searchString : ''});
   
+  const onLocaleChange = (locale: string) => setState({...state, locale});
+
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <CustomAppBar onSearchChange={onSearchChange} onEnter={onEnter}/>
-      <GridView searchString={state.searchString}/>
+      <CustomAppBar onSearchChange={onSearchChange} onLocaleChange={onLocaleChange} locale={state.locale}/>
+      <GridView searchString={state.searchString} locale={state.locale}/>
     </ThemeProvider>
   );
 }
