@@ -115,7 +115,7 @@ function CustomAppBar(props: {onSearchChange: (searchString: string | null) => v
               value={props.searchString}
               onInputChange={onInputChange}
               onChange={onChange}
-              sx={{ flex: 'auto', maxWidth: 700, "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": { border: 'none', "&:hover": { border: 'none'}}}}
+              sx={{ flex: 'auto', maxWidth: 700, "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": { border: 'none', "&:hover": { border: 'none', visibility: 'hidden'}}}}
               componentsProps={{ paper: {sx: {mt: 0.5}}}}
               PopperComponent={(props: any) => <Popper {...props} popperOptions={{strategy: 'fixed'}}/>}
               freeSolo
