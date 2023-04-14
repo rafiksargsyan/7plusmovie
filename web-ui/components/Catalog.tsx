@@ -88,7 +88,7 @@ function L8nSelect(props: {onLocaleChange: (locale: string) => void, currentLoca
 
 function CustomAppBar(props: {onSearchChange: (searchString: string | null) => void,
                               onLocaleChange: (locale: string) => void, locale: string,
-                              searchString: string}) {
+                              searchString: string | null}) {
   const [state, setState] = useState({options: []});
   
   const onInputChange = (event: React.SyntheticEvent<Element, Event>, value: string) => {
@@ -112,10 +112,10 @@ function CustomAppBar(props: {onSearchChange: (searchString: string | null) => v
           <div></div>
           <ThemeProvider theme={searchBoxTheme}>
             <Autocomplete
-              value={props.searchString}
+              value={props.searchString === '' ? undefined : props.searchString}
               onInputChange={onInputChange}
               onChange={onChange}
-              sx={{ flex: 'auto', maxWidth: 700, "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": { border: 'none', "&:hover": { border: 'none', visibility: 'hidden'}}}}
+              sx={{ flex: 'auto', maxWidth: 700, "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": { border: 'none', "&:hover": { border: 'none' }}}}
               componentsProps={{ paper: {sx: {mt: 0.5}}}}
               PopperComponent={(props: any) => <Popper {...props} popperOptions={{strategy: 'fixed'}}/>}
               freeSolo
@@ -176,7 +176,6 @@ function Catalog() {
 
   const paramString = router.asPath.split("?")[1];
 	let searchString = new URLSearchParams(paramString).get('search');
-  if (searchString == null) searchString = '';
 
   const currentLocale = langTagToLangCode[(router.locale != undefined ? router.locale : router.defaultLocale!) as keyof typeof langTagToLangCode];
 
@@ -188,7 +187,7 @@ function Catalog() {
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <CustomAppBar onSearchChange={onSearchChange} onLocaleChange={onLocaleChange} locale={currentLocale} searchString={searchString}/>
-      <GridView searchString={searchString} locale={currentLocale}/>
+      <GridView searchString={searchString == null ? '' : searchString} locale={currentLocale}/>
     </ThemeProvider>
   );
 }
