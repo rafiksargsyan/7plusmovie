@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -14,8 +14,8 @@ import CardActionArea from '@mui/material/CardActionArea';
 import CardMedia from '@mui/material/CardMedia';
 import algoliasearch from 'algoliasearch';
 import { useRouter } from 'next/router'
-import { IconButton, MenuItem, Select, Tooltip } from '@mui/material';
-import { padding } from '@mui/system';
+import { MenuItem, Select, Tooltip } from '@mui/material';
+import Image from 'next/image';
 
 const darkTheme = createTheme({
   palette: {
@@ -53,23 +53,33 @@ const L8nLangCodes = {
   RU : { langTag : "ru", countryCode: "RU" }
 } as const;
 
+const langTagToLangCode = {
+  "en-US" : "EN_US",
+  "ru" : "RU"
+} as const;
+
 const L8nTable = {
   EN_US : {
-    SEARCH_PLACEHOLDER: "Search titles"
+    SEARCH_PLACEHOLDER: "Search titles",
+    RU: "Russian",
+    EN_US: "American English"
   },
   RU : {
-    SEARCH_PLACEHOLDER: "Искать фильмы"
+    SEARCH_PLACEHOLDER: "Искать фильмы",
+    RU: "Русский",
+    EN_US: "Американский английский"
   }
 }
 
-function L8nSelect(props: {onLocaleChange: (locale: string) => void}) {
+function L8nSelect(props: {onLocaleChange: (locale: string) => void, currentLocale: string}) {
   return (
-    <Select defaultValue={"RU"} inputProps={{ IconComponent: () => null, sx: { paddingRight: '14px !important'}}}
+    <Select value={props.currentLocale} inputProps={{ IconComponent: () => null, sx: { paddingRight: '14px !important'}}}
             onChange={(e, c) => props.onLocaleChange(e.target.value)}>
       {Object.keys(L8nLangCodes).map((_) => (
         <MenuItem value={_} key={_}>
           <img src={`https://flagcdn.com/w20/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}.png`}
-               srcSet={`https://flagcdn.com/w40/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}.png 2x`} alt={"todo"} />{" "}
+               srcSet={`https://flagcdn.com/w40/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}.png 2x`}
+               alt={L8nTable[props.currentLocale as keyof typeof L8nTable][_ as keyof typeof L8nTable['EN_US']]} />{" "}
         </MenuItem>
       ))}
     </Select>
@@ -77,7 +87,8 @@ function L8nSelect(props: {onLocaleChange: (locale: string) => void}) {
 }
 
 function CustomAppBar(props: {onSearchChange: (searchString: string | null) => void,
-                              onLocaleChange: (locale: string) => void, locale: string}) {
+                              onLocaleChange: (locale: string) => void, locale: string,
+                              searchString: string}) {
   const [state, setState] = useState({options: []});
   
   const onInputChange = (event: React.SyntheticEvent<Element, Event>, value: string) => {
@@ -101,6 +112,7 @@ function CustomAppBar(props: {onSearchChange: (searchString: string | null) => v
           <div></div>
           <ThemeProvider theme={searchBoxTheme}>
             <Autocomplete
+              value={props.searchString}
               onInputChange={onInputChange}
               onChange={onChange}
               sx={{ flex: 'auto', maxWidth: 700, "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": { border: 'none', "&:hover": { border: 'none'}}}}
@@ -113,7 +125,7 @@ function CustomAppBar(props: {onSearchChange: (searchString: string | null) => v
               ListboxProps={{ style: { maxHeight: 400, transform: 'none' } }}
             />
           </ThemeProvider>
-          <L8nSelect onLocaleChange={props.onLocaleChange}/>
+          <L8nSelect onLocaleChange={props.onLocaleChange} currentLocale={props.locale}/>
         </Toolbar>
       </AppBar>
       <Toolbar/>
@@ -125,8 +137,8 @@ function GridView(props: { searchString: string, locale: string }) {
   const [state, setState] = useState({movies: []});
 
   useEffect(() => {
-    algoliaIndex.search<{objectID: string, originalTitle: string, releaseYear: number, posterImagesPortrait: {string: string}}>(props.searchString).then(result => {
-      setState({movies: result.hits.map(_ => ({id: _.objectID, ot: _.originalTitle, ry: _.releaseYear, pi: _.posterImagesPortrait})) as never[]});
+    algoliaIndex.search<{objectID: string, originalTitle: string, releaseYear: number, posterImagesPortrait: {string: string}, titleL8ns: {string: string}}>(props.searchString).then(result => {
+      setState({movies: result.hits.map(_ => ({id: _.objectID, ot: _.originalTitle, ry: _.releaseYear, pi: _.posterImagesPortrait, tl: _.titleL8ns})) as never[]});
     });
   }, [props.searchString]);
 
@@ -136,16 +148,16 @@ function GridView(props: { searchString: string, locale: string }) {
 
   return (
     <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 4, md: 5, lg: 6, xl: 7 }}>
-      {state.movies.map((_: {id: string, ot: string, ry: number, pi: {[key: string]: string}}, index) => (
+      {state.movies.map((_: {id: string, ot: string, ry: number, pi: {[key: string]: string}, tl: {[key: string]: string}}, index) => (
         <Grid item xs={1} sm={1} md={1} lg={1} xl={1} key={index}>
-          <Tooltip title={`${_.ot} (${_.ry})`} followCursor>
+          <Tooltip title={`${_.tl[props.locale] != undefined ? _.tl[props.locale] : _.ot} (${_.ry})`} followCursor>
             <Card>
               <CardActionArea sx={{position: 'relative'}} onClick={() => {router.push(`/player?movieId=${_.id}`)}}>
                 <CardMedia
                   component="img"
                   src={`${imageBaseUrl}w_160/${_.pi[props.locale]}`}
                   srcSet={`${imageBaseUrl}w_240/${_.pi[props.locale]} 240w, ${imageBaseUrl}w_160/${_.pi[props.locale]} 160w`}
-                  alt={`${_.ot} (${_.ry})`}
+                  alt={`${_.tl[props.locale] != undefined ? _.tl[props.locale] : _.ot} (${_.ry})`}
                   sizes="(max-width: 1200px) 160px, 240px"
                 />
               </CardActionArea>
@@ -158,17 +170,25 @@ function GridView(props: { searchString: string, locale: string }) {
 }
 
 function Catalog() {
-  const [state, setState] = useState({locale: 'RU', searchString: ''});
+  const [state, setState] = useState({searchString: ''});
 
-  const onSearchChange = (searchString: string | null) => setState({...state, searchString: searchString != null ? searchString : ''});
+  const router = useRouter();
+
+  const paramString = router.asPath.split("?")[1];
+	let searchString = new URLSearchParams(paramString).get('search');
+  if (searchString == null) searchString = '';
+
+  const currentLocale = langTagToLangCode[(router.locale != undefined ? router.locale : router.defaultLocale!) as keyof typeof langTagToLangCode];
+
+  const onSearchChange = (searchString: string | null) => router.replace(router.basePath, {query: {search: searchString}});
   
-  const onLocaleChange = (locale: string) => setState({...state, locale});
+  const onLocaleChange = (locale: string) => router.push(router.asPath, router.asPath, { locale: L8nLangCodes[locale as keyof typeof L8nLangCodes].langTag });
 
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <CustomAppBar onSearchChange={onSearchChange} onLocaleChange={onLocaleChange} locale={state.locale}/>
-      <GridView searchString={state.searchString} locale={state.locale}/>
+      <CustomAppBar onSearchChange={onSearchChange} onLocaleChange={onLocaleChange} locale={currentLocale} searchString={searchString}/>
+      <GridView searchString={searchString} locale={currentLocale}/>
     </ThemeProvider>
   );
 }
