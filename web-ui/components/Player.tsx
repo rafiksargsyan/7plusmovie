@@ -22,6 +22,7 @@ function VideoPlayer () {
 		const video = videoComponent.current;
         const ui = video['ui'];
 		var player = ui.getControls().getPlayer();
+        ui.getControls().getLocalization().changeLocale([router.locale]);
 
 		player.getNetworkingEngine()?.registerRequestFilter(function(type: any, request: { uris: string[]; }) {
 			if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST ||
