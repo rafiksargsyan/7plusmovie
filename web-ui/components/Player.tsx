@@ -6,6 +6,11 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { yellow } from '@mui/material/colors';
 
+const SubsLangCodes = {
+  EN_US : { langTag : "en-US" },
+  RU : { langTag : "ru" }
+} as const;
+
 function VideoPlayer () {
   const [videoComponent] = useState(React.createRef() as RefObject<any>);
   const [backdropImage, setBackdropImage] = useState();
@@ -31,10 +36,13 @@ function VideoPlayer () {
 			}
 		});
 
+		const subtitles = x.data.subtitles as {[key: string]: string};
 		// Try to load a manifest.
 		// This is an asynchronous process.
-		player.load(manifestUri);
-	})           
+		player.load(manifestUri).then((v: any) => {
+          Object.keys(subtitles).forEach(k => player.addTextTrackAsync(subtitles[k], SubsLangCodes[k as keyof typeof SubsLangCodes].langTag, 'text'))
+		});
+	})
   }, []);
 
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;

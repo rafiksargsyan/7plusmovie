@@ -166,6 +166,22 @@ functions:
                                    "relativePath" : $input.json(''$.relativePath'') }'
               application/x-www-form-urlencoded: null
 
+  addSubtitleToMovie:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/addSubtitleToMovie.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addSubtitleToMovie
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : $input.json(''$.movieId''),
+                                   "lang" : $input.json(''$.lang''),
+                                   "relativePath" : $input.json(''$.relativePath'') }'
+              application/x-www-form-urlencoded: null
+
 plugins:
   - serverless-esbuild
 

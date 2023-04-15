@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import { L8nLangCode } from './L8nLangCodes';
+import { SubsLangCode } from './SubsLangCodes';
 
 type RelativePath = string;
 
@@ -57,6 +58,14 @@ export class Movie {
     this.lastUpdateTime = Date.now();
   }
 
+  public addSubtitle(locale: SubsLangCode, relativePath: RelativePath) {
+    if (! /\S/.test(relativePath)) {
+      throw new InvalidSubtitleRelativePathError();
+    }
+    this.subtitles[locale.code] = relativePath;
+    this.lastUpdateTime = Date.now();
+  }
+
   public addBackdropImage(relativePath: RelativePath) {
     if (! /\S/.test(relativePath)) {
       throw new InvalidBackdropImageRelativePathError();
@@ -96,3 +105,5 @@ class InvalidOriginalLocaleError extends Error {}
 class InvalidTitleL8nError extends Error {}
 
 class InvalidBackdropImageRelativePathError extends Error {}
+
+class InvalidSubtitleRelativePathError extends Error {}

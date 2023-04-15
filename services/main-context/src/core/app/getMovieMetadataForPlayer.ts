@@ -56,7 +56,7 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   const signedUrl = getSignedUrl({url, privateKey, keyPairId, policy});
   
   return {
-    subtitles: movie.subtitles,
+    subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `https://${cfDistro.domain}/${movie.subtitles[key]}`; return acc;}, {}),
     mpdFile: `https://${cfDistro.domain}/${movie.mpdFile}`,
     cloudFrontSignedUrlParams: signedUrl.substring(signedUrl.indexOf("?") + 1),
     backdropImage: movie.backdropImage
