@@ -7,7 +7,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { yellow } from '@mui/material/colors';
 
 function VideoPlayer () {
-  const [videoComponent] = useState(React.createRef() as RefObject<HTMLVideoElement>);
+  const [videoComponent] = useState(React.createRef() as RefObject<any>);
   const [backdropImage, setBackdropImage] = useState();
   const router = useRouter();
   useEffect(() => {
@@ -19,9 +19,9 @@ function VideoPlayer () {
 
 		var manifestUri = x.data.mpdFile;
 
-		const video = videoComponent.current as HTMLMediaElement;
-
-		var player = new shaka.Player(video);
+		const video = videoComponent.current;
+        const ui = video['ui'];
+		var player = ui.getControls().getPlayer();
 
 		player.getNetworkingEngine()?.registerRequestFilter(function(type: any, request: { uris: string[]; }) {
 			if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST ||
@@ -39,12 +39,14 @@ function VideoPlayer () {
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
 
   return (
-	<video
-	  style={{width: '100vw', height: '100vh', objectFit: 'contain', maxWidth: '100%', maxHeight: '100%', position: 'absolute'}}
-	  ref={videoComponent}
-	  poster={backdropImage == undefined ? undefined : `${imageBaseUrl}h_720/${backdropImage}`}
-      controls
+	<div data-shaka-player-container style={{width: '100vw', height: '100vh'}}>	
+	  <video
+	    data-shaka-player
+	    style={{width: '100vw', height: '100vh', objectFit: 'contain', maxWidth: '100%', maxHeight: '100%', position: 'absolute'}}
+	    ref={videoComponent}
+	    poster={backdropImage == undefined ? undefined : `${imageBaseUrl}h_720/${backdropImage}`}
 	  />
+	</div>
   );
 }
 
