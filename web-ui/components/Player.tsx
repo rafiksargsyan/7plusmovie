@@ -18,31 +18,28 @@ function VideoPlayer () {
   useEffect(() => {
 	const paramString = router.asPath.split("?")[1];
 	const movieId = new URLSearchParams(paramString).get('movieId');
-	axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${movieId}`)
-	.then((x) => {
-        setBackdropImage(x.data.backdropImage);
-
-		var manifestUri = x.data.mpdFile;
-
-		const video = videoComponent.current;
-        const ui = video['ui'];
-		var player = ui.getControls().getPlayer();
-        ui.getControls().getLocalization().changeLocale([router.locale]);
-
-		player.getNetworkingEngine()?.registerRequestFilter(function(type: any, request: { uris: string[]; }) {
-			if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST ||
-			type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
-				request.uris[0] += `?${x.data.cloudFrontSignedUrlParams}`;
-			}
-		});
-
-		const subtitles = x.data.subtitles as {[key: string]: string};
-		// Try to load a manifest.
-		// This is an asynchronous process.
-		player.load(manifestUri).then((v: any) => {
-          Object.keys(subtitles).forEach(k => player.addTextTrackAsync(subtitles[k], SubsLangCodes[k as keyof typeof SubsLangCodes].langTag, 'text'))
-		});
-	})
+	document.addEventListener('shaka-ui-loaded', () => {
+	  axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${movieId}`)
+	  .then((x) => {
+	  	setBackdropImage(x.data.backdropImage);  
+	  	var manifestUri = x.data.mpdFile;  
+	  	const video = videoComponent.current;
+	  	const ui = video['ui'];
+	  	var player = ui.getControls().getPlayer();
+	  	ui.getControls().getLocalization().changeLocale([router.locale]);  
+	  	player.getNetworkingEngine()?.registerRequestFilter(function(type: any, request: { uris: string[]; }) {
+	  		if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST ||
+	  		type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+	  			request.uris[0] += `?${x.data.cloudFrontSignedUrlParams}`;
+	  		}
+	  	});  
+	  	const subtitles = x.data.subtitles as {[key: string]: string};
+	  	// Try to load a manifest.
+	  	// This is an asynchronous process.
+	  	player.load(manifestUri).then((v: any) => {
+	  	Object.keys(subtitles).forEach(k => player.addTextTrackAsync(subtitles[k], SubsLangCodes[k as keyof typeof SubsLangCodes].langTag, 'text'))
+	  	});
+	  })});
   }, []);
 
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
