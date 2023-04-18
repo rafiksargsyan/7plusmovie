@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import React, { RefObject, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import shaka from 'shaka-player';
 import axios from 'axios';
 import CssBaseline from '@mui/material/CssBaseline';
