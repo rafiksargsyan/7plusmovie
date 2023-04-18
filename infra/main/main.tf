@@ -139,12 +139,14 @@ resource "aws_cognito_user_pool" "admin_user_pool" {
 resource "aws_cognito_user_pool_client" "admin_client_cli" {
   name         = "${local.deployment_id}-admin-client-cli"
   user_pool_id = aws_cognito_user_pool.admin_user_pool.id
+
+  allowed_oauth_flows = ["USER_PASSWORD_AUTH"]
 }
 
 resource "aws_cognito_user" "rafiksargsyan07" {
   user_pool_id             = aws_cognito_user_pool.admin_user_pool.id
   username                 = "rafiksargsyan07@gmail.com"
-  desired_delivery_mediums = [ "EMAIL" ]
+  desired_delivery_mediums = ["EMAIL"]
   attributes = {
     email = "rafiksargsyan07@gmail.com"
   }
