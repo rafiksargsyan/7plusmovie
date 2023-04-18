@@ -127,10 +127,16 @@ resource "aws_cognito_user_pool" "admin_user_pool" {
   software_token_mfa_configuration {
     enabled = true
   }
+
+  account_recovery_setting {
+    recovery_mechanism {
+      name     = "verified_email"
+      priority = 1
+    }
+  }
 }
 
 resource "aws_cognito_user" "rafiksargsyan07" {
   user_pool_id = aws_cognito_user_pool.admin_user_pool.id
   username     = "rafiksargsyan07@gmail.com"
 }
-
