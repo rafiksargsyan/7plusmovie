@@ -41,6 +41,8 @@ functions:
                                    "originalTitle" : $input.json(''$.originalTitle''),
                                    "releaseYear" : $input.json(''$.releaseYear'') }'
               application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
   movieS3BucketTrigger:
     environment:
@@ -69,6 +71,8 @@ functions:
                                    "locale" : $input.json(''$.locale''),
                                    "relativePath" : $input.json(''$.relativePath'') }'
               application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
   addMpdFileToMovie:
     environment:
@@ -84,7 +88,9 @@ functions:
               application/json: '{ "movieId" : $input.json(''$.movieId''),
                                    "relativePath" : $input.json(''$.relativePath'') }'
               application/x-www-form-urlencoded: null                      
-  
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+
   movieUpdateHandler:
     handler: src/core/app/movieUpdateHandler.handler
     environment:
@@ -109,7 +115,9 @@ functions:
                                    "locale" : $input.json(''$.locale''),
                                    "title" : $input.json(''$.title'') }'
               application/x-www-form-urlencoded: null
-    
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+
   createCloudFrontDistroMetadata:
     environment:
       DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME: ${env:DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME}
@@ -127,6 +135,8 @@ functions:
                                    "awsAccountNumber" : $input.json(''$.awsAccountNumber''),
                                    "signerKeyId" : $input.json(''$.signerKeyId'') }'
               application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
   getMovieMetadataForPlayer:
     environment:
@@ -165,6 +175,8 @@ functions:
               application/json: '{ "movieId" : $input.json(''$.movieId''),
                                    "relativePath" : $input.json(''$.relativePath'') }'
               application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
   addSubtitleToMovie:
     environment:
@@ -181,6 +193,8 @@ functions:
                                    "lang" : $input.json(''$.lang''),
                                    "relativePath" : $input.json(''$.relativePath'') }'
               application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
 plugins:
   - serverless-esbuild
