@@ -110,3 +110,27 @@ resource "aws_s3_bucket_cors_configuration" "media_assets_cors" {
     allowed_origins = ["*"]
   }
 }
+
+resource "aws_cognito_user_pool" "admin_user_pool" {
+  name = "${local.deployment_id}-admin-user-pool"
+
+  admin_create_user_config {
+    allow_admin_create_user_only = true
+  }
+
+  mfa_configuration = "OPTIONAL"
+
+  username_configuration {
+    case_sensitive = false
+  }
+
+  software_token_mfa_configuration {
+    enabled = true
+  }
+}
+
+resource "aws_cognito_user" "rafiksargsyan07" {
+  user_pool_id = aws_cognito_user_pool.admin_user_pool.id
+  username     = "rafiksargsyan07@gmail.com"
+}
+
