@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import React, { RefObject, useEffect, useRef, useState } from 'react';
+import React, { RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import shaka from 'shaka-player';
 import axios from 'axios';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -42,7 +42,7 @@ function VideoPlayer () {
 	  	});
 	  })
 	});
-  }, []);
+  });
 
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
 
