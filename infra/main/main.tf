@@ -140,7 +140,7 @@ resource "aws_cognito_user_pool_client" "admin_client_cli" {
   name         = "${local.deployment_id}-admin-client-cli"
   user_pool_id = aws_cognito_user_pool.admin_user_pool.id
 
-  allowed_oauth_flows = ["USER_PASSWORD_AUTH"]
+  explicit_auth_flows = ["USER_PASSWORD_AUTH"]
 }
 
 resource "aws_cognito_user" "rafiksargsyan07" {
