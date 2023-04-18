@@ -139,4 +139,5 @@ resource "aws_cognito_user_pool" "admin_user_pool" {
 resource "aws_cognito_user" "rafiksargsyan07" {
   user_pool_id = aws_cognito_user_pool.admin_user_pool.id
   username     = "rafiksargsyan07@gmail.com"
+  desired_delivery_mediums = [ "EMAIL" ]
 }
