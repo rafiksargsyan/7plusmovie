@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import React, { RefObject, useEffect, useState } from 'react';
+import React, { RefObject, useEffect, useRef, useState } from 'react';
 import shaka from 'shaka-player';
 import axios from 'axios';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -12,7 +12,7 @@ const SubsLangCodes = {
 } as const;
 
 function VideoPlayer () {
-  const [videoComponent] = useState(React.createRef() as RefObject<any>);
+  const videoComponent = useRef(null);
   const [backdropImage, setBackdropImage] = useState();
   const router = useRouter();
   useEffect(() => {
@@ -24,22 +24,24 @@ function VideoPlayer () {
 	  	setBackdropImage(x.data.backdropImage);  
 	  	var manifestUri = x.data.mpdFile;  
 	  	const video = videoComponent.current;
-	  	const ui = video['ui'];
+		if (video == null) return;
+	  	const ui: any = video['ui'];
 	  	var player = ui.getControls().getPlayer();
 	  	ui.getControls().getLocalization().changeLocale([router.locale]);  
 	  	player.getNetworkingEngine()?.registerRequestFilter(function(type: any, request: { uris: string[]; }) {
-	  		if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST ||
-	  		type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
-	  			request.uris[0] += `?${x.data.cloudFrontSignedUrlParams}`;
-	  		}
+	  	  if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST ||
+	  	  type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+	  	  	request.uris[0] += `?${x.data.cloudFrontSignedUrlParams}`;
+	  	  }
 	  	});  
 	  	const subtitles = x.data.subtitles as {[key: string]: string};
 	  	// Try to load a manifest.
 	  	// This is an asynchronous process.
 	  	player.load(manifestUri).then((v: any) => {
-	  	Object.keys(subtitles).forEach(k => player.addTextTrackAsync(subtitles[k], SubsLangCodes[k as keyof typeof SubsLangCodes].langTag, 'text'))
+	  	  Object.keys(subtitles).forEach(k => player.addTextTrackAsync(subtitles[k], SubsLangCodes[k as keyof typeof SubsLangCodes].langTag, 'text'))
 	  	});
-	  })});
+	  })
+	});
   }, []);
 
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
