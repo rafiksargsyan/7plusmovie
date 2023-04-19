@@ -7,7 +7,7 @@ const player = () => (
   <>
     <Head>
       <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/shaka-player@4.3.5/dist/controls.css"></link>
-      <script async src="https://cdn.jsdelivr.net/npm/shaka-player@4.3.5/dist/shaka-player.ui.js"></script>
+      <script defer src="https://cdn.jsdelivr.net/npm/shaka-player@4.3.5/dist/shaka-player.ui.js"></script>
     </Head>
     <Player />
   </>
