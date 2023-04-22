@@ -47,14 +47,6 @@ function VideoPlayer () {
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
 
   return (
-	// <div ref={videoContainerComponent} data-shaka-player-container style={{width: '100vw', height: '100vh'}}>	
-	//   <video
-	//     data-shaka-player
-	//     style={{width: '100vw', height: '100vh', objectFit: 'contain', maxWidth: '100%', maxHeight: '100%', position: 'absolute'}}
-	//     ref={videoComponent}
-	//     poster={backdropImage == undefined ? undefined : `${imageBaseUrl}h_720/${backdropImage}`}
-	//   />
-	// </div>
 	<ShakaPlayer className="shaka-player-video-container" ref={controllerRef} poster={backdropImage} style={{width: '100vw', height: '100vh', objectFit: 'contain', maxWidth: '100%', maxHeight: '100%', position: 'absolute'}}/>
   );
 }
