@@ -1,10 +1,11 @@
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
-import shaka from 'shaka-player';
 import axios from 'axios';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { yellow } from '@mui/material/colors';
+import ShakaPlayer from 'shaka-player-react';
+import 'shaka-player-react/dist/controls.css';
 
 const SubsLangCodes = {
   EN_US : { langTag : "en-US" },
@@ -12,25 +13,25 @@ const SubsLangCodes = {
 } as const;
 
 function VideoPlayer () {
-  const videoComponent = useRef(null);
-  const [backdropImage, setBackdropImage] = useState();
   const router = useRouter();
+  const controllerRef = useRef(null);
+  const [backdropImage, setBackdropImage] = useState<string>();
   useEffect(() => {
 	const paramString = router.asPath.split("?")[1];
 	const movieId = new URLSearchParams(paramString).get('movieId');
-	document.addEventListener('shaka-ui-loaded', () => {
+	if (controllerRef.current == null) return;
+	const {
+		/** @type {shaka.Player} */ player,
+		/** @type {shaka.ui.Overlay} */ ui,
+		/** @type {HTMLVideoElement} */ videoElement
+	} = controllerRef.current as any;
 	  axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${movieId}`)
 	  .then((x) => {
-	  	setBackdropImage(x.data.backdropImage);  
-	  	var manifestUri = x.data.mpdFile;  
-	  	const video = videoComponent.current;
-		if (video == null) return;
-	  	const ui: any = video['ui'];
-	  	var player = ui.getControls().getPlayer();
-	  	ui.getControls().getLocalization().changeLocale([router.locale]);  
+		setBackdropImage(`${imageBaseUrl}h_720/${x.data.backdropImage}`);
+		if (player == null) return;
+        const manifestUri = x.data.mpdFile;
 	  	player.getNetworkingEngine()?.registerRequestFilter(function(type: any, request: { uris: string[]; }) {
-	  	  if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST ||
-	  	  type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+	  	  if (type === 0 || type === 1) {
 	  	  	request.uris[0] += `?${x.data.cloudFrontSignedUrlParams}`;
 	  	  }
 	  	});  
@@ -41,20 +42,20 @@ function VideoPlayer () {
 	  	  Object.keys(subtitles).forEach(k => player.addTextTrackAsync(subtitles[k], SubsLangCodes[k as keyof typeof SubsLangCodes].langTag, 'text'))
 	  	});
 	  })
-	});
   });
 
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
 
   return (
-	<div data-shaka-player-container style={{width: '100vw', height: '100vh'}}>	
-	  <video
-	    data-shaka-player
-	    style={{width: '100vw', height: '100vh', objectFit: 'contain', maxWidth: '100%', maxHeight: '100%', position: 'absolute'}}
-	    ref={videoComponent}
-	    poster={backdropImage == undefined ? undefined : `${imageBaseUrl}h_720/${backdropImage}`}
-	  />
-	</div>
+	// <div ref={videoContainerComponent} data-shaka-player-container style={{width: '100vw', height: '100vh'}}>	
+	//   <video
+	//     data-shaka-player
+	//     style={{width: '100vw', height: '100vh', objectFit: 'contain', maxWidth: '100%', maxHeight: '100%', position: 'absolute'}}
+	//     ref={videoComponent}
+	//     poster={backdropImage == undefined ? undefined : `${imageBaseUrl}h_720/${backdropImage}`}
+	//   />
+	// </div>
+	<ShakaPlayer className="shaka-player-video-container" ref={controllerRef} poster={backdropImage} style={{width: '100vw', height: '100vh', objectFit: 'contain', maxWidth: '100%', maxHeight: '100%', position: 'absolute'}}/>
   );
 }
 

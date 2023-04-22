@@ -1,3 +1,3 @@
-declare module 'shaka-player' {
-  export = shaka;
+declare module 'shaka-player-react' {
+  export = ShakaPlayer;
 }
