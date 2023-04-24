@@ -1,6 +1,4 @@
-import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { yellow } from '@mui/material/colors';
@@ -12,42 +10,35 @@ const SubsLangCodes = {
   RU : { langTag : "ru" }
 } as const;
 
-function VideoPlayer () {
-  const router = useRouter();
+function VideoPlayer(props: {mpdFile: string, cloudFrontSignedUrlParams: string, backdropImage: string, subtitles: {[key: string]: string}}) {
   const controllerRef = useRef(null);
-  const [backdropImage, setBackdropImage] = useState<string>();
+  const [counter, setCounter] = useState(0);
+
   useEffect(() => {
-	const paramString = router.asPath.split("?")[1];
-	const movieId = new URLSearchParams(paramString).get('movieId');
-	if (controllerRef.current == null) return;
+	if (counter === 0) setCounter(1);
 	const {
-		/** @type {shaka.Player} */ player,
-		/** @type {shaka.ui.Overlay} */ ui,
-		/** @type {HTMLVideoElement} */ videoElement
+	  player,
+	  ui,
+	  videoElement
 	} = controllerRef.current as any;
-	  axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${movieId}`)
-	  .then((x) => {
-		setBackdropImage(`${imageBaseUrl}h_720/${x.data.backdropImage}`);
-		if (player == null) return;
-        const manifestUri = x.data.mpdFile;
-	  	player.getNetworkingEngine()?.registerRequestFilter(function(type: any, request: { uris: string[]; }) {
-	  	  if (type === 0 || type === 1) {
-	  	  	request.uris[0] += `?${x.data.cloudFrontSignedUrlParams}`;
-	  	  }
-	  	});  
-	  	const subtitles = x.data.subtitles as {[key: string]: string};
-	  	// Try to load a manifest.
-	  	// This is an asynchronous process.
-	  	player.load(manifestUri).then((v: any) => {
-	  	  Object.keys(subtitles).forEach(k => player.addTextTrackAsync(subtitles[k], SubsLangCodes[k as keyof typeof SubsLangCodes].langTag, 'text'))
-	  	});
-	  })
-  });
+	if (player == null) return;
+	player.getNetworkingEngine()?.registerRequestFilter(function(type: any, request: { uris: string[]; }) {
+	  if (type === 0 || type === 1) {
+		request.uris[0] += `?${props.cloudFrontSignedUrlParams}`;
+	  }
+	});
+	// Try to load a manifest.
+	// This is an asynchronous process.
+	player.load(props.mpdFile).then((v: any) => {
+		Object.keys(props.subtitles).forEach(k => player.addTextTrackAsync(props.subtitles[k], SubsLangCodes[k as keyof typeof SubsLangCodes].langTag, 'text'))
+	});
+  }, [counter]);
 
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
 
   return (
-	<ShakaPlayer className="shaka-player-video-container" ref={controllerRef} poster={backdropImage} style={{width: '100vw', height: '100vh', objectFit: 'contain', maxWidth: '100%', maxHeight: '100%', position: 'absolute'}}/>
+	<ShakaPlayer className="shaka-player-video-container" ref={controllerRef} poster={`${imageBaseUrl}h_720/${props.backdropImage}`}
+	             style={{width: '100vw', height: '100vh', objectFit: 'contain', maxWidth: '100%', maxHeight: '100%', position: 'absolute'}}/>
   );
 }
 
@@ -60,13 +51,17 @@ const darkTheme = createTheme({
   },
 });
 
-function VideoPlayerWrapper() {
+function VideoPlayerWrapper(props: {mpdFile: string, cloudFrontSignedUrlParams: string, backdropImage: string, subtitles: {[key: string]: string}}) {
   return (
 	<ThemeProvider theme={darkTheme}>
 	  <CssBaseline />
-	  <VideoPlayer />
+	  <VideoPlayer {...props} />
 	</ThemeProvider>
   ); 
 }
 
 export default VideoPlayerWrapper;
+function setState(arg0: number): [any, any] {
+	throw new Error('Function not implemented.');
+}
+

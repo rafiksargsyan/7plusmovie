@@ -16,6 +16,7 @@ import algoliasearch from 'algoliasearch';
 import { useRouter } from 'next/router'
 import { MenuItem, Select, Tooltip } from '@mui/material';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const darkTheme = createTheme({
   palette: {
@@ -152,15 +153,17 @@ function GridView(props: { searchString: string, locale: string }) {
         <Grid item xs={1} sm={1} md={1} lg={1} xl={1} key={index}>
           <Tooltip title={`${_.tl[props.locale] != undefined ? _.tl[props.locale] : _.ot} (${_.ry})`} followCursor>
             <Card>
-              <CardActionArea sx={{position: 'relative'}} onClick={() => {router.push(`/player?movieId=${_.id}`)}}>
-                <CardMedia
-                  component="img"
-                  src={`${imageBaseUrl}w_160/${_.pi[props.locale]}`}
-                  srcSet={`${imageBaseUrl}w_240/${_.pi[props.locale]} 240w, ${imageBaseUrl}w_160/${_.pi[props.locale]} 160w`}
-                  alt={`${_.tl[props.locale] != undefined ? _.tl[props.locale] : _.ot} (${_.ry})`}
-                  sizes="(max-width: 1200px) 160px, 240px"
-                />
-              </CardActionArea>
+              <Link href={{pathname: '/player', query: {movieId: _.id}}}>
+                <CardActionArea>
+                  <CardMedia
+                    component="img"
+                    src={`${imageBaseUrl}w_160/${_.pi[props.locale]}`}
+                    srcSet={`${imageBaseUrl}w_240/${_.pi[props.locale]} 240w, ${imageBaseUrl}w_160/${_.pi[props.locale]} 160w`}
+                    alt={`${_.tl[props.locale] != undefined ? _.tl[props.locale] : _.ot} (${_.ry})`}
+                    sizes="(max-width: 1200px) 160px, 240px"
+                  />
+                </CardActionArea>
+              </Link>
             </Card>
           </Tooltip>
         </Grid>

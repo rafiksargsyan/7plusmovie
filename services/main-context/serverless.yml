@@ -159,7 +159,10 @@ functions:
             template: '{ "subtitles" : $input.json(''$.subtitles''),
                          "mpdFile" : $input.json(''$.mpdFile''),
                          "cloudFrontSignedUrlParams" :  $input.json(''$.cloudFrontSignedUrlParams''),
-                         "backdropImage": $input.json(''$.backdropImage'') }'
+                         "backdropImage": $input.json(''$.backdropImage''),
+                         "originalTitle": $input.json(''$.originalTitle''),
+                         "titleL8ns": $input.json(''$.titleL8ns''),
+                         "releaseYear": $input.json(''$.releaseYear'') }'
 
   addBackdropImageToMovie:
     environment:

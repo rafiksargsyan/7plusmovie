@@ -19,13 +19,19 @@ interface GetMovieMetadataResponse {
   mpdFile: string;
   cloudFrontSignedUrlParams: string;
   backdropImage: string;
+  originalTitle: string;
+  titleL8ns: { [key: string]: string };
+  releaseYear: number;
 }
 
 interface Movie {
   id: string
   subtitles: { [key: string]: string };
   mpdFile: string; 
-  backdropImage: string; 
+  backdropImage: string;
+  originalTitle: string;
+  titleL8ns: { [key: string]: string };
+  releaseYear: number; 
 }
 
 interface CloudFrontDistro {
@@ -59,7 +65,10 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
     subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `https://${cfDistro.domain}/${movie.subtitles[key]}`; return acc;}, {}),
     mpdFile: `https://${cfDistro.domain}/${movie.mpdFile}`,
     cloudFrontSignedUrlParams: signedUrl.substring(signedUrl.indexOf("?") + 1),
-    backdropImage: movie.backdropImage
+    backdropImage: movie.backdropImage,
+    originalTitle: movie.originalTitle,
+    titleL8ns: movie.titleL8ns,
+    releaseYear: movie.releaseYear
   };
 };
 
