@@ -56,4 +56,28 @@ provider "aws" {
   }
 }
 
+provider "aws" {
+  alias  = "mutantcandlelight_1"
 
+  region = "eu-west-3"
+  access_key = var.aws_workloads_prod_access_key
+  secret_key = var.aws_workloads_prod_secret_key
+
+  assume_role {
+    role_arn     = "arn:aws:iam::011949300477:role/WorkloadsProd1AssumeRole"
+    session_name = "mutantcandlelight1"
+  }
+}
+
+provider "aws" {
+  alias  = "mutantcandlelight_2"
+
+  region = "eu-west-3"
+  access_key = var.aws_workloads_prod_access_key
+  secret_key = var.aws_workloads_prod_secret_key
+
+  assume_role {
+    role_arn     = "arn:aws:iam::386464960221:role/WorkloadsProd1AssumeRole"
+    session_name = "mutantcandlelight2"
+  }
+}

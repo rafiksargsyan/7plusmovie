@@ -37,3 +37,23 @@ output "mutantcandlelight" {
     "aws_account_number" : module.cf_distro_mutantcandlelight.cf_aws_account_number
   })
 }
+
+output "mutantcandlelight_1" {
+  value = tomap({
+    "cf_domain": module.cf_distro_mutantcandlelight_1.cf_domain,
+    "signer_key_id": module.cf_distro_mutantcandlelight_1.signer_key_id,
+    "cf_arn": module.cf_distro_mutantcandlelight_1.cf_arn,
+    "assume_role_arn_for_main_account" : "arn:aws:iam::011949300477:role/WorkloadsProd1AssumeRole",
+    "aws_account_number" : module.cf_distro_mutantcandlelight_1.cf_aws_account_number
+  })
+}
+
+output "mutantcandlelight_2" {
+  value = tomap({
+    "cf_domain": module.cf_distro_mutantcandlelight_2.cf_domain,
+    "signer_key_id": module.cf_distro_mutantcandlelight_2.signer_key_id,
+    "cf_arn": module.cf_distro_mutantcandlelight_2.cf_arn,
+    "assume_role_arn_for_main_account" : "arn:aws:iam::386464960221:role/WorkloadsProd1AssumeRole",
+    "aws_account_number" : module.cf_distro_mutantcandlelight_2.cf_aws_account_number
+  })
+}
