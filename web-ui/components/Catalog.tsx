@@ -134,32 +134,22 @@ function CustomAppBar(props: {onSearchChange: (searchString: string | null) => v
   );
 }
 
-function GridView(props: { searchString: string, locale: string }) {
-  const [state, setState] = useState({movies: []});
-
-  useEffect(() => {
-    algoliaIndex.search<{objectID: string, originalTitle: string, releaseYear: number, posterImagesPortrait: {string: string}, titleL8ns: {string: string}}>(props.searchString).then(result => {
-      setState({movies: result.hits.map(_ => ({id: _.objectID, ot: _.originalTitle, ry: _.releaseYear, pi: _.posterImagesPortrait, tl: _.titleL8ns})) as never[]});
-    });
-  }, [props.searchString]);
-
+function GridView(props: CatalogProps) {
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
-
-  const router = useRouter();
 
   return (
     <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 4, md: 5, lg: 6, xl: 7 }}>
-      {state.movies.map((_: {id: string, ot: string, ry: number, pi: {[key: string]: string}, tl: {[key: string]: string}}, index) => (
+      {props.movies.map((_: MovieItem, index) => (
         <Grid item xs={1} sm={1} md={1} lg={1} xl={1} key={index}>
-          <Tooltip title={`${_.tl[props.locale] != undefined ? _.tl[props.locale] : _.ot} (${_.ry})`} followCursor>
+          <Tooltip title={`${_.title} (${_.releaseYear})`} followCursor>
             <Card>
               <Link href={{pathname: '/player', query: {movieId: _.id}}}>
                 <CardActionArea>
                   <CardMedia
                     component="img"
-                    src={`${imageBaseUrl}w_160/${_.pi[props.locale]}`}
-                    srcSet={`${imageBaseUrl}w_240/${_.pi[props.locale]} 240w, ${imageBaseUrl}w_160/${_.pi[props.locale]} 160w`}
-                    alt={`${_.tl[props.locale] != undefined ? _.tl[props.locale] : _.ot} (${_.ry})`}
+                    src={`${imageBaseUrl}w_160/${_.posterImage}`}
+                    srcSet={`${imageBaseUrl}w_240/${_.posterImage} 240w, ${imageBaseUrl}w_160/${_.posterImage} 160w`}
+                    alt={`${_.title} (${_.releaseYear})`}
                     sizes="(max-width: 1200px) 160px, 240px"
                   />
                 </CardActionArea>
@@ -172,25 +162,27 @@ function GridView(props: { searchString: string, locale: string }) {
   )
 }
 
-function Catalog() {
-  const [state, setState] = useState({searchString: ''});
+interface MovieItem {
+  id: string;
+  title: string;
+  releaseYear: number;
+  posterImage: string;
+}
 
-  const router = useRouter();
+interface CatalogProps {
+  movies: MovieItem[];
+  currentLocale: string;
+  searchString: string | null;
+  onSearchChange: (searchString: string | null) => void;
+  onLocaleChange: (locale: string) => void;
+}
 
-  const paramString = router.asPath.split("?")[1];
-	let searchString = new URLSearchParams(paramString).get('search');
-
-  const currentLocale = langTagToLangCode[(router.locale != undefined ? router.locale : router.defaultLocale!) as keyof typeof langTagToLangCode];
-
-  const onSearchChange = (searchString: string | null) => router.replace(router.basePath, {query: {search: searchString}});
-  
-  const onLocaleChange = (locale: string) => router.push(router.asPath, router.asPath, { locale: L8nLangCodes[locale as keyof typeof L8nLangCodes].langTag });
-
+function Catalog(props: CatalogProps) {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <CustomAppBar onSearchChange={onSearchChange} onLocaleChange={onLocaleChange} locale={currentLocale} searchString={searchString}/>
-      <GridView searchString={searchString == null ? '' : searchString} locale={currentLocale}/>
+      <CustomAppBar onSearchChange={props.onSearchChange} onLocaleChange={props.onLocaleChange} locale={props.currentLocale} searchString={props.searchString}/>
+      <GridView {...props}/>
     </ThemeProvider>
   );
 }

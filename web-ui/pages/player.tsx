@@ -52,6 +52,9 @@ function PlayerPage() {
     <>
       <Head>
         <title>{movie == undefined ? '' : `${movie.titleL8ns[currentLocaleCode] != undefined ? movie.titleL8ns[currentLocaleCode] : movie.originalTitle} (${movie.releaseYear})`}</title>
+        <link rel="alternate" href="/en-US" hrefLang='en-US'></link>
+        <link rel="alternate" href="/ru" hrefLang='ru'></link>
+        <link rel="alternate" href="/en-US" hrefLang='x-default'></link>
       </Head>
       {movie != undefined && <Player mpdFile={movie.mpdFile} cloudFrontSignedUrlParams={movie.cloudFrontSignedUrlParams}
                                      backdropImage={movie.backdropImage} subtitles={movie.subtitles}/>}
