@@ -33,11 +33,14 @@ const langTagToLangCode = {
   "ru" : "RU"
 } as const;
 
+const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
+
 function PlayerPage(props : {movie: Movie, currentLocale: string}) {
   return (
     <>
       <Head>
         <title>{props.movie == undefined ? '' : `${props.movie.titleL8ns[props.currentLocale] != undefined ? props.movie.titleL8ns[props.currentLocale] : props.movie.originalTitle} (${props.movie.releaseYear})`}</title>
+        <meta property="og:image" content={props.movie == undefined ? undefined : `${imageBaseUrl}h_720/${props.movie.backdropImage}`}/>
         <link rel="alternate" href="/en-US" hrefLang='en-US'></link>
         <link rel="alternate" href="/ru" hrefLang='ru'></link>
         <link rel="alternate" href="/en-US" hrefLang='x-default'></link>
