@@ -138,7 +138,7 @@ function GridView(props: CatalogProps) {
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
 
   return (
-    <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 4, md: 5, lg: 6, xl: 7 }}>
+    <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 5, md: 6, lg: 7, xl: 8 }}>
       {props.movies.map((_: MovieItem, index) => (
         <Grid item xs={1} sm={1} md={1} lg={1} xl={1} key={index}>
           <Tooltip title={`${_.title} (${_.releaseYear})`} followCursor>
