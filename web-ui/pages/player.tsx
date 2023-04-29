@@ -1,10 +1,9 @@
 import axios from 'axios';
+import { GetServerSidePropsContext } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
 
-const Player = dynamic(import ("../components/Player"), { ssr: false });
+const Player = dynamic(() => import ("../components/Player"), {ssr: false});
 
 interface Movie {
   originalTitle: string;
@@ -34,32 +33,31 @@ const langTagToLangCode = {
   "ru" : "RU"
 } as const;
 
-function PlayerPage() {
-  const [movie, setMovie] = useState<Movie>();
-  const router = useRouter();
-  const paramString = router.asPath.split("?")[1];
-	const movieId = new URLSearchParams(paramString).get('movieId')!;
-  const currentLocale = router.locale != null ? router.locale : router.defaultLocale!;
-  const currentLocaleCode = langTagToLangCode[currentLocale as keyof typeof langTagToLangCode];
-  
-  useEffect(() => {
-    getMovie(movieId).then(m => {
-      setMovie(m);
-    });
-  }, [movieId]);
-
+function PlayerPage(props : {movie: Movie, currentLocale: string}) {
   return (
     <>
       <Head>
-        <title>{movie == undefined ? '' : `${movie.titleL8ns[currentLocaleCode] != undefined ? movie.titleL8ns[currentLocaleCode] : movie.originalTitle} (${movie.releaseYear})`}</title>
+        <title>{props.movie == undefined ? '' : `${props.movie.titleL8ns[props.currentLocale] != undefined ? props.movie.titleL8ns[props.currentLocale] : props.movie.originalTitle} (${props.movie.releaseYear})`}</title>
         <link rel="alternate" href="/en-US" hrefLang='en-US'></link>
         <link rel="alternate" href="/ru" hrefLang='ru'></link>
         <link rel="alternate" href="/en-US" hrefLang='x-default'></link>
       </Head>
-      {movie != undefined && <Player mpdFile={movie.mpdFile} cloudFrontSignedUrlParams={movie.cloudFrontSignedUrlParams}
-                                     backdropImage={movie.backdropImage} subtitles={movie.subtitles}/>}
+      <Player mpdFile={props.movie.mpdFile} cloudFrontSignedUrlParams={props.movie.cloudFrontSignedUrlParams}
+              backdropImage={props.movie.backdropImage} subtitles={props.movie.subtitles}/>
     </>
   )
 }
 
 export default PlayerPage;
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const movieId = context.query.movieId;
+  const movie = await getMovie(movieId as string);
+  const locale = (context.locale != null ? context.locale : context.defaultLocale!) as keyof typeof langTagToLangCode;
+  const langCode = langTagToLangCode[locale];
+  return { props: {
+    movie: movie,
+    currentLocale: langCode
+    }
+  }
+}

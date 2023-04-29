@@ -61,7 +61,4 @@ function VideoPlayerWrapper(props: {mpdFile: string, cloudFrontSignedUrlParams: 
 }
 
 export default VideoPlayerWrapper;
-function setState(arg0: number): [any, any] {
-	throw new Error('Function not implemented.');
-}
 
