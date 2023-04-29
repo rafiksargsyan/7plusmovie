@@ -49,7 +49,7 @@ function CatalogPage(props: CatalogPageProps) {
     <>
       <Head>
         <title>{L8nTable[props.currentLocale]['TITLE']}</title>
-        <meta property="og:image" content="/apple-touch-icon.png" />
+        <meta property="og:image" content="/ogImage.jpg" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"></link>
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"></link>
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"></link>
