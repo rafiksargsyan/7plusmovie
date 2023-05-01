@@ -19,7 +19,7 @@ const darkTheme = createTheme({
   },
 });
 
-function VideoPlayer(props: {mpdFile: string, cloudFrontSignedUrlParams: string, backdropImage: string, subtitles: {[key: string]: string}}) {
+function VideoPlayer(props: {mpdFile: string, cloudFrontSignedUrlParams: string, backdropImage: string, subtitles: {[key: string]: string}, playerLocale: string}) {
   const controllerRef = useRef(null);
   const [counter, setCounter] = useState(0);
 
@@ -31,6 +31,7 @@ function VideoPlayer(props: {mpdFile: string, cloudFrontSignedUrlParams: string,
 	  videoElement
 	} = controllerRef.current as any;
 	if (player == null) return;
+	ui.getControls().getLocalization().changeLocale([props.playerLocale]);
 	player.getNetworkingEngine()?.registerRequestFilter(function(type: any, request: { uris: string[]; }) {
 	  if (type === 0 || type === 1) {
 		request.uris[0] += `?${props.cloudFrontSignedUrlParams}`;
@@ -40,6 +41,7 @@ function VideoPlayer(props: {mpdFile: string, cloudFrontSignedUrlParams: string,
 	// This is an asynchronous process.
 	player.load(props.mpdFile).then((v: any) => {
 	  Object.keys(props.subtitles).forEach(k => player.addTextTrackAsync(props.subtitles[k], SubsLangCodes[k as keyof typeof SubsLangCodes].langTag, 'text'))	
+	  player.selectAudioLanguage(props.playerLocale);
 	});
   }, [counter]);
 
@@ -52,7 +54,7 @@ function VideoPlayer(props: {mpdFile: string, cloudFrontSignedUrlParams: string,
   );
 }
 
-function VideoPlayerWrapper(props: {mpdFile: string, cloudFrontSignedUrlParams: string, backdropImage: string, subtitles: {[key: string]: string}}) {
+function VideoPlayerWrapper(props: {mpdFile: string, cloudFrontSignedUrlParams: string, backdropImage: string, subtitles: {[key: string]: string}, playerLocale: string}) {
   return (
 	<ThemeProvider theme={darkTheme}>
 	  <CssBaseline />

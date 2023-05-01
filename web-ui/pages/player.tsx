@@ -35,18 +35,18 @@ const langTagToLangCode = {
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
 
-function PlayerPage(props : {movie: Movie, currentLocale: string}) {
+function PlayerPage(props : {movie: Movie, currentLocaleCode: string, currentLocale: string}) {
   return (
     <>
       <Head>
-        <title>{props.movie == undefined ? '' : `${props.movie.titleL8ns[props.currentLocale] != undefined ? props.movie.titleL8ns[props.currentLocale] : props.movie.originalTitle} (${props.movie.releaseYear})`}</title>
+        <title>{props.movie == undefined ? '' : `${props.movie.titleL8ns[props.currentLocaleCode] != undefined ? props.movie.titleL8ns[props.currentLocaleCode] : props.movie.originalTitle} (${props.movie.releaseYear})`}</title>
         <meta property="og:image" content={props.movie == undefined ? undefined : `${imageBaseUrl}h_720/${props.movie.backdropImage}`}/>
         <link rel="alternate" href="/en-US" hrefLang='en-US'></link>
         <link rel="alternate" href="/ru" hrefLang='ru'></link>
         <link rel="alternate" href="/en-US" hrefLang='x-default'></link>
       </Head>
       <Player mpdFile={props.movie.mpdFile} cloudFrontSignedUrlParams={props.movie.cloudFrontSignedUrlParams}
-              backdropImage={props.movie.backdropImage} subtitles={props.movie.subtitles}/>
+              backdropImage={props.movie.backdropImage} subtitles={props.movie.subtitles} playerLocale={props.currentLocale}/>
     </>
   )
 }
@@ -59,8 +59,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const locale = (context.locale != null ? context.locale : context.defaultLocale!) as keyof typeof langTagToLangCode;
   const langCode = langTagToLangCode[locale];
   return { props: {
-    movie: movie,
-    currentLocale: langCode
+      movie: movie,
+      currentLocaleCode: langCode,
+      currentLocale: locale
     }
   }
 }
