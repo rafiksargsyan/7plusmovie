@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -6,23 +6,21 @@ import Toolbar from '@mui/material/Toolbar';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { yellow, indigo } from '@mui/material/colors';
+import { red } from '@mui/material/colors';
 import Grid from '@mui/material/Grid';
 import Popper from '@mui/material/Popper';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardMedia from '@mui/material/CardMedia';
 import algoliasearch from 'algoliasearch';
-import { useRouter } from 'next/router'
 import { MenuItem, Select, Tooltip } from '@mui/material';
-import Image from 'next/image';
 import Link from 'next/link';
 
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: yellow[600],
+      main: red[600],
     }
   },
 });
@@ -30,9 +28,6 @@ const darkTheme = createTheme({
 const searchBoxTheme = createTheme({
   palette: {
     mode: 'light',
-    primary: {
-      main: indigo[500]
-    }
   },
   components: {
     MuiAutocomplete: {
@@ -46,7 +41,6 @@ const searchBoxTheme = createTheme({
 });
 
 const algoliaClient = algoliasearch(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!, process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!);
-const algoliaIndex = algoliaClient.initIndex(process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!);
 const algoliaQuerySuggestionsIndex = algoliaClient.initIndex(process.env.NEXT_PUBLIC_ALGOLIA_QUERY_SUGGESTIONS_ALL_INDEX!);
 
 const L8nLangCodes = {
