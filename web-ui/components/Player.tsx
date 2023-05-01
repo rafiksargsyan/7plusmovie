@@ -22,7 +22,6 @@ const darkTheme = createTheme({
 function VideoPlayer(props: {mpdFile: string, cloudFrontSignedUrlParams: string, backdropImage: string, subtitles: {[key: string]: string}}) {
   const controllerRef = useRef(null);
   const [counter, setCounter] = useState(0);
-  let [loading, setLoading] = useState(true);
 
   useEffect(() => {
 	if (counter === 0) setCounter(1);
@@ -40,8 +39,7 @@ function VideoPlayer(props: {mpdFile: string, cloudFrontSignedUrlParams: string,
 	// Try to load a manifest.
 	// This is an asynchronous process.
 	player.load(props.mpdFile).then((v: any) => {
-	  Object.keys(props.subtitles).forEach(k => player.addTextTrackAsync(props.subtitles[k], SubsLangCodes[k as keyof typeof SubsLangCodes].langTag, 'text'))
-      setLoading(false);	
+	  Object.keys(props.subtitles).forEach(k => player.addTextTrackAsync(props.subtitles[k], SubsLangCodes[k as keyof typeof SubsLangCodes].langTag, 'text'))	
 	});
   }, [counter]);
 
