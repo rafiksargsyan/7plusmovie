@@ -81,3 +81,42 @@ provider "aws" {
     session_name = "mutantcandlelight2"
   }
 }
+
+provider "aws" {
+  alias  = "tracenoon"
+
+  region = "eu-west-3"
+  access_key = var.aws_workloads_prod_access_key
+  secret_key = var.aws_workloads_prod_secret_key
+
+  assume_role {
+    role_arn     = "arn:aws:iam::694508858683:role/WorkloadsProd1AssumeRole"
+    session_name = "tracenoon"
+  }
+}
+
+provider "aws" {
+  alias  = "tracenoon_1"
+
+  region = "eu-west-3"
+  access_key = var.aws_workloads_prod_access_key
+  secret_key = var.aws_workloads_prod_secret_key
+
+  assume_role {
+    role_arn     = "arn:aws:iam::831916282287:role/WorkloadsProd1AssumeRole"
+    session_name = "tracenoon_1"
+  }
+}
+
+provider "aws" {
+  alias  = "tracenoon_2"
+
+  region = "eu-west-3"
+  access_key = var.aws_workloads_prod_access_key
+  secret_key = var.aws_workloads_prod_secret_key
+
+  assume_role {
+    role_arn     = "arn:aws:iam::855101825283:role/WorkloadsProd1AssumeRole"
+    session_name = "tracenoon_2"
+  }
+}
