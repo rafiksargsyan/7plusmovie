@@ -2,6 +2,7 @@ import algoliasearch from 'algoliasearch';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 import Catalog from '../components/Catalog';
 
 const L8nLangCodes = {
@@ -25,9 +26,10 @@ const L8nTable = {
 
 interface MovieItem {
   id: string;
-  title: string;
+  originalTitle: string;
+  titleL8ns: {[key: string]: string};
   releaseYear: number;
-  posterImage: string;
+  posterImagesPortrait: {[key: string]: string};
 }
 
 interface CatalogPageProps {
@@ -38,12 +40,18 @@ interface CatalogPageProps {
 
 function CatalogPage(props: CatalogPageProps) {
   const router = useRouter();
+  const [locale, setLocale] = useState(props.currentLocale);
+  const [search, setSearch] = useState(props.searchString);
 
-  const onSearchChange = (searchString: string | null) =>
-    router.push({ pathname: router.basePath, query: {search: searchString}});
+  const onSearchChange = (searchString: string | null) => {
+    router.replace({ pathname: router.basePath, query: {search: searchString}});
+    setSearch(searchString != null ? searchString : '');
+  };
   
-  const onLocaleChange = (locale: string) => router.push(router.asPath,
-    undefined, { locale: L8nLangCodes[locale as keyof typeof L8nLangCodes].langTag });
+  const onLocaleChange = (locale: string) => {
+    router.replace(router.asPath, undefined, { locale: L8nLangCodes[locale as keyof typeof L8nLangCodes].langTag });
+    setLocale(locale as keyof typeof L8nLangCodes);
+  }
   
   return (
     <>
@@ -58,7 +66,7 @@ function CatalogPage(props: CatalogPageProps) {
         <link rel="alternate" href="/ru" hrefLang='ru'></link>
         <link rel="alternate" href="/en-US" hrefLang='x-default'></link>
       </Head>
-      <Catalog {...props} currentLocale={props.currentLocale} searchString={props.searchString}
+      <Catalog {...props} currentLocale={locale} searchString={search}
         onSearchChange={onSearchChange} onLocaleChange={onLocaleChange}/>
     </>
   )  
@@ -85,9 +93,10 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   return { props: {
     movies: algoliaSearchResponse.hits.map(_ => ({
       id: _.objectID,
-      title: _.titleL8ns[langCode] != null ? _.titleL8ns[langCode] : _.originalTitle,
+      originalTitle: _.originalTitle,
+      titleL8ns: _.titleL8ns,
       releaseYear: _.releaseYear,
-      posterImage: _.posterImagesPortrait[langCode]})),
+      posterImagesPortrait: _.posterImagesPortrait})),
     currentLocale: langCode, 
     searchString: searchString
     }
