@@ -68,7 +68,7 @@ const L8nTable = {
 
 function L8nSelect(props: {onLocaleChange: (locale: string) => void, currentLocale: string}) {
   return (
-    <Select value={props.currentLocale} inputProps={{ IconComponent: () => null, sx: { paddingRight: '14px !important'}}}
+    <Select value={props.currentLocale} inputProps={{ IconComponent: () => null, sx: { paddingTop: '8.5px', paddingBottom: '8.5px', paddingRight: '14px !important'}}}
             onChange={(e, c) => props.onLocaleChange(e.target.value)}>
       {Object.keys(L8nLangCodes).map((_) => (
         <MenuItem value={_} key={_}>
@@ -116,14 +116,14 @@ function CustomAppBar(props: {onSearchChange: (searchString: string | null) => v
               freeSolo
               options={state.options}
               filterOptions={(options, state) => options}
-              renderInput={(params) => <TextField {...params} variant='outlined' placeholder={L8nTable[props.locale as keyof typeof L8nTable]['SEARCH_PLACEHOLDER']} />}
+              renderInput={(params) => <TextField {...params} variant='outlined' size='small' placeholder={L8nTable[props.locale as keyof typeof L8nTable]['SEARCH_PLACEHOLDER']} />}
               ListboxProps={{ style: { maxHeight: 400, transform: 'none' } }}
             />
           </ThemeProvider>
           <L8nSelect onLocaleChange={props.onLocaleChange} currentLocale={props.locale}/>
         </Toolbar>
       </AppBar>
-      <Toolbar/>
+      <Toolbar variant='dense'/>
     </Box>
   );
 }
