@@ -132,10 +132,10 @@ function GridView(props: CatalogProps) {
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
   const locale = props.currentLocale;
   return (
-    <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 2, sm: 4, md: 5, lg: 6, xl: 7 }}>
+    <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 4, md: 5, lg: 6, xl: 7 }}>
       {props.movies.map((_: MovieItem, index) => (
         <Grid item xs={1} sm={1} md={1} lg={1} xl={1} key={index}>
-          <Card>
+          <Card sx={{position: 'relative', borderRadius: 0}}>
             <CardActionArea>
               <Link href={{pathname: '/player', query: {movieId: _.id}}}>
                 <CardMedia
@@ -145,13 +145,15 @@ function GridView(props: CatalogProps) {
                   alt={`${_.titleL8ns[locale] != null ? _.titleL8ns[locale] : _.originalTitle} (${_.releaseYear})`}
                   sizes="(max-width: 1200px) 160px, 240px"
                 />
-              </Link> 
+              </Link>
             </CardActionArea>     
-            <CardContent>
-              <Typography noWrap variant="body2" color="text.secondary">
-                {`(${_.releaseYear}) ${_.titleL8ns[locale] != null ? _.titleL8ns[locale] : _.originalTitle}`}
-              </Typography>
-            </CardContent>   
+            <Typography color="text.primary"
+                        sx={{ typography: { sm: 'body1', xs: 'body2' }, position: 'absolute', bottom: 0,
+                              right: 0, mr: { sm: 1, xs: 0.5 }, mb: { sm: 1, xs: 0.5 },
+                              pr: { sm: 1, xs: 0.5 }, pl: { sm: 1, xs: 0.5 }, backgroundColor: 'primary.main'}}>
+              {/* {`(${_.releaseYear}) ${_.titleL8ns[locale] != null ? _.titleL8ns[locale] : _.originalTitle}`} */}
+              {_.releaseYear}
+            </Typography>
           </Card>
         </Grid>
       ))}
