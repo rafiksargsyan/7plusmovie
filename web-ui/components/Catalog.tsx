@@ -103,7 +103,7 @@ function CustomAppBar(props: {onSearchChange: (searchString: string | null) => v
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position='fixed'>
-        <Toolbar sx={{ justifyContent: "space-between" }}>
+        <Toolbar variant='dense' sx={{ justifyContent: "space-between" }}>
           <div></div>
           <ThemeProvider theme={searchBoxTheme}>
             <Autocomplete
