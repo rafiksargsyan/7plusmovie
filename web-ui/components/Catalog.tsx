@@ -13,7 +13,7 @@ import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardMedia from '@mui/material/CardMedia';
 import algoliasearch from 'algoliasearch';
-import { MenuItem, Select, Tooltip } from '@mui/material';
+import { CardContent, MenuItem, Select, Tooltip, Typography } from '@mui/material';
 import Link from 'next/link';
 
 const darkTheme = createTheme({
@@ -132,24 +132,27 @@ function GridView(props: CatalogProps) {
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
   const locale = props.currentLocale;
   return (
-    <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 5, md: 6, lg: 7, xl: 8 }}>
+    <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 2, sm: 4, md: 5, lg: 6, xl: 7 }}>
       {props.movies.map((_: MovieItem, index) => (
         <Grid item xs={1} sm={1} md={1} lg={1} xl={1} key={index}>
-          <Tooltip title={`${_.titleL8ns[locale] != null ? _.titleL8ns[locale] : _.originalTitle} (${_.releaseYear})`} followCursor>
-            <Card>
+          <Card>
+            <CardActionArea>
               <Link href={{pathname: '/player', query: {movieId: _.id}}}>
-                <CardActionArea>
-                  <CardMedia
-                    component="img"
-                    src={`${imageBaseUrl}w_160/${_.posterImagesPortrait[locale]}`}
-                    srcSet={`${imageBaseUrl}w_240/${_.posterImagesPortrait[locale]} 240w, ${imageBaseUrl}w_160/${_.posterImagesPortrait[locale]} 160w`}
-                    alt={`${_.titleL8ns[locale] != null ? _.titleL8ns[locale] : _.originalTitle} (${_.releaseYear})`}
-                    sizes="(max-width: 1200px) 160px, 240px"
-                  />
-                </CardActionArea>
-              </Link>
-            </Card>
-          </Tooltip>
+                <CardMedia
+                  component="img"
+                  src={`${imageBaseUrl}w_160/${_.posterImagesPortrait[locale]}`}
+                  srcSet={`${imageBaseUrl}w_240/${_.posterImagesPortrait[locale]} 240w, ${imageBaseUrl}w_160/${_.posterImagesPortrait[locale]} 160w`}
+                  alt={`${_.titleL8ns[locale] != null ? _.titleL8ns[locale] : _.originalTitle} (${_.releaseYear})`}
+                  sizes="(max-width: 1200px) 160px, 240px"
+                />
+              </Link> 
+            </CardActionArea>     
+            <CardContent>
+              <Typography noWrap variant="body2" color="text.secondary">
+                {`(${_.releaseYear}) ${_.titleL8ns[locale] != null ? _.titleL8ns[locale] : _.originalTitle}`}
+              </Typography>
+            </CardContent>   
+          </Card>
         </Grid>
       ))}
     </Grid>
