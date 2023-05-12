@@ -17,10 +17,12 @@ const langTagToLangCode = {
 
 const L8nTable = {
   EN_US : {
-    TITLE: "Watch Free Movies Online"
+    TITLE: "Watch Free Movies Online",
+    DESC: "Good movies are like good books, they are timeless. Our mission is to make the best movies of all time accessible to everyone."
   },
   RU : {
-    TITLE: "Смотри бесплатные фильмы онлайн"
+    TITLE: "Смотри бесплатные фильмы онлайн",
+    DESC: "Хорошие фильмы похожи на хорошие книги, они вне времени. Наша миссия — сделать лучшие фильмы всех времен доступными для всех."
   }
 }
 
@@ -58,6 +60,9 @@ function CatalogPage(props: CatalogPageProps) {
       <Head>
         <title>{L8nTable[props.currentLocale]['TITLE']}</title>
         <meta property="og:image" content="/ogImage.jpg" />
+        <meta property="og:title" content={L8nTable[props.currentLocale]['TITLE']} />
+        <meta property="description" content={L8nTable[props.currentLocale]['DESC']} />
+        <meta property="og:description" content={L8nTable[props.currentLocale]['DESC']} />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"></link>
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"></link>
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"></link>

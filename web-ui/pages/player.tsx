@@ -40,6 +40,7 @@ function PlayerPage(props : {movie: Movie, currentLocaleCode: string, currentLoc
     <>
       <Head>
         <title>{props.movie == undefined ? '' : `${props.movie.titleL8ns[props.currentLocaleCode] != undefined ? props.movie.titleL8ns[props.currentLocaleCode] : props.movie.originalTitle} (${props.movie.releaseYear})`}</title>
+        <meta property="og:title" content={props.movie == undefined ? '' : `${props.movie.titleL8ns[props.currentLocaleCode] != undefined ? props.movie.titleL8ns[props.currentLocaleCode] : props.movie.originalTitle} (${props.movie.releaseYear})`} />
         <meta property="og:image" content={props.movie == undefined ? undefined : `${imageBaseUrl}h_720/${props.movie.backdropImage}`}/>
         <link rel="alternate" href="/en-US" hrefLang='en-US'></link>
         <link rel="alternate" href="/ru" hrefLang='ru'></link>
