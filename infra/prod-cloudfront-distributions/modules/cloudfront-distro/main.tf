@@ -70,7 +70,7 @@ resource "aws_cloudfront_response_headers_policy" "cors_policy" {
     }
 
     access_control_allow_origins {
-      items = ["*"]
+      items = ["https://www.q62.xyz", "http://localhost:3000"]
     }
 
     origin_override = true
