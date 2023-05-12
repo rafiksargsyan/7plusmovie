@@ -142,7 +142,6 @@ functions:
     environment:
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
       DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME: ${env:DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME}
-      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
     handler: src/core/app/getMovieMetadataForPlayer.handler
     events:
       - http:
@@ -158,7 +157,6 @@ functions:
               Access-Control-Allow-Origin: "'*'"
             template: '{ "subtitles" : $input.json(''$.subtitles''),
                          "mpdFile" : $input.json(''$.mpdFile''),
-                         "cloudFrontSignedUrlParams" :  $input.json(''$.cloudFrontSignedUrlParams''),
                          "backdropImage": $input.json(''$.backdropImage''),
                          "originalTitle": $input.json(''$.originalTitle''),
                          "titleL8ns": $input.json(''$.titleL8ns''),

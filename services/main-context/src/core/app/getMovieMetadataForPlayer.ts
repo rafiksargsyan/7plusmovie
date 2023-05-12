@@ -1,14 +1,11 @@
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
-import { getSignedUrl } from '@aws-sdk/cloudfront-signer';
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
-const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}));
-const secretsManager = new SecretsManager({});
 
 interface GetMovieParam {
   movieId: string;
@@ -17,7 +14,6 @@ interface GetMovieParam {
 interface GetMovieMetadataResponse {
   subtitles: { [key: string]: string };
   mpdFile: string;
-  cloudFrontSignedUrlParams: string;
   backdropImage: string;
   originalTitle: string;
   titleL8ns: { [key: string]: string };
@@ -41,30 +37,12 @@ interface CloudFrontDistro {
 }
 
 export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataResponse> => {
-  const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
-  const secret = JSON.parse(secretStr.SecretString!);
   let movie = await getMovie(event.movieId);
   let cfDistro = await getRandomCloudFrontDistro();
-  
-  const url = `https://${cfDistro.domain}/${movie.id}/*`; 
-  const policy = JSON.stringify({
-    "Statement": [{
-       "Resource": url,
-       "Condition": {
-          "DateLessThan": {
-            "AWS:EpochTime": Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 1)
-          }
-       }
-    }]
-  });
-  const privateKey = Buffer.from(secret.COOKIE_SIGNING_PRIVATE_KEY_BASE64_ENCODED, 'base64').toString();
-  const keyPairId = cfDistro.signerKeyId;
-  const signedUrl = getSignedUrl({url, privateKey, keyPairId, policy});
   
   return {
     subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `https://${cfDistro.domain}/${movie.subtitles[key]}`; return acc;}, {}),
     mpdFile: `https://${cfDistro.domain}/${movie.mpdFile}`,
-    cloudFrontSignedUrlParams: signedUrl.substring(signedUrl.indexOf("?") + 1),
     backdropImage: movie.backdropImage,
     originalTitle: movie.originalTitle,
     titleL8ns: movie.titleL8ns,

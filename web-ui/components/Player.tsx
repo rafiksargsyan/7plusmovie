@@ -19,7 +19,7 @@ const darkTheme = createTheme({
   },
 });
 
-function VideoPlayer(props: {mpdFile: string, cloudFrontSignedUrlParams: string, backdropImage: string, subtitles: {[key: string]: string}, playerLocale: string}) {
+function VideoPlayer(props: {mpdFile: string, backdropImage: string, subtitles: {[key: string]: string}, playerLocale: string}) {
   const controllerRef = useRef(null);
   const [counter, setCounter] = useState(0);
 
@@ -32,11 +32,6 @@ function VideoPlayer(props: {mpdFile: string, cloudFrontSignedUrlParams: string,
 	} = controllerRef.current as any;
 	if (player == null) return;
 	ui.getControls().getLocalization().changeLocale([props.playerLocale]);
-	player.getNetworkingEngine()?.registerRequestFilter(function(type: any, request: { uris: string[]; }) {
-	  if (type === 0 || type === 1) {
-		request.uris[0] += `?${props.cloudFrontSignedUrlParams}`;
-	  }
-	});
 	// Try to load a manifest.
 	// This is an asynchronous process.
 	player.load(props.mpdFile).then((v: any) => {
@@ -54,7 +49,7 @@ function VideoPlayer(props: {mpdFile: string, cloudFrontSignedUrlParams: string,
   );
 }
 
-function VideoPlayerWrapper(props: {mpdFile: string, cloudFrontSignedUrlParams: string, backdropImage: string, subtitles: {[key: string]: string}, playerLocale: string}) {
+function VideoPlayerWrapper(props: {mpdFile: string, backdropImage: string, subtitles: {[key: string]: string}, playerLocale: string}) {
   return (
 	<ThemeProvider theme={darkTheme}>
 	  <CssBaseline />

@@ -10,7 +10,6 @@ interface Movie {
   titleL8ns: { [key: string]: string };
   releaseYear: number;
   backdropImage: string;
-  cloudFrontSignedUrlParams: string;
   mpdFile: string;
   subtitles: { [key: string]: string };
 }
@@ -22,7 +21,6 @@ async function getMovie(movieId: string): Promise<Movie> {
     titleL8ns: response.data.titleL8ns,
     releaseYear: response.data.releaseYear,
     backdropImage: response.data.backdropImage,
-    cloudFrontSignedUrlParams: response.data.cloudFrontSignedUrlParams,
     mpdFile: response.data.mpdFile,
     subtitles: response.data.subtitles
   }
@@ -46,8 +44,8 @@ function PlayerPage(props : {movie: Movie, currentLocaleCode: string, currentLoc
         <link rel="alternate" href="/ru" hrefLang='ru'></link>
         <link rel="alternate" href="/en-US" hrefLang='x-default'></link>
       </Head>
-      <Player mpdFile={props.movie.mpdFile} cloudFrontSignedUrlParams={props.movie.cloudFrontSignedUrlParams}
-              backdropImage={props.movie.backdropImage} subtitles={props.movie.subtitles} playerLocale={props.currentLocale}/>
+      <Player mpdFile={props.movie.mpdFile} backdropImage={props.movie.backdropImage}
+              subtitles={props.movie.subtitles} playerLocale={props.currentLocale}/>
     </>
   )
 }
