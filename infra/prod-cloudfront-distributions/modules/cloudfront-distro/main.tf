@@ -18,6 +18,7 @@ resource "aws_cloudfront_distribution" "cf_distro" {
       }
     }
 #    trusted_key_groups = [ aws_cloudfront_key_group.signers_key_group.id ]
+    trusted_key_groups = []
     response_headers_policy_id = aws_cloudfront_response_headers_policy.cors_policy.id
   }
   origin {
