@@ -2,6 +2,7 @@ import { Box, CircularProgress, createTheme, CssBaseline, ThemeProvider } from '
 import { red } from '@mui/material/colors';
 import type { AppProps } from 'next/app'
 import { Router } from 'next/router';
+import Script from 'next/script';
 import { useEffect, useState } from 'react';
 import '../components/Player.css'
 
@@ -34,6 +35,19 @@ export default function App({ Component, pageProps }: AppProps) {
   }, []);
   return (
     <>
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-9F6DBJPMHW"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){window.dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-9F6DBJPMHW');
+        `}
+      </Script>
       {loading ? (
         <ThemeProvider theme={darkTheme}>
           <CssBaseline />
