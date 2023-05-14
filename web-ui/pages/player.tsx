@@ -1,9 +1,20 @@
+import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
+import { red } from '@mui/material/colors';
 import axios from 'axios';
 import { GetServerSidePropsContext } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 
 const Player = dynamic(() => import ("../components/Player"), {ssr: false});
+
+const darkTheme = createTheme({
+  palette: {
+	mode: 'dark',
+	  primary: {
+		main: red[600],
+	  }
+  },
+});
 
 interface Movie {
   originalTitle: string;
@@ -44,8 +55,11 @@ function PlayerPage(props : {movie: Movie, currentLocaleCode: string, currentLoc
         <link rel="alternate" href="/ru" hrefLang='ru'></link>
         <link rel="alternate" href="/en-US" hrefLang='x-default'></link>
       </Head>
-      <Player mpdFile={props.movie.mpdFile} backdropImage={props.movie.backdropImage}
-              subtitles={props.movie.subtitles} playerLocale={props.currentLocale}/>
+      <ThemeProvider theme={darkTheme}>
+	    <CssBaseline />
+        <Player mpdFile={props.movie.mpdFile} backdropImage={props.movie.backdropImage}
+                subtitles={props.movie.subtitles} playerLocale={props.currentLocale}/>
+      </ThemeProvider>
     </>
   )
 }

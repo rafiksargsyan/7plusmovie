@@ -43,7 +43,7 @@ function VideoPlayer(props: {mpdFile: string, backdropImage: string, subtitles: 
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
 
   return (
-	<ShakaPlayer className="shaka-player-video-container" ref={controllerRef} poster={`${imageBaseUrl}h_720/${props.backdropImage}`}
+	<ShakaPlayer className="shaka-player-video-container" ref={controllerRef} poster={`${imageBaseUrl}h_720,f_auto/${props.backdropImage}`}
 				 style={{width: '100vw', height: '100vh', objectFit: 'contain', maxWidth: '100%', maxHeight: '100%', position: 'absolute'}}/>
  
   );

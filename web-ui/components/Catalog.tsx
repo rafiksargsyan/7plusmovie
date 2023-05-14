@@ -138,8 +138,8 @@ function GridView(props: CatalogProps) {
                 <Link href={{pathname: '/player', query: {movieId: _.id}}}>
                   <CardMedia
                     component="img"
-                    src={`${imageBaseUrl}w_160/${_.posterImagesPortrait[locale]}`}
-                    srcSet={`${imageBaseUrl}w_240/${_.posterImagesPortrait[locale]} 240w, ${imageBaseUrl}w_160/${_.posterImagesPortrait[locale]} 160w`}
+                    src={`${imageBaseUrl}w_160,f_auto/${_.posterImagesPortrait[locale]}`}
+                    srcSet={`${imageBaseUrl}w_240,f_auto/${_.posterImagesPortrait[locale]} 240w, ${imageBaseUrl}w_160,f_auto/${_.posterImagesPortrait[locale]} 160w`}
                     alt={`${_.titleL8ns[locale] != null ? _.titleL8ns[locale] : _.originalTitle} (${_.releaseYear})`}
                     sizes="(max-width: 1200px) 160px, 240px"
                   />
