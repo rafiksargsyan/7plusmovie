@@ -30,9 +30,7 @@ export default function App({ Component, pageProps }: AppProps) {
       }
     };
     const end = () => {
-      if (loading === true) {
-        setLoading(false);
-      }
+      setLoading(false);
     };
     router.events.on("routeChangeStart", onRouteChangeStart);
     router.events.on("routeChangeComplete", end);
