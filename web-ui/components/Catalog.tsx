@@ -48,21 +48,18 @@ const L8nLangCodes = {
   RU : { langTag : "ru", countryCode: "RU" }
 } as const;
 
-const langTagToLangCode = {
-  "en-US" : "EN_US",
-  "ru" : "RU"
-} as const;
-
 const L8nTable = {
   EN_US : {
     SEARCH_PLACEHOLDER: "Search titles",
     RU: "Russian",
-    EN_US: "American English"
+    EN_US: "American English",
+    EMPTY_RESULT_MSG: "Oops, we couldn't find anything. Try to adjust your search."
   },
   RU : {
     SEARCH_PLACEHOLDER: "Искать фильмы",
     RU: "Русский",
-    EN_US: "Американский английский"
+    EN_US: "Американский английский",
+    EMPTY_RESULT_MSG: "Упс, мы ничего не нашли. Попробуйте скорректировать поиск."
   }
 }
 
@@ -133,30 +130,46 @@ function GridView(props: CatalogProps) {
   const locale = props.currentLocale;
   return (
     <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 2, sm: 4, md: 5, lg: 7, xl: 9 }}>
-      {props.movies.map((_: MovieItem, index) => (
-        <Grid item xs={1} sm={1} md={1} lg={1} xl={1} key={index}>
-          <Card sx={{position: 'relative', borderRadius: 0}}>
-            <CardActionArea>
-              <Link href={{pathname: '/player', query: {movieId: _.id}}}>
-                <CardMedia
-                  component="img"
-                  src={`${imageBaseUrl}w_160/${_.posterImagesPortrait[locale]}`}
-                  srcSet={`${imageBaseUrl}w_240/${_.posterImagesPortrait[locale]} 240w, ${imageBaseUrl}w_160/${_.posterImagesPortrait[locale]} 160w`}
-                  alt={`${_.titleL8ns[locale] != null ? _.titleL8ns[locale] : _.originalTitle} (${_.releaseYear})`}
-                  sizes="(max-width: 1200px) 160px, 240px"
-                />
-              </Link>
-            </CardActionArea>     
-            <Typography color="text.primary"
-                        sx={{ typography: { sm: 'body1', xs: 'body2' }, position: 'absolute', bottom: 0,
-                              right: 0, mr: { sm: 1, xs: 0.5 }, mb: { sm: 1, xs: 0.5 },
-                              pr: { sm: 1, xs: 0.5 }, pl: { sm: 1, xs: 0.5 }, backgroundColor: 'primary.main'}}>
-              {/* {`(${_.releaseYear}) ${_.titleL8ns[locale] != null ? _.titleL8ns[locale] : _.originalTitle}`} */}
-              {_.releaseYear}
+      {props.movies.length > 0 ?
+         props.movies.map((_: MovieItem, index) => (
+          <Grid item xs={1} sm={1} md={1} lg={1} xl={1} key={index}>
+            <Card sx={{position: 'relative', borderRadius: 0}}>
+              <CardActionArea>
+                <Link href={{pathname: '/player', query: {movieId: _.id}}}>
+                  <CardMedia
+                    component="img"
+                    src={`${imageBaseUrl}w_160/${_.posterImagesPortrait[locale]}`}
+                    srcSet={`${imageBaseUrl}w_240/${_.posterImagesPortrait[locale]} 240w, ${imageBaseUrl}w_160/${_.posterImagesPortrait[locale]} 160w`}
+                    alt={`${_.titleL8ns[locale] != null ? _.titleL8ns[locale] : _.originalTitle} (${_.releaseYear})`}
+                    sizes="(max-width: 1200px) 160px, 240px"
+                  />
+                </Link>
+              </CardActionArea>     
+              <Typography color="text.primary"
+                          sx={{ typography: { sm: 'body1', xs: 'body2' }, position: 'absolute', bottom: 0,
+                                right: 0, mr: { sm: 1, xs: 0.5 }, mb: { sm: 1, xs: 0.5 },
+                                pr: { sm: 1, xs: 0.5 }, pl: { sm: 1, xs: 0.5 }, backgroundColor: 'primary.main'}}>
+                {_.releaseYear}
+              </Typography>
+            </Card>
+          </Grid>
+        )) : (
+          <Box sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+            <Typography sx={{p: 2}} variant="subtitle1" align="center" color="text.secondary">
+              {L8nTable[locale as keyof typeof L8nTable]['EMPTY_RESULT_MSG']}
             </Typography>
-          </Card>
-        </Grid>
-      ))}
+          </Box>
+        )
+      }
     </Grid>
   )
 }
