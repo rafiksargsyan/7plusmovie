@@ -34,10 +34,13 @@ function VideoPlayer(props: {mpdFile: string, backdropImage: string, subtitles: 
 	ui.getControls().getLocalization().changeLocale([props.playerLocale]);
 	// Try to load a manifest.
 	// This is an asynchronous process.
-	player.load(props.mpdFile).then((v: any) => {
-	  Object.keys(props.subtitles).forEach(k => player.addTextTrackAsync(props.subtitles[k], SubsLangCodes[k as keyof typeof SubsLangCodes].langTag, 'text'))	
-	  player.selectAudioLanguage(props.playerLocale);
-	});
+	// player.load(props.mpdFile).then((v: any) => {
+	//    Object.keys(props.subtitles).forEach(k => player.addTextTrackAsync(props.subtitles[k], SubsLangCodes[k as keyof typeof SubsLangCodes].langTag, 'text'))	
+	//    player.selectAudioLanguage(props.playerLocale);
+	// });
+	player.load(props.mpdFile).catch((error: any) => {
+		console.error('Error loading manifest:', error);
+	  });
   }, [counter]);
 
   const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
