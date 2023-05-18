@@ -1,4 +1,3 @@
-import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 
@@ -14,6 +13,7 @@ interface GetMovieParam {
 interface GetMovieMetadataResponse {
   subtitles: { [key: string]: string };
   mpdFile: string;
+  m3u8File: string;
   backdropImage: string;
   originalTitle: string;
   titleL8ns: { [key: string]: string };
@@ -23,7 +23,8 @@ interface GetMovieMetadataResponse {
 interface Movie {
   id: string
   subtitles: { [key: string]: string };
-  mpdFile: string; 
+  mpdFile: string;
+  m3u8File: string;
   backdropImage: string;
   originalTitle: string;
   titleL8ns: { [key: string]: string };
@@ -43,6 +44,7 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   return {
     subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `https://${cfDistro.domain}/${movie.subtitles[key]}`; return acc;}, {}),
     mpdFile: `https://${cfDistro.domain}/${movie.mpdFile}`,
+    m3u8File: `https://${cfDistro.domain}/${movie.m3u8File}`,
     backdropImage: movie.backdropImage,
     originalTitle: movie.originalTitle,
     titleL8ns: movie.titleL8ns,

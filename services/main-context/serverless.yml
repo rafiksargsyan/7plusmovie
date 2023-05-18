@@ -91,6 +91,23 @@ functions:
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
+  addM3u8FileToMovie:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/addM3u8FileToMovie.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addM3u8FileToMovie
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : $input.json(''$.movieId''),
+                                   "relativePath" : $input.json(''$.relativePath'') }'
+              application/x-www-form-urlencoded: null                      
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+
   movieUpdateHandler:
     handler: src/core/app/movieUpdateHandler.handler
     environment:
@@ -157,6 +174,7 @@ functions:
               Access-Control-Allow-Origin: "'*'"
             template: '{ "subtitles" : $input.json(''$.subtitles''),
                          "mpdFile" : $input.json(''$.mpdFile''),
+                         "m3u8File" : $input.json(''$.m3u8File''),
                          "backdropImage": $input.json(''$.backdropImage''),
                          "originalTitle": $input.json(''$.originalTitle''),
                          "titleL8ns": $input.json(''$.titleL8ns''),

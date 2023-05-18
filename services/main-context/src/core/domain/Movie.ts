@@ -16,6 +16,7 @@ export class Movie {
   private backdropImage: RelativePath;
   private subtitles: { [key: string]: RelativePath } = {};
   private mpdFile: RelativePath;
+  private m3u8File: RelativePath;
   private releaseYear: number;
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
@@ -82,6 +83,14 @@ export class Movie {
     this.lastUpdateTime = Date.now();
   }
 
+  public addM3u8File(relativePath: RelativePath) {
+    if (! /\S/.test(relativePath)) {
+        throw new InvalidM3u8FileRelativePathError();
+      }
+    this.m3u8File = relativePath;
+    this.lastUpdateTime = Date.now();
+  }
+
   public addTitleL8n(locale: L8nLangCode, title: string) {
     if (! /\S/.test(title)) {
       throw new InvalidTitleL8nError();
@@ -107,3 +116,5 @@ class InvalidTitleL8nError extends Error {}
 class InvalidBackdropImageRelativePathError extends Error {}
 
 class InvalidSubtitleRelativePathError extends Error {}
+
+class InvalidM3u8FileRelativePathError extends Error {}
