@@ -22,6 +22,7 @@ interface Movie {
   releaseYear: number;
   backdropImage: string;
   mpdFile: string;
+  m3u8File: string;
   subtitles: { [key: string]: string };
 }
 
@@ -33,6 +34,7 @@ async function getMovie(movieId: string): Promise<Movie> {
     releaseYear: response.data.releaseYear,
     backdropImage: response.data.backdropImage,
     mpdFile: response.data.mpdFile,
+    m3u8File: response.data.m3u8File,
     subtitles: response.data.subtitles
   }
 }
@@ -57,7 +59,7 @@ function PlayerPage(props : {movie: Movie, currentLocaleCode: string, currentLoc
       </Head>
       <ThemeProvider theme={darkTheme}>
 	    <CssBaseline />
-        <Player mpdFile={props.movie.mpdFile} backdropImage={props.movie.backdropImage}
+        <Player mpdFile={props.movie.mpdFile} m3u8File={props.movie.m3u8File} backdropImage={props.movie.backdropImage}
                 subtitles={props.movie.subtitles} playerLocale={props.currentLocale}/>
       </ThemeProvider>
     </>
