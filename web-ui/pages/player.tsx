@@ -47,20 +47,21 @@ const langTagToLangCode = {
 const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
 
 function PlayerPage(props : {movie: Movie, currentLocaleCode: string, currentLocale: string}) {
+  const movieTitle = props.movie == undefined ? '' : `${props.movie.titleL8ns[props.currentLocaleCode] != undefined ? props.movie.titleL8ns[props.currentLocaleCode] : props.movie.originalTitle} (${props.movie.releaseYear})`;
   return (
     <>
       <Head>
-        <title>{props.movie == undefined ? '' : `${props.movie.titleL8ns[props.currentLocaleCode] != undefined ? props.movie.titleL8ns[props.currentLocaleCode] : props.movie.originalTitle} (${props.movie.releaseYear})`}</title>
-        <meta property="og:title" content={props.movie == undefined ? '' : `${props.movie.titleL8ns[props.currentLocaleCode] != undefined ? props.movie.titleL8ns[props.currentLocaleCode] : props.movie.originalTitle} (${props.movie.releaseYear})`} />
+        <title>{movieTitle}</title>
+        <meta property="og:title" content={movieTitle} />
         <meta property="og:image" content={props.movie == undefined ? undefined : `${imageBaseUrl}h_720/${props.movie.backdropImage}`}/>
         <link rel="alternate" href="/en-US" hrefLang='en-US'></link>
         <link rel="alternate" href="/ru" hrefLang='ru'></link>
         <link rel="alternate" href="/en-US" hrefLang='x-default'></link>
       </Head>
       <ThemeProvider theme={darkTheme}>
-	    <CssBaseline />
+	      <CssBaseline />
         <Player mpdFile={props.movie.mpdFile} m3u8File={props.movie.m3u8File} backdropImage={props.movie.backdropImage}
-                subtitles={props.movie.subtitles} playerLocale={props.currentLocale}/>
+                subtitles={props.movie.subtitles} playerLocale={props.currentLocale} movieTitle={movieTitle} localeCode={props.currentLocaleCode}/>
       </ThemeProvider>
     </>
   )
