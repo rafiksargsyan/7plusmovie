@@ -69,7 +69,8 @@ resource "aws_cloudfront_response_headers_policy" "cors_policy" {
     }
 
     access_control_allow_origins {
-      items = ["https://www.q62.xyz", "http://localhost:3000", "https://reference.dashif.org", "https://hlsjs.video-dev.org"]
+      items = ["https://www.q62.xyz", "http://localhost:3000",
+               "https://reference.dashif.org", "https://hlsjs.video-dev.org", "https://bitmovin.com"]
     }
 
     origin_override = true
