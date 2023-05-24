@@ -245,6 +245,7 @@ export default function (dashjsMediaPlayer, displayUTCTimeCodes) {
             volumebar.value = value;
         }
         self.player.setVolume(parseFloat(volumebar.value));
+        document.getElementById(getControlId('volumebar')).value=volumebar.value;
         self.player.setMute(self.player.getVolume() === 0);
         if (isNaN(lastVolumeLevel)) {
             lastVolumeLevel = self.player.getVolume();
