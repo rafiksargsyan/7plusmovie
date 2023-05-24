@@ -817,7 +817,8 @@ export default function (dashjsMediaPlayer, displayUTCTimeCodes) {
         } else {
             menu.classList.add('hide');
         }
-        menu.style.position = isFullscreen() ? 'fixed' : 'absolute';
+//        menu.style.position = isFullscreen() ? 'fixed' : 'absolute';
+        menu.style.position = 'fixed';
         positionMenu(menu, btn);
     };
 
