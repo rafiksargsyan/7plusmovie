@@ -4,7 +4,6 @@ import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router';
 import Script from 'next/script';
 import { useEffect, useState } from 'react';
-import "../components/contrib-akamai-controlbar/controlbar.css";
 
 const darkTheme = createTheme({
   palette: {
