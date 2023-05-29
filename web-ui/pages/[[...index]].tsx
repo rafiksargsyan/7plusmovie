@@ -61,7 +61,7 @@ function CatalogPage(props: CatalogPageProps) {
         <title>{L8nTable[props.currentLocale]['TITLE']}</title>
         <meta property="og:image" content="/ogImage.jpg" />
         <meta property="og:title" content={L8nTable[props.currentLocale]['TITLE']} />
-        <meta property="description" content={L8nTable[props.currentLocale]['DESC']} />
+        <meta name="description" content={L8nTable[props.currentLocale]['DESC']} />
         <meta property="og:description" content={L8nTable[props.currentLocale]['DESC']} />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"></link>
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"></link>
