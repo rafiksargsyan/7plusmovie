@@ -4,6 +4,7 @@ import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router';
 import Script from 'next/script';
 import { useEffect, useState } from 'react';
+import '../components/video-js-overrides.css';
 
 const darkTheme = createTheme({
   palette: {

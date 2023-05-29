@@ -15,8 +15,14 @@ function DashPlayer(props: DashPlayerProps) {
   useEffect(() => {
     const videoElement = videoRef.current;
     if (videoElement == null) return;
-    const player = videojs(videoElement);
-    player.fill(true);
+    const player = videojs(videoElement, {
+        fill: true,
+        controlBar: {
+          skipButtons: {
+            forward: 10,
+            backward: 5
+          }
+        }});
     player.src({ src: props.mpdFile, type: 'application/dash+xml'});
     
     return () => {
@@ -26,11 +32,11 @@ function DashPlayer(props: DashPlayerProps) {
  
   return (
     <>
-      <div data-js-player style={{width: '100vw', height: '100vh'}}>
+      <div data-js-player style={{height: '100vh', width: '100vw'}}>
         <video ref={videoRef}
-               style={{objectFit: props.isLandscape ? 'fill' : 'contain', }}
+               style={{objectFit: props.isLandscape ? 'fill' : 'contain'}}
                className="video-js vjs-default-skin" controls
-               poster={props.poster}
+               data-setup={`{"poster":"${props.poster}"}`}
         />
       </div>
     </>
