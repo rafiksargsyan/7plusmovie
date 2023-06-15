@@ -8,5 +8,5 @@ then
 fi
 
 
-aws cognito-idp initiate-auth --auth-flow USER_PASSWORD_AUTH --client-id $1 --auth-parameters "USERNAME=${2},PASSWORD=${3}"
+aws cognito-idp initiate-auth --auth-flow USER_PASSWORD_AUTH --client-id $1 --auth-parameters "USERNAME=${2},PASSWORD=${3}" | jq ".AuthenticationResult.IdToken" | tr -d '"'
 

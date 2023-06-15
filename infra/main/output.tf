@@ -29,3 +29,7 @@ output "admin_user_pool_arn" {
 output "admin_user_pool_cli_client_id" {
   value = aws_cognito_user_pool_client.admin_client_cli.id
 }
+
+output "raw_media_assets_s3_bucket_name" {
+  value = aws_s3_bucket.raw_media_assets.bucket
+}

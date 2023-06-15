@@ -152,3 +152,18 @@ resource "aws_cognito_user" "rafiksargsyan07" {
   }
 }
 
+resource "aws_s3_bucket" "raw_media_assets" {
+  bucket = "raw-media-assets-${local.deployment_id}"
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "raw_media_assets_lifecycle_config" {
+  bucket = aws_s3_bucket.raw_media_assets.bucket
+
+  rule {
+    id = "remove-old-files"
+    expiration {
+      days = 5
+    }
+    status = "Enabled"
+  }
+}
