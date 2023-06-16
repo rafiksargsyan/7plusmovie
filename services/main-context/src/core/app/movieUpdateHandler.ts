@@ -15,7 +15,10 @@ interface Movie {
   posterImagesPortrait: { [key: string]: string };
   subtitles: { [key: string]: string };
   releaseYear: number;
-  titleL8ns: { [key: string]: string }
+  titleL8ns: { [key: string]: string };
+  creationTime: number;
+  mpdFile: string;
+  m3u8File: string;
 }
 
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
@@ -29,7 +32,12 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
       await algoliaIndex.deleteBy({filters: `objectID: ${record.dynamodb?.Keys?.id.S}`});
     } else {
       let movie: Movie = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as Movie;
+      if (movie.mpdFile == null || movie.m3u8File == null
+        || Object.keys(movie.posterImagesPortrait).length === 0) {
+        return;
+      }
       await algoliaIndex.saveObject({ objectID: movie.id,
+                                      creationTime: movie.creationTime,
                                       category: "MOVIE",
                                       originalTitle: movie.originalTitle,
                                       posterImagesPortrait: movie.posterImagesPortrait,
