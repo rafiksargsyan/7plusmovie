@@ -19,7 +19,7 @@ jobs:
       Q62_ADMIN_USERNAME: rafiksargsyan07@gmail.com
       Q62_ADMIN_PASSWORD: ${{ secrets.Q62_ADMIN_PASSWORD }}
       ADMIN_USER_POOL_CLI_CLIENT_ID: 2so94a4hnjq3hb38a3km1huf9d
-      S3_FOLDER_KEY: ${{ github.event.inputs.user_input }}
+      S3_FOLDER_KEY: ${{ github.event.inputs.s3_folder_key }}
       RAW_MEDIA_FILES_S3_BUCKET: raw-media-assets-prod-e1pjapsk
       MEDIA_FILES_S3_BUCKET: media-assets-prod-e1pjapsk
     steps:
