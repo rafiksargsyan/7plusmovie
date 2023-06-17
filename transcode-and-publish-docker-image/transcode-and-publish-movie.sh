@@ -95,7 +95,7 @@ default_text_lang=$(jq ".transcodeSpec.defaultTextLang" ../../$SPEC_FILE)
 
 COMMAND="${COMMAND}--mpd_output manifest.mpd --hls_master_playlist_output master.m3u8"
 
-eval '$COMMAND'
+eval "$COMMAND"
 
 sed -i "/shaka-packager/d" ./*.vtt
 sed -i "/shaka-packager/d" ./*.mpd
