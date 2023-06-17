@@ -25,8 +25,8 @@ jobs:
     steps:
       - name: Download 'bundle.mkv' and 'spec.json'
         run: |
-          aws s3 cp s3://${RAW_MEDIA_FILES_S3_BUCKET}/${S3_FOLDER_KEY}/bundle.mkv
-          aws s3 cp s3://${RAW_MEDIA_FILES_S3_BUCKET}/${S3_FOLDER_KEY}/spec.json
+          aws s3 cp s3://${RAW_MEDIA_FILES_S3_BUCKET}/${S3_FOLDER_KEY}/bundle.mkv .
+          aws s3 cp s3://${RAW_MEDIA_FILES_S3_BUCKET}/${S3_FOLDER_KEY}/spec.json .
       
       - name: Transcode and publish
         env:
