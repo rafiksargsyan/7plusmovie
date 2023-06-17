@@ -10,6 +10,7 @@ on:
 jobs:
   publish-movie:
     runs-on: ubuntu-latest
+    container: q62xyz/transcode-and-publish:1.0.0
     env:
       AWS_ACCESS_KEY_ID: AKIAQBPWKPTSTP3HL4UM
       AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
@@ -18,7 +19,7 @@ jobs:
       Q62_ADMIN_USERNAME: rafiksargsyan07@gmail.com
       Q62_ADMIN_PASSWORD: ${{ secrets.Q62_ADMIN_PASSWORD }}
       ADMIN_USER_POOL_CLI_CLIENT_ID: 2so94a4hnjq3hb38a3km1huf9d
-      S3_FOLDRER_KEY: ${{ github.event.inputs.user_input }}
+      S3_FOLDER_KEY: ${{ github.event.inputs.user_input }}
       RAW_MEDIA_FILES_S3_BUCKET: raw-media-assets-prod-e1pjapsk
       MEDIA_FILES_S3_BUCKET: media-assets-prod-e1pjapsk
     steps:
@@ -27,90 +28,9 @@ jobs:
           aws s3 cp s3://${RAW_MEDIA_FILES_S3_BUCKET}/${S3_FOLDER_KEY}/bundle.mkv
           aws s3 cp s3://${RAW_MEDIA_FILES_S3_BUCKET}/${S3_FOLDER_KEY}/spec.json
       
-      - name: Transcode video (540p)
+      - name: Transcode and publish
+        env:
+          MKV_FILE_PATH: ./bundle.mkv
+          SPEC_FILE_PATH: ./spec.json
         run: |
-          transcode-video-from-mkv bundle.mkv 0 540
-
-      - name: Transcode video (720p)
-        run: |
-          transcode-video-from-mkv bundle.mkv 0 720
-
-      - name: Transcode video (1080p)
-        run: |
-          transcode-video-from-mkv bundle.mkv 0 1080
-
-      - name: Transcode audio
-        run: |
-          NUM_AUDIO_STREAMS=$(jq ".transcodeSpec.audio | length" spec.json)
-          for (( i=0; i < NUM_AUDIO_STREAMS; ++i )); do
-            stream=$(jq ".transcodeSpec.audio[$i].stream" spec.json)
-            bitrate=$(jq ".transcodeSpec.audio[$i].bitrate" spec.json)
-            channels=$(jq ".transcodeSpec.audio[$i].channels" spec.json)
-            lang_code=$(jq ".transcodeSpec.audio[$i].langCode" spec.json)
-            transcode-audio-from-mkv bundle.mkv $stream $channels $bitrate $lang_code 
-          done
-
-      - name: Transcode text
-        run: |
-          NUM_TEXT_STREAMS=$(jq ".transcodeSpec.text | length" spec.json)
-          for (( i=0; i < NUM_TEXT_STREAMS; ++i )); do
-            stream=$(jq ".transcodeSpec.text[$i].stream" spec.json)
-            forced=$(jq ".transcodeSpec.text[$i].forced" spec.json)
-            lang_code=$(jq ".transcodeSpec.text[$i].langCode" spec.json)
-            [ "$forced" = "true" ] && file_name="${lang_code}-forced" || file_name="${lang_code}"           
-            transcode-subs-from-mkv bundle.mkv $stream $file_name 
-          done
-
-      - name: Create folders
-        run: |
-          mkdir s3
-          mkdir s3/vod
-          mkdir s3/subtitles
-
-      - name: Copy subtitles
-        run: cp *.vtt s3/subtitles
-
-      - name: Create vod streams using shaka-packager
-        run: |
-          cd s3/vod
-          COMMAND="shaka-packager "
-          COMMAND="${COMMAND}in=../../h264_main_540p_18.mp4,stream=video,output=h264_main_540p_18.mp4 "
-          COMMAND="${COMMAND}in=../../h264_main_720p_18.mp4,stream=video,output=h264_main_720p_18.mp4 "
-          COMMAND="${COMMAND}in=../../h264_high_1080p_19.mp4,stream=video,output=h264_high_1080p_19.mp4 "
-          
-          NUM_AUDIO_STREAMS=$(jq ".transcodeSpec.audio | length" ../../spec.json)
-          for (( i=0; i < NUM_AUDIO_STREAMS; ++i )); do
-            stream=$(jq ".transcodeSpec.audio[$i].stream" ../../spec.json)
-            bitrate=$(jq ".transcodeSpec.audio[$i].bitrate" ../../spec.json)
-            channels=$(jq ".transcodeSpec.audio[$i].channels" ../../spec.json)
-            lang_code=$(jq ".transcodeSpec.audio[$i].langCode" ../../spec.json)
-            file_name="aac_${channels}_${bitrate}_${lang_code}.mp4"
-            lang="${lang_code}-x-${channels}"
-            [ "$lang_code" = "ru" ] && lang_name="Русский"
-            [ "$lang_code" = "en-US" ] && lang_name="English (US)"
-            [ "$channels" = "6" ] && lang_name="${lang_name} (5.1)"
-            COMMAND="${COMMAND}in=../../${file_name},stream=audio,output=${file_name},lang=${lang},hls_group_id=audio,hls_name='${lang_name}' " 
-          done
-          
-          NUM_TEXT_STREAMS=$(jq ".transcodeSpec.text | length" ../../spec.json)
-          for (( i=0; i < NUM_TEXT_STREAMS; ++i )); do
-            stream=$(jq ".transcodeSpec.text[$i].stream" ../../spec.json)
-            forced=$(jq ".transcodeSpec.text[$i].forced" ../../spec.json)
-            lang_code=$(jq ".transcodeSpec.text[$i].langCode" ../../spec.json)
-            [ "$forced" = "true" ] && lang="${lang_code}-x-forced" || lang="${lang_code}"
-            [ "$forced" = "true" ] && file_name="${lang_code}-forced.vtt" || file_name="${lang_code}.vtt"
-            [ "$lang_code" = "ru" ] && lang_name="Русский"
-            [ "$lang_code" = "en-US" ] && lang_name="English (US)"
-            [ "$forced" = "true" ] && lang_name="${lang_name} (forced)"
-            COMMAND="${COMMAND}in=../../${file_name},stream=text,output=${file_name},lang=${lang},hls_group_id=subtitle,hls_name='${lang_name}' "
-          done
-
-          default_lang=$(jq ".transcodeSpec.defaultLang" ../../spec.json)
-          [ "${default_lang}" = "null" ] || COMMAND="${COMMAND} --default_language ${default_lang} "
-          
-          default_text_lang=$(jq ".transcodeSpec.defaultTextLang" ../../spec.json)
-          [ "${default_text_lang}" = "null" ] || COMMAND="${COMMAND} --default_text_language ${default_text_lang} "
-          
-          $COMMAND
-
-      - name:
+          transcode-and-publish-movie

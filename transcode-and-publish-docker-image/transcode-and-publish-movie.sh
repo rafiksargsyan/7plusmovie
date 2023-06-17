@@ -20,8 +20,8 @@ MKV_FILE=bundle.mkv
 SPEC_FILE=spec.json
 
 WORKING_DIR_NAME=transcode-and-publish-movie-work-dir
-mkdir $WORKING_DIR_NAME > /dev/null 2>&1 || true
-rm -r ${WORKING_DIR_NAME:?}/* > /dev/null 2>&1 || true
+mkdir $WORKING_DIR_NAME || true
+rm -r ${WORKING_DIR_NAME:?}/* || true
 cp "$MKV_FILE_PATH" $WORKING_DIR_NAME/$MKV_FILE
 cp "$SPEC_FILE_PATH" $WORKING_DIR_NAME/$SPEC_FILE
 cd $WORKING_DIR_NAME || exit 1
@@ -29,16 +29,11 @@ mkdir s3
 mkdir s3/vod
 mkdir s3/subtitles
 
-transcode-video-from-mkv $MKV_FILE 0 540 > 540.log 2>&1 &
-PID540=$!
-transcode-video-from-mkv $MKV_FILE 0 720 > 720.log 2>&1 &
-PID720=$!
-transcode-video-from-mkv $MKV_FILE 0 1080 > 1080.log 2>&1 &
-PID1080=$!
+transcode-video-from-mkv $MKV_FILE 0 540
 
-wait $PID540
-wait $PID720
-wait $PID1080
+transcode-video-from-mkv $MKV_FILE 0 720
+
+transcode-video-from-mkv $MKV_FILE 0 1080
 
 NUM_AUDIO_STREAMS=$(jq ".transcodeSpec.audio | length" $SPEC_FILE)
 for (( i=0; i < NUM_AUDIO_STREAMS; ++i )); do
@@ -46,7 +41,7 @@ for (( i=0; i < NUM_AUDIO_STREAMS; ++i )); do
   bitrate=$(jq -r ".transcodeSpec.audio[$i].bitrate" $SPEC_FILE)
   channels=$(jq ".transcodeSpec.audio[$i].channels" $SPEC_FILE)
   lang_code=$(jq -r ".transcodeSpec.audio[$i].langCode" $SPEC_FILE)
-  transcode-audio-from-mkv $MKV_FILE "$stream" "$channels" "$bitrate" "$lang_code" > audio.log 2>&1
+  transcode-audio-from-mkv $MKV_FILE "$stream" "$channels" "$bitrate" "$lang_code" 2>&1
 done
 
 NUM_TEXT_STREAMS=$(jq ".transcodeSpec.text | length" $SPEC_FILE)
@@ -55,7 +50,7 @@ for (( i=0; i < NUM_TEXT_STREAMS; ++i )); do
   forced=$(jq ".transcodeSpec.text[$i].forced" $SPEC_FILE)
   lang_code=$(jq -r ".transcodeSpec.text[$i].langCode" $SPEC_FILE)
   [ "$forced" = "true" ] && file_name="${lang_code}-forced" || file_name="${lang_code}"
-  transcode-subs-from-mkv $MKV_FILE $stream $file_name > text.log 2>&1
+  transcode-subs-from-mkv $MKV_FILE $stream $file_name 2>&1
 done
 
 cp ./*.vtt s3/subtitles
@@ -100,7 +95,7 @@ default_text_lang=$(jq ".transcodeSpec.defaultTextLang" ../../$SPEC_FILE)
 
 COMMAND="${COMMAND}--mpd_output manifest.mpd --hls_master_playlist_output master.m3u8"
 
-eval "$COMMAND > ../../shaka-packager.log 2>&1"
+eval '$COMMAND'
 
 sed -i "/shaka-packager/d" ./*.vtt
 sed -i "/shaka-packager/d" ./*.mpd
@@ -180,6 +175,3 @@ for (( i=0; i < NUM_TEXT_STREAMS; ++i )); do
 done
 
 get-movie "$Q62_MOVIE_ID"
-
-cd ..
-rm -r $WORKING_DIR_NAME
