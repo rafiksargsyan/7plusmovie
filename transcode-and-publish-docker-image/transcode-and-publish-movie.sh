@@ -111,7 +111,7 @@ sed -i 's/.*contentType=\"audio\".* lang=\"ru-x-2\".*/&\n      \<Label\>Русс
 sed -i 's/.*contentType=\"audio\".* lang=\"ru-x-6\".*/&\n      \<Label\>Русский (5.1)\<\/Label\>/' manifest.mpd
 sed -i 's/.*contentType=\"audio\".*lang=\"en-US-x-1\".*/&\n      \<Label\>English\<\/Label\>/' manifest.mpd
 sed -i 's/.*contentType=\"audio\".* lang=\"en-US-x-2\".*/&\n      \<Label\>English\<\/Label\>/' manifest.mpd
-sed -i 's/.*contentType=\"audio\".* lang=\"en-US-x-6\".*/&\n      \<Label\>English US (5.1)\<\/Label\>/' manifest.mpd
+sed -i 's/.*contentType=\"audio\".* lang=\"en-US-x-6\".*/&\n      \<Label\>English (US) (5.1)\<\/Label\>/' manifest.mpd
 
 cd ../..
 
