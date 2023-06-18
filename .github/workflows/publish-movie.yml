@@ -10,6 +10,7 @@ on:
 jobs:
   publish-movie:
     runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 1440
     container: q62xyz/transcode-and-publish:1.0.2
     env:
       AWS_ACCESS_KEY_ID: AKIAQBPWKPTSTP3HL4UM
