@@ -11,4 +11,4 @@ Q62_API_BASE="https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod"
 curl -s -X PATCH "${Q62_API_BASE}/addTitleL8nToMovie" \
   -H "Authorization: Bearer $1" \
   -H "Content-Type: application/json" \
-  -d "{ \"movieId\" : \"$2\", \"locale\" : \"$3\", \"title\" : $4 }"
+  -d "{ \"movieId\" : \"$2\", \"locale\" : \"$3\", \"title\" : \"$4\" }"
