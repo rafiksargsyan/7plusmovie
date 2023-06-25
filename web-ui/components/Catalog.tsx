@@ -13,7 +13,7 @@ import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardMedia from '@mui/material/CardMedia';
 import algoliasearch from 'algoliasearch';
-import { CardContent, MenuItem, Select, Tooltip, Typography } from '@mui/material';
+import { MenuItem, Select, Typography } from '@mui/material';
 import Link from 'next/link';
 
 const darkTheme = createTheme({

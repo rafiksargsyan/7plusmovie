@@ -85,6 +85,7 @@ interface AlgoliaQueryItem {
   releaseYear: number;
   posterImagesPortrait: { [key: string]: string};
   titleL8ns: { [key: string]: string};
+  creationTime: number;
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
@@ -96,14 +97,19 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const locale = (context.locale != null ? context.locale : context.defaultLocale!) as keyof typeof langTagToLangCode;
   const langCode = langTagToLangCode[locale];
   return { props: {
-    movies: algoliaSearchResponse.hits.map(_ => ({
+    movies: algoliaSearchResponse.hits.sort((a, b) => {
+      if (a.releaseYear !== b.releaseYear) {
+        return b.releaseYear - a.releaseYear;
+      }
+      return b.creationTime - a.creationTime;
+  }).map(_ => ({
       id: _.objectID,
       originalTitle: _.originalTitle,
       titleL8ns: _.titleL8ns,
       releaseYear: _.releaseYear,
       posterImagesPortrait: _.posterImagesPortrait})),
-    currentLocale: langCode, 
-    searchString: searchString
+      currentLocale: langCode, 
+      searchString: searchString
     }
   }
 }
