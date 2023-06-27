@@ -93,7 +93,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!);
   const algoliaIndex = algoliaClient.initIndex(process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!);
   const searchString = context.query.search as (string | undefined);
-  const algoliaSearchResponse = await algoliaIndex.search<AlgoliaQueryItem>(searchString == null ? '' : searchString);
+  const algoliaSearchResponse = await algoliaIndex.search<AlgoliaQueryItem>(searchString == null ? '' : searchString,
+    {hitsPerPage: 1000});
   const locale = (context.locale != null ? context.locale : context.defaultLocale!) as keyof typeof langTagToLangCode;
   const langCode = langTagToLangCode[locale];
   return { props: {
