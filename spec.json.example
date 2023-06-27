@@ -1,0 +1,56 @@
+{
+  "themoviedbId": 121,	
+  
+  "transcodeSpec": {	
+    
+    "audio" : [
+      {
+        "stream" : 1,
+        "bitrate" : "640k",
+        "channels" : 6,
+        "langCode" : "ru"
+      },
+      {
+        "stream" : 1,
+        "bitrate" : "192k",
+        "channels" : 2,
+        "langCode" : "ru"
+      },
+      {
+        "stream" : 13,
+        "bitrate" : "640k",
+        "channels" : 6,
+        "langCode" : "en-US"
+      },
+      {
+        "stream" : 13,
+        "bitrate" : "192k",
+        "channels" : 2,
+        "langCode" : "en-US"
+      }    
+    ],
+    
+    "text" : [
+      {	  
+        "stream" : 5,
+        "forced" : true,
+        "langCode" : "ru"    
+      },
+      {
+        "stream" : 9,
+        "forced" : false,
+        "langCode" : "en-US"
+      },
+      {
+        "stream" : 6,
+        "forced" : false,
+        "langCode" : "ru"
+      }
+    ],	  
+    
+    "defaultLang" : "ru-x-2",
+    
+    "defaultTextLang" : "ru-x-forced"
+
+  }
+}    
