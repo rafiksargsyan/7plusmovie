@@ -70,6 +70,7 @@ for (( i=0; i < NUM_AUDIO_STREAMS; ++i )); do
   lang="${lang_code}-x-${channels}"
   [ "$lang_code" = "ru" ] && lang_name="Русский"
   [ "$lang_code" = "en-US" ] && lang_name="English (US)"
+  [ "$lang_code" = "fr" ] && lang_name="Français"
   [ "$channels" = "6" ] && lang_name="${lang_name} (5.1)"
   COMMAND="${COMMAND}in=../../${file_name},stream=audio,output=${file_name},lang=${lang},hls_group_id=audio,hls_name='${lang_name}' "
 done
@@ -82,8 +83,10 @@ for (( i=0; i < NUM_TEXT_STREAMS; ++i )); do
   [ "$forced" = "true" ] && file_name="${lang_code}-forced.vtt" || file_name="${lang_code}.vtt"
   [ "$lang_code" = "ru" ] && lang_name="Русский"
   [ "$lang_code" = "en-US" ] && lang_name="English (US)"
+  [ "$lang_code" = "fr" ] && lang_name="Français"
   [ "$forced" = "true" ] && [ "$lang_code" = "ru" ] && lang_name="${lang_name} (форсированный)"
   [ "$forced" = "true" ] && [ "$lang_code" = "en-US" ] && lang_name="${lang_name} (forced)"
+  [ "$forced" = "true" ] && [ "$lang_code" = "fr" ] && lang_name="${lang_name} (forcés)"
   COMMAND="${COMMAND}in=../../${file_name},stream=text,output=${file_name},lang=${lang},hls_group_id=subtitle,hls_name='${lang_name}' "
 done
 
@@ -105,6 +108,8 @@ sed -i 's/.*contentType=\"text\".*lang=\"ru\".*/&\n      \<Label\>Русский
 sed -i 's/.*contentType=\"text\".* lang=\"ru-x-forced\".*/&\n      \<Label\>Русский (форсированный)\<\/Label\>/' manifest.mpd
 sed -i 's/.*contentType=\"text\".*lang=\"en-US\".*/&\n      \<Label\>English (US)\<\/Label\>/' manifest.mpd
 sed -i 's/.*contentType=\"text\".* lang=\"en-US-x-forced\".*/&\n      \<Label\>English (US) (forced)\<\/Label\>/' manifest.mpd
+sed -i 's/.*contentType=\"text\".*lang=\"fr\".*/&\n      \<Label\>Français\<\/Label\>/' manifest.mpd
+sed -i 's/.*contentType=\"text\".* lang=\"fr-x-forced\".*/&\n      \<Label\>Français (forcés)\<\/Label\>/' manifest.mpd
 
 sed -i 's/.*contentType=\"audio\".*lang=\"ru-x-1\".*/&\n      \<Label\>Русский\<\/Label\>/' manifest.mpd
 sed -i 's/.*contentType=\"audio\".* lang=\"ru-x-2\".*/&\n      \<Label\>Русский\<\/Label\>/' manifest.mpd
@@ -112,6 +117,10 @@ sed -i 's/.*contentType=\"audio\".* lang=\"ru-x-6\".*/&\n      \<Label\>Русс
 sed -i 's/.*contentType=\"audio\".*lang=\"en-US-x-1\".*/&\n      \<Label\>English\<\/Label\>/' manifest.mpd
 sed -i 's/.*contentType=\"audio\".* lang=\"en-US-x-2\".*/&\n      \<Label\>English\<\/Label\>/' manifest.mpd
 sed -i 's/.*contentType=\"audio\".* lang=\"en-US-x-6\".*/&\n      \<Label\>English (US) (5.1)\<\/Label\>/' manifest.mpd
+sed -i 's/.*contentType=\"audio\".*lang=\"fr-x-1\".*/&\n      \<Label\>Français\<\/Label\>/' manifest.mpd
+sed -i 's/.*contentType=\"audio\".* lang=\"fr-x-2\".*/&\n      \<Label\>Français\<\/Label\>/' manifest.mpd
+sed -i 's/.*contentType=\"audio\".* lang=\"fr-x-6\".*/&\n      \<Label\>Français (5.1)\<\/Label\>/' manifest.mpd
+
 
 cd ../..
 
@@ -133,13 +142,14 @@ POSTER_PATH_RU=$(jq -r '.poster_path' <<< "${THEMOVIEDB_MOVIE_RU}")
 BACKDROP_PATH=$(jq -r '.backdrop_path' <<< "${THEMOVIEDB_MOVIE_EN_US}")
 
 [ "${ORIGINAL_LANG}" == "en" ] || [ "${ORIGINAL_LANG}" == "en-US" ] || [ "${ORIGINAL_LANG}" == "en-GB" ] \
-  || [ "${ORIGINAL_LANG}" == "it" ] || [ "${ORIGINAL_LANG}" == "ru" ] || exit 1
+  || [ "${ORIGINAL_LANG}" == "it" ] || [ "${ORIGINAL_LANG}" == "ru" ] || [ "${ORIGINAL_LANG}" == "fr" ] || exit 1
 
 [ "${ORIGINAL_LANG}" == "en" ] && ORIGINAL_LANG="EN_US"
 [ "${ORIGINAL_LANG}" == "en-US" ] && ORIGINAL_LANG="EN_US"
 [ "${ORIGINAL_LANG}" == "en-GB" ] && ORIGINAL_LANG="EN_GB"
 [ "${ORIGINAL_LANG}" == "ru" ] && ORIGINAL_LANG="RU"
 [ "${ORIGINAL_LANG}" == "it" ] && ORIGINAL_LANG="IT"
+[ "${ORIGINAL_LANG}" == "fr" ] && ORIGINAL_LANG="FR"
 
 Q62_ADMIN_AUTH_TOKEN=$(get-auth-token "$ADMIN_USER_POOL_CLI_CLIENT_ID" "$Q62_ADMIN_USERNAME" "$Q62_ADMIN_PASSWORD")
 
@@ -170,6 +180,7 @@ for (( i=0; i < NUM_TEXT_STREAMS; ++i )); do
   [ "$forced" = "true" ] && file_name="${lang_code}-forced.vtt" || file_name="${lang_code}.vtt"
   [ "$lang_code" = "ru" ] && locale="RU"
   [ "$lang_code" = "en-US" ] && locale="EN_US"
+  [ "$lang_code" = "fr" ] && locale="FR"
   [ "$forced" = "true" ] && locale="${locale}_FORCED"
   add-subtitle-to-movie "$Q62_ADMIN_AUTH_TOKEN" "$Q62_MOVIE_ID" "${locale}" "${Q62_MOVIE_ID}/subtitles/${file_name}"
 done
