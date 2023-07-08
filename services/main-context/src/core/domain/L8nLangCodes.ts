@@ -2,7 +2,8 @@ export const L8nLangCodes = {
   EN_US : { langTag : "en-US" },
   EN_GB : { langTag : "en-GB" },
   RU : { langTag : "ru" },
-  IT : { langTag : "it" }
+  IT : { langTag : "it" },
+  FR : { langTag : "fr" }
 } as const;
 
 export class L8nLangCode {

@@ -4,7 +4,9 @@ export const SubsLangCodes = {
   EN_GB : { lang : "en", langTag : "en-GB" },
   RU : { lang : "ru", langTag : "ru" },
   RU_FORCED : { lang: "ru", langTag : "ru-x-forced"},
-  EN_US_FORCED : { lang: "en", langTag : "en-US-x-forced"}
+  EN_US_FORCED : { lang: "en", langTag : "en-US-x-forced"},
+  FR : { lang : "fr", langTag : "fr" }
+
 } as const;
 
 export class SubsLangCode {
