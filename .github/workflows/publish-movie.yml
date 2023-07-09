@@ -11,7 +11,7 @@ jobs:
   publish-movie:
     runs-on: [self-hosted, linux, x64]
     timeout-minutes: 1440
-    container: q62xyz/transcode-and-publish:1.1.1
+    container: q62xyz/transcode-and-publish:1.1.3
     env:
       AWS_ACCESS_KEY_ID: AKIAQBPWKPTSTP3HL4UM
       AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}

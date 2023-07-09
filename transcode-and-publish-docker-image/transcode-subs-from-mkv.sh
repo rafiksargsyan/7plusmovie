@@ -10,5 +10,5 @@ MKV_FILE=$1
 STREAM=$2
 OUTPUT_FILE_NAME=$3
 
-ffmpeg -i ${MKV_FILE} -vn -an -map 0:${STREAM} -codec:s webvtt ${OUTPUT_FILE_NAME}.vtt 
+ffmpeg -i ${MKV_FILE} -vn -an -map 0:${STREAM} -codec:s webvtt ${OUTPUT_FILE_NAME}.vtt > /dev/null
 

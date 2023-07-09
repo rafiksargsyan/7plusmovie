@@ -13,5 +13,5 @@ CHANNELS=$3
 BITRATE=$4
 OUTPUT_FILE_NAME_SUFFIX=$5
 
-ffmpeg -i ${MKV_FILE} -map 0:${STREAM} -ac ${CHANNELS} -c aac -ab ${BITRATE} -vn -sn aac_${CHANNELS}_${BITRATE}_${OUTPUT_FILE_NAME_SUFFIX}.mp4
+ffmpeg -i ${MKV_FILE} -map 0:${STREAM} -ac ${CHANNELS} -c aac -ab ${BITRATE} -vn -sn aac_${CHANNELS}_${BITRATE}_${OUTPUT_FILE_NAME_SUFFIX}.mp4 > /dev/null
 

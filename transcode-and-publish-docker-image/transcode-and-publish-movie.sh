@@ -30,11 +30,11 @@ mkdir s3/vod
 mkdir s3/subtitles
 
 echo "Starting transcoding to 540"
-transcode-video-from-mkv $MKV_FILE 0 540 > /dev/null 2>&1
+transcode-video-from-mkv $MKV_FILE 0 540
 echo "Starting transcoding to 720"
-transcode-video-from-mkv $MKV_FILE 0 720 > /dev/null 2>&1
+transcode-video-from-mkv $MKV_FILE 0 720
 echo "Starting transcoding to 1080"
-transcode-video-from-mkv $MKV_FILE 0 1080 > /dev/null 2>&1
+transcode-video-from-mkv $MKV_FILE 0 1080
 
 echo "Starting transcoding audio tracks"
 NUM_AUDIO_STREAMS=$(jq ".transcodeSpec.audio | length" $SPEC_FILE)
@@ -43,7 +43,7 @@ for (( i=0; i < NUM_AUDIO_STREAMS; ++i )); do
   bitrate=$(jq -r ".transcodeSpec.audio[$i].bitrate" $SPEC_FILE)
   channels=$(jq ".transcodeSpec.audio[$i].channels" $SPEC_FILE)
   lang_code=$(jq -r ".transcodeSpec.audio[$i].langCode" $SPEC_FILE)
-  transcode-audio-from-mkv $MKV_FILE "$stream" "$channels" "$bitrate" "$lang_code" > /dev/null 2>&1
+  transcode-audio-from-mkv $MKV_FILE "$stream" "$channels" "$bitrate" "$lang_code"
 done
 
 echo "Starting transcoding text tracks"
@@ -53,7 +53,7 @@ for (( i=0; i < NUM_TEXT_STREAMS; ++i )); do
   forced=$(jq ".transcodeSpec.text[$i].forced" $SPEC_FILE)
   lang_code=$(jq -r ".transcodeSpec.text[$i].langCode" $SPEC_FILE)
   [ "$forced" = "true" ] && file_name="${lang_code}-forced" || file_name="${lang_code}"
-  transcode-subs-from-mkv $MKV_FILE $stream $file_name > /dev/null 2>&1
+  transcode-subs-from-mkv $MKV_FILE $stream $file_name
 done
 
 cp ./*.vtt s3/subtitles
@@ -102,7 +102,7 @@ default_text_lang=$(jq ".transcodeSpec.defaultTextLang" ../../$SPEC_FILE)
 COMMAND="${COMMAND}--mpd_output manifest.mpd --hls_master_playlist_output master.m3u8"
 
 echo "Starting VOD packaging"
-eval "$COMMAND > /dev/null"
+eval "$COMMAND"
 
 sed -i "/shaka-packager/d" ./*.vtt
 sed -i "/shaka-packager/d" ./*.mpd
