@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import Script from 'next/script';
 import { useEffect, useState } from 'react';
 import '../components/video-js-overrides.css';
+import { Analytics } from '@vercel/analytics/react';
 
 const darkTheme = createTheme({
   palette: {
@@ -57,6 +58,7 @@ export default function App({ Component, pageProps }: AppProps) {
           gtag('config', 'G-9F6DBJPMHW');
         `}
       </Script>
+      <Analytics />
       {loading ? (
         <ThemeProvider theme={darkTheme}>
           <CssBaseline />
