@@ -17,6 +17,7 @@ const darkTheme = createTheme({
 });
 
 interface Movie {
+  id: string;
   originalTitle: string;
   titleL8ns: { [key: string]: string };
   releaseYear: number;
@@ -29,6 +30,7 @@ interface Movie {
 async function getMovie(movieId: string): Promise<Movie> {
   const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${movieId}`);
   return {
+    id: movieId,
     originalTitle: response.data.originalTitle,
     titleL8ns: response.data.titleL8ns,
     releaseYear: response.data.releaseYear,
@@ -48,15 +50,16 @@ const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
 
 function PlayerPage(props : {movie: Movie, currentLocaleCode: string, currentLocale: string}) {
   const movieTitle = props.movie == undefined ? '' : `${props.movie.titleL8ns[props.currentLocaleCode] != undefined ? props.movie.titleL8ns[props.currentLocaleCode] : props.movie.originalTitle} (${props.movie.releaseYear})`;
+  const movieId = props.movie == undefined ? '' : props.movie.id;
   return (
     <>
       <Head>
         <title>{movieTitle}</title>
         <meta property="og:title" content={movieTitle} />
         <meta property="og:image" content={props.movie == undefined ? undefined : `${imageBaseUrl}h_720/${props.movie.backdropImage}`}/>
-        <link rel="alternate" href="/en-US" hrefLang='en-US'></link>
-        <link rel="alternate" href="/ru" hrefLang='ru'></link>
-        <link rel="alternate" href="/en-US" hrefLang='x-default'></link>
+        <link rel="alternate" href={`https://www.q62.xyz/en-US/player?movieId=${movieId}`} hrefLang='en-US'></link>
+        <link rel="alternate" href={`https://www.q62.xyz/ru/player?movieId=${movieId}`} hrefLang='ru'></link>
+        <link rel="alternate" href={`https://www.q62.xyz/en-US/player?movieId=${movieId}`} hrefLang='x-default'></link>
       </Head>
       <ThemeProvider theme={darkTheme}>
 	      <CssBaseline />

@@ -67,9 +67,9 @@ function CatalogPage(props: CatalogPageProps) {
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"></link>
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"></link>
         <link rel="manifest" href="/site.webmanifest"></link>
-        <link rel="alternate" href="/en-US" hrefLang='en-US'></link>
-        <link rel="alternate" href="/ru" hrefLang='ru'></link>
-        <link rel="alternate" href="/en-US" hrefLang='x-default'></link>
+        <link rel="alternate" href="https://www.q62.xyz/en-US" hrefLang='en-US'></link>
+        <link rel="alternate" href="https://www.q62.xyz/ru" hrefLang='ru'></link>
+        <link rel="alternate" href="https://www.q62.xyz/en-US" hrefLang='x-default'></link>
       </Head>
       <Catalog {...props} currentLocale={locale} searchString={search}
         onSearchChange={onSearchChange} onLocaleChange={onLocaleChange}/>
