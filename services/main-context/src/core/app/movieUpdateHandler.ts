@@ -4,6 +4,8 @@ import algoliasearch from 'algoliasearch';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import { v2 as cloudinary } from 'cloudinary';
 import { S3 } from '@aws-sdk/client-s3';
+import { MovieGenre, MovieGenres } from '../domain/MovieGenres';
+import { Person, Persons } from '../domain/Persons';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
@@ -22,6 +24,9 @@ interface Movie {
   creationTime: number;
   mpdFile: string;
   m3u8File: string;
+  genres: MovieGenre[];
+  actors: Person[];
+  directors: Person[];
 }
 
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
@@ -51,7 +56,10 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
                                       originalTitle: movie.originalTitle,
                                       posterImagesPortrait: movie.posterImagesPortrait,
                                       titleL8ns: movie.titleL8ns,
-                                      releaseYear: movie.releaseYear });
+                                      releaseYear: movie.releaseYear,
+                                      genres: movie.genres.reduce((r, _) => { return { ...r, [_.code] : MovieGenres[_.code] } }, {}),
+                                      actors: movie.actors.reduce((r, _) => { return { ...r, [_.code] : Persons[_.code] } }, {}),
+                                      directors: movie.directors.reduce((r, _) => { return { ...r, [_.code] : Persons[_.code] } }, {}) });
     }
   }
 };

@@ -217,6 +217,57 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  addGenreToMovie:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/addGenreToMovie.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addGenreToMovie
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : $input.json(''$.movieId''),
+                                   "genre" : $input.json(''$.genre'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+
+  addActorToMovie:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/addActorToMovie.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addActorToMovie
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : $input.json(''$.movieId''),
+                                   "actor" : $input.json(''$.actor'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+
+  addDirectorToMovie:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/addDirectorToMovie.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addDirectorToMovie
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : $input.json(''$.movieId''),
+                                   "director" : $input.json(''$.director'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
 plugins:
   - serverless-esbuild

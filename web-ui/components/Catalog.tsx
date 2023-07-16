@@ -50,13 +50,13 @@ const L8nLangCodes = {
 
 const L8nTable = {
   EN_US : {
-    SEARCH_PLACEHOLDER: "Search titles",
+    SEARCH_PLACEHOLDER: "Search titles, genres, persons",
     RU: "Russian",
     EN_US: "American English",
     EMPTY_RESULT_MSG: "Oops, we couldn't find anything. Try to adjust your search."
   },
   RU : {
-    SEARCH_PLACEHOLDER: "Искать фильмы",
+    SEARCH_PLACEHOLDER: "Искать фильмы, жанры, людей",
     RU: "Русский",
     EN_US: "Американский английский",
     EMPTY_RESULT_MSG: "Упс, мы ничего не нашли. Попробуйте скорректировать поиск."

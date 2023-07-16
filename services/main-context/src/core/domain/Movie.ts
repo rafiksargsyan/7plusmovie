@@ -1,5 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { L8nLangCode } from './L8nLangCodes';
+import { MovieGenre } from './MovieGenres';
+import { Person } from './Persons';
 import { SubsLangCode } from './SubsLangCodes';
 
 type RelativePath = string;
@@ -18,6 +20,9 @@ export class Movie {
   private mpdFile: RelativePath;
   private m3u8File: RelativePath;
   private releaseYear: number;
+  private genres: MovieGenre[] = [];
+  private actors: Person[] = [];
+  private directors: Person[] = [];
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -97,6 +102,36 @@ export class Movie {
     }
     // TODO: validate that title is in provided locale
     this.titleL8ns[locale.code] = title;
+    this.lastUpdateTime = Date.now();
+  }
+
+  public addGenre(genre: MovieGenre) {
+    for (const g of this.genres) {
+      if (genre.code === g.code) {
+        return;
+      }
+    }
+    this.genres.push(genre);
+    this.lastUpdateTime = Date.now();
+  }
+
+  public addActor(actor: Person) {
+    for (const a of this.actors) {
+      if (actor.code === a.code) {
+        return;
+      }
+    }  
+    this.actors.push(actor);
+    this.lastUpdateTime = Date.now();
+  }
+
+  public addDirector(director: Person) {
+    for (const d of this.directors) {
+      if (director.code === d.code) {
+        return;
+      }
+    }
+    this.directors.push(director);
     this.lastUpdateTime = Date.now();
   }
 }
