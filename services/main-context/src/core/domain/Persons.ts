@@ -50,7 +50,9 @@ export const Persons = {
   ANTHONY_HOPKINS : { EN_US : "Anthony Hopkins", RU : "Энтони Хопкинс" },
   ROBERT_DE_NIRO : { EN_US : "Robert De Niro", RU : "Роберт Де Ниро" },
   AL_CAPINO : { EN_US : "Al Pacino", RU : "Аль Пачино" },
-  CLINT_EASTWOOD : { EN_US : "Clint Eastwood", RU : "Клинт Иствуд" }
+  CLINT_EASTWOOD : { EN_US : "Clint Eastwood", RU : "Клинт Иствуд" },
+  MARK_WAHLBERG : { EN_US : "Mark Wahlberg", RU : "Марк Уолберг" },
+  MONICA_BELLUCCI : { EN_US : "Monica Bellucci", RU : "Моника Беллуччи" }
 } as const;
 
 export class Person {
