@@ -35,3 +35,7 @@ variable "algolia_admin_key" {
 variable "cookie_signing_private_key_base64_encoded" {
   type = string
 }
+
+variable "tmdb_api_key" {
+  type = string
+}
