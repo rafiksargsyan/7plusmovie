@@ -12,6 +12,7 @@
     "@aws/dynamodb-auto-marshaller": "^0.7.1",
     "@types/uuid": "^8.3.4",
     "algoliasearch": "^4.15.0",
+    "axios": "^1.4.0",
     "cloudinary": "^1.35.0"
   },
   "devDependencies": {

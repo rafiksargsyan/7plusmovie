@@ -23,6 +23,7 @@ export class Movie {
   private genres: MovieGenre[] = [];
   private actors: Person[] = [];
   private directors: Person[] = [];
+  private tmdbId : string;
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -61,7 +62,7 @@ export class Movie {
       throw new InvalidPosterImageRelativePathError();
     }
     this.posterImagesPortrait[locale.code] = relativePath;
-    this.lastUpdateTime = Date.now();
+    this.touch();
   }
 
   public addSubtitle(locale: SubsLangCode, relativePath: RelativePath) {
@@ -69,7 +70,7 @@ export class Movie {
       throw new InvalidSubtitleRelativePathError();
     }
     this.subtitles[locale.code] = relativePath;
-    this.lastUpdateTime = Date.now();
+    this.touch();
   }
 
   public addBackdropImage(relativePath: RelativePath) {
@@ -77,7 +78,7 @@ export class Movie {
       throw new InvalidBackdropImageRelativePathError();
     }
     this.backdropImage = relativePath;
-    this.lastUpdateTime = Date.now();
+    this.touch();
   }
 
   public addMpdFile(relativePath: RelativePath) {
@@ -85,7 +86,7 @@ export class Movie {
         throw new InvalidMpdFileRelativePathError();
       }
     this.mpdFile = relativePath;
-    this.lastUpdateTime = Date.now();
+    this.touch();
   }
 
   public addM3u8File(relativePath: RelativePath) {
@@ -93,7 +94,7 @@ export class Movie {
         throw new InvalidM3u8FileRelativePathError();
       }
     this.m3u8File = relativePath;
-    this.lastUpdateTime = Date.now();
+    this.touch();
   }
 
   public addTitleL8n(locale: L8nLangCode, title: string) {
@@ -102,7 +103,7 @@ export class Movie {
     }
     // TODO: validate that title is in provided locale
     this.titleL8ns[locale.code] = title;
-    this.lastUpdateTime = Date.now();
+    this.touch();
   }
 
   public addGenre(genre: MovieGenre) {
@@ -112,7 +113,7 @@ export class Movie {
       }
     }
     this.genres.push(genre);
-    this.lastUpdateTime = Date.now();
+    this.touch();
   }
 
   public addActor(actor: Person) {
@@ -122,7 +123,7 @@ export class Movie {
       }
     }  
     this.actors.push(actor);
-    this.lastUpdateTime = Date.now();
+    this.touch();
   }
 
   public addDirector(director: Person) {
@@ -132,7 +133,16 @@ export class Movie {
       }
     }
     this.directors.push(director);
+    this.touch();
+  }
+
+  public touch() {
     this.lastUpdateTime = Date.now();
+  }
+
+  public setTheMovieDbId(tmdbId: string) {
+    this.tmdbId = tmdbId;
+    this.touch();
   }
 }
 
