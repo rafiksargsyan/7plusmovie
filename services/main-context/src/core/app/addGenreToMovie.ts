@@ -1,7 +1,7 @@
 import { Movie } from "../domain/Movie";
 import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
-import { MovieGenre } from "../domain/MovieGenres";
+import { MovieGenre, MovieGenres } from "../domain/MovieGenres";
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 
@@ -15,7 +15,7 @@ const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 
 interface AddGenreParam {
   movieId: string;
-  genre: string;
+  genre: keyof typeof MovieGenres;
 }
 
 export const handler = async (event: AddGenreParam): Promise<void> => {

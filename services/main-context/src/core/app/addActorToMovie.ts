@@ -1,7 +1,7 @@
 import { Movie } from "../domain/Movie";
 import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
-import { Person } from "../domain/Persons";
+import { Person, Persons } from "../domain/Persons";
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 
@@ -15,7 +15,7 @@ const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 
 interface AddActorParam {
   movieId: string;
-  actor: string;
+  actor: keyof typeof Persons;
 }
 
 export const handler = async (event: AddActorParam): Promise<void> => {

@@ -25,9 +25,9 @@ export const MovieGenres = {
 } as const;
   
 export class MovieGenre {
-  readonly code: string;
+  readonly code: keyof typeof MovieGenres;
   
-  public constructor(code: string) {
+  public constructor(code: keyof typeof MovieGenres) {
     if (!(code in MovieGenres)) {
       throw new InvalidMovieGenreError();
     }

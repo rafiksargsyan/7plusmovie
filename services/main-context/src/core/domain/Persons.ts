@@ -57,9 +57,9 @@ export const Persons = {
 } as const;
 
 export class Person {
-  readonly code: string;
+  readonly code: keyof typeof Persons;
   
-  public constructor(code: string) {
+  public constructor(code: keyof typeof Persons) {
     if (!(code in Persons)) {
       throw new InvalidPersonError();
     }
