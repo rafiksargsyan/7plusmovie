@@ -86,6 +86,9 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         || Object.keys(movie.posterImagesPortrait).length === 0) {
         return;
       }
+      if (movie.genres == undefined) movie.genres = [];
+      if (movie.actors == undefined) movie.actors = [];
+      if (movie.directors == undefined) movie.directors = [];
       await algoliaIndex.saveObject({ objectID: movie.id,
                                       creationTime: movie.creationTime,
                                       category: "MOVIE",
@@ -200,7 +203,6 @@ async function updateBasedOnTmdbId(movieId: string, tmdbId: string, tmdbApiKey: 
       updated = true;
     }
   }
-  
   tmdbMovieEnUs.genres.forEach(_ => {
     let mg: MovieGenre | undefined = tmdbMovieGenreId2MovieGenre[_.id];
     if (mg != undefined && movie.addGenre(mg)) {
