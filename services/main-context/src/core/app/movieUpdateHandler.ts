@@ -200,7 +200,29 @@ async function updateBasedOnTmdbId(movieId: string, tmdbId: string, tmdbApiKey: 
       updated = true;
     }
   }
+  
+  tmdbMovieEnUs.genres.forEach(_ => {
+    let mg: MovieGenre | undefined = tmdbMovieGenreId2MovieGenre[_.id];
+    if (mg != undefined && movie.addGenre(mg)) {
+      updated = true;
+    }
+  });
 
+  const tmdbCredits = (await tmdbClient.get(`movie/${tmdbId}/credits?api_key=${tmdbApiKey}`)).data;
+
+  tmdbCredits.cast.forEach(_ => {
+    let p: Person | undefined  = tmdbPersonId2Person[_.id];
+    if (p != undefined && movie.addActor(p)) {
+      updated = true;
+    }
+  });
+ 
+  tmdbCredits.crew.filter(({job}) => job === 'Director').forEach(_ => {
+    let p: Person | undefined  = tmdbPersonId2Person[_.id];
+    if (p != undefined && movie.addDirector(p)) {
+      updated = true;
+    }
+  });
 
   if (updated) {
     await docClient.put({ TableName: dynamodbMovieTableName, Item: movie });
@@ -229,7 +251,7 @@ const tmdbMovieGenreId2MovieGenre = {
   "37" : new MovieGenre('WESTERN')
 } as const;
 
-const thdbPersonId2Person = {
+const tmdbPersonId2Person = {
   "116" : new Person("KEIRA_KNIGHTLEY"),
   "131" : new Person("JAKE_GYLLENHAAL"),
   "956" : new Person("GUY_RITCHIE"),

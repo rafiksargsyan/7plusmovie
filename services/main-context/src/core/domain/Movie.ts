@@ -106,34 +106,37 @@ export class Movie {
     this.touch();
   }
 
-  public addGenre(genre: MovieGenre) {
+  public addGenre(genre: MovieGenre): boolean {
     for (const g of this.genres) {
       if (genre.code === g.code) {
-        return;
+        return false;
       }
     }
     this.genres.push(genre);
     this.touch();
+    return true;
   }
 
-  public addActor(actor: Person) {
+  public addActor(actor: Person): boolean {
     for (const a of this.actors) {
       if (actor.code === a.code) {
-        return;
+        return false;
       }
     }  
     this.actors.push(actor);
     this.touch();
+    return true;
   }
 
-  public addDirector(director: Person) {
+  public addDirector(director: Person): boolean {
     for (const d of this.directors) {
       if (director.code === d.code) {
-        return;
+        return false;
       }
     }
     this.directors.push(director);
     this.touch();
+    return true;
   }
 
   public touch() {
