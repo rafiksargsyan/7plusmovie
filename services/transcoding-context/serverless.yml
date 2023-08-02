@@ -1,0 +1,66 @@
+org: 7plusmovie
+app: 7plusmovie
+service: transcoding-context
+frameworkVersion: '3'
+useDotenv: true
+
+package:
+  individually: true
+  patterns:
+    - '!node_modules/@aws-sdk/**'
+
+provider:
+  name: aws
+  region: eu-west-3
+  runtime: nodejs18.x
+  iam:
+    role:
+      managedPolicies:
+        - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        - "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+  stage: ${opt:stage}
+  logRetentionInDays: 1
+
+functions:
+  createMovie:
+    handler: src/core/app/createMovie.handler
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      ALGOLIA_APP_ID: ${env:ALGOLIA_APP_ID}
+      ALGOLIA_ALL_INDEX: ${env:ALGOLIA_ALL_INDEX}
+      ALGOLIA_SEARCH_ONLY_KEY: ${env:ALGOLIA_SEARCH_ONLY_KEY}
+    events:
+      - http:
+          integration: lambda
+          path: /createMovie
+          method: post
+          request:
+            template:
+              application/json: '{ "originalLocale" : $input.json(''$.originalLocale''),
+                                   "originalTitle" : $input.json(''$.originalTitle''),
+                                   "releaseYear" : $input.json(''$.releaseYear'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+
+  movieUpdateHandler:
+    handler: src/core/app/movieUpdateHandler.handler
+    environment:
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      ALGOLIA_APP_ID: ${env:ALGOLIA_APP_ID}
+      ALGOLIA_ALL_INDEX: ${env:ALGOLIA_ALL_INDEX}
+      CLOUDINARY_CLOUD_NAME: ${env:CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${env:CLOUDINARY_API_KEY}
+      MEDIA_ASSETS_S3_BUCKET: ${env:MEDIA_ASSETS_S3_BUCKET}
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    events:
+      - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_MOVIE_STREAM_ARN}
+
+plugins:
+  - serverless-esbuild
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false
