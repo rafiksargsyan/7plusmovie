@@ -144,6 +144,9 @@ export class Movie {
   }
 
   public setTheMovieDbId(tmdbId: string) {
+    if (! /\S/.test(tmdbId)) {
+      throw new InvalidTmdbIdError();
+    }
     this.tmdbId = tmdbId;
     this.touch();
   }
@@ -166,3 +169,5 @@ class InvalidBackdropImageRelativePathError extends Error {}
 class InvalidSubtitleRelativePathError extends Error {}
 
 class InvalidM3u8FileRelativePathError extends Error {}
+
+class InvalidTmdbIdError extends Error {}
