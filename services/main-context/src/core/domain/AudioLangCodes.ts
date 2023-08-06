@@ -6,3 +6,16 @@ export const AudioLangCodes = {
   FR : { lang : "fr", langTag: "fr" },
   JA : { lang : "ja", langTag: "ja" }
 } as const;
+
+export class AudioLangCode {
+  readonly code: string;
+  
+  public constructor(code: string) {
+    if (!(code in AudioLangCodes)) {
+      throw new InvalidAudioLangCodeError();
+    }
+    this.code = code;
+  }
+}
+
+class InvalidAudioLangCodeError extends Error {}
