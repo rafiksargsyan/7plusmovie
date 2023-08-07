@@ -168,3 +168,16 @@ resource "aws_s3_bucket_lifecycle_configuration" "raw_media_assets_lifecycle_con
     status = "Enabled"
   }
 }
+
+resource "aws_dynamodb_table" "movie_transcoding_job" {
+  name     = "${local.deployment_id}-movie_transcoding_job"
+  hash_key = "id"
+  attribute {
+    name = "id"
+    type = "S"
+  }
+  stream_enabled   = true
+  stream_view_type = "NEW_IMAGE"
+  billing_mode     = "PAY_PER_REQUEST"
+  deletion_protection_enabled = var.dynamodb_deletion_protection_enabled
+}

@@ -33,3 +33,7 @@ output "admin_user_pool_cli_client_id" {
 output "raw_media_assets_s3_bucket_name" {
   value = aws_s3_bucket.raw_media_assets.bucket
 }
+
+output "ddb_movie_transcoding_job_table_stream_arn" {
+  value = aws_dynamodb_table.movie_transcoding_job.stream_arn
+}
