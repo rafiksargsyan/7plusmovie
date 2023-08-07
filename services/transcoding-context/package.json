@@ -1,0 +1,7 @@
+{
+  "name": "transcoding-context",
+  "version": "1.0.0",
+  "dependencies": {
+    "@types/uuid": "^9.0.2"
+  }
+}
