@@ -37,3 +37,7 @@ output "raw_media_assets_s3_bucket_name" {
 output "ddb_movie_transcoding_job_table_stream_arn" {
   value = aws_dynamodb_table.movie_transcoding_job.stream_arn
 }
+
+output "ddb_movie_transcoding_job_table_name" {
+  value = aws_dynamodb_table.movie_transcoding_job.name
+}
