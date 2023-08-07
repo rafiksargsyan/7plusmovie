@@ -19,6 +19,7 @@ export class MovieTranscodingJob {
   public readonly id: string;
   private creationTime: number;
   private lastUpdateTime: number;
+  private ttl: number;
   private movieId: string;
   private mkvS3ObjectKey: string;
   private audioTranscodeSpecs: AudioTranscodeSpec[];
@@ -40,6 +41,7 @@ export class MovieTranscodingJob {
       this.setDefaultTextTrack(defaultTextTrack);
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
+      this.ttl = (this.creationTime / 1000) + 5 * 24 * 60 * 60;
     }
   }
 
