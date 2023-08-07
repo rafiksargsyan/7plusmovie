@@ -26,11 +26,12 @@ export class MovieTranscodingJob {
   private textTranscodeSpecs: TextTranscodeSpec[];
   private defaultAudioTrack: number | undefined;
   private defaultTextTrack: number | undefined;
+  private transcodingContextJobId: string;
 
-  public constructor(createEmptyObject: boolean, movieId: string,
-    mkvS3ObjectKey: string, audioTranscodeSpecs: AudioTranscodeSpec[],
-    textTranscodeSpecs: TextTranscodeSpec[], defaultAudioTrack: number | undefined,
-    defaultTextTrack: number | undefined) {
+  public constructor(createEmptyObject: boolean, movieId?: string,
+    mkvS3ObjectKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
+    textTranscodeSpecs?: TextTranscodeSpec[], defaultAudioTrack?: number,
+    defaultTextTrack?: number) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setMovieId(movieId);
@@ -45,28 +46,28 @@ export class MovieTranscodingJob {
     }
   }
 
-  private setMovieId(movieId: string) {
-    if (! /\S/.test(movieId)) {
+  private setMovieId(movieId: string | undefined) {
+    if (movieId == undefined || ! /\S/.test(movieId)) {
       throw new InvalidMovieIdError();
     }
     this.movieId = movieId;
   }
 
-  private setMkvS3ObjectKey(mkvS3ObjectKey: string) {
-    if (! /\S/.test(mkvS3ObjectKey)) {
+  private setMkvS3ObjectKey(mkvS3ObjectKey: string | undefined) {
+    if (mkvS3ObjectKey == undefined || ! /\S/.test(mkvS3ObjectKey)) {
       throw new InvalidMkvS3ObjectKeyError();
     }
     this.mkvS3ObjectKey = mkvS3ObjectKey;
   }
 
-  private setAudioTranscodeSpecs(audioTranscodeSpecs: AudioTranscodeSpec[]) {
+  private setAudioTranscodeSpecs(audioTranscodeSpecs: AudioTranscodeSpec[] | undefined) {
     if (audioTranscodeSpecs == undefined || audioTranscodeSpecs.length == 0) {
       throw new InvalidAudioTranscodeSpecsError();
     }
     this.audioTranscodeSpecs = audioTranscodeSpecs;
   }
 
-  private setTextTranscodeSpecs(textTranscodeSpecs: TextTranscodeSpec[]) {
+  private setTextTranscodeSpecs(textTranscodeSpecs: TextTranscodeSpec[] | undefined) {
     if (textTranscodeSpecs == undefined || textTranscodeSpecs.length == 0) {
       throw new InvalidTextTranscodeSpecsError();
     }
@@ -86,6 +87,18 @@ export class MovieTranscodingJob {
     }
     this.defaultTextTrack = defaultTextTrack;
   }
+
+  public setTranscodingContextJobId(transcodingContextJobId: string) {
+    if (transcodingContextJobId == undefined || ! /\S/.test(transcodingContextJobId)) {
+      throw new InvalidTranscodingContextJobIdError();
+    }
+    this.transcodingContextJobId = transcodingContextJobId;
+    this.lastUpdateTime = Date.now();  
+  }
+
+  public getTranscodingContextJobId() {
+    return this.transcodingContextJobId;
+  }
 }
 
 class InvalidMovieIdError extends Error {}
@@ -99,3 +112,5 @@ class InvalidTextTranscodeSpecsError extends Error {}
 class InvalidDefaultAudioTrackError extends Error {}
 
 class InvalidDefaultTextTrackError extends Error {}
+
+class InvalidTranscodingContextJobIdError extends Error {}
