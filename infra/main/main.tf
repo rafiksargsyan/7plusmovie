@@ -180,4 +180,8 @@ resource "aws_dynamodb_table" "movie_transcoding_job" {
   stream_view_type = "NEW_IMAGE"
   billing_mode     = "PAY_PER_REQUEST"
   deletion_protection_enabled = var.dynamodb_deletion_protection_enabled
+  ttl {
+    attribute_name = "ttl"
+    enabled        = true
+  }
 }
