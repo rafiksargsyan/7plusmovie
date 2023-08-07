@@ -30,6 +30,7 @@ interface TextTranscodeSpecParam {
 interface CreateMovieTranscodingJobParam {
   movieId: string;
   mkvS3ObjectKey: string;
+  outputFolderKey: string;
   audioTranscodeSpecParams: AudioTranscodeSpecParam[];
   textTranscodeSpecParams: TextTranscodeSpecParam[];
   defaultAudioTrack: number | undefined;
@@ -39,14 +40,14 @@ interface CreateMovieTranscodingJobParam {
 export const handler = async (event: CreateMovieTranscodingJobParam): Promise<string> => {
   let audioTranscodeSpecParams = event.audioTranscodeSpecParams == undefined ? []
   : event.audioTranscodeSpecParams.map(_ => {
-    return { stream: _.stream, bitrate: _.bitrate, channels: _.channels, lang: new AudioLangCode(_.lang)}
+    return { stream: _.stream, bitrate: _.bitrate, channels: _.channels, lang: new AudioLangCode(_.lang) }
   });
   let textTranscodeSpecParams = event.textTranscodeSpecParams == undefined ? []
   : event.textTranscodeSpecParams.map(_ => {
     return { stream: _.stream, forced: _.forced, lang: new SubsLangCode(_.lang)}
   });
-  let movieTranscodingJob = new MovieTranscodingJob(false, event.movieId, event.mkvS3ObjectKey, audioTranscodeSpecParams,
-    textTranscodeSpecParams, event.defaultAudioTrack, event.defaultTextTrack);
+  let movieTranscodingJob = new MovieTranscodingJob(false, event.movieId, event.mkvS3ObjectKey, event.outputFolderKey,
+    audioTranscodeSpecParams, textTranscodeSpecParams, event.defaultAudioTrack, event.defaultTextTrack);
   
   await docClient.put({TableName: dynamodbMovieTableName, Item: movieTranscodingJob});
 

@@ -22,6 +22,7 @@ export class MovieTranscodingJob {
   private ttl: number;
   private movieId: string;
   private mkvS3ObjectKey: string;
+  private outputFolderKey: string;
   private audioTranscodeSpecs: AudioTranscodeSpec[];
   private textTranscodeSpecs: TextTranscodeSpec[];
   private defaultAudioTrack: number | undefined;
@@ -29,20 +30,21 @@ export class MovieTranscodingJob {
   private transcodingContextJobId: string;
 
   public constructor(createEmptyObject: boolean, movieId?: string,
-    mkvS3ObjectKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
+    mkvS3ObjectKey?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
     textTranscodeSpecs?: TextTranscodeSpec[], defaultAudioTrack?: number,
     defaultTextTrack?: number) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setMovieId(movieId);
       this.setMkvS3ObjectKey(mkvS3ObjectKey);
+      this.setOutputFolderKey(outputFolderKey)
       this.setAudioTranscodeSpecs(audioTranscodeSpecs);
       this.setTextTranscodeSpecs(textTranscodeSpecs);
       this.setDefaultAudioTrack(defaultAudioTrack);
       this.setDefaultTextTrack(defaultTextTrack);
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
-      this.ttl = (this.creationTime / 1000) + 5 * 24 * 60 * 60;
+      this.ttl = Math.round(this.creationTime / 1000) + 5 * 24 * 60 * 60;
     }
   }
 
@@ -58,6 +60,13 @@ export class MovieTranscodingJob {
       throw new InvalidMkvS3ObjectKeyError();
     }
     this.mkvS3ObjectKey = mkvS3ObjectKey;
+  }
+
+  private setOutputFolderKey(outputFolderKey: string | undefined) {
+    if (outputFolderKey == undefined || ! /\S/.test(outputFolderKey)) {
+      throw new InvalidOutputFolderKeyError();
+    }
+    this.outputFolderKey = outputFolderKey;
   }
 
   private setAudioTranscodeSpecs(audioTranscodeSpecs: AudioTranscodeSpec[] | undefined) {
@@ -114,3 +123,5 @@ class InvalidDefaultAudioTrackError extends Error {}
 class InvalidDefaultTextTrackError extends Error {}
 
 class InvalidTranscodingContextJobIdError extends Error {}
+
+class InvalidOutputFolderKeyError extends Error {}

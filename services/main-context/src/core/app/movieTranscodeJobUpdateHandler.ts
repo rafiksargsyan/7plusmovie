@@ -35,7 +35,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         };
         const invokeCommand = new InvokeCommand(transcodingJobParams);
         const response = await lambdaClient.send(invokeCommand);
-        
+        console.log(JSON.stringify(response));
       }
     }
   }
