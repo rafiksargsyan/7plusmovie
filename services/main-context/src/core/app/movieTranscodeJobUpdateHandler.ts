@@ -1,16 +1,5 @@
 import { Marshaller } from '@aws/dynamodb-auto-marshaller';
 import { DynamoDBStreamEvent } from 'aws-lambda';
-import algoliasearch from 'algoliasearch';
-import { SecretsManager } from '@aws-sdk/client-secrets-manager';
-import { v2 as cloudinary } from 'cloudinary';
-import { S3 } from '@aws-sdk/client-s3';
-import { MovieGenre, MovieGenres } from '../domain/MovieGenres';
-import { Person, Persons } from '../domain/Persons';
-import { DynamoDB } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
-import { Movie } from "../domain/Movie";
-import axios from 'axios';
-import { L8nLangCode } from '../domain/L8nLangCodes';
 import { MovieTranscodingJob } from '../domain/MovieTranscodingJob';
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 
