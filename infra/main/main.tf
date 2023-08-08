@@ -185,3 +185,20 @@ resource "aws_dynamodb_table" "movie_transcoding_job" {
     enabled        = true
   }
 }
+
+resource "aws_dynamodb_table" "transcoding_job" {
+  name     = "${local.deployment_id}-transcoding_job"
+  hash_key = "id"
+  attribute {
+    name = "id"
+    type = "S"
+  }
+  stream_enabled   = true
+  stream_view_type = "NEW_IMAGE"
+  billing_mode     = "PAY_PER_REQUEST"
+  deletion_protection_enabled = var.dynamodb_deletion_protection_enabled
+  ttl {
+    attribute_name = "ttl"
+    enabled        = true
+  }
+}

@@ -41,3 +41,11 @@ output "ddb_movie_transcoding_job_table_stream_arn" {
 output "ddb_movie_transcoding_job_table_name" {
   value = aws_dynamodb_table.movie_transcoding_job.name
 }
+
+output "ddb_transcoding_job_table_stream_arn" {
+  value = aws_dynamodb_table.transcoding_job.stream_arn
+}
+
+output "ddb_transcoding_job_table_name" {
+  value = aws_dynamodb_table.transcoding_job.name
+}
