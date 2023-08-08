@@ -4,7 +4,7 @@ import { MovieTranscodingJob } from "../domain/MovieTranscodingJob";
 import { AudioLangCode } from "../domain/AudioLangCodes";
 import { SubsLangCode } from "../domain/SubsLangCodes";
 
-const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME!;
+const dynamodbMovieTranscodingJobTableName = process.env.DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME!;
 
 const marshallOptions = {
   convertClassInstanceToMap: true
@@ -49,7 +49,7 @@ export const handler = async (event: CreateMovieTranscodingJobParam): Promise<st
   let movieTranscodingJob = new MovieTranscodingJob(false, event.movieId, event.mkvS3ObjectKey, event.outputFolderKey,
     audioTranscodeSpecParams, textTranscodeSpecParams, event.defaultAudioTrack, event.defaultTextTrack);
   
-  await docClient.put({TableName: dynamodbMovieTableName, Item: movieTranscodingJob});
+  await docClient.put({TableName: dynamodbMovieTranscodingJobTableName, Item: movieTranscodingJob});
 
   return movieTranscodingJob.id;
 };
