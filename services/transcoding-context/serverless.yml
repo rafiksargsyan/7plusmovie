@@ -57,6 +57,24 @@ functions:
     events:
       - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_MOVIE_STREAM_ARN}
 
+  githubTranscodingJobCompletionHandler:
+    handler: src/core/app/githubTranscodingJobCompletionHandler.handler
+    events:
+      - http:
+          integration: lambda
+          path: /githubTranscodingJobCompletionHandler
+          method: post
+          template:
+              application/json: '{ "todo" : $input.json(''$.originalLocale''),
+                                   "originalTitle" : $input.json(''$.originalTitle''),
+                                   "releaseYear" : $input.json(''$.releaseYear'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            name: githubWebhookAuthorizer
+              
+  githubWebhookAuthorizer:
+    handler: src/core/app/githubWebhookAuthorizer.handler
+ 
 plugins:
   - serverless-esbuild
 

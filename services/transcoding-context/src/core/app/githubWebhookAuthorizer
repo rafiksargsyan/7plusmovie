@@ -1,0 +1,24 @@
+const crypto = require('crypto');
+
+// Replace with your GitHub Webhook Secret
+const GITHUB_WEBHOOK_SECRET = 'your-github-webhook-secret';
+
+// Lambda Authorizer
+const authorize = (event, context, callback) => {
+    // Retrieve headers from the event
+    const headers = event.headers;
+    const signature = headers['X-Hub-Signature'];
+
+    // Get the payload from the event
+    const payload = event.body;
+
+    // Calculate the expected signature
+    const expectedSignature = `sha1=${crypto.createHmac('sha1', GITHUB_WEBHOOK_SECRET).update(payload).digest('hex')}`;
+
+    // Compare the received and expected signatures
+    if (crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) {
+        callback(null, generatePolicy('user', 'Allow', event.methodArn));
+    } else {
+        callback('Unauthorized');
+    }
+};
