@@ -51,24 +51,12 @@ functions:
 
   githubTranscodingJobCompletionHandler:
     handler: src/core/app/githubTranscodingJobCompletionHandler.handler
-    events:
-      - http:
-          integration: lambda
-          path: /githubTranscodingJobCompletionHandler
-          method: post
-          request:
-            template:
-              application/json: '$input.json(''$'')'
-              application/x-www-form-urlencoded: null
-          authorizer:
-            name: githubWebhookAuthorizer
-            type: request
-            identitySource: method.request.header.X-Hub-Signature
-              
-  githubWebhookAuthorizer:
-    handler: src/core/app/githubWebhookAuthorizer.handler
     environment:
       SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+    events:
+      - http:
+          path: /githubTranscodingJobCompletionHandler
+          method: post 
  
 plugins:
   - serverless-esbuild
