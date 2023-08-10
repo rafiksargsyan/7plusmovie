@@ -7,6 +7,8 @@ import * as crypto from 'crypto';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
+const githubWorkflowId = process.env.TRANSCODING_GITHUB_WORKFLOW_ID!;
+const OK = { statusCode: 200 };
 
 const secretsManager = new SecretsManager({});
 
@@ -30,7 +32,17 @@ export const handler = async (event: HandlerParam) => {
     throw new SignatureMismatchError();
   }
   const payloadObject = JSON.parse(payload);
-  console.log(payloadObject);
+  if (payloadObject?.workflow_run?.workflow_id !== Number(githubWorkflowId)) {
+    return OK;
+  }
+  const action = payloadObject?.action;
+  const status = payloadObject?.workflow_run?.status;
+  const conclusion = payloadObject?.workflow_run?.concluion;
+  const workflowRunId = payloadObject?.workflow_run?.id;
+  const runAttempt = payloadObject?.workflow_run?.run_attempt;
+  const rerunUrl = payloadObject?.workflow_run?.rerun_url;
+
+  return OK;
 };
 
 class InvalidContentTypeError extends Error {}

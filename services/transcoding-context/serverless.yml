@@ -52,6 +52,7 @@ functions:
   githubTranscodingJobCompletionHandler:
     handler: src/core/app/githubTranscodingJobCompletionHandler.handler
     environment:
+      TRANSCODING_GITHUB_WORKFLOW_ID: ${env:TRANSCODING_GITHUB_WORKFLOW_ID}
       SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
     events:
       - http:
