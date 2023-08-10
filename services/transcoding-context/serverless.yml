@@ -23,39 +23,31 @@ provider:
   logRetentionInDays: 1
 
 functions:
-  createMovie:
-    handler: src/core/app/createMovie.handler
+  createTranscodingJob:
+    handler: src/core/app/createTranscodingJob.handler
     environment:
-      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
-      ALGOLIA_APP_ID: ${env:ALGOLIA_APP_ID}
-      ALGOLIA_ALL_INDEX: ${env:ALGOLIA_ALL_INDEX}
-      ALGOLIA_SEARCH_ONLY_KEY: ${env:ALGOLIA_SEARCH_ONLY_KEY}
+      DYNAMODB_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TRANSCODING_JOB_TABLE_NAME}
     events:
       - http:
           integration: lambda
-          path: /createMovie
+          path: /createTranscodingJob
           method: post
           request:
             template:
-              application/json: '{ "originalLocale" : $input.json(''$.originalLocale''),
-                                   "originalTitle" : $input.json(''$.originalTitle''),
-                                   "releaseYear" : $input.json(''$.releaseYear'') }'
+              application/json: '{ "mkvS3ObjectKey" : $input.json(''$.mkvS3ObjectKey''),
+                                   "outputFolderKey" : $input.json(''$.outputFolderKey''),
+                                   "audioTranscodeSpecParams" : $input.json(''$.audioTranscodeSpecParams''),
+                                   "textTranscodeSpecParams" : $input.json(''$.textTranscodeSpecParams''),
+                                   "defaultAudioTrack" : $input.json(''$.defaultAudioTrack''),
+                                   "defaultTextTrack" : $input.json(''$.defaultTextTrack'') }'
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
-  movieUpdateHandler:
-    handler: src/core/app/movieUpdateHandler.handler
-    environment:
-      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
-      ALGOLIA_APP_ID: ${env:ALGOLIA_APP_ID}
-      ALGOLIA_ALL_INDEX: ${env:ALGOLIA_ALL_INDEX}
-      CLOUDINARY_CLOUD_NAME: ${env:CLOUDINARY_CLOUD_NAME}
-      CLOUDINARY_API_KEY: ${env:CLOUDINARY_API_KEY}
-      MEDIA_ASSETS_S3_BUCKET: ${env:MEDIA_ASSETS_S3_BUCKET}
-      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+  transcodingJobUpdateHandler:
+    handler: src/core/app/transcodingJobUpdateHandler.handler
     events:
-      - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_MOVIE_STREAM_ARN}
+      - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_TRANSCODING_JOB_STREAM_ARN}
 
   githubTranscodingJobCompletionHandler:
     handler: src/core/app/githubTranscodingJobCompletionHandler.handler
@@ -64,16 +56,19 @@ functions:
           integration: lambda
           path: /githubTranscodingJobCompletionHandler
           method: post
-          template:
-              application/json: '{ "todo" : $input.json(''$.originalLocale''),
-                                   "originalTitle" : $input.json(''$.originalTitle''),
-                                   "releaseYear" : $input.json(''$.releaseYear'') }'
+          request:
+            template:
+              application/json: '$input.json(''$'')'
               application/x-www-form-urlencoded: null
           authorizer:
             name: githubWebhookAuthorizer
+            type: request
+            identitySource: method.request.header.X-Hub-Signature
               
   githubWebhookAuthorizer:
     handler: src/core/app/githubWebhookAuthorizer.handler
+    environment:
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
  
 plugins:
   - serverless-esbuild

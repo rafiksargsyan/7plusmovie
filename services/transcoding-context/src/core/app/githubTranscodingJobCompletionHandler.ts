@@ -3,3 +3,10 @@
 // model. Basically we need infrastracture part that listens to github workflow run
 // event and calls application logic. We might also consider this with other handlers.
 
+interface HandlerParam {
+
+}
+
+const handler = async (event: HandlerParam) => {
+  console.log(JSON.stringify(event));
+};

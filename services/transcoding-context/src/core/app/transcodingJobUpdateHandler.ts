@@ -11,6 +11,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
     } else {
       let movieTranscodingJob = new TranscodingJob(true);
       Object.assign(movieTranscodingJob, marshaller.unmarshallItem(record.dynamodb?.NewImage!));
+      console.log(JSON.stringify(movieTranscodingJob));
       // Run github action
     }
   }
