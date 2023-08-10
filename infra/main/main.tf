@@ -202,3 +202,16 @@ resource "aws_dynamodb_table" "transcoding_job" {
     enabled        = true
   }
 }
+
+resource "aws_secretsmanager_secret" "transcoding_context_secrets" {
+  name = "${local.deployment_id}-trans-ctx-secrets"
+}
+
+resource "aws_secretsmanager_secret_version" "transcoding_context_secrets_version" {
+  secret_id     = aws_secretsmanager_secret.transcoding_context_secrets.id
+  secret_string = jsonencode(
+    tomap({
+      GITHUB_WEBHOOK_SECRET: var.github_webhook_secret
+    })
+  )
+}

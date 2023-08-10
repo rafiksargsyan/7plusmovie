@@ -39,3 +39,7 @@ variable "cookie_signing_private_key_base64_encoded" {
 variable "tmdb_api_key" {
   type = string
 }
+
+variable "github_webhook_secret" {
+  type = string
+}
