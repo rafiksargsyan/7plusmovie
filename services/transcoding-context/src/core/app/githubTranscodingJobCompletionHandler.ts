@@ -41,7 +41,13 @@ export const handler = async (event: HandlerParam) => {
   const workflowRunId = payloadObject?.workflow_run?.id;
   const runAttempt = payloadObject?.workflow_run?.run_attempt;
   const rerunUrl = payloadObject?.workflow_run?.rerun_url;
-
+  console.log(action);
+  console.log(status);
+  console.log(conclusion);
+  console.log(workflowRunId);
+  console.log(runAttempt);
+  console.log(rerunUrl);
+  
   return OK;
 };
 
