@@ -70,31 +70,32 @@ async function run(): Promise<void> {
 
     process.chdir(vodFolderAbsolutePath);
 
-    let shakaPackagerCommand = "shaka-packager ".concat(`in=${path.resolve(workdirAbsolutePath, "h264_main_540p_18.mp4")},stream=video,output=h264_main_540p_18.mp4 `)
-                                                .concat(`in=${path.resolve(workdirAbsolutePath, "h264_main_720p_18.mp4")},stream=video,output=h264_main_720p_18.mp4 `)
-                                                .concat(`in=${path.resolve(workdirAbsolutePath, "h264_high_1080p_19.mp4")},stream=video,output=h264_high_1080p_19.mp4 `);
+    let shakaPackagerCommand = "shaka-packager ";
+    shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, "h264_main_540p_18.mp4")},stream=video,output=h264_main_540p_18.mp4 `;
+    shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, "h264_main_720p_18.mp4")},stream=video,output=h264_main_720p_18.mp4 `;
+    shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, "h264_high_1080p_19.mp4")},stream=video,output=h264_high_1080p_19.mp4 `;
     
     audioTranscodeSpecs.forEach(_ => {
       const audioFileName = `aac_${_.channels}_${_.bitrate}_${AudioLangCodes[_.lang]['langTag']}.mp4`
       let hlsName: string = AudioLangCodes[_.lang]['displayName'];
-      if (_.channels === 6) hlsName = hlsName.concat(' (5.1)');
-      shakaPackagerCommand = shakaPackagerCommand.concat(`in=${path.resolve(workdirAbsolutePath, audioFileName)},stream=audio,output=${audioFileName},lang=${AudioLangCodes[_.lang]['langTag']}-x-${_.channels},hls_group_id=audio,hls_name='${hlsName}' `)
+      if (_.channels === 6) hlsName += ' (5.1)';
+      shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, audioFileName)},stream=audio,output=${audioFileName},lang=${AudioLangCodes[_.lang]['langTag']}-x-${_.channels},hls_group_id=audio,hls_name='${hlsName}' `;
     })
     
     textTranscodeSpecs.forEach(_ => {
       const textFileName = `${SubsLangCodes[_.lang]['langTag']}.vtt`
-      shakaPackagerCommand = shakaPackagerCommand.concat(`in=${path.resolve(workdirAbsolutePath, textFileName)},stream=text,output=${textFileName},lang=${SubsLangCodes[_.lang]['langTag']},hls_group_id=subtitle,hls_name='${SubsLangCodes[_.lang]['displayName']}' `);
+      shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, textFileName)},stream=text,output=${textFileName},lang=${SubsLangCodes[_.lang]['langTag']},hls_group_id=subtitle,hls_name='${SubsLangCodes[_.lang]['displayName']}' `;
     })
 
     if (defaultAudioTrack != undefined) {
-      shakaPackagerCommand = shakaPackagerCommand.concat(`--default-language ${AudioLangCodes[audioTranscodeSpecs[defaultAudioTrack].lang].langTag}-x-${audioTranscodeSpecs[defaultAudioTrack].channels} `)
+      shakaPackagerCommand += `--default-language ${AudioLangCodes[audioTranscodeSpecs[defaultAudioTrack].lang].langTag}-x-${audioTranscodeSpecs[defaultAudioTrack].channels} `;
     }
 
     if (defaultTextTrack != undefined) {
-      shakaPackagerCommand = shakaPackagerCommand.concat(`--default_text_language ${SubsLangCodes[textTranscodeSpecs[defaultTextTrack].lang].langTag} `);
+      shakaPackagerCommand += `--default_text_language ${SubsLangCodes[textTranscodeSpecs[defaultTextTrack].lang].langTag} `;
     }
 
-    shakaPackagerCommand = shakaPackagerCommand.concat("--mpd_output manifest.mpd --hls_master_playlist_output master.m3u8");
+    shakaPackagerCommand += "--mpd_output manifest.mpd --hls_master_playlist_output master.m3u8";
 
     execSync(`eval "${shakaPackagerCommand}"`);
 
@@ -104,16 +105,22 @@ async function run(): Promise<void> {
 
 
     textTranscodeSpecs.forEach(_ =>  {
+      const langTag = SubsLangCodes[_.lang]['langTag'];
+      const langDisplayName = SubsLangCodes[_.lang]['displayName'];
+      const command = `sed -i 's/.*contentType=\\"text\\".*lang=\\"${langTag}\\".*/&\\n      \\<Label\\>${langDisplayName}\\<\\/Label\\>/' manifest.mpd`;
+      execSync(command);
+    });
 
-    })
-    execSync("sed -i 's/.*contentType=\\\"text\\\".*lang=\\\"ru\\\".*/&\\n      \\<Label\\>Русский\\<\\/Label\\>/' manifest.mpd");
-    execSync("sed -i 's/.*contentType=\\\"text\\\".* lang=\\\"ru-x-forced\\\".*/&\\n      \\<Label\\>Русский (форсированный)\\<\\/Label\\>/' manifest.mpd");
-    execSync("sed -i 's/.*contentType=\\\"text\\\".*lang=\\\"en-US\\\".*/&\\n      \\<Label\\>English (US)\\<\\/Label\\>/' manifest.mpd");
-    execSync("sed -i 's/.*contentType=\\\"text\\\".* lang=\\\"en-US-x-forced\\\".*/&\\n      \\<Label\\>English (US) (forced)\\<\\/Label\\>/' manifest.mpd");
-    execSync("sed -i 's/.*contentType=\\\"text\\\".*lang=\\\"fr\\\".*/&\\n      \\<Label\\>Français\\<\\/Label\\>/' manifest.mpd");
-    execSync("sed -i 's/.*contentType=\\\"text\\\".*lang=\\\"ja\\\".*/&\\n      \\<Label\\>日本\\<\\/Label\\>/' manifest.mpd");
+    audioTranscodeSpecs.forEach(_ => {
+      const langTag = AudioLangCodes[_.lang]['langTag'] + `-x-${_.channels}`;
+      let langDisplayName = AudioLangCodes[_.lang]['displayName'];
+      if (_.channels === 6) {
+        langDisplayName += ' (5.1)';
+      }
+      const command = `sed -i 's/.*contentType=\\"audio\\".* lang=\\"${langTag}\\".*/&\\n      \\<Label\\>${langDisplayName}\\<\\/Label\\>/' manifest.mpd`;
+      execSync(command);
+    });
 
-    execSync()
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
   }
