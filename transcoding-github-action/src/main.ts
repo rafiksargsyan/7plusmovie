@@ -132,42 +132,30 @@ function transcodeSubsFromMkv(mkvFilePath: string, stream: number, lang: SubsLan
 }
 
 function transcodeAudioFromMkv(mkvFilePath: string, stream: number, channels: number, bitrate: string, lang: AudioLangCode) {
-  const command = `ffmpeg -i ${mkvFilePath} -map 0:${stream} -ac ${channels} -c aac -ab ${bitrate} -vn -sn aac_${channels}_${bitrate}_${AudioLangCodes[lang.code]['langTag']}.mp4 > /dev/null 2>&1`
+  let command = `ffmpeg -i ${mkvFilePath} -map 0:${stream} -ac ${channels} -c aac -ab ${bitrate} `;
+  command += `-vn -sn aac_${channels}_${bitrate}_${AudioLangCodes[lang.code]['langTag']}.mp4 > /dev/null 2>&1`;
   execSync(command);
 }
 
 function transcodeVideoFromMkv(mkvFilePath: string, stream: number, resolution: number) {
-  let level;
-  let profile;
-  let crf;
-  let maxRate;
-  let bufSize;
+  let level, profile, crf, maxRate, bufSize;
   switch (resolution) {
     case 540:
-      level = '3.1';
-      profile = 'main';
-      crf = 18;
-      maxRate = '1500k';
-      bufSize = '3000k';
+      level = '3.1'; profile = 'main'; crf = 18; maxRate = '1500k'; bufSize = '3000k';
       break;
     case 720:
-      level = '4.0';
-      profile = 'main';
-      crf = 18;
-      maxRate = '3000k';
-      bufSize = '6000k';
+      level = '4.0'; profile = 'main'; crf = 18; maxRate = '3000k'; bufSize = '6000k';
       break;
     case 1080:
-      level = '4.2';
-      profile = 'high';
-      crf = 19;
-      maxRate = '5000k';
-      bufSize = '10000k';
+      level = '4.2'; profile = 'high'; crf = 19; maxRate = '5000k'; bufSize = '10000k';
       break;
     default:
       throw new UnsupportedVideoResolutionError();
   }
-  const command = `ffmpeg -i ${mkvFilePath} -an -sn -c:v:${stream} libx264 -profile:v ${profile} -level:v ${level} -x264opts 'keyint=120:min-keyint=120:no-scenecut:open_gop=0' -map_chapters -1 -crf ${crf} -maxrate ${maxRate} -bufsize ${bufSize} -preset veryslow -tune film -vf "scale=-2:540,format=yuv420p"  h264_${profile}_${resolution}p_${crf}.mp4 > /dev/null 2>&1`  
+  let command = `ffmpeg -i ${mkvFilePath} -an -sn -c:v:${stream} libx264 -profile:v ${profile} -level:v ${level} `;
+  command += `-x264opts 'keyint=120:min-keyint=120:no-scenecut:open_gop=0' -map_chapters -1 -crf ${crf} -maxrate ${maxRate} `;
+  command += `-bufsize ${bufSize} -preset veryslow -tune film -vf "scale=-2:540,format=yuv420p" `;
+  command += `h264_${profile}_${resolution}p_${crf}.mp4 > /dev/null 2>&1`;  
   execSync(command);
 }
 
