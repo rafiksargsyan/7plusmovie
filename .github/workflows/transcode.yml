@@ -9,6 +9,9 @@ on:
       output_s3_folder_key:
         description: 'Transcoding output s3 folder key'  
         required: true
+      transcoding_spec_base64_encoded:
+        desription: 'Base 64 encoded transcoding specification'
+        required: true
 jobs:
   get-transcode-and-publish:
     runs-on: ubuntu
@@ -22,7 +25,8 @@ jobs:
       RAW_MEDIA_FILES_S3_BUCKET: raw-media-assets-prod-e1pjapsk
       MEDIA_FILES_S3_BUCKET: media-assets-prod-e1pjapsk
       TRANSCODING_OUTPUT_DIR_NAME: transcoding-output
-      OUTPUT_S3_FOLDER_KEY: output_s3_folder_key
+      OUTPUT_S3_FOLDER_KEY: ${{ github.event.inputs.output_s3_folder_key }}
+      TRANSCODING_SPEC_BASE64_ENCODED: ${{ github.event.inputs.transcoding_spec_base64_encoded }}
     steps:
       - name: Download MKV file
         run: |
@@ -36,9 +40,9 @@ jobs:
       - name: Transcode
         uses: ./transcode-github-action
         with:
-          mkvFilePath: "./${{ env.GITHUB_RUN_ID}}.mkv"
+          mkvFilePath: "./${{ env.GITHUB_RUN_ID }}.mkv"
           outputFolder: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}"
-          transcodingSpecBase64Encoded: ${ env.TRANSCODING_OUTPUT_DIR_NAME }
+          transcodingSpecBase64Encoded: ${{ env.TRANSCODING_SPEC_BASE64_ENCODED }}
 
       - name: Upload transcoding results
         run: |
