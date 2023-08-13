@@ -1,8 +1,13 @@
 import { Marshaller } from '@aws/dynamodb-auto-marshaller';
 import { DynamoDBStreamEvent } from 'aws-lambda';
 import { TranscodingJob } from '../domain/TranscodingJob';
+import { Octokit } from '@octokit/rest';
 
 const marshaller = new Marshaller();
+
+const octokit = new Octokit({
+  auth: process.env.GITHUB_PAT,
+});
 
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
   for (const record of event.Records) {
@@ -13,6 +18,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
       Object.assign(movieTranscodingJob, marshaller.unmarshallItem(record.dynamodb?.NewImage!));
       console.log(JSON.stringify(movieTranscodingJob));
       // Run github action
+      octokit.actions.createWorkflowDispatch
     }
   }
 }
