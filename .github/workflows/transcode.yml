@@ -1,0 +1,50 @@
+name: Transcode
+
+on:
+  workflow_dispatch:
+    inputs:
+      mkv_s3_object_key:
+        description: 'S3 path of mkv file to be transcoded'
+        required: true
+      output_s3_folder_key:
+        description: 'Transcoding output s3 folder key'  
+        required: true
+jobs:
+  get-transcode-and-publish:
+    runs-on: ubuntu
+    timeout-minutes: 1440
+    container: q62xyz/transcode-and-publish:1.2.0
+    env:
+      AWS_ACCESS_KEY_ID: AKIAQBPWKPTSTP3HL4UM
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: eu-west-3
+      MKV_S3_OBJECT_KEY: ${{ github.event.inputs.mkv_s3_object_key }}
+      RAW_MEDIA_FILES_S3_BUCKET: raw-media-assets-prod-e1pjapsk
+      MEDIA_FILES_S3_BUCKET: media-assets-prod-e1pjapsk
+      TRANSCODING_OUTPUT_DIR_NAME: transcoding-output
+      OUTPUT_S3_FOLDER_KEY: output_s3_folder_key
+    steps:
+      - name: Download MKV file
+        run: |
+          aws s3 cp s3://${RAW_MEDIA_FILES_S3_BUCKET}/${MKV_S3_OBJECT_KEY} ${GITHUB_RUN_ID}.mkv
+      
+      - name: Prepare transcoding output directory
+        run: |
+          mkdir -p ${TRANSCODING_OUTPUT_DIR_NAME}
+          rm -rf ${TRANSCODING_OUTPUT_DIR_NAME:?}/*
+
+      - name: Transcode
+        uses: ./transcode-github-action
+        with:
+          mkvFilePath: "./${{ env.GITHUB_RUN_ID}}.mkv"
+          outputFolder: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}"
+          transcodingSpecBase64Encoded: ${ env.TRANSCODING_OUTPUT_DIR_NAME }
+
+      - name: Upload transcoding results
+        run: |
+          aws s3 cp "${TRANSCODING_OUTPUT_DIR_NAME}" "s3://${MEDIA_FILES_S3_BUCKET}/${OUTPUT_S3_FOLDER_KEY}" --recursive  
+
+      - name: Cleanup
+        run:
+          rm *.mkv
+    
