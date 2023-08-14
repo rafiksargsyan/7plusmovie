@@ -212,6 +212,7 @@ resource "aws_secretsmanager_secret_version" "transcoding_context_secrets_versio
   secret_string = jsonencode(
     tomap({
       GITHUB_WEBHOOK_SECRET: var.github_webhook_secret
+      GITHUB_PAT: var.github_pat
     })
   )
 }

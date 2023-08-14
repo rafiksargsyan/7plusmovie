@@ -43,3 +43,7 @@ variable "tmdb_api_key" {
 variable "github_webhook_secret" {
   type = string
 }
+
+variable "github_pat" {
+  type = string
+}
