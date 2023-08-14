@@ -17,6 +17,7 @@ interface TextTranscodeSpec {
 
 export class TranscodingJob {
   public readonly id: string;
+  private githubWorkflowRunId: number;
   private creationTime: number;
   private lastUpdateTime: number;
   private ttl: number;
@@ -85,6 +86,13 @@ export class TranscodingJob {
     }
     this.defaultTextTrack = defaultTextTrack;
   }
+
+  public setGithubWorkflowRunId(githubWorkflowRunId: number | undefined) {
+    if (githubWorkflowRunId == undefined) {
+      throw new InvalidGithubWorkflowRunIdError();
+    }
+    this.githubWorkflowRunId = githubWorkflowRunId;
+  }
 }
 
 class InvalidMkvS3ObjectKeyError extends Error {}
@@ -98,3 +106,5 @@ class InvalidDefaultAudioTrackError extends Error {}
 class InvalidDefaultTextTrackError extends Error {}
 
 class InvalidOutputFolderKeyError extends Error {}
+
+class InvalidGithubWorkflowRunIdError extends Error {}
