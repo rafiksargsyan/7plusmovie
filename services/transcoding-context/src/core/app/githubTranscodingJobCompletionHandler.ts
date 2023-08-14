@@ -47,7 +47,9 @@ export const handler = async (event: HandlerParam) => {
   console.log(workflowRunId);
   console.log(runAttempt);
   console.log(rerunUrl);
-  
+  if (status == 'completed' && conclusion == 'success') {
+    
+  } 
   return OK;
 };
 
