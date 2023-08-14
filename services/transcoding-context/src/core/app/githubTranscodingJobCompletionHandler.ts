@@ -5,12 +5,15 @@
 
 import * as crypto from 'crypto';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
+import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const githubWorkflowId = process.env.TRANSCODING_GITHUB_WORKFLOW_ID!;
+const lambdaHook = process.env.LAMBDA_HOOK!;
 const OK = { statusCode: 200 };
 
 const secretsManager = new SecretsManager({});
+const lambdaClient = new LambdaClient({});
 
 interface HandlerParam {
   headers: { [key: string]: string };
@@ -48,7 +51,14 @@ export const handler = async (event: HandlerParam) => {
   console.log(runAttempt);
   console.log(rerunUrl);
   if (status == 'completed' && conclusion == 'success') {
-    
+    const transcodingJobParams = {
+      FunctionName: lambdaHook,
+      InvocationType: 'RequestResponse',
+      Payload: JSON.stringify({ transcodingContextJobId: workflowRunId })
+    };
+    const invokeCommand = new InvokeCommand(transcodingJobParams);
+    const response = await lambdaClient.send(invokeCommand);
+    console.log(JSON.stringify(response));
   } 
   return OK;
 };
