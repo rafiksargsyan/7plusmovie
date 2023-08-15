@@ -1,6 +1,68 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 707:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AudioLangCode = exports.AudioLangCodes = void 0;
+exports.AudioLangCodes = {
+    EN: { lang: "en", langTag: "en", displayName: "English" },
+    EN_US: { lang: "en", langTag: "en-US", displayName: "English (US)" },
+    EN_GB: { lang: "en", langTag: "en-GB", displayName: "English (GB)" },
+    RU: { lang: "ru", langTag: "ru", displayName: "Русский" },
+    FR: { lang: "fr", langTag: "fr", displayName: "Français" },
+    JA: { lang: "ja", langTag: "ja", displayName: "日本" }
+};
+class AudioLangCode {
+    constructor(code) {
+        if (!(code in exports.AudioLangCodes)) {
+            throw new InvalidAudioLangCodeError();
+        }
+        this.code = code;
+    }
+}
+exports.AudioLangCode = AudioLangCode;
+class InvalidAudioLangCodeError extends Error {
+}
+
+
+/***/ }),
+
+/***/ 466:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubsLangCode = exports.SubsLangCodes = void 0;
+exports.SubsLangCodes = {
+    EN: { lang: "en", langTag: "en", displayName: "English" },
+    EN_US: { lang: "en", langTag: "en-US", displayName: "English (US)" },
+    EN_GB: { lang: "en", langTag: "en-GB", displayName: "English (GB)" },
+    RU: { lang: "ru", langTag: "ru", displayName: "Русский" },
+    RU_FORCED: { lang: "ru", langTag: "ru-x-forced", displayName: "Русский (форсированный)" },
+    EN_US_FORCED: { lang: "en", langTag: "en-US-x-forced", displayName: "English (US) (forced)" },
+    FR: { lang: "fr", langTag: "fr", displayName: "Français" },
+    JA: { lang: "ja", langTag: "ja", displayName: "日本" }
+};
+class SubsLangCode {
+    constructor(code) {
+        if (!(code in exports.SubsLangCodes)) {
+            throw new InvalidSubsLangCodeError();
+        }
+        this.code = code;
+    }
+}
+exports.SubsLangCode = SubsLangCode;
+class InvalidSubsLangCodeError extends Error {
+}
+
+
+/***/ }),
+
 /***/ 109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -38,18 +100,103 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
-const wait_1 = __nccwpck_require__(817);
+const path_1 = __importDefault(__nccwpck_require__(17));
+const fs_1 = __importDefault(__nccwpck_require__(147));
+const child_process_1 = __nccwpck_require__(81);
+const SubsLangCodes_1 = __nccwpck_require__(466);
+const AudioLangCodes_1 = __nccwpck_require__(707);
+const WORKING_DIR_NAME = '.transcoding-job-work-dir';
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const ms = core.getInput('milliseconds');
-            core.debug(`Waiting ${ms} milliseconds ...`); // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
-            core.debug(new Date().toTimeString());
-            yield (0, wait_1.wait)(parseInt(ms, 10));
-            core.debug(new Date().toTimeString());
-            core.setOutput('time', new Date().toTimeString());
+            const mkvFilePath = core.getInput('mkvFilePath');
+            const outputFolder = core.getInput('outputFolder');
+            const transcodingSpecBase64Encoded = core.getInput('transcodingSpecBase64Encoded');
+            const transcodingSpec = JSON.parse(Buffer.from(transcodingSpecBase64Encoded, "base64").toString());
+            // TODO: Get transcoding spec json schema from CDN and validate
+            const mkvFileAbsolutePath = path_1.default.resolve(mkvFilePath);
+            const outputFolderAbsolutePath = path_1.default.resolve(outputFolder);
+            if (!fs_1.default.existsSync(WORKING_DIR_NAME)) {
+                fs_1.default.mkdirSync(WORKING_DIR_NAME);
+            }
+            else {
+                const files = fs_1.default.readdirSync(WORKING_DIR_NAME);
+                for (const file of files) {
+                    const filePath = path_1.default.join(WORKING_DIR_NAME, file);
+                    fs_1.default.unlinkSync(filePath);
+                }
+            }
+            const workdirAbsolutePath = path_1.default.resolve(WORKING_DIR_NAME);
+            process.chdir(WORKING_DIR_NAME);
+            const vodFolderAbsolutePath = path_1.default.resolve(outputFolderAbsolutePath, '/vod');
+            fs_1.default.mkdirSync(vodFolderAbsolutePath);
+            const subtitlesFolderAbsolutePath = path_1.default.resolve(outputFolderAbsolutePath, '/subtitles');
+            fs_1.default.mkdirSync(subtitlesFolderAbsolutePath);
+            transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 540);
+            transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 720);
+            transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 1080);
+            let audioTranscodeSpecs = transcodingSpec['audio'];
+            if (audioTranscodeSpecs == undefined)
+                audioTranscodeSpecs = [];
+            let textTranscodeSpecs = transcodingSpec['text'];
+            if (textTranscodeSpecs == undefined)
+                textTranscodeSpecs = [];
+            const defaultAudioTrack = transcodingSpec['defaultAudioTrack'];
+            const defaultTextTrack = transcodingSpec['defaultTextTrack'];
+            audioTranscodeSpecs.forEach(_ => {
+                transcodeAudioFromMkv(mkvFileAbsolutePath, _.stream, _.channels, _.bitrate, new AudioLangCodes_1.AudioLangCode(_.lang));
+            });
+            textTranscodeSpecs.forEach(_ => {
+                transcodeSubsFromMkv(mkvFileAbsolutePath, _.stream, new SubsLangCodes_1.SubsLangCode(_.lang));
+            });
+            (0, child_process_1.execSync)(`cp ./*.vtt ${subtitlesFolderAbsolutePath}`);
+            process.chdir(vodFolderAbsolutePath);
+            let shakaPackagerCommand = "shaka-packager ";
+            shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, "h264_main_540p_18.mp4")},stream=video,output=h264_main_540p_18.mp4 `;
+            shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, "h264_main_720p_18.mp4")},stream=video,output=h264_main_720p_18.mp4 `;
+            shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, "h264_high_1080p_19.mp4")},stream=video,output=h264_high_1080p_19.mp4 `;
+            audioTranscodeSpecs.forEach(_ => {
+                const audioFileName = `aac_${_.channels}_${_.bitrate}_${AudioLangCodes_1.AudioLangCodes[_.lang]['langTag']}.mp4`;
+                let hlsName = AudioLangCodes_1.AudioLangCodes[_.lang]['displayName'];
+                if (_.channels === 6)
+                    hlsName += ' (5.1)';
+                shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, audioFileName)},stream=audio,output=${audioFileName},lang=${AudioLangCodes_1.AudioLangCodes[_.lang]['langTag']}-x-${_.channels},hls_group_id=audio,hls_name='${hlsName}' `;
+            });
+            textTranscodeSpecs.forEach(_ => {
+                const textFileName = `${SubsLangCodes_1.SubsLangCodes[_.lang]['langTag']}.vtt`;
+                shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, textFileName)},stream=text,output=${textFileName},lang=${SubsLangCodes_1.SubsLangCodes[_.lang]['langTag']},hls_group_id=subtitle,hls_name='${SubsLangCodes_1.SubsLangCodes[_.lang]['displayName']}' `;
+            });
+            if (defaultAudioTrack != undefined) {
+                shakaPackagerCommand += `--default-language ${AudioLangCodes_1.AudioLangCodes[audioTranscodeSpecs[defaultAudioTrack].lang].langTag}-x-${audioTranscodeSpecs[defaultAudioTrack].channels} `;
+            }
+            if (defaultTextTrack != undefined) {
+                shakaPackagerCommand += `--default_text_language ${SubsLangCodes_1.SubsLangCodes[textTranscodeSpecs[defaultTextTrack].lang].langTag} `;
+            }
+            shakaPackagerCommand += "--mpd_output manifest.mpd --hls_master_playlist_output master.m3u8";
+            (0, child_process_1.execSync)(`eval "${shakaPackagerCommand}"`);
+            (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.vtt');
+            (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.mpd');
+            (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.m3u8');
+            textTranscodeSpecs.forEach(_ => {
+                const langTag = SubsLangCodes_1.SubsLangCodes[_.lang]['langTag'];
+                const langDisplayName = SubsLangCodes_1.SubsLangCodes[_.lang]['displayName'];
+                const command = `sed -i 's/.*contentType=\\"text\\".*lang=\\"${langTag}\\".*/&\\n      \\<Label\\>${langDisplayName}\\<\\/Label\\>/' manifest.mpd`;
+                (0, child_process_1.execSync)(command);
+            });
+            audioTranscodeSpecs.forEach(_ => {
+                const langTag = AudioLangCodes_1.AudioLangCodes[_.lang]['langTag'] + `-x-${_.channels}`;
+                let langDisplayName = AudioLangCodes_1.AudioLangCodes[_.lang]['displayName'];
+                if (_.channels === 6) {
+                    langDisplayName += ' (5.1)';
+                }
+                const command = `sed -i 's/.*contentType=\\"audio\\".* lang=\\"${langTag}\\".*/&\\n      \\<Label\\>${langDisplayName}\\<\\/Label\\>/' manifest.mpd`;
+                (0, child_process_1.execSync)(command);
+            });
         }
         catch (error) {
             if (error instanceof Error)
@@ -57,38 +204,52 @@ function run() {
         }
     });
 }
-run();
-
-
-/***/ }),
-
-/***/ 817:
-/***/ (function(__unused_webpack_module, exports) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.wait = void 0;
-function wait(milliseconds) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(resolve => {
-            if (isNaN(milliseconds)) {
-                throw new Error('milliseconds not a number');
-            }
-            setTimeout(() => resolve('done!'), milliseconds);
-        });
-    });
+function transcodeSubsFromMkv(mkvFilePath, stream, lang) {
+    const command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${SubsLangCodes_1.SubsLangCodes[lang.code]['langTag']}.vtt > /dev/null 2>&1`;
+    (0, child_process_1.execSync)(command);
 }
-exports.wait = wait;
+function transcodeAudioFromMkv(mkvFilePath, stream, channels, bitrate, lang) {
+    let command = `ffmpeg -i ${mkvFilePath} -map 0:${stream} -ac ${channels} -c aac -ab ${bitrate} `;
+    command += `-vn -sn aac_${channels}_${bitrate}_${AudioLangCodes_1.AudioLangCodes[lang.code]['langTag']}.mp4 > /dev/null 2>&1`;
+    (0, child_process_1.execSync)(command);
+}
+function transcodeVideoFromMkv(mkvFilePath, stream, resolution) {
+    let level, profile, crf, maxRate, bufSize;
+    switch (resolution) {
+        case 540:
+            level = '3.1';
+            profile = 'main';
+            crf = 18;
+            maxRate = '1500k';
+            bufSize = '3000k';
+            break;
+        case 720:
+            level = '4.0';
+            profile = 'main';
+            crf = 18;
+            maxRate = '3000k';
+            bufSize = '6000k';
+            break;
+        case 1080:
+            level = '4.2';
+            profile = 'high';
+            crf = 19;
+            maxRate = '5000k';
+            bufSize = '10000k';
+            break;
+        default:
+            throw new UnsupportedVideoResolutionError();
+    }
+    let command = `ffmpeg -i ${mkvFilePath} -an -sn -c:v:${stream} libx264 -profile:v ${profile} -level:v ${level} `;
+    command += `-x264opts 'keyint=120:min-keyint=120:no-scenecut:open_gop=0' -map_chapters -1 -crf ${crf} -maxrate ${maxRate} `;
+    command += `-bufsize ${bufSize} -preset veryslow -tune film -vf "scale=-2:540,format=yuv420p" `;
+    command += `h264_${profile}_${resolution}p_${crf}.mp4 > /dev/null 2>&1`;
+    (0, child_process_1.execSync)(command);
+}
+run();
+class UnsupportedVideoResolutionError extends Error {
+}
+;
 
 
 /***/ }),
@@ -2785,6 +2946,14 @@ exports["default"] = _default;
 
 "use strict";
 module.exports = require("assert");
+
+/***/ }),
+
+/***/ 81:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("child_process");
 
 /***/ }),
 
