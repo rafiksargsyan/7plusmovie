@@ -70,17 +70,11 @@ export class MovieTranscodingJob {
   }
 
   private setAudioTranscodeSpecs(audioTranscodeSpecs: AudioTranscodeSpec[] | undefined) {
-    if (audioTranscodeSpecs == undefined || audioTranscodeSpecs.length == 0) {
-      throw new InvalidAudioTranscodeSpecsError();
-    }
-    this.audioTranscodeSpecs = audioTranscodeSpecs;
+    this.audioTranscodeSpecs = audioTranscodeSpecs !== undefined ? audioTranscodeSpecs : [];
   }
 
   private setTextTranscodeSpecs(textTranscodeSpecs: TextTranscodeSpec[] | undefined) {
-    if (textTranscodeSpecs == undefined || textTranscodeSpecs.length == 0) {
-      throw new InvalidTextTranscodeSpecsError();
-    }
-    this.textTranscodeSpecs = textTranscodeSpecs;
+    this.textTranscodeSpecs = textTranscodeSpecs !== undefined ? textTranscodeSpecs : [];
   }
 
   private setDefaultAudioTrack(defaultAudioTrack: number | undefined) {
@@ -109,10 +103,6 @@ export class MovieTranscodingJob {
 class InvalidMovieIdError extends Error {}
 
 class InvalidMkvS3ObjectKeyError extends Error {}
-
-class InvalidAudioTranscodeSpecsError extends Error {}
-
-class InvalidTextTranscodeSpecsError extends Error {}
 
 class InvalidDefaultAudioTrackError extends Error {}
 
