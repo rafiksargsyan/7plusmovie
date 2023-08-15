@@ -306,7 +306,8 @@ functions:
   movieTranscodingJobUpdateHandler:
     handler: src/core/app/movieTranscodingJobUpdateHandler.handler
     environment:
-      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      TRANSCODING_CONTEXT_JOB_CREATION_LAMBDA_NAME: ${env:TRANSCODING_CONTEXT_JOB_CREATION_LAMBDA_NAME}
+      DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME}
     events:
       - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_MOVIE_TRANSCODING_JOB_STREAM_ARN}
 

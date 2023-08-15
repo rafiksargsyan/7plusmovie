@@ -104,10 +104,6 @@ export class MovieTranscodingJob {
     this.transcodingContextJobId = transcodingContextJobId;
     this.lastUpdateTime = Date.now();  
   }
-
-  public getTranscodingContextJobId() {
-    return this.transcodingContextJobId;
-  }
 }
 
 class InvalidMovieIdError extends Error {}

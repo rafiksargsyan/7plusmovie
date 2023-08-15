@@ -42,43 +42,46 @@ interface MovieTranscodingJobRead {
   outputFolderKey?: string;
   defaultAudioTrack?: number | undefined;
   defaultTextTrack?: number | undefined;
+  transcodingContextJobId?: string | undefined;
 }
 
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
-  for (const record of event.Records) {
-    if (record.eventName === 'REMOVE') {
-      // For now nothing to do in case of item removal
-    } else {
-      let movieTranscodingJob = new MovieTranscodingJob(true);
-      let item = marshaller.unmarshallItem(record.dynamodb?.NewImage!);
-      Object.assign(movieTranscodingJob, item);
-      let movieTranscodingJobRead: MovieTranscodingJobRead = item;
-      if (movieTranscodingJob.getTranscodingContextJobId() == undefined) {
-        // Create transcoding job in transcoding context and get the id of the job
-        const transcodingJobParams = {
-          mkvS3ObjectKey: movieTranscodingJobRead.mkvS3ObjectKey,
-          outputFolderKey: movieTranscodingJobRead.outputFolderKey,
-          audioTranscodeSpecParams: movieTranscodingJobRead.audioTranscodeSpecs?.map(_ => ({ ..._, lang: _.lang.code })),
-          textTranscodeSpecParams: movieTranscodingJobRead.textTranscodeSpecs?.map(_ => ({ ..._, lang: _.lang.code })),
-          defaultAudioTrack: movieTranscodingJobRead.defaultAudioTrack,
-          defaultTextTrack: movieTranscodingJobRead.defaultTextTrack
+  try {
+    for (const record of event.Records) {
+      if (record.eventName === 'REMOVE') {
+        // For now nothing to do in case of item removal
+      } else {
+        let movieTranscodingJob = new MovieTranscodingJob(true);
+        let item = marshaller.unmarshallItem(record.dynamodb?.NewImage!);
+        Object.assign(movieTranscodingJob, item);
+        let movieTranscodingJobRead: MovieTranscodingJobRead = item;
+        if (movieTranscodingJobRead.transcodingContextJobId == undefined) {
+          const transcodingJobParams = {
+            mkvS3ObjectKey: movieTranscodingJobRead.mkvS3ObjectKey,
+            outputFolderKey: movieTranscodingJobRead.outputFolderKey,
+            audioTranscodeSpecParams: movieTranscodingJobRead.audioTranscodeSpecs?.map(_ => ({ ..._, lang: _.lang.code })),
+            textTranscodeSpecParams: movieTranscodingJobRead.textTranscodeSpecs?.map(_ => ({ ..._, lang: _.lang.code })),
+            defaultAudioTrack: movieTranscodingJobRead.defaultAudioTrack,
+            defaultTextTrack: movieTranscodingJobRead.defaultTextTrack
+          }
+          const lambdaParams = {
+            FunctionName: transcodingContextJobCreationLambdaName,
+            InvocationType: 'RequestResponse',
+            Payload: JSON.stringify(transcodingJobParams)
+          };
+          const invokeCommand = new InvokeCommand(lambdaParams);
+          const response = await lambdaClient.send(invokeCommand);
+          if (response.Payload === undefined) {
+            throw new TranscodingContextResponseEmptyPayloadError();
+          }
+          movieTranscodingJob.setTranscodingContextJobId(response.Payload.toString());
+          await docClient.put({TableName: dynamodbMovieTranscodingJobTableName, Item: movieTranscodingJob});
         }
-        const lambdaParams = {
-          FunctionName: transcodingContextJobCreationLambdaName,
-          InvocationType: 'RequestResponse',
-          Payload: JSON.stringify(transcodingJobParams)
-        };
-        const invokeCommand = new InvokeCommand(lambdaParams);
-        const response = await lambdaClient.send(invokeCommand);
-        console.log(JSON.stringify(response));
-        if (response.Payload?.toString() === undefined) {
-            throw new FailedToCreateTranscodingJobError();
-        }
-        movieTranscodingJob.setTranscodingContextJobId(response.Payload?.toString());
-        await docClient.put({TableName: dynamodbMovieTranscodingJobTableName, Item: movieTranscodingJob});
       }
     }
+  } catch (e) {
+    console.error(e);
   }
 }
 
-class FailedToCreateTranscodingJobError extends Error {};
+class TranscodingContextResponseEmptyPayloadError extends Error {};
