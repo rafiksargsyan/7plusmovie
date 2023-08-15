@@ -19,6 +19,7 @@ provider:
         - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
         - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
         - "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+        - "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
   stage: ${opt:stage}
   logRetentionInDays: 1
 
@@ -46,6 +47,13 @@ functions:
 
   transcodingJobUpdateHandler:
     handler: src/core/app/transcodingJobUpdateHandler.handler
+    environment:
+      DYNAMODB_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TRANSCODING_JOB_TABLE_NAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      TRANSCODING_WORKFLOW_FILE_NAME: ${env:TRANSCODING_WORKFLOW_FILE_NAME}
+      GITHUB_OWNER: ${env:GITHUB_OWNER}
+      GITHUB_REPO: ${env:GITHUB_REPO}
+      GIT_REF: ${env:GIT_REF}
     events:
       - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_TRANSCODING_JOB_STREAM_ARN}
 
@@ -54,6 +62,7 @@ functions:
     environment:
       TRANSCODING_GITHUB_WORKFLOW_ID: ${env:TRANSCODING_GITHUB_WORKFLOW_ID}
       SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      LAMBDA_HOOK: ${env:LAMBDA_HOOK}
     events:
       - http:
           path: /githubTranscodingJobCompletionHandler

@@ -36,6 +36,7 @@ export const handler = async (event: HandlerParam) => {
   }
   const payloadObject = JSON.parse(payload);
   if (payloadObject?.workflow_run?.workflow_id !== Number(githubWorkflowId)) {
+    console.log(`workflow_id = ${payloadObject?.workflow_run?.workflow_id}`);
     return OK;
   }
   const action = payloadObject?.action;

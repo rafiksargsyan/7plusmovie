@@ -19,6 +19,7 @@ provider:
         - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
         - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
         - "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+        - "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
   stage: ${opt:stage}
   logRetentionInDays: 1
 
@@ -303,7 +304,7 @@ functions:
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
   
-  movieTranscodingJobUpdateHandler:
+  movieTranscoddingJobUpdateHandler:
     handler: src/core/app/movieTranscodingJobUpdateHandler.handler
     environment:
       TRANSCODING_CONTEXT_JOB_CREATION_LAMBDA_NAME: ${env:TRANSCODING_CONTEXT_JOB_CREATION_LAMBDA_NAME}

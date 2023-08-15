@@ -37,12 +37,10 @@ interface CreateTranscodingJobParam {
 }
 
 export const handler = async (event: CreateTranscodingJobParam): Promise<string> => {
-  let audioTranscodeSpecParams = event.audioTranscodeSpecParams == undefined ? undefined
-  : event.audioTranscodeSpecParams.map(_ => {
+  let audioTranscodeSpecParams = event.audioTranscodeSpecParams?.map(_ => {
     return { stream: _.stream, bitrate: _.bitrate, channels: _.channels, lang: new AudioLangCode(_.lang) }
   });
-  let textTranscodeSpecParams = event.textTranscodeSpecParams == undefined ? undefined
-  : event.textTranscodeSpecParams.map(_ => {
+  let textTranscodeSpecParams = event.textTranscodeSpecParams?.map(_ => {
     return { stream: _.stream, forced: _.forced, lang: new SubsLangCode(_.lang)}
   });
   let transcodingJob = new TranscodingJob(false, event.mkvS3ObjectKey, event.outputFolderKey,
