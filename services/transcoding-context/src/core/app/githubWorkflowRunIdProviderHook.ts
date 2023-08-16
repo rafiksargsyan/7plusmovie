@@ -12,7 +12,6 @@ import { TranscodingJob } from '../domain/TranscodingJob';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const dynamodbTranscodingJobTableName = process.env.DYNAMODB_TRANSCODING_JOB_TABLE_NAME!;
-const lambdaHook = process.env.LAMBDA_HOOK!;
 const OK = { statusCode: 200 };
 
 const secretsManager = new SecretsManager({});

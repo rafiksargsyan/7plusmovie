@@ -92,6 +92,7 @@ export class TranscodingJob {
       throw new InvalidGithubWorkflowRunIdError();
     }
     this.githubWorkflowRunId = githubWorkflowRunId;
+    this.lastUpdateTime = Date.now();
   }
 }
 

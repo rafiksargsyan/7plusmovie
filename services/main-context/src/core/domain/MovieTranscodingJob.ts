@@ -96,7 +96,7 @@ export class MovieTranscodingJob {
       throw new InvalidTranscodingContextJobIdError();
     }
     this.transcodingContextJobId = transcodingContextJobId;
-    this.lastUpdateTime = Date.now();  
+    this.lastUpdateTime = Date.now();
   }
 }
 

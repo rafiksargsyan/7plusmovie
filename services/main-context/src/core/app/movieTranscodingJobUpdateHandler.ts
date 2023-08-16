@@ -53,7 +53,9 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
       } else {
         let movieTranscodingJob = new MovieTranscodingJob(true);
         let item = marshaller.unmarshallItem(record.dynamodb?.NewImage!);
+        console.log(JSON.stringify(item));
         Object.assign(movieTranscodingJob, item);
+        console.log(JSON.stringify(movieTranscodingJob));
         let movieTranscodingJobRead: MovieTranscodingJobRead = item;
         if (movieTranscodingJobRead.transcodingContextJobId == undefined) {
           const transcodingJobParams = {
@@ -76,6 +78,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
           }
           const payloadStr = Buffer.from(response.Payload).toString();
           movieTranscodingJob.setTranscodingContextJobId(payloadStr.substring(1, payloadStr.length - 1));
+          console.log(JSON.stringify(movieTranscodingJob));
           await docClient.put({TableName: dynamodbMovieTranscodingJobTableName, Item: movieTranscodingJob});
         }
       }
