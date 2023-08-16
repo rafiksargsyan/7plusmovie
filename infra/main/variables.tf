@@ -47,3 +47,7 @@ variable "github_webhook_secret" {
 variable "github_pat" {
   type = string
 }
+
+variable "workflow_run_id_provider_hook_secret" {
+  type = string
+}

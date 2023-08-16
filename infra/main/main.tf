@@ -213,6 +213,7 @@ resource "aws_secretsmanager_secret_version" "transcoding_context_secrets_versio
     tomap({
       GITHUB_WEBHOOK_SECRET: var.github_webhook_secret
       GITHUB_PAT: var.github_pat
+      WORKFLOW_RUN_ID_PROVIDER_HOOK_SECRET: var.workflow_run_id_provider_hook_secret
     })
   )
 }
