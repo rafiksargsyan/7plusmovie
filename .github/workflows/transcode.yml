@@ -45,7 +45,7 @@ jobs:
       - name: Transcode
         uses: ./transcoding-github-action
         with:
-          mkvFilePath: "./${{ env.GITHUB_RUN_ID }}.mkv"
+          mkvFilePath: "./${{ github.run_id }}.mkv"
           outputFolder: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}"
           transcodingSpecBase64Encoded: ${{ env.TRANSCODING_SPEC_BASE64_ENCODED }}
 
