@@ -28,6 +28,11 @@ jobs:
       OUTPUT_S3_FOLDER_KEY: ${{ github.event.inputs.output_s3_folder_key }}
       TRANSCODING_SPEC_BASE64_ENCODED: ${{ github.event.inputs.transcoding_spec_base64_encoded }}
     steps:
+      - uses: actions/checkout@v3
+        with:
+          sparse-checkout: |
+            transcoding-github-action
+
       - name: Download MKV file
         run: |
           aws s3 cp s3://${RAW_MEDIA_FILES_S3_BUCKET}/${MKV_S3_OBJECT_KEY} ${GITHUB_RUN_ID}.mkv
