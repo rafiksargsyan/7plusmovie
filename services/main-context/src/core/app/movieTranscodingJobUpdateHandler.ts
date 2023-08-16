@@ -74,7 +74,8 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
           if (response.Payload === undefined) {
             throw new TranscodingContextResponseEmptyPayloadError();
           }
-          movieTranscodingJob.setTranscodingContextJobId(response.Payload.toString());
+          const payloadStr = Buffer.from(response.Payload).toString();
+          movieTranscodingJob.setTranscodingContextJobId(payloadStr.substring(1, payloadStr.length - 1));
           await docClient.put({TableName: dynamodbMovieTranscodingJobTableName, Item: movieTranscodingJob});
         }
       }

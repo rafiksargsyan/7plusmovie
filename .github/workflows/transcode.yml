@@ -12,10 +12,9 @@ on:
       transcoding_spec_base64_encoded:
         desription: 'Base 64 encoded transcoding specification'
         required: true
-  pull_request:
 jobs:
   get-transcode-and-publish:
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     timeout-minutes: 1440
     container: q62xyz/transcode-and-publish:1.2.0
     env:
