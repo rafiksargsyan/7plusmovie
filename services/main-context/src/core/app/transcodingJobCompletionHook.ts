@@ -53,7 +53,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     Key: { 'id':  movieTranscodingJobRead.movieId }
   } as const;
   let movieData = await docClient.get(queryParams);
-  if (movieData === undefined || movieData.Item === undefined) {
+  if (movieData == undefined || movieData.Item == undefined) {
     throw new FailedToGetMovieError();
   }
   let movie = new Movie(true);

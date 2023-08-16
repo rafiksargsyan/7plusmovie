@@ -65,7 +65,7 @@ export const handler = async (event: HandlerParam) => {
     ExpressionAttributeValues: { ':value': workflowRunId }
   } as const;
   let data = await docClient.scan(scanParams);
-  if (data === undefined || data.Items === undefined || data.Items.length == 0) {
+  if (data == undefined || data.Items == undefined || data.Items.length == 0) {
     throw new FailedToGetTranscodingJobError();
   }
   let transcodingJobRead: TranscodingJobRead = {};
@@ -79,7 +79,6 @@ export const handler = async (event: HandlerParam) => {
     };
     const invokeCommand = new InvokeCommand(transcodingJobParams);
     const response = await lambdaClient.send(invokeCommand);
-    console.log(JSON.stringify(response));
   } 
   return OK;
 };

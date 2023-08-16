@@ -51,7 +51,7 @@ export const handler = async (event: HandlerParam) => {
     Key: { 'id': transcodingJobId }
   } as const;
   let data = await docClient.get(queryParams);
-  if (data === undefined || data.Item === undefined) {
+  if (data == undefined || data.Item == undefined) {
     throw new FailedToGetTranscodingJobError();
   }
   let transcodingJob = new TranscodingJob(true);

@@ -35,6 +35,7 @@ interface TextTranscodeSpec {
 }
   
 interface MovieTranscodingJobRead {
+  id?: string;
   movieId?: string;
   textTranscodeSpecs?: TextTranscodeSpec[];
   audioTranscodeSpecs?: AudioTranscodeSpec[];
@@ -51,13 +52,20 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
       if (record.eventName === 'REMOVE') {
         // For now nothing to do in case of item removal
       } else {
-        let movieTranscodingJob = new MovieTranscodingJob(true);
         let item = marshaller.unmarshallItem(record.dynamodb?.NewImage!);
-        console.log(JSON.stringify(item));
-        Object.assign(movieTranscodingJob, item);
-        console.log(JSON.stringify(movieTranscodingJob));
         let movieTranscodingJobRead: MovieTranscodingJobRead = item;
         if (movieTranscodingJobRead.transcodingContextJobId == undefined) {
+          const queryParams = {
+            TableName: dynamodbMovieTranscodingJobTableName,
+            Key: { 'id': movieTranscodingJobRead.id }
+          }  as const;
+          let data = await docClient.get(queryParams);
+          if (data == undefined || data.Item == undefined) {
+            throw new FailedToGetMovieTranscodingJobError();
+          }
+          let movieTranscodingJob = new MovieTranscodingJob(true);
+          Object.assign(movieTranscodingJob, data.Item);
+
           const transcodingJobParams = {
             mkvS3ObjectKey: movieTranscodingJobRead.mkvS3ObjectKey,
             outputFolderKey: movieTranscodingJobRead.outputFolderKey,
@@ -73,12 +81,11 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
           };
           const invokeCommand = new InvokeCommand(lambdaParams);
           const response = await lambdaClient.send(invokeCommand);
-          if (response.Payload === undefined) {
+          if (response.Payload == undefined) {
             throw new TranscodingContextResponseEmptyPayloadError();
           }
           const payloadStr = Buffer.from(response.Payload).toString();
           movieTranscodingJob.setTranscodingContextJobId(payloadStr.substring(1, payloadStr.length - 1));
-          console.log(JSON.stringify(movieTranscodingJob));
           await docClient.put({TableName: dynamodbMovieTranscodingJobTableName, Item: movieTranscodingJob});
         }
       }
@@ -89,3 +96,5 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
 }
 
 class TranscodingContextResponseEmptyPayloadError extends Error {};
+
+class FailedToGetMovieTranscodingJobError extends Error {};

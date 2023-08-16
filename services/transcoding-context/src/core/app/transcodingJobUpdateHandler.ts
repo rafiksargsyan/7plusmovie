@@ -1,22 +1,12 @@
 import { Marshaller } from '@aws/dynamodb-auto-marshaller';
 import { DynamoDBStreamEvent } from 'aws-lambda';
-import { TranscodingJob } from '../domain/TranscodingJob';
 import { Octokit } from '@octokit/rest';
 import { AudioLangCode } from '../domain/AudioLangCodes';
 import { SubsLangCode } from '../domain/SubsLangCodes';
-import { DynamoDB } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
-const marshallOptions = {
-  convertClassInstanceToMap: true
-};
-  
-const translateConfig = { marshallOptions };
-  
-const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 const secretsManager = new SecretsManager({});
 
 const marshaller = new Marshaller();
@@ -62,8 +52,6 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         if ((transcodingJobRead as TranscodingJobRead).githubWorkflowRunId !== undefined) {
           return;
         }
-        let transcodingJob = new TranscodingJob(true);
-        Object.assign(transcodingJob, transcodingJobItem);
         const transcodingSpec = {
           "audio" : (transcodingJobRead as TranscodingJobRead).audioTranscodeSpecs.map(_ => { return {..._, lang: _.lang.code }}),
           "text" : (transcodingJobRead as TranscodingJobRead).textTranscodeSpecs.map(_ => { return {..._, lang: _.lang.code }}),
@@ -84,10 +72,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
           ref: process.env.GIT_REF!,
           inputs: workflowInputParams
         }
-        const response = await octokit.actions.createWorkflowDispatch(params);
-        console.log(JSON.stringify(response));
-        transcodingJob.setGithubWorkflowRunId((response.data as any).id);
-        await docClient.put({TableName: process.env.DYNAMODB_TRANSCODING_JOB_TABLE_NAME, Item: transcodingJob});
+        await octokit.actions.createWorkflowDispatch(params);
       }
     }
   } catch (e) {
