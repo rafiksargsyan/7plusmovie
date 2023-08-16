@@ -60,6 +60,7 @@ functions:
   githubTranscodingJobCompletionHandler:
     handler: src/core/app/githubTranscodingJobCompletionHandler.handler
     environment:
+      DYNAMODB_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TRANSCODING_JOB_TABLE_NAME}
       TRANSCODING_GITHUB_WORKFLOW_ID: ${env:TRANSCODING_GITHUB_WORKFLOW_ID}
       SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
       LAMBDA_HOOK: ${env:LAMBDA_HOOK}
@@ -67,7 +68,16 @@ functions:
       - http:
           path: /githubTranscodingJobCompletionHandler
           method: post 
- 
+  
+  githubWorkflowRunIdProviderHook:
+    handler: src/core/app/githubWorkflowRunIdProviderHook.handler
+    environment:
+      DYNAMODB_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TRANSCODING_JOB_TABLE_NAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+    events:
+      - http:
+          path: /githubWorkflowRunIdProviderHook
+          method: post
 plugins:
   - serverless-esbuild
 

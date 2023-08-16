@@ -6,18 +6,33 @@
 import * as crypto from 'crypto';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
+import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
+import { DynamoDB } from '@aws-sdk/client-dynamodb';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const githubWorkflowId = process.env.TRANSCODING_GITHUB_WORKFLOW_ID!;
+const dynamodbTranscodingJobTableName = process.env.DYNAMODB_TRANSCODING_JOB_TABLE_NAME!;
 const lambdaHook = process.env.LAMBDA_HOOK!;
 const OK = { statusCode: 200 };
 
 const secretsManager = new SecretsManager({});
 const lambdaClient = new LambdaClient({});
 
+const marshallOptions = {
+    convertClassInstanceToMap: true
+  };
+    
+  const translateConfig = { marshallOptions };
+    
+  const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
+
 interface HandlerParam {
   headers: { [key: string]: string };
   body: string;
+}
+
+interface TranscodingJobRead {
+  id?: string;
 }
 
 export const handler = async (event: HandlerParam) => {   
@@ -39,23 +54,28 @@ export const handler = async (event: HandlerParam) => {
     console.log(`workflow_id = ${payloadObject?.workflow_run?.workflow_id}`);
     return OK;
   }
-  const action = payloadObject?.action;
   const status = payloadObject?.workflow_run?.status;
-  const conclusion = payloadObject?.workflow_run?.concluion;
+  const conclusion = payloadObject?.workflow_run?.conclusion;
   const workflowRunId = payloadObject?.workflow_run?.id;
-  const runAttempt = payloadObject?.workflow_run?.run_attempt;
-  const rerunUrl = payloadObject?.workflow_run?.rerun_url;
-  console.log(action);
-  console.log(status);
-  console.log(conclusion);
-  console.log(workflowRunId);
-  console.log(runAttempt);
-  console.log(rerunUrl);
+
+  const scanParams = {
+    TableName: dynamodbTranscodingJobTableName,
+    FilterExpression: '#githubWorkflowRunId = :value',
+    ExpressionAttributeNames: { '#githubWorkflowRunId': 'githubWorkflowRunId' },
+    ExpressionAttributeValues: { ':value': workflowRunId }
+  } as const;
+  let data = await docClient.scan(scanParams);
+  if (data === undefined || data.Items === undefined || data.Items.length == 0) {
+    throw new FailedToGetTranscodingJobError();
+  }
+  let transcodingJobRead: TranscodingJobRead = {};
+  Object.assign(transcodingJobRead, data.Items[0]);
+
   if (status == 'completed' && conclusion == 'success') {
     const transcodingJobParams = {
       FunctionName: lambdaHook,
       InvocationType: 'RequestResponse',
-      Payload: JSON.stringify({ transcodingContextJobId: workflowRunId })
+      Payload: JSON.stringify({ transcodingContextJobId: transcodingJobRead.id })
     };
     const invokeCommand = new InvokeCommand(transcodingJobParams);
     const response = await lambdaClient.send(invokeCommand);
@@ -67,3 +87,5 @@ export const handler = async (event: HandlerParam) => {
 class InvalidContentTypeError extends Error {}
 
 class SignatureMismatchError extends Error {}
+
+class FailedToGetTranscodingJobError extends Error {}
