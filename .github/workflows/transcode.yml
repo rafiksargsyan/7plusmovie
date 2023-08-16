@@ -12,6 +12,7 @@ on:
       transcoding_spec_base64_encoded:
         desription: 'Base 64 encoded transcoding specification'
         required: true
+  pull_request:
 jobs:
   get-transcode-and-publish:
     runs-on: ubuntu
