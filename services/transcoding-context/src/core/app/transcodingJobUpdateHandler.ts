@@ -71,9 +71,9 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
           "defaultTextTrack"  : (transcodingJobRead as TranscodingJobRead).defaultTextTrack
         }
         const workflowInputParams = {
-          mkvFilePath: (transcodingJobRead as TranscodingJobRead).mkvS3ObjectKey,
-          outputFolder: (transcodingJobRead as TranscodingJobRead).outputFolderKey,
-          transcodingSpecBase64Encoded: Buffer.from(JSON.stringify(transcodingSpec)).toString("base64")
+          mkv_s3_object_key: (transcodingJobRead as TranscodingJobRead).mkvS3ObjectKey,
+          output_s3_folder_key: (transcodingJobRead as TranscodingJobRead).outputFolderKey,
+          transcoding_spec_base64_encoded: Buffer.from(JSON.stringify(transcodingSpec)).toString("base64")
         };
         const params = {
           owner: process.env.GITHUB_OWNER!,

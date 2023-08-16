@@ -1,4 +1,4 @@
-name: 'MKV to adaptrive streaming action'
+name: 'MKV to adaptive streaming action'
 description: 'Takes mkv and spec files and trancodes the mkv to MPEG-DASH and HLS streams'
 author: 'Rafik Sargsyan'
 inputs:
