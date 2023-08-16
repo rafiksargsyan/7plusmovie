@@ -63,7 +63,7 @@ jobs:
           outputFolder: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}"
           transcodingSpecBase64Encoded: ${{ env.TRANSCODING_SPEC_BASE64_ENCODED }}
 
-     - uses: mxschmitt/action-tmate@v3
+      - uses: mxschmitt/action-tmate@v3
 
       - name: Upload transcoding results
         run: |
