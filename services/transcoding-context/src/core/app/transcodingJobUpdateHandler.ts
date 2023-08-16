@@ -84,6 +84,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
           inputs: workflowInputParams
         }
         const response = await octokit.actions.createWorkflowDispatch(params);
+        console.log(JSON.stringify(response));
         transcodingJob.setGithubWorkflowRunId((response.data as any).id);
         await docClient.put({TableName: process.env.DYNAMODB_TRANSCODING_JOB_TABLE_NAME, Item: transcodingJob});
       }
