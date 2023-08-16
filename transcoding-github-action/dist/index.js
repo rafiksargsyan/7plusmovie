@@ -172,7 +172,7 @@ function run() {
                 shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, textFileName)},stream=text,output=${textFileName},lang=${SubsLangCodes_1.SubsLangCodes[_.lang]['langTag']},hls_group_id=subtitle,hls_name='${SubsLangCodes_1.SubsLangCodes[_.lang]['displayName']}' `;
             });
             if (defaultAudioTrack != undefined) {
-                shakaPackagerCommand += `--default-language ${AudioLangCodes_1.AudioLangCodes[audioTranscodeSpecs[defaultAudioTrack].lang].langTag}-x-${audioTranscodeSpecs[defaultAudioTrack].channels} `;
+                shakaPackagerCommand += `--default_language ${AudioLangCodes_1.AudioLangCodes[audioTranscodeSpecs[defaultAudioTrack].lang].langTag}-x-${audioTranscodeSpecs[defaultAudioTrack].channels} `;
             }
             if (defaultTextTrack != undefined) {
                 shakaPackagerCommand += `--default_text_language ${SubsLangCodes_1.SubsLangCodes[textTranscodeSpecs[defaultTextTrack].lang].langTag} `;

@@ -88,7 +88,7 @@ async function run(): Promise<void> {
     })
 
     if (defaultAudioTrack != undefined) {
-      shakaPackagerCommand += `--default-language ${AudioLangCodes[audioTranscodeSpecs[defaultAudioTrack].lang].langTag}-x-${audioTranscodeSpecs[defaultAudioTrack].channels} `;
+      shakaPackagerCommand += `--default_language ${AudioLangCodes[audioTranscodeSpecs[defaultAudioTrack].lang].langTag}-x-${audioTranscodeSpecs[defaultAudioTrack].channels} `;
     }
 
     if (defaultTextTrack != undefined) {
