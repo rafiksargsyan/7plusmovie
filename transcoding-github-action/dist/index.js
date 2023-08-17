@@ -133,9 +133,9 @@ function run() {
             }
             const workdirAbsolutePath = path_1.default.resolve(WORKING_DIR_NAME);
             process.chdir(WORKING_DIR_NAME);
-            const vodFolderAbsolutePath = path_1.default.resolve(outputFolderAbsolutePath, '/vod');
+            const vodFolderAbsolutePath = path_1.default.resolve(outputFolderAbsolutePath, 'vod');
             fs_1.default.mkdirSync(vodFolderAbsolutePath);
-            const subtitlesFolderAbsolutePath = path_1.default.resolve(outputFolderAbsolutePath, '/subtitles');
+            const subtitlesFolderAbsolutePath = path_1.default.resolve(outputFolderAbsolutePath, 'subtitles');
             fs_1.default.mkdirSync(subtitlesFolderAbsolutePath);
             console.log(`vodFolderAbsolutePath = ${vodFolderAbsolutePath}`);
             transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 540);

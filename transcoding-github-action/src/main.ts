@@ -42,9 +42,9 @@ async function run(): Promise<void> {
     const workdirAbsolutePath = path.resolve(WORKING_DIR_NAME);
     process.chdir(WORKING_DIR_NAME);
      
-    const vodFolderAbsolutePath = path.resolve(outputFolderAbsolutePath, '/vod');
+    const vodFolderAbsolutePath = path.resolve(outputFolderAbsolutePath, 'vod');
     fs.mkdirSync(vodFolderAbsolutePath);
-    const subtitlesFolderAbsolutePath = path.resolve(outputFolderAbsolutePath, '/subtitles');
+    const subtitlesFolderAbsolutePath = path.resolve(outputFolderAbsolutePath, 'subtitles');
     fs.mkdirSync(subtitlesFolderAbsolutePath);
 
     console.log(`vodFolderAbsolutePath = ${vodFolderAbsolutePath}`);
