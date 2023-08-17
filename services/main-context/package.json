@@ -3,23 +3,24 @@
   "version": "1.0.0",
   "dependencies": {
     "@aws-sdk/client-cloudfront": "^3.303.0",
-    "@aws-sdk/client-dynamodb": "^3.301.0",
+    "@aws-sdk/client-dynamodb": "^3.386.0",
+    "@aws-sdk/client-lambda": "^3.385.0",
     "@aws-sdk/client-s3": "^3.301.0",
     "@aws-sdk/client-secrets-manager": "^3.301.0",
     "@aws-sdk/cloudfront-signer": "^3.303.0",
-    "@aws-sdk/lib-dynamodb": "^3.301.0",
+    "@aws-sdk/lib-dynamodb": "^3.386.0",
     "@aws-sdk/s3-request-presigner": "^3.301.0",
     "@aws/dynamodb-auto-marshaller": "^0.7.1",
-    "@types/uuid": "^8.3.4",
     "algoliasearch": "^4.15.0",
     "axios": "^1.4.0",
     "cloudinary": "^1.35.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.101",
+    "@types/uuid": "^8.3.4",
     "esbuild": "^0.16.17",
     "prettier": "^2.8.7",
-    "serverless": "^3.33.0",
+    "serverless": "^3.34.0",
     "serverless-esbuild": "^1.43.0",
     "serverless-offline": "^9.1.6",
     "typescript": "^5.0.2"

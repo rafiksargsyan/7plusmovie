@@ -29,7 +29,7 @@ export const handler = async (event: AddPosterImagePortraitParam): Promise<void>
     throw new FailedToGetMovieError();
   }
   let movie = new Movie(true);
-  Object.assign(movie, data.Item);  
+  Object.assign(movie, data.Item);
   movie.addPosterImagePortrait(new L8nLangCode(event.locale), event.relativePath);
   await docClient.put({ TableName: dynamodbMovieTableName, Item: movie });
 };

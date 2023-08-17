@@ -58,49 +58,53 @@ interface MovieRead {
 }
 
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
-  const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
-  const secret = JSON.parse(secretStr.SecretString!);
-  const algoliaClient = algoliasearch(process.env.ALGOLIA_APP_ID!, secret.ALGOLIA_ADMIN_KEY!);
-  const algoliaIndex = algoliaClient.initIndex(process.env.ALGOLIA_ALL_INDEX!);
-  const tmdbApiKey = secret.TMDB_API_KEY!;
-  cloudinary.config({ cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-                      api_key: process.env.CLOUDINARY_API_KEY,
-                      api_secret: secret.CLOUDINARY_API_SECRET });
-
-  for (const record of event.Records) {
-    if (record.eventName === 'REMOVE') {
-      let objectID = record.dynamodb?.Keys?.id.S;
-      await algoliaIndex.deleteBy({filters: `objectID: ${objectID}`});
-      await cloudinary.api.delete_resources_by_prefix(objectID!);
-      await emptyS3Directory(mediaAssetsS3Bucket, `${objectID}/`);
-    } else {
-      let movie: MovieRead = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as MovieRead;
-      let updated: boolean = false;
-      if (movie.tmdbId != undefined) {
-        updated = await updateBasedOnTmdbId(movie.id, movie.tmdbId, tmdbApiKey, movie);
-      } 
-      if (updated) {
-        return;
+  try {
+    const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
+    const secret = JSON.parse(secretStr.SecretString!);
+    const algoliaClient = algoliasearch(process.env.ALGOLIA_APP_ID!, secret.ALGOLIA_ADMIN_KEY!);
+    const algoliaIndex = algoliaClient.initIndex(process.env.ALGOLIA_ALL_INDEX!);
+    const tmdbApiKey = secret.TMDB_API_KEY!;
+    cloudinary.config({ cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+                        api_key: process.env.CLOUDINARY_API_KEY,
+                        api_secret: secret.CLOUDINARY_API_SECRET });
+  
+    for (const record of event.Records) {
+      if (record.eventName === 'REMOVE') {
+        let objectID = record.dynamodb?.Keys?.id.S;
+        await algoliaIndex.deleteBy({filters: `objectID: ${objectID}`});
+        await cloudinary.api.delete_resources_by_prefix(objectID!);
+        await emptyS3Directory(mediaAssetsS3Bucket, `${objectID}/`);
+      } else {
+        let movie: MovieRead = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as MovieRead;
+        let updated: boolean = false;
+        if (movie.tmdbId != undefined) {
+          updated = await updateBasedOnTmdbId(movie.id, movie.tmdbId, tmdbApiKey, movie);
+        } 
+        if (updated) {
+          return;
+        }
+        if (movie.mpdFile == null || movie.m3u8File == null
+          || Object.keys(movie.posterImagesPortrait).length === 0) {
+          return;
+        }
+        if (movie.genres == undefined) movie.genres = [];
+        if (movie.actors == undefined) movie.actors = [];
+        if (movie.directors == undefined) movie.directors = [];
+        await algoliaIndex.saveObject({ objectID: movie.id,
+                                        creationTime: movie.creationTime,
+                                        category: "MOVIE",
+                                        originalTitle: movie.originalTitle,
+                                        posterImagesPortrait: movie.posterImagesPortrait,
+                                        titleL8ns: movie.titleL8ns,
+                                        releaseYear: movie.releaseYear,
+                                        genres: movie.genres.reduce((r, _) => { return { ...r, [_.code] : MovieGenres[_.code] } }, {}),
+                                        actors: movie.actors.reduce((r, _) => { return { ...r, [_.code] : Persons[_.code] } }, {}),
+                                        directors: movie.directors.reduce((r, _) => { return { ...r, [_.code] : Persons[_.code] } }, {}) });
       }
-      if (movie.mpdFile == null || movie.m3u8File == null
-        || Object.keys(movie.posterImagesPortrait).length === 0) {
-        return;
-      }
-      if (movie.genres == undefined) movie.genres = [];
-      if (movie.actors == undefined) movie.actors = [];
-      if (movie.directors == undefined) movie.directors = [];
-      await algoliaIndex.saveObject({ objectID: movie.id,
-                                      creationTime: movie.creationTime,
-                                      category: "MOVIE",
-                                      originalTitle: movie.originalTitle,
-                                      posterImagesPortrait: movie.posterImagesPortrait,
-                                      titleL8ns: movie.titleL8ns,
-                                      releaseYear: movie.releaseYear,
-                                      genres: movie.genres.reduce((r, _) => { return { ...r, [_.code] : MovieGenres[_.code] } }, {}),
-                                      actors: movie.actors.reduce((r, _) => { return { ...r, [_.code] : Persons[_.code] } }, {}),
-                                      directors: movie.directors.reduce((r, _) => { return { ...r, [_.code] : Persons[_.code] } }, {}) });
     }
-  }
+  } catch (e) {
+    console.error(e);
+  } 
 };
 
 async function emptyS3Directory(bucket, dir) {

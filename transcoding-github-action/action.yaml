@@ -1,0 +1,16 @@
+name: 'MKV to adaptive streaming action'
+description: 'Takes mkv and spec files and trancodes the mkv to MPEG-DASH and HLS streams'
+author: 'Rafik Sargsyan'
+inputs:
+  mkvFilePath:
+    required: true
+    description: 'MKV file path'
+  outputFolder:
+    required: true
+    description: 'Output folder path'
+  transcodingSpecBase64Encoded:
+    required: true
+    description: 'Transcoding spec json in base 64 encoded format'    
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

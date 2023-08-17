@@ -1,0 +1,87 @@
+org: 7plusmovie
+app: 7plusmovie
+service: transcoding-context
+frameworkVersion: '3'
+useDotenv: true
+
+package:
+  individually: true
+  patterns:
+    - '!node_modules/@aws-sdk/**'
+
+provider:
+  name: aws
+  region: eu-west-3
+  runtime: nodejs18.x
+  iam:
+    role:
+      managedPolicies:
+        - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        - "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+        - "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
+  stage: ${opt:stage}
+  logRetentionInDays: 1
+
+functions:
+  createTranscodingJob:
+    handler: src/core/app/createTranscodingJob.handler
+    environment:
+      DYNAMODB_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TRANSCODING_JOB_TABLE_NAME}
+    events:
+      - http:
+          integration: lambda
+          path: /createTranscodingJob
+          method: post
+          request:
+            template:
+              application/json: '{ "mkvS3ObjectKey" : $input.json(''$.mkvS3ObjectKey''),
+                                   "outputFolderKey" : $input.json(''$.outputFolderKey''),
+                                   "audioTranscodeSpecParams" : $input.json(''$.audioTranscodeSpecParams''),
+                                   "textTranscodeSpecParams" : $input.json(''$.textTranscodeSpecParams''),
+                                   "defaultAudioTrack" : $input.json(''$.defaultAudioTrack''),
+                                   "defaultTextTrack" : $input.json(''$.defaultTextTrack'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+
+  transcodingJobUpdateHandler:
+    handler: src/core/app/transcodingJobUpdateHandler.handler
+    environment:
+      DYNAMODB_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TRANSCODING_JOB_TABLE_NAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      TRANSCODING_WORKFLOW_FILE_NAME: ${env:TRANSCODING_WORKFLOW_FILE_NAME}
+      GITHUB_OWNER: ${env:GITHUB_OWNER}
+      GITHUB_REPO: ${env:GITHUB_REPO}
+      GIT_REF: ${env:GIT_REF}
+    events:
+      - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_TRANSCODING_JOB_STREAM_ARN}
+
+  githubTranscodingJobCompletionHandler:
+    handler: src/core/app/githubTranscodingJobCompletionHandler.handler
+    environment:
+      DYNAMODB_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TRANSCODING_JOB_TABLE_NAME}
+      TRANSCODING_GITHUB_WORKFLOW_ID: ${env:TRANSCODING_GITHUB_WORKFLOW_ID}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      LAMBDA_HOOK: ${env:LAMBDA_HOOK}
+    events:
+      - http:
+          path: /githubTranscodingJobCompletionHandler
+          method: post 
+  
+  githubWorkflowRunIdProviderHook:
+    handler: src/core/app/githubWorkflowRunIdProviderHook.handler
+    environment:
+      DYNAMODB_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TRANSCODING_JOB_TABLE_NAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+    events:
+      - http:
+          path: /githubWorkflowRunIdProviderHook
+          method: post
+plugins:
+  - serverless-esbuild
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false

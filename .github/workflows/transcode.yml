@@ -1,0 +1,72 @@
+name: Transcode
+
+on:
+  workflow_dispatch:
+    inputs:
+      mkv_s3_object_key:
+        description: 'S3 path of mkv file to be transcoded'
+        required: true
+      output_s3_folder_key:
+        description: 'Transcoding output s3 folder key'  
+        required: true
+      transcoding_spec_base64_encoded:
+        desription: 'Base 64 encoded transcoding specification'
+        required: true
+      transcoding_context_job_id:
+        description: 'The id of corresponding model in transcoding context'
+        required: true
+jobs:
+  get-transcode-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1440
+    container: q62xyz/transcode:1.0.0
+    env:
+      AWS_ACCESS_KEY_ID: AKIAQBPWKPTSTP3HL4UM
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: eu-west-3
+      MKV_S3_OBJECT_KEY: ${{ github.event.inputs.mkv_s3_object_key }}
+      RAW_MEDIA_FILES_S3_BUCKET: raw-media-assets-prod-e1pjapsk
+      MEDIA_FILES_S3_BUCKET: media-assets-prod-e1pjapsk
+      TRANSCODING_OUTPUT_DIR_NAME: transcoding-output
+      OUTPUT_S3_FOLDER_KEY: ${{ github.event.inputs.output_s3_folder_key }}
+      TRANSCODING_SPEC_BASE64_ENCODED: ${{ github.event.inputs.transcoding_spec_base64_encoded }}
+      WORKFLOW_RUN_ID_PROVIDER_HOOK_SECRET: ${{ secrets.WORKFLOW_RUN_ID_PROVIDER_HOOK_SECRET }}
+      TRANSCODING_CONTEXT_JOB_ID: ${{ github.event.inputs.transcoding_context_job_id }}
+      GITHUB_WORKFLOW_RUN_ID_PROVIDER_HOOK_ENDPOINT: https://fkz0cftrr6.execute-api.eu-west-3.amazonaws.com/prod/githubWorkflowRunIdProviderHook
+      GITHUB_RUN_ID: ${{ github.run_id }}
+    steps:
+      - name: Provide workflow run id to transcoding context
+        run: |
+          curl -X POST "${GITHUB_WORKFLOW_RUN_ID_PROVIDER_HOOK_ENDPOINT}" \
+               -H "Authorization: ${WORKFLOW_RUN_ID_PROVIDER_HOOK_SECRET}" \
+               -H "Content-Type: application/json" \
+               -d "{\"transcodingJobId\": \"${TRANSCODING_CONTEXT_JOB_ID}\", \"githubWorkflowRunId\": ${GITHUB_RUN_ID} }"
+ 
+      - uses: actions/checkout@v3
+        with:
+          sparse-checkout: |
+            transcoding-github-action
+
+      - name: Download MKV file
+        run: |
+          for i in 1 2 3; do aws s3 cp s3://${RAW_MEDIA_FILES_S3_BUCKET}/${MKV_S3_OBJECT_KEY} ${GITHUB_RUN_ID}.mkv && break; done
+      
+      - name: Prepare transcoding output directory
+        run: |
+          mkdir -p ${TRANSCODING_OUTPUT_DIR_NAME}
+          rm -rf ${TRANSCODING_OUTPUT_DIR_NAME:?}/*
+
+      - name: Transcode
+        uses: ./transcoding-github-action
+        with:
+          mkvFilePath: "./${{ github.run_id }}.mkv"
+          outputFolder: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}"
+          transcodingSpecBase64Encoded: ${{ env.TRANSCODING_SPEC_BASE64_ENCODED }}
+
+      - name: Upload transcoding results
+        run: |
+          for i in 1 2 3; do aws s3 cp "${TRANSCODING_OUTPUT_DIR_NAME}" "s3://${MEDIA_FILES_S3_BUCKET}/${OUTPUT_S3_FOLDER_KEY}" --recursive && break; done
+
+      - name: Cleanup
+        run:
+          rm *.mkv

@@ -19,6 +19,7 @@ provider:
         - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
         - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
         - "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+        - "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
   stage: ${opt:stage}
   logRetentionInDays: 1
 
@@ -302,6 +303,36 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  movieTranscodingJobUpdateHandler:
+    handler: src/core/app/movieTranscodingJobUpdateHandler.handler
+    environment:
+      TRANSCODING_CONTEXT_JOB_CREATION_LAMBDA_NAME: ${env:TRANSCODING_CONTEXT_JOB_CREATION_LAMBDA_NAME}
+      DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME}
+    events:
+      - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_MOVIE_TRANSCODING_JOB_STREAM_ARN}
+
+  createMovieTranscodingJob:
+    handler: src/core/app/createMovieTranscodingJob.handler
+    environment:
+      DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME}
+    events:
+      - http:
+          integration: lambda
+          path: /createMovieTranscodingJob
+          method: post
+          request:
+            template:
+              application/json: '$input.json(''$'')'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+
+  transcodingJobCompletionHook:
+    handler: src/core/app/transcodingJobCompletionHook.handler
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME}
 
 plugins:
   - serverless-esbuild
