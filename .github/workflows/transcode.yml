@@ -49,7 +49,7 @@ jobs:
 
       - name: Download MKV file
         run: |
-          aws s3 cp s3://${RAW_MEDIA_FILES_S3_BUCKET}/${MKV_S3_OBJECT_KEY} ${GITHUB_RUN_ID}.mkv
+          for i in 1 2 3; do aws s3 cp s3://${RAW_MEDIA_FILES_S3_BUCKET}/${MKV_S3_OBJECT_KEY} ${GITHUB_RUN_ID}.mkv && break; done
       
       - name: Prepare transcoding output directory
         run: |
@@ -65,7 +65,7 @@ jobs:
 
       - name: Upload transcoding results
         run: |
-          aws s3 cp "${TRANSCODING_OUTPUT_DIR_NAME}" "s3://${MEDIA_FILES_S3_BUCKET}/${OUTPUT_S3_FOLDER_KEY}" --recursive  
+          for i in 1 2 3; do aws s3 cp "${TRANSCODING_OUTPUT_DIR_NAME}" "s3://${MEDIA_FILES_S3_BUCKET}/${OUTPUT_S3_FOLDER_KEY}" --recursive && break; done
 
       - name: Cleanup
         run:
