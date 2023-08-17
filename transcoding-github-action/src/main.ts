@@ -47,8 +47,6 @@ async function run(): Promise<void> {
     const subtitlesFolderAbsolutePath = path.resolve(outputFolderAbsolutePath, 'subtitles');
     fs.mkdirSync(subtitlesFolderAbsolutePath);
 
-    console.log(`vodFolderAbsolutePath = ${vodFolderAbsolutePath}`);
-
     transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 540);
     transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 720);
     transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 1080);
@@ -98,8 +96,6 @@ async function run(): Promise<void> {
     }
 
     shakaPackagerCommand += "--mpd_output manifest.mpd --hls_master_playlist_output master.m3u8";
-
-    console.log(`shakaPackagerCommand = ${shakaPackagerCommand}`); 
 
     execSync(`eval "${shakaPackagerCommand}"`);
 
