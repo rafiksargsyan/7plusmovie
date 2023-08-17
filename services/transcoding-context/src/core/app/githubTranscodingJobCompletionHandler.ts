@@ -50,13 +50,13 @@ export const handler = async (event: HandlerParam) => {
     throw new SignatureMismatchError();
   }
   const payloadObject = JSON.parse(payload);
-  if (payloadObject?.workflow_run?.workflow_id !== Number(githubWorkflowId)) {
-    console.log(`workflow_id = ${payloadObject?.workflow_run?.workflow_id}`);
+  const workflowRunId = payloadObject?.workflow_run?.id;
+  if (workflowRunId !== Number(githubWorkflowId)) {
     return OK;
   }
+
   const status = payloadObject?.workflow_run?.status;
   const conclusion = payloadObject?.workflow_run?.conclusion;
-  const workflowRunId = payloadObject?.workflow_run?.id;
 
   const scanParams = {
     TableName: dynamodbTranscodingJobTableName,
