@@ -63,8 +63,6 @@ jobs:
           outputFolder: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}"
           transcodingSpecBase64Encoded: ${{ env.TRANSCODING_SPEC_BASE64_ENCODED }}
 
-      - uses: mxschmitt/action-tmate@v3
-
       - name: Upload transcoding results
         run: |
           aws s3 cp "${TRANSCODING_OUTPUT_DIR_NAME}" "s3://${MEDIA_FILES_S3_BUCKET}/${OUTPUT_S3_FOLDER_KEY}" --recursive  
