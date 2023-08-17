@@ -137,6 +137,7 @@ function run() {
             fs_1.default.mkdirSync(vodFolderAbsolutePath);
             const subtitlesFolderAbsolutePath = path_1.default.resolve(outputFolderAbsolutePath, '/subtitles');
             fs_1.default.mkdirSync(subtitlesFolderAbsolutePath);
+            console.log(`vodFolderAbsolutePath = ${vodFolderAbsolutePath}`);
             transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 540);
             transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 720);
             transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 1080);
@@ -178,6 +179,7 @@ function run() {
                 shakaPackagerCommand += `--default_text_language ${SubsLangCodes_1.SubsLangCodes[textTranscodeSpecs[defaultTextTrack].lang].langTag} `;
             }
             shakaPackagerCommand += "--mpd_output manifest.mpd --hls_master_playlist_output master.m3u8";
+            console.log(`shakaPackagerCommand = ${shakaPackagerCommand}`);
             (0, child_process_1.execSync)(`eval "${shakaPackagerCommand}"`);
             (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.vtt');
             (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.mpd');
