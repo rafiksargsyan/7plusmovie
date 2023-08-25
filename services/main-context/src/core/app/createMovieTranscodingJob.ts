@@ -7,7 +7,8 @@ import { SubsLangCode } from "../domain/SubsLangCodes";
 const dynamodbMovieTranscodingJobTableName = process.env.DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME!;
 
 const marshallOptions = {
-  convertClassInstanceToMap: true
+  convertClassInstanceToMap: true,
+  removeUndefinedValues: true
 };
 
 const translateConfig = { marshallOptions };

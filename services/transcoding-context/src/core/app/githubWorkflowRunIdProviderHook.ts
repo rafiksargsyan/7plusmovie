@@ -17,7 +17,8 @@ const OK = { statusCode: 200 };
 const secretsManager = new SecretsManager({});
 
 const marshallOptions = {
-    convertClassInstanceToMap: true
+    convertClassInstanceToMap: true,
+    removeUndefinedValues: true
   };
     
 const translateConfig = { marshallOptions };

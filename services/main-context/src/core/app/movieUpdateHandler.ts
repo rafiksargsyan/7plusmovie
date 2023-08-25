@@ -312,7 +312,16 @@ const tmdbPersonId2Person = {
   "190" : new Person("CLINT_EASTWOOD"),
   "13240" : new Person("MARK_WAHLBERG"),
   "28782" : new Person("MONICA_BELLUCCI"),
-  "6384" : new Person("KEANU_REEVES")
+  "6384" : new Person("KEANU_REEVES"),
+  "19292" : new Person("ADAM_SANDLER"),
+  "4491" : new Person("JENNIFER_ANISTON"),
+  "74568" : new Person("CHRIS_HEMSWORTH"),
+  "18182" : new Person("OLGA_KURYLENKO"),
+  "17605" : new Person("IDRIS_ELBA"),
+  "18865" : new Person("LOUIS_LETERRIER"),
+  "117642" : new Person("JASON_MOMOA"),
+  "976" : new Person("JASON_STATHEM"),
+  "6885" : new Person("CHARLIZE_THERON")
 } as const;
 
 

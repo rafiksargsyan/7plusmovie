@@ -53,7 +53,16 @@ export const Persons = {
   CLINT_EASTWOOD : { EN_US : "Clint Eastwood", RU : "Клинт Иствуд" },
   MARK_WAHLBERG : { EN_US : "Mark Wahlberg", RU : "Марк Уолберг" },
   MONICA_BELLUCCI : { EN_US : "Monica Bellucci", RU : "Моника Беллуччи" },
-  KEANU_REEVES : { EN_US : "Keanu Reeves", RU : "Киану Ривз" }
+  KEANU_REEVES : { EN_US : "Keanu Reeves", RU : "Киану Ривз" },
+  ADAM_SANDLER : { EN_US : "Adam Sandler", RU : "Адам Сэндлер" },
+  JENNIFER_ANISTON : { EN_US : "Jennifer Aniston", RU : "Дженнифер Энистон" },
+  CHRIS_HEMSWORTH : { EN_US : "Chris Hemsworth", RU : "Крис Хемсворт" },
+  OLGA_KURYLENKO : { EN_US : "Olga Kurylenko", RU : "Ольга Куриленко" },
+  IDRIS_ELBA : { EN_US : "Idris Elba", RU : "Идрис Эльба" },
+  LOUIS_LETERRIER : { EN_US : "Louis Leterrier", RU : "Луи Летерье" },
+  JASON_MOMOA : { EN_US : "Jason Momoa", RU : "Джейсон Момоа" },
+  JASON_STATHEM : { EN_US : "Jason Statham", RU : "Джейсон Стэтхэм" },
+  CHARLIZE_THERON : { EN_US : "Charlize Theron", RU : "Шарлиз Терон" }
 } as const;
 
 export class Person {
