@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import { L8nLangCode, L8nLangCodes } from './L8nLangCodes';
+import { L8nLangCode } from './L8nLangCodes';
 import { TvShowGenre } from './TvShowGenres';
 import { SubsLangCode } from './SubsLangCodes';
 
@@ -9,6 +9,7 @@ interface Episode {
   stillImage: string;
   mpdFile: string;
   m3u8File: string;
+  subtitles: { [key: string]: string };
   tmdbEpisodeNumber: number;
 }
 
@@ -17,7 +18,7 @@ interface Season {
   posterImagesLandscape: { [key: string]: string };
   originalName: string;
   nameL8ns: { [key: string]: string };
-  tmdbSeasonNumber: number;
+  tmdbSeasonNumber?: number;
   episodes: Episode[];
 }
 
@@ -31,11 +32,10 @@ export class TvShow {
   private posterImagesPortrait: { [key: string]: string } = {};
   private posterImagesLandscape: { [key: string]: string } = {};
   private backdropImage: string;
-  private subtitles: { [key: string]: string } = {};
   private releaseYear: number;
   private genres: TvShowGenre[] = [];
   private tmdbId : string;
-  private seasons: Season[];
+  private seasons: Season[] = [];
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -49,14 +49,14 @@ export class TvShow {
   }
 
   private validateOriginalLocale(origianlLocale: L8nLangCode | undefined) {
-    if (origianlLocale === undefined) {
+    if (origianlLocale == undefined) {
       throw new InvalidOriginalLocaleError();
     }
     return origianlLocale;
   }
 
   private validateTitle(title: string | undefined) {
-    if (title === undefined || ! /\S/.test(title)) {
+    if (title == undefined || ! /\S/.test(title)) {
       throw new InvalidTitleError();
     }
     return title.trim();
@@ -69,7 +69,7 @@ export class TvShow {
     return releaseYear;
   }
 
-  public addPosterImagePortrait(locale: L8nLangCode, relativePath: RelativePath) {
+  public addPosterImagePortrait(locale: L8nLangCode, relativePath: string) {
     if (! /\S/.test(relativePath)) {
       throw new InvalidPosterImageRelativePathError();
     }
@@ -77,15 +77,15 @@ export class TvShow {
     this.touch();
   }
 
-  public addSubtitle(locale: SubsLangCode, relativePath: RelativePath) {
+  public addSubtitle(season: number, episode: number, locale: SubsLangCode, relativePath: string) {
     if (! /\S/.test(relativePath)) {
       throw new InvalidSubtitleRelativePathError();
     }
-    this.subtitles[locale.code] = relativePath;
+    this.seasons[season].episodes[episode].subtitles[locale.code] = relativePath;
     this.touch();
   }
 
-  public addBackdropImage(relativePath: RelativePath) {
+  public addBackdropImage(relativePath: string) {
     if (! /\S/.test(relativePath)) {
       throw new InvalidBackdropImageRelativePathError();
     }
@@ -93,19 +93,19 @@ export class TvShow {
     this.touch();
   }
 
-  public addMpdFile(relativePath: RelativePath) {
+  public addMpdFile(season: number, episode: number, relativePath: string) {
     if (! /\S/.test(relativePath)) {
-        throw new InvalidMpdFileRelativePathError();
-      }
-    this.mpdFile = relativePath;
+      throw new InvalidMpdFileRelativePathError();
+    }
+    this.seasons[season].episodes[episode].mpdFile = relativePath;
     this.touch();
   }
 
-  public addM3u8File(relativePath: RelativePath) {
+  public addM3u8File(season: number, episode: number, relativePath: string) {
     if (! /\S/.test(relativePath)) {
-        throw new InvalidM3u8FileRelativePathError();
-      }
-    this.m3u8File = relativePath;
+      throw new InvalidM3u8FileRelativePathError();
+    }
+    this.seasons[season].episodes[episode].m3u8File = relativePath;
     this.touch();
   }
 
@@ -118,35 +118,13 @@ export class TvShow {
     this.touch();
   }
 
-  public addGenre(genre: MovieGenre): boolean {
+  public addGenre(genre: TvShowGenre): boolean {
     for (const g of this.genres) {
       if (genre.code === g.code) {
         return false;
       }
     }
     this.genres.push(genre);
-    this.touch();
-    return true;
-  }
-
-  public addActor(actor: Person): boolean {
-    for (const a of this.actors) {
-      if (actor.code === a.code) {
-        return false;
-      }
-    }  
-    this.actors.push(actor);
-    this.touch();
-    return true;
-  }
-
-  public addDirector(director: Person): boolean {
-    for (const d of this.directors) {
-      if (director.code === d.code) {
-        return false;
-      }
-    }
-    this.directors.push(director);
     this.touch();
     return true;
   }
@@ -160,6 +138,34 @@ export class TvShow {
       throw new InvalidTmdbIdError();
     }
     this.tmdbId = tmdbId;
+    this.touch();
+  }
+
+  public addSeason(originalName?: string) {
+    if (originalName == undefined || ! /\S/.test(originalName)) {
+      throw new InvalidSeasonNameError();
+    }
+    this.seasons.push({
+      originalName: originalName,
+      posterImagesPortrait: {},
+      posterImagesLandscape: {},
+      nameL8ns: {},
+      episodes: []
+    });
+    this.touch();
+  }
+
+  public addPosterImagePortraitToSeason(season?: number, locale?: L8nLangCode, relativePath?: string) {
+    if (season == undefined || season < 0 || season >= this.seasons.length) {
+      throw new InvalidSeasonError();
+    }
+    if (locale == undefined) {
+      throw new InvalidLocaleError();
+    }
+    if (relativePath == undefined || ! /\S/.test(relativePath)) {
+      throw new InvalidPosterImageRelativePathError();
+    }
+    this.seasons[season].posterImagesPortrait[locale.code] = relativePath;
     this.touch();
   }
 }
@@ -183,3 +189,9 @@ class InvalidSubtitleRelativePathError extends Error {}
 class InvalidM3u8FileRelativePathError extends Error {}
 
 class InvalidTmdbIdError extends Error {}
+
+class InvalidSeasonNameError extends Error {}
+
+class InvalidSeasonError extends Error {}
+
+class InvalidLocaleError extends Error {}
