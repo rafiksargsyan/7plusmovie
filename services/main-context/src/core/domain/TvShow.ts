@@ -6,11 +6,11 @@ import { SubsLangCode } from './SubsLangCodes';
 interface Episode {
   originalName: string;
   nameL8ns: { [key: string]: string };
-  stillImage: string;
-  mpdFile: string;
-  m3u8File: string;
+  stillImage?: string;
+  mpdFile?: string;
+  m3u8File?: string;
   subtitles: { [key: string]: string };
-  tmdbEpisodeNumber: number;
+  tmdbEpisodeNumber?: number;
 }
 
 interface Season {
@@ -145,6 +145,11 @@ export class TvShow {
     if (originalName == undefined || ! /\S/.test(originalName)) {
       throw new InvalidSeasonNameError();
     }
+    this.seasons.forEach(_ => {
+      if (_.originalName == originalName) {
+        throw new SeasonWithNameAlreadyExistsError();
+      }
+    })
     this.seasons.push({
       originalName: originalName,
       posterImagesPortrait: {},
@@ -166,6 +171,51 @@ export class TvShow {
       throw new InvalidPosterImageRelativePathError();
     }
     this.seasons[season].posterImagesPortrait[locale.code] = relativePath;
+    this.touch();
+  }
+
+  public addTmdbSeasonNumberToSeason(season: number | undefined, tmdbSeasonNumber: number | undefined) {
+    if (season == undefined || season < 0 || season >= this.seasons.length) {
+      throw new InvalidSeasonError();
+    }
+    if (tmdbSeasonNumber == undefined) {
+      throw new InvalidTmdbSeasonNumberError();
+    }
+    this.seasons[season].tmdbSeasonNumber = tmdbSeasonNumber;
+    this.touch();
+  }
+
+  public addSeasonNameL8n(season: number | undefined, locale: L8nLangCode | undefined, name: string | undefined) {
+    if (season == undefined || season < 0 || season >= this.seasons.length) {
+      throw new InvalidSeasonError();
+    }
+    if (locale == undefined) {
+      throw new InvalidLocaleError();
+    }
+    if (name == undefined || ! /\S/.test(name)) {
+      throw new InvalidSeasonNameL8nError();
+    }
+    this.seasons[season].nameL8ns[locale.code] = name;
+    this.touch();
+  }
+
+  public addEpisodeToSeason(season: number | undefined, originalName: string | undefined) {
+    if (originalName == undefined || ! /\S/.test(originalName)) {
+      throw new InvalidEpisodeNameError();
+    }
+    if (season == undefined || season < 0 || season >= this.seasons.length) {
+      throw new InvalidSeasonError();
+    }
+    this.seasons[season].episodes.forEach(_ => {
+      if (_.originalName == originalName) {
+        throw new EpisodeWithNameAlreadyExistsError();
+      }
+    })
+    this.seasons[season].episodes.push({
+      originalName: originalName,
+      subtitles: {},
+      nameL8ns: {}
+    });
     this.touch();
   }
 }
@@ -195,3 +245,13 @@ class InvalidSeasonNameError extends Error {}
 class InvalidSeasonError extends Error {}
 
 class InvalidLocaleError extends Error {}
+
+class InvalidTmdbSeasonNumberError extends Error {}
+
+class InvalidSeasonNameL8nError extends Error {}
+
+class SeasonWithNameAlreadyExistsError extends Error {}
+
+class InvalidEpisodeNameError extends Error {}
+
+class EpisodeWithNameAlreadyExistsError extends Error {}
