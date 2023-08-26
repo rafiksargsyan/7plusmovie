@@ -62,7 +62,8 @@ export const Persons = {
   LOUIS_LETERRIER : { EN_US : "Louis Leterrier", RU : "Луи Летерье" },
   JASON_MOMOA : { EN_US : "Jason Momoa", RU : "Джейсон Момоа" },
   JASON_STATHEM : { EN_US : "Jason Statham", RU : "Джейсон Стэтхэм" },
-  CHARLIZE_THERON : { EN_US : "Charlize Theron", RU : "Шарлиз Терон" }
+  CHARLIZE_THERON : { EN_US : "Charlize Theron", RU : "Шарлиз Терон" },
+  CHRIS_PRATT : { EN_US : "Chris Pratt", RU : "Крис Пратт" } 
 } as const;
 
 export class Person {
