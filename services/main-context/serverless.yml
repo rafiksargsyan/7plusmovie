@@ -327,6 +327,27 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+ 
+  createTvShow:
+    handler: src/core/app/tv-show/createTvShow.handler
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+      ALGOLIA_APP_ID: ${env:ALGOLIA_APP_ID}
+      ALGOLIA_ALL_INDEX: ${env:ALGOLIA_ALL_INDEX}
+      ALGOLIA_SEARCH_ONLY_KEY: ${env:ALGOLIA_SEARCH_ONLY_KEY}
+    events:
+      - http:
+          integration: lambda
+          path: /createTvShow
+          method: post
+          request:
+            template:
+              application/json: '{ "originalLocale" : $input.json(''$.originalLocale''),
+                                   "originalTitle" : $input.json(''$.originalTitle''),
+                                   "releaseYear" : $input.json(''$.releaseYear'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
   transcodingJobCompletionHook:
     handler: src/core/app/transcodingJobCompletionHook.handler
