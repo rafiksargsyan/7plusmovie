@@ -69,8 +69,11 @@ export class TvShow {
     return releaseYear;
   }
 
-  public addPosterImagePortrait(locale: L8nLangCode, relativePath: string) {
-    if (! /\S/.test(relativePath)) {
+  public addPosterImagePortrait(locale: L8nLangCode | undefined, relativePath: string | undefined) {
+    if (locale == undefined) {
+      throw new InvalidLocaleError();
+    }
+    if (relativePath == undefined || ! /\S/.test(relativePath)) {
       throw new InvalidPosterImageRelativePathError();
     }
     this.posterImagesPortrait[locale.code] = relativePath;
@@ -95,8 +98,8 @@ export class TvShow {
     this.touch();
   }
 
-  public addBackdropImage(relativePath: string) {
-    if (! /\S/.test(relativePath)) {
+  public addBackdropImage(relativePath: string | undefined) {
+    if (relativePath == undefined || ! /\S/.test(relativePath)) {
       throw new InvalidBackdropImageRelativePathError();
     }
     this.backdropImage = relativePath;
@@ -145,16 +148,22 @@ export class TvShow {
     this.touch();
   }
 
-  public addTitleL8n(locale: L8nLangCode, title: string) {
-    if (! /\S/.test(title)) {
+  public addTitleL8n(locale: L8nLangCode | undefined, title: string | undefined) {
+    if (title == undefined || ! /\S/.test(title)) {
       throw new InvalidTitleL8nError();
+    }
+    if (locale == undefined) {
+      throw new InvalidLocaleError();
     }
     // TODO: validate that title is in provided locale
     this.titleL8ns[locale.code] = title;
     this.touch();
   }
 
-  public addGenre(genre: TvShowGenre): boolean {
+  public addGenre(genre: TvShowGenre | undefined): boolean {
+    if (genre == undefined) {
+      throw new InvalidGenreError();
+    }
     for (const g of this.genres) {
       if (genre.code === g.code) {
         return false;
@@ -169,8 +178,8 @@ export class TvShow {
     this.lastUpdateTime = Date.now();
   }
 
-  public setTheMovieDbId(tmdbId: string) {
-    if (! /\S/.test(tmdbId)) {
+  public setTheMovieDbId(tmdbId: string | undefined) {
+    if (tmdbId == undefined || ! /\S/.test(tmdbId)) {
       throw new InvalidTmdbIdError();
     }
     this.tmdbId = tmdbId;
@@ -326,3 +335,5 @@ class InvalidTmdbEpisodeNumberError extends Error {}
 class DuplicateTmdbEpisodeNumberError extends Error {}
 
 class InvalidStillImageRelativePathError extends Error {}
+
+class InvalidGenreError extends Error {}
