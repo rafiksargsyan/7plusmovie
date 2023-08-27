@@ -77,8 +77,18 @@ export class TvShow {
     this.touch();
   }
 
-  public addSubtitle(season: number, episode: number, locale: SubsLangCode, relativePath: string) {
-    if (! /\S/.test(relativePath)) {
+  public addSubtitle(season: number | undefined, episode: number | undefined,
+                     locale: SubsLangCode | undefined, relativePath: string | undefined) {
+    if (season == undefined || season < 0 || season >= this.seasons.length) {
+      throw new InvalidSeasonError();
+    }
+    if (episode == undefined || episode < 0 || episode >= this.seasons[season].episodes.length) {
+      throw new InvalidEpisodeError();
+    }
+    if (locale == undefined) {
+      throw new InvalidLocaleError();
+    }        
+    if (relativePath == undefined || ! /\S/.test(relativePath)) {
       throw new InvalidSubtitleRelativePathError();
     }
     this.seasons[season].episodes[episode].subtitles[locale.code] = relativePath;
@@ -93,19 +103,45 @@ export class TvShow {
     this.touch();
   }
 
-  public addMpdFile(season: number, episode: number, relativePath: string) {
-    if (! /\S/.test(relativePath)) {
+  public addMpdFile(season: number | undefined, episode: number | undefined, relativePath: string | undefined) {
+    if (season == undefined || season < 0 || season >= this.seasons.length) {
+      throw new InvalidSeasonError();
+    }
+    if (episode == undefined || episode < 0 || episode >= this.seasons[season].episodes.length) {
+      throw new InvalidEpisodeError();
+    }
+    if (relativePath == undefined || ! /\S/.test(relativePath)) {
       throw new InvalidMpdFileRelativePathError();
     }
     this.seasons[season].episodes[episode].mpdFile = relativePath;
     this.touch();
   }
 
-  public addM3u8File(season: number, episode: number, relativePath: string) {
-    if (! /\S/.test(relativePath)) {
+  public addM3u8File(season: number | undefined, episode: number | undefined, relativePath: string | undefined) {
+    if (season == undefined || season < 0 || season >= this.seasons.length) {
+      throw new InvalidSeasonError();
+    }
+    if (episode == undefined || episode < 0 || episode >= this.seasons[season].episodes.length) {
+      throw new InvalidEpisodeError();
+    }
+    if (relativePath == undefined || ! /\S/.test(relativePath)) {
       throw new InvalidM3u8FileRelativePathError();
     }
     this.seasons[season].episodes[episode].m3u8File = relativePath;
+    this.touch();
+  }
+
+  public addStillImage(season: number | undefined, episode: number | undefined, relativePath: string | undefined) {
+    if (season == undefined || season < 0 || season >= this.seasons.length) {
+      throw new InvalidSeasonError();
+    }
+    if (episode == undefined || episode < 0 || episode >= this.seasons[season].episodes.length) {
+      throw new InvalidEpisodeError();
+    }
+    if (relativePath == undefined || ! /\S/.test(relativePath)) {
+      throw new InvalidStillImageRelativePathError();
+    }
+    this.seasons[season].episodes[episode].stillImage = relativePath;
     this.touch();
   }
 
@@ -181,6 +217,11 @@ export class TvShow {
     if (tmdbSeasonNumber == undefined) {
       throw new InvalidTmdbSeasonNumberError();
     }
+    this.seasons.forEach((_, i) => {
+      if (i != season && _.tmdbSeasonNumber == tmdbSeasonNumber) {
+        throw new DuplicateTmdbSeasonNumberError();
+      }
+    })
     this.seasons[season].tmdbSeasonNumber = tmdbSeasonNumber;
     this.touch();
   }
@@ -216,6 +257,26 @@ export class TvShow {
       subtitles: {},
       nameL8ns: {}
     });
+    this.touch();
+  }
+
+  public addTmdbEpisodeNumber(season: number | undefined, episode: number | undefined,
+                              tmdbEpisodeNumber: number | undefined) {
+    if (season == undefined || season < 0 || season >= this.seasons.length) {
+      throw new InvalidSeasonError();
+    }
+    if (episode == undefined || episode < 0 || episode >= this.seasons[season].episodes.length) {
+      throw new InvalidEpisodeError();
+    }
+    if (tmdbEpisodeNumber == undefined) {
+      throw new InvalidTmdbEpisodeNumberError();
+    }
+    this.seasons[season].episodes.forEach((_, i) => {
+      if (i != episode && _.tmdbEpisodeNumber == tmdbEpisodeNumber) {
+        throw new DuplicateTmdbEpisodeNumberError();
+      }
+    })
+    this.seasons[season].episodes[episode].tmdbEpisodeNumber = tmdbEpisodeNumber;
     this.touch();
   }
 }
@@ -255,3 +316,13 @@ class SeasonWithNameAlreadyExistsError extends Error {}
 class InvalidEpisodeNameError extends Error {}
 
 class EpisodeWithNameAlreadyExistsError extends Error {}
+
+class InvalidEpisodeError extends Error {}
+
+class DuplicateTmdbSeasonNumberError extends Error {}
+
+class InvalidTmdbEpisodeNumberError extends Error {}
+
+class DuplicateTmdbEpisodeNumberError extends Error {}
+
+class InvalidStillImageRelativePathError extends Error {}
