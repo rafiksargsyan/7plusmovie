@@ -74,6 +74,24 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  addPosterImagePortraitToTvShow:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/addPosterImagePortraitToTvShow.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addPosterImagePortraitToTvShow
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
+                                   "locale" : $input.json(''$.locale''),
+                                   "relativePath" : $input.json(''$.relativePath'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
   addMpdFileToMovie:
     environment:
@@ -385,6 +403,99 @@ functions:
             template:
               application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
                                    "genre" : $input.json(''$.genre'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+    
+  addM3u8FileToTvShow:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/addM3u8FileToTvShow.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addM3u8FileToTvShow
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
+                                   "relativePath" : $input.json(''$.relativePath''),
+                                   "season" : $input.json(''$.season''),
+                                   "episode" : $input.json(''$.episode'') }'
+              application/x-www-form-urlencoded: null                      
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  addMpdFileToTvShow:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/addMpdFileToTvShow.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addMpdFileToTvShow
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
+                                   "relativePath" : $input.json(''$.relativePath''),
+                                   "season" : $input.json(''$.season''),
+                                   "episode" : $input.json(''$.episode'') }'
+              application/x-www-form-urlencoded: null                      
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  addSubtitleToTvShow:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/addSubtitleToTvShow.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addSubtitleToTvShow
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
+                                   "lang" : $input.json(''$.lang''),
+                                   "relativePath" : $input.json(''$.relativePath''),
+                                   "season" : $input.json(''$.season''),
+                                   "episode" : $input.json(''$.episode'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6 
+  
+  addTheMovieDbIdToTvShow:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/addTheMovieDbIdToTvShow.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addTheMovieDbIdToTvShow
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
+                                   "tmdbId" : $input.json(''$.tmdbId'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  addTitleL8nToTvShow:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/addTitleL8nToTvShow.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addTitleL8nToTvShow
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
+                                   "locale" : $input.json(''$.locale''),
+                                   "title" : $input.json(''$.title'') }'
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
