@@ -327,7 +327,13 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
- 
+
+  transcodingJobCompletionHook:
+    handler: src/core/app/transcodingJobCompletionHook.handler
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME}
+  
   createTvShow:
     handler: src/core/app/tv-show/createTvShow.handler
     environment:
@@ -349,11 +355,22 @@ functions:
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
-  transcodingJobCompletionHook:
-    handler: src/core/app/transcodingJobCompletionHook.handler
+  addBackdropImageToTvShow:
     environment:
-      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
-      DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME}
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/addBackdropImageToTvShow.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addBackdropImageToTvShow
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
+                                   "relativePath" : $input.json(''$.relativePath'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
 plugins:
   - serverless-esbuild
