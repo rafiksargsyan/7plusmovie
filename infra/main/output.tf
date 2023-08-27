@@ -53,3 +53,11 @@ output "ddb_transcoding_job_table_name" {
 output "secret_manager_transcoding_context_secret_id" {
   value = aws_secretsmanager_secret.transcoding_context_secrets.name
 }
+
+output "ddb_tv_show_table_name" {
+  value = aws_dynamodb_table.tv_show.name
+}
+
+output "ddb_tv_show_transcoding_job_table_name" {
+  value = aws_dynamodb_table.tv_show_transcoding_job.name
+}
