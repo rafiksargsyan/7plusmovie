@@ -288,6 +288,22 @@ export class TvShow {
     this.seasons[season].episodes[episode].tmdbEpisodeNumber = tmdbEpisodeNumber;
     this.touch();
   }
+
+  public addEpisodeNameL8n(season: number | undefined, episode: number | undefined,
+                           locale: L8nLangCode | undefined, name: string | undefined) {
+    if (season == undefined || season < 0 || season >= this.seasons.length) {
+      throw new InvalidSeasonError();
+    }
+    if (episode == undefined || episode < 0 || episode >= this.seasons[season].episodes.length) {
+      throw new InvalidEpisodeError();
+    }
+    if (locale == undefined) {
+      throw new InvalidLocaleError();
+    }
+    if (name == undefined || ! /\S/.test(name)) {
+      throw new InvalidEpisodeNameL8nError();
+    }
+  }
 }
 
 class InvalidTitleError extends Error {}
@@ -337,3 +353,5 @@ class DuplicateTmdbEpisodeNumberError extends Error {}
 class InvalidStillImageRelativePathError extends Error {}
 
 class InvalidGenreError extends Error {}
+
+class InvalidEpisodeNameL8nError extends Error {}
