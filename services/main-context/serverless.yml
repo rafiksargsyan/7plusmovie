@@ -544,6 +544,28 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  tvShowUpdateHandler:
+    handler: src/core/app/tv-show/tvShowUpdateHandler.handler
+    environment:
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      ALGOLIA_APP_ID: ${env:ALGOLIA_APP_ID}
+      ALGOLIA_ALL_INDEX: ${env:ALGOLIA_ALL_INDEX}
+      CLOUDINARY_CLOUD_NAME: ${env:CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${env:CLOUDINARY_API_KEY}
+      MEDIA_ASSETS_S3_BUCKET: ${env:MEDIA_ASSETS_S3_BUCKET}
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    events:
+      - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_TV_SHOW_STREAM_ARN}
+
+  tvShowTranscodingJobUpdateHandler:
+    handler: src/core/app/tv-show/tvShowTranscodingJobUpdateHandler.handler
+    environment:
+      TRANSCODING_CONTEXT_JOB_CREATION_LAMBDA_NAME: ${env:TRANSCODING_CONTEXT_JOB_CREATION_LAMBDA_NAME}
+      DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME}
+    events:
+      - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_MOVIE_TRANSCODING_JOB_STREAM_ARN}
+
 
 plugins:
   - serverless-esbuild
