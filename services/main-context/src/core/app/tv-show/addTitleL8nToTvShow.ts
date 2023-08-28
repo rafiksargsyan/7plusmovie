@@ -26,7 +26,7 @@ export const handler = async (event: AddTitleL8nParam): Promise<void> => {
     Key: { 'id': event.tvShowId }
   } as const;
   let data = await docClient.get(queryParams);
-  if (data === undefined || data.Item === undefined) {
+  if (data == undefined || data.Item == undefined) {
     throw new FailedToGetTvShowError();
   }
   let tvShow = new TvShow(true);

@@ -512,7 +512,7 @@ functions:
           method: get
           request:
             template:
-              application/json: '{ "movieId" : "$input.params(''id'')" }'
+              application/json: '{ "tvShowId" : "$input.params(''id'')" }'
               application/x-www-form-urlencoded: null
           response:
             headers:
@@ -562,9 +562,9 @@ functions:
     handler: src/core/app/tv-show/tvShowTranscodingJobUpdateHandler.handler
     environment:
       TRANSCODING_CONTEXT_JOB_CREATION_LAMBDA_NAME: ${env:TRANSCODING_CONTEXT_JOB_CREATION_LAMBDA_NAME}
-      DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME}
+      DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME}
     events:
-      - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_MOVIE_TRANSCODING_JOB_STREAM_ARN}
+      - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_TV_SHOW_TRANSCODING_JOB_STREAM_ARN}
 
 
 plugins:

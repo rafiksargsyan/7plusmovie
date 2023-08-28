@@ -94,7 +94,7 @@ async function getTvShow(id: string) {
     Key: { 'id': id }
   } as const;
   let data = await docClient.get(queryParams);
-  if (data === undefined || data.Item === undefined) {
+  if (data == undefined || data.Item == undefined) {
     throw new FailedToGetTvShowError();
   }
   let tvShow: TvShow = data.Item as unknown as TvShow;
@@ -112,7 +112,7 @@ async function getRandomCloudFrontDistro() {
     items =  await docClient.scan(params);
     items.Items.forEach((item) => cfDistros.push(item as unknown as CloudFrontDistro));
     params.ExclusiveStartKey = items.LastEvaluatedKey;
-  } while (typeof items.LastEvaluatedKey !== "undefined");
+  } while (typeof items.LastEvaluatedKey != "undefined");
   const randomIndex = Math.floor(Math.random() * cfDistros.length);
   return cfDistros[randomIndex];
 }

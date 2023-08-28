@@ -86,6 +86,9 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
     for (const record of event.Records) {
       if (record.eventName === 'REMOVE') {
         let objectID = record.dynamodb?.Keys?.id.S;
+        if (objectID == undefined || ! /\S/.test(objectID)) {
+          throw new EmptyObjectIdError();
+        }
         await algoliaIndex.deleteBy({filters: `objectID: ${objectID}`});
         await cloudinary.api.delete_resources_by_prefix(objectID!);
         await emptyS3Directory(mediaAssetsS3Bucket, `${objectID}/`);
@@ -351,3 +354,5 @@ const tmdbTvShowGenreId2TvShowGenre = {
 
 
 class FailedToGetTvShowError extends Error {}
+
+class EmptyObjectIdError extends Error {}
