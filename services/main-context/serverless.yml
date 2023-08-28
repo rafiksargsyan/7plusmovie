@@ -499,6 +499,51 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  getTvShowMetadataForPlayer:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+      DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME: ${env:DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME}
+    handler: src/core/app/tv-show/getTvShowMetadataForPlayer.handler
+    events:
+      - http:
+          integration: lambda
+          path: /getTvShowMetadataForPlayer/{id}
+          method: get
+          request:
+            template:
+              application/json: '{ "movieId" : "$input.params(''id'')" }'
+              application/x-www-form-urlencoded: null
+          response:
+            headers:
+              Access-Control-Allow-Origin: "'*'"
+            template: '{ "subtitles" : $input.json(''$.subtitles''),
+                         "mpdFile" : $input.json(''$.mpdFile''),
+                         "m3u8File" : $input.json(''$.m3u8File''),
+                         "stillImage": $input.json(''$.stillImage''),
+                         "originalTitle": $input.json(''$.originalTitle''),
+                         "titleL8ns": $input.json(''$.titleL8ns''),
+                         "releaseYear": $input.json(''$.releaseYear''),
+                         "seasonOriginalName": $input.json(''$.seasonOriginalName''),
+                         "seasonNameL8ns": $input.json(''$.seasonNameL8ns''),
+                         "episodeOriginalName": $input.json(''$.episodeOriginalName''),
+                         "episodeNameL8ns": $input.json(''$.episodeNameL8ns'') }'
+  
+  createTvShowTranscodingJob:
+    handler: src/core/app/tv-show/createTvShowTranscodingJob.handler
+    environment:
+      DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME}
+    events:
+      - http:
+          integration: lambda
+          path: /createTvShowTranscodingJob
+          method: post
+          request:
+            template:
+              application/json: '$input.json(''$'')'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
 plugins:
   - serverless-esbuild
