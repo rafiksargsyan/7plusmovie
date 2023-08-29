@@ -65,7 +65,9 @@ export const Persons = {
   CHARLIZE_THERON : { EN_US : "Charlize Theron", RU : "Шарлиз Терон" },
   CHRIS_PRATT : { EN_US : "Chris Pratt", RU : "Крис Пратт" },
   GAL_GADOT : { EN_US : "Gal Gadot", RU : "Галь Гадот" },
-  KATE_WINSLET : { EN_US : "Kate Winslet", RU : "Кейт Уинслет" }
+  KATE_WINSLET : { EN_US : "Kate Winslet", RU : "Кейт Уинслет" },
+  SCOTT_ADKINS : { EN_US : "Scott Adkins", RU : "Скотт Адкинс" },
+  JENNIFER_LAWRENCE : { EN_US : "Jennifer Lawrence", RU : "Дженифер Лоуренс" }
 } as const;
 
 export class Person {
