@@ -38,8 +38,6 @@ interface TextTranscodeSpec {
 interface TvShowTranscodingJobRead {
   id?: string;
   tvShowId?: string;
-  season?: number;
-  episode?: number;
   textTranscodeSpecs?: TextTranscodeSpec[];
   audioTranscodeSpecs?: AudioTranscodeSpec[];
   mkvS3ObjectKey?: string;
