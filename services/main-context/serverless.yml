@@ -602,6 +602,43 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  addTmdbSeasonNumber:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/addTmdbSeasonNumber.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addTmdbSeasonNumber
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
+                                   "seasonNumber" : $input.json(''$.seasonNumber''),
+                                   "tmdbSeasonNumber" : $input.json(''$.tmdbSeasonNumber'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  addTmdbEpisodeNumber:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/addTmdbEpisodeNumber.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addTmdbEpisodeNumber
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
+                                   "seasonNumber" : $input.json(''$.seasonNumber''),
+                                   "episodeNumber" : $input.json(''$.episodeNumber''),
+                                   "tmdbEpisodeNumber" : $input.json(''$.tmdbEpisodeNumber'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
 plugins:
   - serverless-esbuild

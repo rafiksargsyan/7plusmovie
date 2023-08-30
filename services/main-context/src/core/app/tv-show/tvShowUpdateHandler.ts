@@ -289,22 +289,21 @@ async function updateBasedOnTmdbId(tvShowId: string, tmdbId: string, tmdbApiKey:
           updated = true;
         }
       }
-
       const tmdbEpisodeNumber2TmdbEpisodeEnUs = tmdbSeasonEnUs.episodes.reduce((acc, cur) => {
         acc[cur.episode_number] = cur;
         return acc;
-      })
+      }, [])
       const tmdbEpisodeNumber2TmdbEpisodeRu = tmdbSeasonRu.episodes.reduce((acc, cur) => {
         acc[cur.episode_number] = cur;
         return acc;
-      })
+      }, [])
 
       for (let episode of _.episodes) {
         if (episode.tmdbEpisodeNumber != undefined) {
           const tmdbEpisodeEnUs = tmdbEpisodeNumber2TmdbEpisodeEnUs[episode.tmdbEpisodeNumber];
           const tmdbEpisodeRu = tmdbEpisodeNumber2TmdbEpisodeRu[episode.tmdbEpisodeNumber];
           if (episode.nameL8ns['EN_US'] == undefined && tmdbEpisodeEnUs.name != undefined) {
-            tvShow.addEpisodeNameL8n(_.seasonNumber, episode.episodeNumber, new L8nLangCode('EN_US'), seasonNameEnUs);
+            tvShow.addEpisodeNameL8n(_.seasonNumber, episode.episodeNumber, new L8nLangCode('EN_US'), tmdbEpisodeEnUs.name);
             updated = true;
           }
           if (episode.nameL8ns['RU'] == undefined && tmdbEpisodeRu.name != undefined) {
