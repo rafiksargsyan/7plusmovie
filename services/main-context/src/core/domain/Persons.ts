@@ -67,7 +67,10 @@ export const Persons = {
   GAL_GADOT : { EN_US : "Gal Gadot", RU : "Галь Гадот" },
   KATE_WINSLET : { EN_US : "Kate Winslet", RU : "Кейт Уинслет" },
   SCOTT_ADKINS : { EN_US : "Scott Adkins", RU : "Скотт Адкинс" },
-  JENNIFER_LAWRENCE : { EN_US : "Jennifer Lawrence", RU : "Дженифер Лоуренс" }
+  JENNIFER_LAWRENCE : { EN_US : "Jennifer Lawrence", RU : "Дженифер Лоуренс" },
+  EVANGELINE_LILLY : { EN_US : "Evangeline Lilly", RU : "Эванджелин Лилли" },
+  MICHELLE_PFEIFFER : { EN_US : "Michelle Pfeiffer", RU : "Мишель Пфайффер" },
+  MICHAEL_DOUGLAS : { EN_US : "Michael Douglas", RU : "Майкл Дуглас" }
 } as const;
 
 export class Person {
