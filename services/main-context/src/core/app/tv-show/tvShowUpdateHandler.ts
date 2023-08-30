@@ -103,14 +103,14 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         if (updated) {
           return;
         }
-        if (Object.keys(tvShow.posterImagesPortrait).length === 0) {
+        if (Object.keys(tvShow.posterImagesPortrait).length == 0) {
           return;
         }
-        const seasons = tvShow.seasons.map(_ => ({
+        let seasons = tvShow.seasons.map(_ => ({
           ..._,
           episodes: _.episodes.filter(e => e.mpdFile != undefined && e.m3u8File != undefined)
         }));
-        seasons.filter(_ => _.episodes.length != 0);
+        seasons = seasons.filter(_ => _.episodes.length != 0);
         if (seasons.length == 0) {
           return;
         }
