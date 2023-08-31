@@ -155,7 +155,7 @@ function transcodeVideoFromMkv(mkvFilePath: string, stream: number, resolution: 
   let command = `ffmpeg -i ${mkvFilePath} -an -sn -c:v:${stream} libx264 -profile:v ${profile} -level:v ${level} `;
   command += `-x264opts 'keyint=120:min-keyint=120:no-scenecut:open_gop=0' -map_chapters -1 -crf ${crf} -maxrate ${maxRate} `;
   command += `-bufsize ${bufSize} -preset veryslow -tune film -vf "scale=-2:${resolution},format=yuv420p" `;
-  command += "-color_primaries bt709 -color_trc bt709 -colorspace bt709 -color_range tv "
+//  command += "-color_primaries bt709 -color_trc bt709 -colorspace bt709 -color_range tv "
   command += `h264_${profile}_${resolution}p_${crf}.mp4 > /dev/null 2>&1`;  
   execSync(command);
 }
