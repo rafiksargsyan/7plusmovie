@@ -351,7 +351,9 @@ functions:
     environment:
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
       DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME}
-  
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}    
+      DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME}
+
   createTvShow:
     handler: src/core/app/tv-show/createTvShow.handler
     environment:
@@ -508,11 +510,13 @@ functions:
     events:
       - http:
           integration: lambda
-          path: /getTvShowMetadataForPlayer/{id}
+          path: /getTvShowMetadataForPlayer/{id}/{season}/{episode}
           method: get
           request:
             template:
-              application/json: '{ "tvShowId" : "$input.params(''id'')" }'
+              application/json: '{ "tvShowId" : "$input.params(''id'')",
+                                   "season" : $input.params(''season''),
+                                   "episode" : $input.params(''episode'') }'
               application/x-www-form-urlencoded: null
           response:
             headers:

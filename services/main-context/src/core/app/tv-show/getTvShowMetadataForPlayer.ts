@@ -41,12 +41,14 @@ interface Episode {
   mpdFile: string;
   m3u8File: string;
   subtitles: { [key: string]: string };
+  episodeNumber: number;
 }
   
 interface Season {
   originalName: string;
   nameL8ns: { [key: string]: string };
   episodes: Episode[];
+  seasonNumber: number;
 }
 
 interface CloudFrontDistro {
@@ -58,11 +60,11 @@ interface CloudFrontDistro {
 export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataResponse> => {
   const tvShow = await getTvShow(event.tvShowId);
   const cfDistro = await getRandomCloudFrontDistro();
-  const season = tvShow.seasons[event.season];
+  const season = tvShow.seasons.filter(_ => _.seasonNumber == event.season)[0];
   if (season == undefined) {
     throw new TvShowSeasonNotFoundError();
   }
-  const episode = season.episodes[event.episode];
+  const episode = season.episodes.filter(_ => _.episodeNumber == event.episode)[0];
   if (episode == undefined) {
     throw new TvShowEpisodeNotFoundError();
   }

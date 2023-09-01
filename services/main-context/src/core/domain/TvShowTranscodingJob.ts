@@ -70,6 +70,7 @@ export class TvShowTranscodingJob {
     if (episode == undefined || episode < 0) {
       throw new InvalidEpisodeError();
     }
+    this.episode = episode;
   }
 
   private setMkvS3ObjectKey(mkvS3ObjectKey: string | undefined) {
