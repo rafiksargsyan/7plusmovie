@@ -56,7 +56,8 @@ jobs:
           if [ -z "${MKV_HTTP_URL}"]; then
             DOWNLOAD_COMMAND="aws s3 cp s3://${RAW_MEDIA_FILES_S3_BUCKET}/${MKV_S3_OBJECT_KEY} ${GITHUB_RUN_ID}.mkv"
           else
-            DOWNLOAD_COMMAND="wget -O ${GITHUB_RUN_ID}.mkv ${MKV_HTTP_URL}"  
+            DOWNLOAD_COMMAND="wget -O ${GITHUB_RUN_ID}.mkv ${MKV_HTTP_URL}"
+          fi
           for i in 1 2 3; do ${DOWNLOAD_COMMAND} && break; done
       
       - name: Prepare transcoding output directory
