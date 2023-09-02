@@ -30,6 +30,7 @@ interface TextTranscodeSpecParam {
 
 interface CreateTranscodingJobParam {
   mkvS3ObjectKey: string;
+  mkvHttpUrl: string;
   outputFolderKey: string;
   audioTranscodeSpecParams: AudioTranscodeSpecParam[] | undefined;
   textTranscodeSpecParams: TextTranscodeSpecParam[] | undefined;
@@ -44,7 +45,7 @@ export const handler = async (event: CreateTranscodingJobParam): Promise<string>
   let textTranscodeSpecParams = event.textTranscodeSpecParams?.map(_ => {
     return { stream: _.stream, forced: _.forced, lang: new SubsLangCode(_.lang)}
   });
-  let transcodingJob = new TranscodingJob(false, event.mkvS3ObjectKey, event.outputFolderKey,
+  let transcodingJob = new TranscodingJob(false, event.mkvS3ObjectKey, event.mkvHttpUrl, event.outputFolderKey,
     audioTranscodeSpecParams, textTranscodeSpecParams, event.defaultAudioTrack, event.defaultTextTrack);
   
   await docClient.put({TableName: dynamodbTranscodingJobTableName, Item: transcodingJob});

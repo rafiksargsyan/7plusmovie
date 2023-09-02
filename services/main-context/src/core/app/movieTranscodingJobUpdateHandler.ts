@@ -40,6 +40,7 @@ interface MovieTranscodingJobRead {
   textTranscodeSpecs?: TextTranscodeSpec[];
   audioTranscodeSpecs?: AudioTranscodeSpec[];
   mkvS3ObjectKey?: string;
+  mkvHttpUrl?: string;
   outputFolderKey?: string;
   defaultAudioTrack?: number | undefined;
   defaultTextTrack?: number | undefined;
@@ -68,6 +69,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
 
           const transcodingJobParams = {
             mkvS3ObjectKey: movieTranscodingJobRead.mkvS3ObjectKey,
+            mkvHttpUrl: movieTranscodingJobRead.mkvHttpUrl,
             outputFolderKey: movieTranscodingJobRead.outputFolderKey,
             audioTranscodeSpecParams: movieTranscodingJobRead.audioTranscodeSpecs?.map(_ => ({ ..._, lang: _.lang.code })),
             textTranscodeSpecParams: movieTranscodingJobRead.textTranscodeSpecs?.map(_ => ({ ..._, lang: _.lang.code })),

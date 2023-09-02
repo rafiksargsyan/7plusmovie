@@ -5,7 +5,10 @@ on:
     inputs:
       mkv_s3_object_key:
         description: 'S3 path of mkv file to be transcoded'
-        required: true
+        required: false
+      mkv_http_url:
+        description: 'Http url of mkv file'
+        required: false
       output_s3_folder_key:
         description: 'Transcoding output s3 folder key'  
         required: true
@@ -25,6 +28,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: eu-west-3
       MKV_S3_OBJECT_KEY: ${{ github.event.inputs.mkv_s3_object_key }}
+      MKV_HTTP_URL: ${{ github.event.inputs.mkv_http_url }}
       RAW_MEDIA_FILES_S3_BUCKET: raw-media-assets-prod-e1pjapsk
       MEDIA_FILES_S3_BUCKET: media-assets-prod-e1pjapsk
       TRANSCODING_OUTPUT_DIR_NAME: transcoding-output
@@ -49,7 +53,11 @@ jobs:
 
       - name: Download MKV file
         run: |
-          for i in 1 2 3; do aws s3 cp s3://${RAW_MEDIA_FILES_S3_BUCKET}/${MKV_S3_OBJECT_KEY} ${GITHUB_RUN_ID}.mkv && break; done
+          if [ -z "${MKV_HTTP_URL}"]; then
+            DOWNLOAD_COMMAND="aws s3 cp s3://${RAW_MEDIA_FILES_S3_BUCKET}/${MKV_S3_OBJECT_KEY} ${GITHUB_RUN_ID}.mkv"
+          else
+            DOWNLOAD_COMMAND="wget -O ${GITHUB_RUN_ID}.mkv ${MKV_HTTP_URL}"  
+          for i in 1 2 3; do ${DOWNLOAD_COMMAND} && break; done
       
       - name: Prepare transcoding output directory
         run: |

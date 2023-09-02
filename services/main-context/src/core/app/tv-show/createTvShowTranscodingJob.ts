@@ -33,6 +33,7 @@ interface CreateTvShowTranscodingJobParam {
   season: number;
   episode: number;
   mkvS3ObjectKey: string;
+  mkvHttpUrl: string
   outputFolderKey: string;
   audioTranscodeSpecParams: AudioTranscodeSpecParam[] | undefined;
   textTranscodeSpecParams: TextTranscodeSpecParam[] | undefined;
@@ -48,7 +49,7 @@ export const handler = async (event: CreateTvShowTranscodingJobParam): Promise<s
     return { stream: _.stream, forced: _.forced, lang: new SubsLangCode(_.lang)}
   });
   let tvShowTranscodingJob = new TvShowTranscodingJob(false, event.tvShowId, event.season, event.episode, event.mkvS3ObjectKey,
-    event.outputFolderKey, audioTranscodeSpecParams, textTranscodeSpecParams, event.defaultAudioTrack, event.defaultTextTrack);
+    event.mkvHttpUrl, event.outputFolderKey, audioTranscodeSpecParams, textTranscodeSpecParams, event.defaultAudioTrack, event.defaultTextTrack);
   
   await docClient.put({TableName: dynamodbTvShowTranscodingJobTableName, Item: tvShowTranscodingJob});
 
