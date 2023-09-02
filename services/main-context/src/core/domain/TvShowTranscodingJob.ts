@@ -24,6 +24,7 @@ export class TvShowTranscodingJob {
   private season: number;
   private episode: number;
   private mkvS3ObjectKey: string;
+  private mkvHttpUrl: string;
   private outputFolderKey: string;
   private audioTranscodeSpecs: AudioTranscodeSpec[];
   private textTranscodeSpecs: TextTranscodeSpec[];
@@ -32,7 +33,7 @@ export class TvShowTranscodingJob {
   private transcodingContextJobId: string;
 
   public constructor(createEmptyObject: boolean, tvShowId?: string, season?: number, episode?: number,
-    mkvS3ObjectKey?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
+    mkvS3ObjectKey?: string, mkvHttpUrl?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
     textTranscodeSpecs?: TextTranscodeSpec[], defaultAudioTrack?: number,
     defaultTextTrack?: number) {
     if (!createEmptyObject) {
@@ -40,7 +41,7 @@ export class TvShowTranscodingJob {
       this.setTvShowId(tvShowId);
       this.setSeason(season);
       this.setEpisode(episode);
-      this.setMkvS3ObjectKey(mkvS3ObjectKey);
+      this.setMkvLocation(mkvHttpUrl, mkvS3ObjectKey);
       this.setOutputFolderKey(outputFolderKey)
       this.setAudioTranscodeSpecs(audioTranscodeSpecs);
       this.setTextTranscodeSpecs(textTranscodeSpecs);
@@ -73,11 +74,25 @@ export class TvShowTranscodingJob {
     this.episode = episode;
   }
 
-  private setMkvS3ObjectKey(mkvS3ObjectKey: string | undefined) {
-    if (mkvS3ObjectKey == undefined || ! /\S/.test(mkvS3ObjectKey)) {
-      throw new InvalidMkvS3ObjectKeyError();
+  private setMkvLocation(mkvHttpUrl: string | undefined, mkvS3ObjectKey: string | undefined) {
+    if (mkvHttpUrl != undefined && mkvS3ObjectKey != undefined) {
+      throw new MultipleMkvLocationsError();
     }
-    this.mkvS3ObjectKey = mkvS3ObjectKey;
+    if (mkvHttpUrl != undefined) {
+      if (! /\S/.test(mkvHttpUrl)) {
+        throw new InvalidMkvHttpUrlError();
+      }
+      this.mkvHttpUrl = mkvHttpUrl;
+      return;
+    }
+    if (mkvS3ObjectKey != undefined) {
+      if (! /\S/.test(mkvS3ObjectKey)) {
+        throw new InvalidMkvS3ObjectKeyError();
+      }
+      this.mkvS3ObjectKey = mkvS3ObjectKey;
+      return;
+    }         
+    throw new NoMkvLocationError();
   }
 
   private setOutputFolderKey(outputFolderKey: string | undefined) {
@@ -133,3 +148,9 @@ class InvalidOutputFolderKeyError extends Error {}
 class InvalidSeasonError extends Error {}
 
 class InvalidEpisodeError extends Error {}
+
+class MultipleMkvLocationsError extends Error {}
+
+class NoMkvLocationError extends Error {}
+
+class InvalidMkvHttpUrlError extends Error {}

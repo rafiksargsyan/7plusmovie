@@ -27,6 +27,7 @@ interface TextTranscodeSpec {
 interface TranscodingJobRead {
   id: string;
   mkvS3ObjectKey: string;
+  mkvHttpUrl: string;
   outputFolderKey: string;
   audioTranscodeSpecs: AudioTranscodeSpec[];
   textTranscodeSpecs: TextTranscodeSpec[];
@@ -60,6 +61,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         }
         const workflowInputParams = {
           mkv_s3_object_key: (transcodingJobRead as TranscodingJobRead).mkvS3ObjectKey,
+          mkv_http_url: (transcodingJobRead as TranscodingJobRead).mkvHttpUrl,
           output_s3_folder_key: (transcodingJobRead as TranscodingJobRead).outputFolderKey,
           transcoding_spec_base64_encoded: Buffer.from(JSON.stringify(transcodingSpec)).toString("base64"),
           transcoding_context_job_id: (transcodingJobRead as TranscodingJobRead).id

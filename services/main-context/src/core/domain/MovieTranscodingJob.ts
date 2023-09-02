@@ -22,6 +22,7 @@ export class MovieTranscodingJob {
   private ttl: number;
   private movieId: string;
   private mkvS3ObjectKey: string;
+  private mkvHttpUrl;
   private outputFolderKey: string;
   private audioTranscodeSpecs: AudioTranscodeSpec[];
   private textTranscodeSpecs: TextTranscodeSpec[];
@@ -29,14 +30,13 @@ export class MovieTranscodingJob {
   private defaultTextTrack: number | undefined;
   private transcodingContextJobId: string;
 
-  public constructor(createEmptyObject: boolean, movieId?: string,
-    mkvS3ObjectKey?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
-    textTranscodeSpecs?: TextTranscodeSpec[], defaultAudioTrack?: number,
-    defaultTextTrack?: number) {
+  public constructor(createEmptyObject: boolean, movieId?: string, mkvS3ObjectKey?: string,
+    mkvHttpUrl?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
+    textTranscodeSpecs?: TextTranscodeSpec[], defaultAudioTrack?: number, defaultTextTrack?: number) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setMovieId(movieId);
-      this.setMkvS3ObjectKey(mkvS3ObjectKey);
+      this.setMkvLocation(mkvHttpUrl, mkvS3ObjectKey);
       this.setOutputFolderKey(outputFolderKey)
       this.setAudioTranscodeSpecs(audioTranscodeSpecs);
       this.setTextTranscodeSpecs(textTranscodeSpecs);
@@ -55,11 +55,25 @@ export class MovieTranscodingJob {
     this.movieId = movieId;
   }
 
-  private setMkvS3ObjectKey(mkvS3ObjectKey: string | undefined) {
-    if (mkvS3ObjectKey == undefined || ! /\S/.test(mkvS3ObjectKey)) {
-      throw new InvalidMkvS3ObjectKeyError();
+  private setMkvLocation(mkvHttpUrl: string | undefined, mkvS3ObjectKey: string | undefined) {
+    if (mkvHttpUrl != undefined && mkvS3ObjectKey != undefined) {
+      throw new MultipleMkvLocationsError();
     }
-    this.mkvS3ObjectKey = mkvS3ObjectKey;
+    if (mkvHttpUrl != undefined) {
+      if (! /\S/.test(mkvHttpUrl)) {
+        throw new InvalidMkvHttpUrlError();
+      }
+      this.mkvHttpUrl = mkvHttpUrl;
+      return;
+    }
+    if (mkvS3ObjectKey != undefined) {
+      if (! /\S/.test(mkvS3ObjectKey)) {
+        throw new InvalidMkvS3ObjectKeyError();
+      }
+      this.mkvS3ObjectKey = mkvS3ObjectKey;
+      return;
+    }         
+    throw new NoMkvLocationError();
   }
 
   private setOutputFolderKey(outputFolderKey: string | undefined) {
@@ -111,3 +125,9 @@ class InvalidDefaultTextTrackError extends Error {}
 class InvalidTranscodingContextJobIdError extends Error {}
 
 class InvalidOutputFolderKeyError extends Error {}
+
+class MultipleMkvLocationsError extends Error {}
+
+class NoMkvLocationError extends Error {}
+
+class InvalidMkvHttpUrlError extends Error {}

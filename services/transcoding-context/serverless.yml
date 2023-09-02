@@ -36,6 +36,7 @@ functions:
           request:
             template:
               application/json: '{ "mkvS3ObjectKey" : $input.json(''$.mkvS3ObjectKey''),
+                                   "mkvHttpUrl" : $input.json(''$.mkvHttpUrl''),
                                    "outputFolderKey" : $input.json(''$.outputFolderKey''),
                                    "audioTranscodeSpecParams" : $input.json(''$.audioTranscodeSpecParams''),
                                    "textTranscodeSpecParams" : $input.json(''$.textTranscodeSpecParams''),
