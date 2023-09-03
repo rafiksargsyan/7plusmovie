@@ -135,7 +135,7 @@ function GridView(props: CatalogProps) {
           <Grid item xs={1} sm={1} md={1} lg={1} xl={1} key={index}>
             <Card sx={{position: 'relative', borderRadius: 0}}>
               <CardActionArea>
-                <Link href={{pathname: '/player', query: {movieId: _.id}}}>
+                <Link href={_.category == "TV_SHOW" ? {pathname: '/tv-show', query : {id: _.id}} : {pathname: '/player', query: {movieId: _.id}}}>
                   <CardMedia
                     component="img"
                     src={`${imageBaseUrl}w_160,f_auto/${_.posterImagesPortrait[locale]}`}
@@ -180,6 +180,7 @@ interface MovieItem {
   titleL8ns: {[key: string]: string};
   releaseYear: number;
   posterImagesPortrait: {[key: string]: string};
+  category: "TV_SHOW" | "MOVIE";
 }
 
 interface CatalogProps {
