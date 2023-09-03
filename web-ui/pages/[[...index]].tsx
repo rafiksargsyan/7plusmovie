@@ -32,6 +32,7 @@ interface MovieItem {
   titleL8ns: {[key: string]: string};
   releaseYear: number;
   posterImagesPortrait: {[key: string]: string};
+  category: "TV_SHOW" | "MOVIE";
 }
 
 interface CatalogPageProps {
@@ -86,6 +87,7 @@ interface AlgoliaQueryItem {
   posterImagesPortrait: { [key: string]: string};
   titleL8ns: { [key: string]: string};
   creationTime: number;
+  category: "TV_SHOW" | "MOVIE";
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
@@ -108,7 +110,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       originalTitle: _.originalTitle,
       titleL8ns: _.titleL8ns,
       releaseYear: _.releaseYear,
-      posterImagesPortrait: _.posterImagesPortrait})),
+      posterImagesPortrait: _.posterImagesPortrait,
+      category: _.category})),
       currentLocale: langCode, 
       searchString: searchString
     }
