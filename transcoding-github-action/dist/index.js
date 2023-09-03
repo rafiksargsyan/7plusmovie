@@ -240,12 +240,21 @@ function transcodeVideoFromMkv(mkvFilePath, stream, resolution) {
         default:
             throw new UnsupportedVideoResolutionError();
     }
+    let videoSettings = `scale=-2:${resolution},format=yuv420p`;
+    if (isHdr(mkvFilePath)) {
+        videoSettings = `zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,` + videoSettings;
+    }
     let command = `ffmpeg -i ${mkvFilePath} -an -sn -c:v:${stream} libx264 -profile:v ${profile} -level:v ${level} `;
     command += `-x264opts 'keyint=120:min-keyint=120:no-scenecut:open_gop=0' -map_chapters -1 -crf ${crf} -maxrate ${maxRate} `;
-    command += `-bufsize ${bufSize} -preset veryslow -tune film -vf "scale=-2:${resolution},format=yuv420p" `;
-    //  command += "-color_primaries bt709 -color_trc bt709 -colorspace bt709 -color_range tv "
+    command += `-bufsize ${bufSize} -preset veryslow -tune film -vf "${videoSettings}" `;
     command += `h264_${profile}_${resolution}p_${crf}.mp4 > /dev/null 2>&1`;
     (0, child_process_1.execSync)(command);
+}
+function isHdr(mkvFilePath) {
+    const command = `ffprobe -v error -select_streams v:0 -show_entries stream=color_transfer,color_space,color_primaries -of json '${mkvFilePath}'`;
+    const output = (0, child_process_1.execSync)(command);
+    const outputStr = output.toString('utf-8');
+    return outputStr.includes('2020');
 }
 run();
 class UnsupportedVideoResolutionError extends Error {
