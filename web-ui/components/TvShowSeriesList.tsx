@@ -59,9 +59,9 @@ function TvShowSeriesList(props: TvShowSeriesListProps) {
       {props.seasons.map(s => {
         const name = `${s.nameL8ns[props.currentLocale] != undefined ? s.nameL8ns[props.currentLocale] : s.originalName}`;
         return (
-          <Box key={s.seasonNumber} sx={{p: 2, overflow: 'auto', whiteSpace: 'nowrap'}}>
+          <Box key={s.seasonNumber} sx={{p: 2}}>
             <Typography variant="h5" sx={{mb: 1}}>{`${tvShowTitle} (${name})`}</Typography>
-            <Box>
+            <Box sx={{overflow: 'auto', whiteSpace: 'nowrap'}}>
               {s.episodes.map(e => {
                 const episodeName = `${e.nameL8ns[props.currentLocale] != undefined ? e.nameL8ns[props.currentLocale] : e.originalName}`;
                 return (
