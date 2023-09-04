@@ -1,9 +1,6 @@
 import algoliasearch from 'algoliasearch';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
-import Catalog from '../components/Catalog';
 import TvShowSeriesList from '../components/TvShowSeriesList';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;

@@ -26,7 +26,7 @@ export default function App({ Component, pageProps }: AppProps) {
       return true;
     });
     const onRouteChangeStart = (url: string) => {
-      if (url.includes("/player?")) {
+      if (url.includes("/player?") || url.includes("/tv-show?")) {
         setLoading(true);
       }
     };
