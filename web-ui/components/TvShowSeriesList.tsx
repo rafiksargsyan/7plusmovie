@@ -1,12 +1,10 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { red } from '@mui/material/colors';
-
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardMedia from '@mui/material/CardMedia';
-import algoliasearch from 'algoliasearch';
-import { MenuItem, Select, Stack, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Link from 'next/link';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
@@ -61,13 +59,13 @@ function TvShowSeriesList(props: TvShowSeriesListProps) {
       {props.seasons.map(s => {
         const name = `${s.nameL8ns[props.currentLocale] != undefined ? s.nameL8ns[props.currentLocale] : s.originalName}`;
         return (
-          <>
-            <Typography variant="h5">{`${tvShowTitle} (${name})`}</Typography>
-            <div style={{ overflow: "auto", display: "flex" }}>
+          <Box key={s.seasonNumber} sx={{p: 2, overflow: 'auto', whiteSpace: 'nowrap'}}>
+            <Typography variant="h5" sx={{mb: 1}}>{`${tvShowTitle} (${name})`}</Typography>
+            <Box>
               {s.episodes.map(e => {
                 const episodeName = `${e.nameL8ns[props.currentLocale] != undefined ? e.nameL8ns[props.currentLocale] : e.originalName}`;
                 return (
-                  <Card key={e.episodeNumber} sx={{borderRadius: 0, width: "240px", flexShrink: 0}}>
+                  <Card sx={{display: 'inline-block', mr: { xs: 2, md: 3 }, borderRadius: 0, width: { xs: '60%', sm: '34%', md: '25%', lg: '17%', xl: '13%' }}} key={e.episodeNumber}>
                     <CardActionArea>
                       <Link href={{pathname: '/player', query: {tvShowId: props.id, season: s.seasonNumber, episode: e.episodeNumber}}}>
                         <CardMedia
@@ -79,12 +77,12 @@ function TvShowSeriesList(props: TvShowSeriesListProps) {
                         />
                       </Link>
                     </CardActionArea>     
-                    <Typography> {`${L8nTable[props.currentLocale as keyof typeof L8nTable]["EPISODE"]} ${e.episodeNumber} (${episodeName})`} </Typography>
+                    <Typography variant="subtitle2" noWrap> {`${L8nTable[props.currentLocale as keyof typeof L8nTable]["EPISODE"]} ${e.episodeNumber} (${episodeName})`} </Typography>
                   </Card>
                 )
               })} 
-            </div>
-          </>  
+            </Box>
+          </Box>  
         )
       })}
     </ThemeProvider>
