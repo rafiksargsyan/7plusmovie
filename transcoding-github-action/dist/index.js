@@ -205,7 +205,10 @@ function run() {
     });
 }
 function transcodeSubsFromMkv(mkvFilePath, stream, lang) {
-    const command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${SubsLangCodes_1.SubsLangCodes[lang.code]['langTag']}.vtt > /dev/null 2>&1`;
+    const fileName = `${SubsLangCodes_1.SubsLangCodes[lang.code]['langTag']}.vtt`;
+    let command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${fileName} > /dev/null 2>&1`;
+    (0, child_process_1.execSync)(command);
+    command = `echo >> ${fileName}`; // https://github.com/shaka-project/shaka-packager/issues/1018
     (0, child_process_1.execSync)(command);
 }
 function transcodeAudioFromMkv(mkvFilePath, stream, channels, bitrate, lang) {

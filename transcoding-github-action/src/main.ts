@@ -127,7 +127,10 @@ async function run(): Promise<void> {
 }
 
 function transcodeSubsFromMkv(mkvFilePath: string, stream: number, lang: SubsLangCode) {
-  const command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${SubsLangCodes[lang.code]['langTag']}.vtt > /dev/null 2>&1`;
+  const fileName = `${SubsLangCodes[lang.code]['langTag']}.vtt`;
+  let command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${fileName} > /dev/null 2>&1`;
+  execSync(command);
+  command = `echo >> ${fileName}`; // https://github.com/shaka-project/shaka-packager/issues/1018
   execSync(command);
 }
 
