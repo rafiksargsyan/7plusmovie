@@ -161,7 +161,9 @@ functions:
   createCloudFrontDistroMetadata:
     environment:
       DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME: ${env:DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME}
+      TEST_FILE_PATH: ${env:TEST_FILE_PATH}
     handler: src/core/app/createCloudFrontDistroMetadata.handler
+    role: createCloudFrontDistroMetadataRole
     events:
       - http:
           integration: lambda
@@ -169,8 +171,7 @@ functions:
           method: post
           request:
             template:
-              application/json: '{ "domain" : $input.json(''$.domain''),
-                                   "arn" : $input.json(''$.arn''),
+              application/json: '{ "arn" : $input.json(''$.arn''),
                                    "assumeRoleArnForMainAccount" : $input.json(''$.assumeRoleArnForMainAccount''),
                                    "awsAccountNumber" : $input.json(''$.awsAccountNumber''),
                                    "signerKeyId" : $input.json(''$.signerKeyId'') }'
@@ -661,6 +662,24 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+
+resources:
+  Resources:
+    createCloudFrontDistroMetadataRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: createCloudFrontDistroMetadataRole_${sls:stage}
+        ManagedPolicyArns:
+          - "arn:aws:iam::aws:policy/AdministratorAccess"
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action:
+                - 'sts:AssumeRole'
 
 plugins:
   - serverless-esbuild
