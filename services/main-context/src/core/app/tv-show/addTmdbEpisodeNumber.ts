@@ -14,10 +14,10 @@ const translateConfig = { marshallOptions };
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 
 interface AddTmdbEpisodeNumberParam {
-  tvShowId: string;
-  tmdbEpisodeNumber: number;
-  seasonNumber: number;
-  episodeNumber: number;
+  tvShowId?: string;
+  tmdbEpisodeNumber?: number;
+  seasonNumber?: number;
+  episodeNumber?: number;
 }
 
 export const handler = async (event: AddTmdbEpisodeNumberParam): Promise<void> => {
