@@ -16,7 +16,7 @@ const translateConfig = { marshallOptions };
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 
-const sts = new STSClient();
+const sts = new STSClient({});
 
 interface CreateCFDistroParam {
   arn: string;
