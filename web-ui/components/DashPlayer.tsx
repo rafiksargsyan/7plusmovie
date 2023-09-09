@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
-import videojs from 'video.js';
-import '../node_modules/video.js/dist/video-js.css';
-import '../node_modules/videojs-contrib-dash/dist/videojs-dash.min.js';
+//import videojs from 'video.js';
+import Plyr from 'plyr';
+import dashjs from 'dashjs';
+//import '../node_modules/video.js/dist/video-js.css';
+//import '../node_modules/videojs-contrib-dash/dist/videojs-dash.min.js';
+import '../node_modules/plyr/dist/plyr.css';
 
 interface DashPlayerProps {
   mpdFile: string,
@@ -15,31 +18,27 @@ function DashPlayer(props: DashPlayerProps) {
   useEffect(() => {
     const videoElement = videoRef.current;
     if (videoElement == null) return;
-    const player = videojs(videoElement, {
-        fill: true,
-        controlBar: {
-          skipButtons: {
-            forward: 10,
-            backward: 5
-          }
-        }});
-    player.src({ src: props.mpdFile, type: 'application/dash+xml'});
+    const dash = dashjs.MediaPlayer().create();
+    dash.initialize(videoElement, props.mpdFile, false);
+    const player = new Plyr(videoElement, {
+      captions: {active: true, update: true},
+      previewThumbnails: {enabled: true, src: 'https://d3o4ty4sk1leni.cloudfront.net/f01537f7-3441-4702-8d53-837cb9065b25/thumbnails/thumbnails.vtt'}
+    });
     
     return () => {
-      player.dispose();
+      player.destroy();
+      dash.reset();
     };
   }, []);
  
   return (
-    <>
-      <div data-js-player style={{height: '100vh', width: '100vw'}}>
+     <div>
         <video ref={videoRef}
-               style={{objectFit: props.isLandscape ? 'fill' : 'contain'}}
-               className="video-js vjs-default-skin" controls
-               data-setup={`{"poster":"${props.poster}"}`}
+               id="player" controls
+               style={{objectFit: 'contain'}}
+               data-poster={`${props.poster}`}
         />
-      </div>
-    </>
+     </div>  
   )
 }
 
