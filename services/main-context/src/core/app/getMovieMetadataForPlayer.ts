@@ -14,7 +14,7 @@ interface GetMovieMetadataResponse {
   subtitles: { [key: string]: string };
   mpdFile: string;
   m3u8File: string;
-  thumbnailsFile: string;
+  thumbnailsFile?: string;
   backdropImage: string;
   originalTitle: string;
   titleL8ns: { [key: string]: string };
@@ -26,7 +26,7 @@ interface Movie {
   subtitles: { [key: string]: string };
   mpdFile: string;
   m3u8File: string;
-  thumbnailsFile: string;
+  thumbnailsFile?: string;
   backdropImage: string;
   originalTitle: string;
   titleL8ns: { [key: string]: string };
@@ -47,7 +47,7 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
     subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `https://${cfDistro.domain}/${movie.subtitles[key]}`; return acc;}, {}),
     mpdFile: `https://${cfDistro.domain}/${movie.mpdFile}`,
     m3u8File: `https://${cfDistro.domain}/${movie.m3u8File}`,
-    thumbnailsFile: movie.thumbnailsFile,
+    thumbnailsFile: movie.thumbnailsFile !== undefined ? `https://${cfDistro.domain}/${movie.thumbnailsFile}` : undefined,
     backdropImage: movie.backdropImage,
     originalTitle: movie.originalTitle,
     titleL8ns: movie.titleL8ns,
