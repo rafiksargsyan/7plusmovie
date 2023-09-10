@@ -1,6 +1,6 @@
 FROM alpine:3.18.3
 
-RUN apk --update add --no-cache bash jq curl aws-cli imagemagick \
+RUN apk --update add --no-cache bash jq curl aws-cli imagemagick ghostscript \
     && wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz \
     && tar xvf ffmpeg-release-amd64-static.tar.xz \
     && mv ffmpeg-6.0-amd64-static/ffmpeg ffmpeg-6.0-amd64-static/ffprobe /usr/local/bin/ \
