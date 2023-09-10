@@ -4,10 +4,16 @@ import { red } from '@mui/material/colors';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardMedia from '@mui/material/CardMedia';
-import { Box, Typography } from '@mui/material';
+import { AppBar, Box, MenuItem, Select, Toolbar, Typography } from '@mui/material';
 import Link from 'next/link';
+import { useState } from 'react';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
+
+const L8nLangCodes = {
+  EN_US : { langTag : "en-US", countryCode: "US" },
+  RU : { langTag : "ru", countryCode: "RU" }
+} as const;
 
 const L8nTable = {
   EN_US : {
@@ -49,6 +55,38 @@ interface TvShowSeriesListProps {
   seasons: Season[];
   currentLocale: string;
   posterImagesPortrait: {[key: string]: string};
+  onLocaleChange: (locale: string) => void;
+}
+
+function L8nSelect(props: {onLocaleChange: (locale: string) => void, currentLocale: string}) {
+  return (
+    <Select value={props.currentLocale} inputProps={{ IconComponent: () => null, sx: { paddingTop: '8.5px', paddingBottom: '8.5px', paddingRight: '14px !important'}}}
+            onChange={(e, c) => props.onLocaleChange(e.target.value)}>
+      {Object.keys(L8nLangCodes).map((_) => (
+        <MenuItem value={_} key={_}>
+          <img src={`https://flagcdn.com/w20/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}.png`}
+               srcSet={`https://flagcdn.com/w40/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}.png 2x`}
+               alt={L8nTable[props.currentLocale as keyof typeof L8nTable][_ as keyof typeof L8nTable['EN_US']]} />{" "}
+        </MenuItem>
+      ))}
+    </Select>
+  );
+}
+
+function CustomAppBar(props: {onLocaleChange: (locale: string) => void, locale: string, title: string}) {
+  const [state, setState] = useState({options: []});
+
+  return (
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position='fixed'>
+        <Toolbar variant='dense' sx={{ justifyContent: "space-between" }}>
+        <Typography variant="h6" noWrap>{props.title}</Typography>  
+          <L8nSelect onLocaleChange={props.onLocaleChange} currentLocale={props.locale}/>
+        </Toolbar>
+      </AppBar>
+      <Toolbar variant='dense'/>
+    </Box>
+  );
 }
 
 function TvShowSeriesList(props: TvShowSeriesListProps) {
@@ -56,11 +94,12 @@ function TvShowSeriesList(props: TvShowSeriesListProps) {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
+      <CustomAppBar title={tvShowTitle} onLocaleChange={props.onLocaleChange} locale={props.currentLocale}/>
       {props.seasons.map(s => {
         const name = `${s.nameL8ns[props.currentLocale] != undefined ? s.nameL8ns[props.currentLocale] : s.originalName}`;
         return (
           <Box key={s.seasonNumber} sx={{p: 2}}>
-            <Typography variant="h5" sx={{mb: 1}}>{`${tvShowTitle} (${name})`}</Typography>
+            <Typography variant="h6" sx={{mb: 1}}>{name}</Typography>
             <Box sx={{overflow: 'auto', whiteSpace: 'nowrap'}}>
               {s.episodes.map(e => {
                 const episodeName = `${e.nameL8ns[props.currentLocale] != undefined ? e.nameL8ns[props.currentLocale] : e.originalName}`;

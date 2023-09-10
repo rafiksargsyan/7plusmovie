@@ -1,6 +1,8 @@
 import algoliasearch from 'algoliasearch';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 import TvShowSeriesList from '../components/TvShowSeriesList';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
@@ -40,6 +42,14 @@ interface TvShowPageProps {
 }
 
 function TvShowPage(props: TvShowPageProps) {
+  const router = useRouter();
+  const [locale, setLocale] = useState(props.currentLocale);
+
+  const onLocaleChange = (locale: string) => {
+    router.replace(router.asPath, undefined, { locale: L8nLangCodes[locale as keyof typeof L8nLangCodes].langTag });
+    setLocale(locale as keyof typeof L8nLangCodes);
+  }
+
   return (
     <>
       <Head>
@@ -54,7 +64,7 @@ function TvShowPage(props: TvShowPageProps) {
         <link rel="alternate" href="https://www.q62.xyz/ru" hrefLang='ru'></link>
         <link rel="alternate" href="https://www.q62.xyz/en-US" hrefLang='x-default'></link>
       </Head>
-      <TvShowSeriesList {...props} />
+      <TvShowSeriesList {...props} onLocaleChange={onLocaleChange}/>
     </>
   )  
 }
