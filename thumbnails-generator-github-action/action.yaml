@@ -5,6 +5,9 @@ inputs:
   videoFilePath:
     required: true
     description: 'Video file path' 
+  outputFolder:
+    required: true
+    description: 'Output folder path'   
 runs:
   using: 'node16'
   main: 'dist/index.js'

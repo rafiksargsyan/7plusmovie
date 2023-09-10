@@ -32,6 +32,7 @@ jobs:
       RAW_MEDIA_FILES_S3_BUCKET: raw-media-assets-prod-e1pjapsk
       MEDIA_FILES_S3_BUCKET: media-assets-prod-e1pjapsk
       TRANSCODING_OUTPUT_DIR_NAME: transcoding-output
+      THUMBNAILS_DIR_NAME: thumbnails
       OUTPUT_S3_FOLDER_KEY: ${{ github.event.inputs.output_s3_folder_key }}
       TRANSCODING_SPEC_BASE64_ENCODED: ${{ github.event.inputs.transcoding_spec_base64_encoded }}
       WORKFLOW_RUN_ID_PROVIDER_HOOK_SECRET: ${{ secrets.WORKFLOW_RUN_ID_PROVIDER_HOOK_SECRET }}
@@ -71,6 +72,12 @@ jobs:
           mkvFilePath: "./${{ github.run_id }}.mkv"
           outputFolder: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}"
           transcodingSpecBase64Encoded: ${{ env.TRANSCODING_SPEC_BASE64_ENCODED }}
+
+      - name: Generate thumbnails vtt
+        uses: ./thumbnails-generator-github-action
+        with:
+          videoFilePath: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}/vod/h264_main_540p_18.mp4"
+          outputFolder: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}/${{ env.THUMBNAILS_DIR_NAME }}"
 
       - name: Upload transcoding results
         run: |
