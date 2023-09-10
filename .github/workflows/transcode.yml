@@ -22,7 +22,7 @@ jobs:
   get-transcode-and-publish:
     runs-on: [ 'self-hosted', 'Linux', X64 ]
     timeout-minutes: 1440
-    container: q62xyz/transcode:2.0.0
+    container: q62xyz/transcode:2.1.0
     env:
       AWS_ACCESS_KEY_ID: AKIAQBPWKPTSTP3HL4UM
       AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
