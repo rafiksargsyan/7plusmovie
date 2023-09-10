@@ -75,16 +75,12 @@ export class TranscodingJob {
   }
 
   private setAudioTranscodeSpecs(audioTranscodeSpecs: AudioTranscodeSpec[] | undefined) {
-    if (audioTranscodeSpecs == undefined || audioTranscodeSpecs.length == 0) {
-      throw new InvalidAudioTranscodeSpecsError();
-    }
+    if (audioTranscodeSpecs == undefined) audioTranscodeSpecs = [];
     this.audioTranscodeSpecs = audioTranscodeSpecs;
   }
 
   private setTextTranscodeSpecs(textTranscodeSpecs: TextTranscodeSpec[] | undefined) {
-    if (textTranscodeSpecs == undefined || textTranscodeSpecs.length == 0) {
-      throw new InvalidTextTranscodeSpecsError();
-    }
+    if (textTranscodeSpecs == undefined) textTranscodeSpecs = [];
     this.textTranscodeSpecs = textTranscodeSpecs;
   }
 
