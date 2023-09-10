@@ -73,6 +73,10 @@ jobs:
           outputFolder: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}"
           transcodingSpecBase64Encoded: ${{ env.TRANSCODING_SPEC_BASE64_ENCODED }}
 
+      - name: Prepare thumbnails directory
+        run: |
+          mkdir -p ${TRANSCODING_OUTPUT_DIR_NAME}/${THUMBNAILS_DIR_NAME}
+
       - name: Generate thumbnails vtt
         uses: ./thumbnails-generator-github-action
         with:
