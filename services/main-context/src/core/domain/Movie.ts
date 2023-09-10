@@ -24,6 +24,7 @@ export class Movie {
   private actors: Person[] = [];
   private directors: Person[] = [];
   private tmdbId : string;
+  private thumbnailsFile: string;
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -94,6 +95,14 @@ export class Movie {
         throw new InvalidM3u8FileRelativePathError();
       }
     this.m3u8File = relativePath;
+    this.touch();
+  }
+
+  public addThumbnailsFile(relativePath: RelativePath) {
+    if (! /\S/.test(relativePath)) {
+        throw new InvalidThumbnailsFileRelativePathError();
+      }
+    this.thumbnailsFile = relativePath;
     this.touch();
   }
 
@@ -171,3 +180,5 @@ class InvalidSubtitleRelativePathError extends Error {}
 class InvalidM3u8FileRelativePathError extends Error {}
 
 class InvalidTmdbIdError extends Error {}
+
+class InvalidThumbnailsFileRelativePathError extends Error {}

@@ -127,6 +127,23 @@ functions:
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
+  addThumbnailsFileToMovie:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/addThumbnailsFileToMovie.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addThumbnailsFileToMovie
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : $input.json(''$.movieId''),
+                                   "relativePath" : $input.json(''$.relativePath'') }'
+              application/x-www-form-urlencoded: null                      
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+
   movieUpdateHandler:
     handler: src/core/app/movieUpdateHandler.handler
     environment:
@@ -448,6 +465,25 @@ functions:
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
   
+  addThumbnailsFileToTvShow:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/addThumbnailsFileToTvShow.handler
+    events:
+      - http:
+          integration: lambda
+          path: /addThumbnailsFileToTvShow
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
+                                   "relativePath" : $input.json(''$.relativePath''),
+                                   "season" : $input.json(''$.season''),
+                                   "episode" : $input.json(''$.episode'') }'
+              application/x-www-form-urlencoded: null                      
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+
   addSubtitleToTvShow:
     environment:
       DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}

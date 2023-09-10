@@ -16,6 +16,7 @@ interface GetTvShowMetadataResponse {
   subtitles: { [key: string]: string };
   mpdFile: string;
   m3u8File: string;
+  thumbnailsFile: string;
   stillImage: string;
   originalTitle: string;
   titleL8ns: { [key: string]: string };
@@ -42,6 +43,7 @@ interface Episode {
   m3u8File: string;
   subtitles: { [key: string]: string };
   episodeNumber: number;
+  thumbnailsFile: string;
 }
   
 interface Season {
@@ -74,6 +76,7 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
     .reduce((acc, key) => {acc[key] = `https://${cfDistro.domain}/${episode.subtitles[key]}`; return acc;}, {}),
     mpdFile: `https://${cfDistro.domain}/${episode.mpdFile}`,
     m3u8File: `https://${cfDistro.domain}/${episode.m3u8File}`,
+    thumbnailsFile: episode.thumbnailsFile,
     stillImage: episode.stillImage,
     originalTitle: tvShow.originalTitle,
     titleL8ns: tvShow.titleL8ns,

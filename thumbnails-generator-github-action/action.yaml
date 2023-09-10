@@ -1,0 +1,13 @@
+name: 'Video thumbnails action'
+description: 'Takes a video file and makes 1s interval 360p resolution thumbnails WEBVTT file'
+author: 'Rafik Sargsyan'
+inputs:
+  videoFilePath:
+    required: true
+    description: 'Video file path' 
+  outputFolder:
+    required: true
+    description: 'Output folder path'   
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
