@@ -9,6 +9,7 @@ interface Episode {
   stillImage?: string;
   mpdFile?: string;
   m3u8File?: string;
+  thumbnailsFile?: string;
   subtitles: { [key: string]: string };
   tmdbEpisodeNumber?: number;
   episodeNumber: number;
@@ -118,6 +119,15 @@ export class TvShow {
     }
     const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
     episode.m3u8File = relativePath;
+    this.touch();
+  }
+
+  public addThumbnailsFile(seasonNumber: number | undefined, episodeNumber: number | undefined, relativePath: string | undefined) {
+    if (relativePath == undefined || ! /\S/.test(relativePath)) {
+      throw new InvalidThumbnailsFileRelativePathError();
+    }
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    episode.thumbnailsFile = relativePath;
     this.touch();
   }
 
@@ -360,3 +370,5 @@ class InvalidEpisodeNumberError extends Error {}
 class SeasonWithSeasonNumberAlreadyExistsError extends Error {}
 
 class EpisodeWithEpisodeNumberAlreadyExistsError extends Error {}
+
+class InvalidThumbnailsFileRelativePathError extends Error {}
