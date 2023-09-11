@@ -47,7 +47,7 @@ jobs:
           mkdir -p ${THUMBNAILS_DIR_NAME}
           rm -r ${THUMBNAILS_DIR_NAME}/*
 
-       - name: Generate thumbnails vtt
+      - name: Generate thumbnails vtt
         uses: ./thumbnails-generator-github-action
         with:
           videoFilePath: "./h264_main_540p_18.mp4"
