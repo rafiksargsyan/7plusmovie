@@ -17,7 +17,7 @@ async function run(): Promise<void> {
     const metadata = JSON.parse(execSync(ffprobeCommand).toString());
     const fps = eval(metadata['streams'].filter((_: { index: number; }) => _.index === 0)[0]['r_frame_rate']);
 
-    const generateThumbnailsCommand = `ffmpeg -i ${videoFileAbsolutePath} -vf "select='isnan(prev_selected_t)+gte(t-floor(prev_selected_t),1)',scale=-2:360,setpts=N/${fps}/TB" thumbnail-%06d.jpg > /dev/null 2>&1`;
+    const generateThumbnailsCommand = `ffmpeg -i ${videoFileAbsolutePath} -vf "select='isnan(prev_selected_t)+gte(t-floor(prev_selected_t),1)',scale=-2:240,setpts=N/${fps}/TB" thumbnail-%06d.jpg > /dev/null 2>&1`;
     execSync(generateThumbnailsCommand);
 
     const { width, height } = sizeOf('thumbnail-000001.jpg');

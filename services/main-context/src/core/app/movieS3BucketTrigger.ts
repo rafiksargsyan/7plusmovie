@@ -21,7 +21,7 @@ export const handler = async (event: S3Event): Promise<void> => {
   const key = event.Records[0].s3.object.key;
   const params = { Bucket: bucket, Key: key } as const;
   const { ContentType } = await s3.headObject(params);
-  if (ContentType != undefined && ContentType.startsWith('image')) {
+  if (ContentType != undefined && ContentType.startsWith('image') && !key.includes('sprite-')) {
     const command = new GetObjectCommand(params);
     const url = await getSignedUrl(s3, command);
     const folder = key.substring(0, key.lastIndexOf("/")+1);
