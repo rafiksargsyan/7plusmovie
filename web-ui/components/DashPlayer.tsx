@@ -7,7 +7,6 @@ interface DashPlayerProps {
   mpdFile: string,
   thumbnailsFile?: string;
   poster: string,
-  isLandscape: boolean;
 }
 
 function DashPlayer(props: DashPlayerProps) {
