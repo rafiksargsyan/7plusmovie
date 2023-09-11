@@ -10,6 +10,7 @@
     "build:prod": "env-cmd -f .env.prod npm run build"
   },
   "dependencies": {
+    "@antik-web/plyr": "^3.9.1",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@mui/icons-material": "^5.11.16",
@@ -24,12 +25,9 @@
     "eslint": "8.27.0",
     "eslint-config-next": "13.0.4",
     "next": "13.0.4",
-    "plyr": "^3.7.8",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "typescript": "4.9.3",
-    "video.js": "^8.3.0",
-    "videojs-contrib-dash": "^5.1.1"
+    "typescript": "4.9.3"
   },
   "devDependencies": {
     "env-cmd": "^10.1.0"

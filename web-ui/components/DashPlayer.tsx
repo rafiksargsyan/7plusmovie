@@ -1,10 +1,7 @@
-import { useEffect, useRef } from "react";
-//import videojs from 'video.js';
-import Plyr from 'plyr';
+import { useEffect, useRef, useState } from "react";
+import Plyr from '@antik-web/plyr';
 import dashjs from 'dashjs';
-//import '../node_modules/video.js/dist/video-js.css';
-//import '../node_modules/videojs-contrib-dash/dist/videojs-dash.min.js';
-import '../node_modules/plyr/dist/plyr.css';
+import '../node_modules/@antik-web/plyr/dist/plyr.css';
 
 interface DashPlayerProps {
   mpdFile: string,
@@ -15,19 +12,44 @@ interface DashPlayerProps {
 
 function DashPlayer(props: DashPlayerProps) {
   const videoRef = useRef(null);
+  const [audioTracks, setAudioTracks] = useState<{[key:string]:any}>({});
+  const [player, setPlayer] = useState<Plyr>();
 
   useEffect(() => {
     const videoElement = videoRef.current;
-    if (videoElement == null) return;
+    if (videoElement == undefined) return;
     const dash = dashjs.MediaPlayer().create();
     dash.initialize(videoElement, props.mpdFile, false);
-    const player = new Plyr(videoElement, {
-      captions: {active: true, update: true},
-      previewThumbnails: {enabled: true, src: props.thumbnailsFile}
+    dash.on(dashjs.MediaPlayer.events.STREAM_INITIALIZED, () => {
+      const dashAudioTracks = dash.getTracksFor('audio');
+      const audioTracksTmp: {[key: string]: any} = {};
+      dashAudioTracks.forEach(_ => {
+        audioTracksTmp[(_.index as number).toString()] = _.labels[0].text
+      })
+      setAudioTracks(audioTracksTmp);
+      setPlayer(new Plyr(dash as any, {
+        quality: {
+          default: 'auto',
+        },
+        controls: ['play-large', 'play', 'progress', 'current-time', 'captions', 'settings', 'fullscreen'],
+        settings: ['captions', 'speed', 'audioTrack'],
+        captions: {active: true, update: true},
+        previewThumbnails: {enabled: true, src: props.thumbnailsFile},
+        audioTrack: {
+          options: Object.keys(audioTracks),
+          selected: dash.getCurrentTrackFor('audio')?.index?.toString(),
+          onChange: (e: string) => dash.setCurrentTrack(dash.getTracksFor('audio')
+          .filter(_ => _.index?.toString() === e)[0]),
+        },
+        i18n: {
+          audioTrack: 'Language',
+          audioTrackLabel: audioTracksTmp
+        }
+      } as any));
     });
-    
+
     return () => {
-      player.destroy();
+      player?.destroy();
       dash.reset();
     };
   }, []);
@@ -35,7 +57,7 @@ function DashPlayer(props: DashPlayerProps) {
   return (
      <div>
         <video ref={videoRef}
-               id="player" controls
+               id="player"
                style={{objectFit: 'contain'}}
                data-poster={`${props.poster}`}
         />
