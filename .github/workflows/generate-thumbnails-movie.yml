@@ -59,7 +59,7 @@ jobs:
 
       - name: Add thumbnails file path to movie
         run: |
-          curl -X POST "${ADD_THUMBNAILS_FILE_TO_MOVIE_ENDPOINT}" \
+          curl -X PATCH "${ADD_THUMBNAILS_FILE_TO_MOVIE_ENDPOINT}" \
                -H "Authorization: Bearer ${Q62_AUTH_TOKEN}" \
                -H "Content-Type: application/json" \
                -d "{\"movieId\": \"${MOVIE_ID}\", \"relativePath\": \"${MOVIE_ID}/${THUMBNAILS_DIR_NAME}/thumbnails.vtt\" }"
