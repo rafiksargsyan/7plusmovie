@@ -38,9 +38,8 @@ jobs:
         run: |
           rm h264_main_540p_18.mp4 || true
           MOVIE_METADATA=$(curl ${GET_MOVIE_METADATA_ENDPOINT} \
-                                -H "Authorization: Bearer ${Q62_AUTH_TOKEN}")
-          echo $MOVIE_METADATA                      
-          VIDEO_FILE_URL=$(jq -r '.mpdFile' <<< $MOVIE_METADATA | sed -e 's/manifest.mpd/h264_main_540p_18.mp4/')
+                                -H "Authorization: Bearer ${Q62_AUTH_TOKEN}")                     
+          VIDEO_FILE_URL=$(echo $MOVIE_METADATA | jq -r '.mpdFile' | sed -e 's/manifest.mpd/h264_main_540p_18.mp4/')
           wget ${VIDEO_FILE_URL}
 
       - name: Prepare thumbnails directory
