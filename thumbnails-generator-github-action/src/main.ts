@@ -27,7 +27,7 @@ async function run(): Promise<void> {
     if (height == undefined) {
       throw new FailedToResolveThumbnailHeightError();
     }
-    const thumbnailsCount = fs.readdirSync(__dirname).filter(_ => _.startsWith('thumbnail')).length;
+    const thumbnailsCount = fs.readdirSync(outputFolderAbsolutePath).filter(_ => _.startsWith('thumbnail')).length;
 
     const generateSpritesCommand = `magick montage -geometry +0+0 -tile 5x5 thumbnail-*.jpg sprite.jpg`;
     execSync(generateSpritesCommand);

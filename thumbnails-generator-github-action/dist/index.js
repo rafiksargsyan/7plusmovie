@@ -67,7 +67,7 @@ function run() {
             if (height == undefined) {
                 throw new FailedToResolveThumbnailHeightError();
             }
-            const thumbnailsCount = fs_1.default.readdirSync(__dirname).filter(_ => _.startsWith('thumbnail')).length;
+            const thumbnailsCount = fs_1.default.readdirSync(outputFolderAbsolutePath).filter(_ => _.startsWith('thumbnail')).length;
             const generateSpritesCommand = `magick montage -geometry +0+0 -tile 5x5 thumbnail-*.jpg sprite.jpg`;
             (0, child_process_1.execSync)(generateSpritesCommand);
             (0, child_process_1.execSync)(`rm thumbnail-*`);
