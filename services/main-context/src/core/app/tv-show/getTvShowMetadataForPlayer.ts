@@ -76,7 +76,7 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
     .reduce((acc, key) => {acc[key] = `https://${cfDistro.domain}/${episode.subtitles[key]}`; return acc;}, {}),
     mpdFile: `https://${cfDistro.domain}/${episode.mpdFile}`,
     m3u8File: `https://${cfDistro.domain}/${episode.m3u8File}`,
-    thumbnailsFile: episode.thumbnailsFile !== undefined ? `https://${cfDistro.domain}/${movie.thumbnailsFile}` : undefined,
+    thumbnailsFile: episode.thumbnailsFile !== undefined ? `https://${cfDistro.domain}/${episode.thumbnailsFile}` : undefined,
     stillImage: episode.stillImage,
     originalTitle: tvShow.originalTitle,
     titleL8ns: tvShow.titleL8ns,
