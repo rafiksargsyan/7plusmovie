@@ -29,7 +29,7 @@ async function run(): Promise<void> {
     }
     const thumbnailsCount = fs.readdirSync(outputFolderAbsolutePath).filter(_ => _.startsWith('thumbnail')).length;
 
-    const generateSpritesCommand = `magick montage -geometry +0+0 -tile 5x5 thumbnail-*.jpg sprite.jpg`;
+    const generateSpritesCommand = `magick montage -geometry +0+0 -tile 5x3 thumbnail-*.jpg sprite.jpg`;
     execSync(generateSpritesCommand);
 
     execSync(`rm thumbnail-*`);
@@ -39,11 +39,11 @@ async function run(): Promise<void> {
     webvttFile.write('WEBVTT\n\n');
 
     for (let i = 0; i < thumbnailsCount; ++i) {
-      const spriteNumber = Math.floor(i / 25); 
+      const spriteNumber = Math.floor(i / 15); 
       const startTime = i;
       const endTime = i + 1;
       const spritePositionX = i % 5 * width;
-      const spritePositionY = Math.floor(i % 25 / 5) * height;
+      const spritePositionY = Math.floor(i % 15 / 3) * height;
 
       webvttFile.write(`${srtTimestamp(startTime)} --> ${srtTimestamp(endTime)}\n`);
       webvttFile.write(`sprite-${spriteNumber}.jpg#xywh=${spritePositionX},${spritePositionY},${width},${height}\n\n`);
