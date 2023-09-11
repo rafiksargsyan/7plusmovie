@@ -45,7 +45,7 @@ jobs:
       - name: Prepare thumbnails directory
         run: |
           mkdir -p ${THUMBNAILS_DIR_NAME}
-          rm -r ${THUMBNAILS_DIR_NAME}/*
+          rm -r ${THUMBNAILS_DIR_NAME}/* || true
 
       - name: Generate thumbnails vtt
         uses: ./thumbnails-generator-github-action
