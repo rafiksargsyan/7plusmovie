@@ -1,45 +1,66 @@
-import { useEffect, useRef } from "react";
-import videojs from 'video.js';
-import '../node_modules/video.js/dist/video-js.css';
-import '../node_modules/videojs-contrib-dash/dist/videojs-dash.min.js';
+import { useEffect, useRef, useState } from "react";
+import Plyr from '@antik-web/plyr';
+import dashjs from 'dashjs';
+import '../node_modules/@antik-web/plyr/dist/plyr.css';
 
 interface DashPlayerProps {
   mpdFile: string,
+  thumbnailsFile?: string;
   poster: string,
-  isLandscape: boolean;
 }
 
 function DashPlayer(props: DashPlayerProps) {
   const videoRef = useRef(null);
+  const [audioTracks, setAudioTracks] = useState<{[key:string]:any}>({});
+  const [player, setPlayer] = useState<Plyr>();
 
   useEffect(() => {
     const videoElement = videoRef.current;
-    if (videoElement == null) return;
-    const player = videojs(videoElement, {
-        fill: true,
-        controlBar: {
-          skipButtons: {
-            forward: 10,
-            backward: 5
-          }
-        }});
-    player.src({ src: props.mpdFile, type: 'application/dash+xml'});
-    
+    if (videoElement == undefined) return;
+    const dash = dashjs.MediaPlayer().create();
+    dash.initialize(videoElement, props.mpdFile, false);
+    dash.on(dashjs.MediaPlayer.events.STREAM_INITIALIZED, () => {
+      const dashAudioTracks = dash.getTracksFor('audio');
+      const audioTracksTmp: {[key: string]: any} = {};
+      dashAudioTracks.forEach(_ => {
+        audioTracksTmp[(_.index as number).toString()] = _.labels[0].text
+      })
+      setAudioTracks(audioTracksTmp);
+      setPlayer(new Plyr(dash as any, {
+        quality: {
+          default: 'auto',
+        },
+        controls: ['play-large', 'play', 'progress', 'current-time', 'captions', 'settings', 'fullscreen'],
+        settings: ['captions', 'speed', 'audioTrack'],
+        captions: {active: true, update: true},
+        previewThumbnails: {enabled: true, src: props.thumbnailsFile},
+        audioTrack: {
+          options: Object.keys(audioTracks),
+          selected: dash.getCurrentTrackFor('audio')?.index?.toString(),
+          onChange: (e: string) => dash.setCurrentTrack(dash.getTracksFor('audio')
+          .filter(_ => _.index?.toString() === e)[0]),
+        },
+        i18n: {
+          audioTrack: 'Language',
+          audioTrackLabel: audioTracksTmp
+        }
+      } as any));
+    });
+
     return () => {
-      player.dispose();
+      player?.destroy();
+      dash.reset();
     };
   }, []);
  
   return (
-    <>
-      <div data-js-player style={{height: '100vh', width: '100vw'}}>
+     <div>
         <video ref={videoRef}
-               style={{objectFit: props.isLandscape ? 'fill' : 'contain'}}
-               className="video-js vjs-default-skin" controls
-               data-setup={`{"poster":"${props.poster}"}`}
+               id="player"
+               style={{objectFit: 'contain'}}
+               data-poster={`${props.poster}`}
         />
-      </div>
-    </>
+     </div>  
   )
 }
 
