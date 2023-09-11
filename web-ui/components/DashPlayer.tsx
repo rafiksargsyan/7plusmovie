@@ -8,6 +8,7 @@ import '../node_modules/plyr/dist/plyr.css';
 
 interface DashPlayerProps {
   mpdFile: string,
+  thumbnailsFile?: string;
   poster: string,
   isLandscape: boolean;
 }
@@ -22,7 +23,7 @@ function DashPlayer(props: DashPlayerProps) {
     dash.initialize(videoElement, props.mpdFile, false);
     const player = new Plyr(videoElement, {
       captions: {active: true, update: true},
-      previewThumbnails: {enabled: true, src: 'https://d3o4ty4sk1leni.cloudfront.net/f01537f7-3441-4702-8d53-837cb9065b25/thumbnails/thumbnails.vtt'}
+      previewThumbnails: {enabled: true, src: props.thumbnailsFile}
     });
     
     return () => {

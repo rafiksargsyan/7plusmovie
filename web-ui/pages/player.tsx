@@ -25,6 +25,7 @@ interface Movie {
   mpdFile: string;
   m3u8File: string;
   subtitles: { [key: string]: string };
+  thumbnailsFile: string;
 }
 
 interface TvShow {
@@ -42,10 +43,12 @@ interface TvShow {
   mpdFile: string;
   m3u8File: string;
   subtitles: { [key: string]: string };
+  thumbnailsFile: string;
 }
 
 async function getMovie(movieId: string): Promise<Movie> {
   const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${movieId}`);
+  console.log(response.data.thumbnailsFile);
   return {
     id: movieId,
     originalTitle: response.data.originalTitle,
@@ -54,7 +57,8 @@ async function getMovie(movieId: string): Promise<Movie> {
     backdropImage: response.data.backdropImage,
     mpdFile: response.data.mpdFile,
     m3u8File: response.data.m3u8File,
-    subtitles: response.data.subtitles
+    subtitles: response.data.subtitles,
+    thumbnailsFile: response.data.thumbnailsFile
   }
 }
 
@@ -74,7 +78,8 @@ async function getTvShow(id: string, season: number, episode: number): Promise<T
     episodeNameL8ns: response.data.episodeNameL8ns,
     mpdFile: response.data.mpdFile,
     m3u8File: response.data.m3u8File,
-    subtitles: response.data.subtitles
+    subtitles: response.data.subtitles,
+    thumbnailsFile: response.data.thumbnailsFile
   }
 }
 
@@ -106,7 +111,7 @@ function PlayerPage(props : {movie: Movie | TvShow, currentLocaleCode: string, c
       </Head>
       <ThemeProvider theme={darkTheme}>
 	      <CssBaseline />
-        <Player mpdFile={props.movie.mpdFile} m3u8File={props.movie.m3u8File} backdropImage={props.movie.backdropImage}
+        <Player mpdFile={props.movie.mpdFile} m3u8File={props.movie.m3u8File} thumbnailsFile={props.movie.thumbnailsFile} backdropImage={props.movie.backdropImage}
                 subtitles={props.movie.subtitles} playerLocale={props.currentLocale} movieTitle={title} localeCode={props.currentLocaleCode}/>
       </ThemeProvider>
     </>

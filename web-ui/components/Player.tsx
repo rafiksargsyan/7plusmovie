@@ -15,7 +15,7 @@ const darkTheme = createTheme({
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
 
-function VideoPlayer(props: {mpdFile: string, m3u8File: string, backdropImage: string, localeCode: string,
+function VideoPlayer(props: {mpdFile: string, m3u8File: string, thumbnailsFile?: string, backdropImage: string, localeCode: string,
 	                         subtitles: {[key: string]: string}, playerLocale: string, movieTitle: string}) {   
   const [isLandscape, setIsLandscape] = useState(3 * window.innerWidth > 4 * window.innerHeight);
   
@@ -49,10 +49,11 @@ function VideoPlayer(props: {mpdFile: string, m3u8File: string, backdropImage: s
 			   poster={`${imageBaseUrl}h_720,f_auto/${props.backdropImage}`}
 			   mpdFile={props.mpdFile}
 		       isLandscape={isLandscape}
+           thumbnailsFile={props.thumbnailsFile}
 			 /> );
 }
 
-function VideoPlayerWrapper(props: {mpdFile: string, m3u8File: string, backdropImage: string, localeCode: string,
+function VideoPlayerWrapper(props: {mpdFile: string, m3u8File: string, thumbnailsFile?: string, backdropImage: string, localeCode: string,
 	                                subtitles: {[key: string]: string}, playerLocale: string, movieTitle: string}) {
   return (
 	<ThemeProvider theme={darkTheme}>

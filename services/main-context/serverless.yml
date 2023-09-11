@@ -219,7 +219,8 @@ functions:
                          "backdropImage": $input.json(''$.backdropImage''),
                          "originalTitle": $input.json(''$.originalTitle''),
                          "titleL8ns": $input.json(''$.titleL8ns''),
-                         "releaseYear": $input.json(''$.releaseYear'') }'
+                         "releaseYear": $input.json(''$.releaseYear''),
+                         "thumbnailsFile": $input.json(''$.thumbnailsFile'') }'
 
   addBackdropImageToMovie:
     environment:
@@ -568,7 +569,8 @@ functions:
                          "seasonOriginalName": $input.json(''$.seasonOriginalName''),
                          "seasonNameL8ns": $input.json(''$.seasonNameL8ns''),
                          "episodeOriginalName": $input.json(''$.episodeOriginalName''),
-                         "episodeNameL8ns": $input.json(''$.episodeNameL8ns'') }'
+                         "episodeNameL8ns": $input.json(''$.episodeNameL8ns''),
+                         "thumbnailsFile": $input.json(''$.thumbnailsFile'') }'
   
   createTvShowTranscodingJob:
     handler: src/core/app/tv-show/createTvShowTranscodingJob.handler
