@@ -36,8 +36,7 @@ jobs:
 
       - name: Download movie video file
           rm h264_main_540p_18.mp4 || true
-          MOVIE_METADATA=$(curl "${GET_MOVIE_METADATA_ENDPOINT}" \
-                                -H "Authorization: Bearer ${Q62_AUTH_TOKEN}")
+          MOVIE_METADATA=$(curl "${GET_MOVIE_METADATA_ENDPOINT}" -H "Authorization: Bearer ${Q62_AUTH_TOKEN}")
           VIDEO_FILE_URL=$(jq -r '.mpdFile' <<< $MOVIE_METADATA | sed -e 's/manifest.mpd/h264_main_540p_18.mp4/')
           wget ${VIDEO_FILE_URL}
 
