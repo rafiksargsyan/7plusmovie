@@ -38,7 +38,7 @@ jobs:
 
       - name: Setup environment
         run: |
-          echo "Q62_AUTH_TOKEN=$(./tools/get-auth-token.sh ${ADMIN_POOL_CLIENT_ID} ${Q62_ADMIN_USERNAME} '${Q62_ADMIN_PASSWORD}')" >> $GITHUB_ENV
+          echo "Q62_AUTH_TOKEN=$(./tools/get-auth-token.sh ${ADMIN_POOL_CLIENT_ID} ${Q62_ADMIN_USERNAME} ${Q62_ADMIN_PASSWORD})" >> $GITHUB_ENV
 
       - name: Download tv show video file
         run: |
