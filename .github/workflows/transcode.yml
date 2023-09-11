@@ -51,6 +51,7 @@ jobs:
         with:
           sparse-checkout: |
             transcoding-github-action
+            thumbnails-generator-github-action
 
       - name: Download MKV file
         run: |

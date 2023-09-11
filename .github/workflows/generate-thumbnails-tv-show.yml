@@ -1,11 +1,15 @@
-name: Generate thumbnails for movie
+name: Generate thumbnails for tv show
 
 on:
   workflow_dispatch:
     inputs:
-      movie_id:
-        description: 'The movie id for which thumbnails will be generated and published'
+      tv_show_id:
+        description: 'The show id for which thumbnails will be generated and published'
         required: true
+      season:
+        description: 'Season number'
+      episode:
+        description: 'Episode number'
 
 jobs:
   generate-thumbnails-and-publish:
@@ -20,9 +24,11 @@ jobs:
       ADMIN_POOL_CLIENT_ID: 2so94a4hnjq3hb38a3km1huf9d
       Q62_ADMIN_USERNAME: rafiksargsyan07@gmail.com
       Q62_ADMIN_PASSWORD: ${{ secrets.Q62_ADMIN_PASSWORD }}
-      GET_MOVIE_METADATA_ENDPOINT: https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${{ github.event.inputs.movie_id }}
-      MOVIE_ID: ${{ github.event.inputs.movie_id }}
-      ADD_THUMBNAILS_FILE_TO_MOVIE_ENDPOINT: https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/addThumbnailsFileToMovie
+      GET_TV_SHOW_METADATA_ENDPOINT: https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getTvShowMetadataForPlayer/${{ github.event.inputs.tv_show_id }}/${{ github.event.inputs.season }}/${{ github.event.inputs.episode }}
+      TV_SHOW_ID: ${{ github.event.inputs.tv_show_id }}
+      SEASON: ${{ github.event.inputs.season }}
+      EPISODE: ${{ github.event.inputs.episode }}
+      ADD_THUMBNAILS_FILE_TO_TV_SHOW_ENDPOINT: https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/addThumbnailsFileToTvShow
     steps:
       - uses: actions/checkout@v3
         with:
@@ -34,12 +40,12 @@ jobs:
         run: |
           echo "Q62_AUTH_TOKEN=$(./tools/get-auth-token.sh ${ADMIN_POOL_CLIENT_ID} ${Q62_ADMIN_USERNAME} '${Q62_ADMIN_PASSWORD}')" >> $GITHUB_ENV
 
-      - name: Download movie video file
+      - name: Download tv show video file
         run: |
           rm h264_main_540p_18.mp4 || true
-          MOVIE_METADATA=$(curl ${GET_MOVIE_METADATA_ENDPOINT} \
+          TV_SHOW_METADATA=$(curl ${GET_TV_SHOW_METADATA_ENDPOINT} \
                                 -H "Authorization: Bearer ${Q62_AUTH_TOKEN}")                     
-          VIDEO_FILE_URL=$(echo $MOVIE_METADATA | jq -r '.mpdFile' | sed -e 's/manifest.mpd/h264_main_540p_18.mp4/')
+          VIDEO_FILE_URL=$(echo $TV_SHOW_METADATA | jq -r '.mpdFile' | sed -e 's/manifest.mpd/h264_main_540p_18.mp4/')
           wget ${VIDEO_FILE_URL}
 
       - name: Prepare thumbnails directory
@@ -55,11 +61,11 @@ jobs:
 
       - name: Upload thumbnails assets
         run: |
-          for i in 1 2 3; do aws s3 cp "${THUMBNAILS_DIR_NAME}" "s3://${MEDIA_FILES_S3_BUCKET}/${MOVIE_ID}/${THUMBNAILS_DIR_NAME}" --recursive && break; done
+          for i in 1 2 3; do aws s3 cp "${THUMBNAILS_DIR_NAME}" "s3://${MEDIA_FILES_S3_BUCKET}/${TV_SHOW_ID}/${SEASON}/${EPISODE}/${THUMBNAILS_DIR_NAME}" --recursive && break; done
 
-      - name: Add thumbnails file path to movie
+      - name: Add thumbnails file path to tv show
         run: |
-          curl -X POST "${ADD_THUMBNAILS_FILE_TO_MOVIE_ENDPOINT}" \
+          curl -X POST "${ADD_THUMBNAILS_FILE_TO_TV_SHOW_ENDPOINT}" \
                -H "Authorization: Bearer ${Q62_AUTH_TOKEN}" \
                -H "Content-Type: application/json" \
-               -d "{\"movieId\": \"${MOVIE_ID}\", \"relativePath\": \"${MOVIE_ID}/${THUMBNAILS_DIR_NAME}/thumbnails.vtt\" }"
+               -d "{\"tvShowId\": \"${TV_SHOW_ID}\", \"relativePath\": \"${TV_SHOW_ID}/${SEASON}/${EPISODE}/${THUMBNAILS_DIR_NAME}/thumbnails.vtt\", \"season\": ${SEASON}, \"episode\": ${EPISODE} }"
