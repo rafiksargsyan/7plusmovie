@@ -48,7 +48,6 @@ interface TvShow {
 
 async function getMovie(movieId: string): Promise<Movie> {
   const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${movieId}`);
-  console.log(response.data.thumbnailsFile);
   return {
     id: movieId,
     originalTitle: response.data.originalTitle,
