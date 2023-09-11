@@ -43,7 +43,7 @@ async function run(): Promise<void> {
       const startTime = i;
       const endTime = i + 1;
       const spritePositionX = i % 5 * width;
-      const spritePositionY = Math.floor(i % 15 / 3) * height;
+      const spritePositionY = Math.floor(i % 15 / 5) * height;
 
       webvttFile.write(`${srtTimestamp(startTime)} --> ${srtTimestamp(endTime)}\n`);
       webvttFile.write(`sprite-${spriteNumber}.jpg#xywh=${spritePositionX},${spritePositionY},${width},${height}\n\n`);
