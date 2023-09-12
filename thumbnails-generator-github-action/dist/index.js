@@ -58,7 +58,7 @@ function run() {
             const ffprobeCommand = `ffprobe -v quiet -print_format json -show_streams -i ${videoFileAbsolutePath}`;
             const metadata = JSON.parse((0, child_process_1.execSync)(ffprobeCommand).toString());
             const fps = eval(metadata['streams'].filter((_) => _.index === 0)[0]['r_frame_rate']);
-            const generateThumbnailsCommand = `ffmpeg -i ${videoFileAbsolutePath} -vf "select='isnan(prev_selected_t)+gte(t-floor(prev_selected_t),1)',scale=-2:240,setpts=N/${fps}/TB" thumbnail-%06d.jpg > /dev/null 2>&1`;
+            const generateThumbnailsCommand = `ffmpeg -i ${videoFileAbsolutePath} -vf "select='isnan(prev_selected_t)+gte(t-floor(prev_selected_t),1)',scale=-2:240,setpts=N/${fps}/TB" -q:v 31 thumbnail-%06d.jpg > /dev/null 2>&1`;
             (0, child_process_1.execSync)(generateThumbnailsCommand);
             const { width, height } = (0, image_size_1.default)('thumbnail-000001.jpg');
             if (width == undefined) {
