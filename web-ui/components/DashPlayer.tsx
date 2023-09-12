@@ -26,6 +26,10 @@ function DashPlayer(props: DashPlayerProps) {
         audioTracksTmp[(_.index as number).toString()] = _.labels[0].text
       })
       setAudioTracks(audioTracksTmp);
+      const mainAudioTrack = dashAudioTracks.filter(_ => _?.roles?.filter(r => r === 'main')?.length === 1)[0];
+      if (mainAudioTrack != undefined) {
+        dash.setCurrentTrack(mainAudioTrack);
+      }
       setPlayer(new Plyr(dash as any, {
         quality: {
           default: 'auto',
@@ -36,7 +40,7 @@ function DashPlayer(props: DashPlayerProps) {
         previewThumbnails: {enabled: true, src: props.thumbnailsFile},
         audioTrack: {
           options: Object.keys(audioTracks),
-          selected: dash.getCurrentTrackFor('audio')?.index?.toString(),
+          selected: mainAudioTrack?.index != undefined ? mainAudioTrack.index.toString() : dash.getCurrentTrackFor('audio')?.index?.toString(),
           onChange: (e: string) => dash.setCurrentTrack(dash.getTracksFor('audio')
           .filter(_ => _.index?.toString() === e)[0]),
         },
