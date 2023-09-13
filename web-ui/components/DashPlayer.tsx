@@ -34,7 +34,7 @@ function DashPlayer(props: DashPlayerProps) {
         quality: {
           default: 'auto',
         },
-        controls: ['play-large', 'play', 'progress', 'current-time', 'captions', 'settings', 'fullscreen'],
+        controls: ['play-large', 'play', 'progress', 'current-time', 'captions', 'settings', 'fullscreen', 'rewind'],
         settings: ['captions', 'speed', 'audioTrack'],
         captions: {active: true, update: true},
         previewThumbnails: {enabled: true, src: props.thumbnailsFile},
@@ -47,7 +47,8 @@ function DashPlayer(props: DashPlayerProps) {
         i18n: {
           audioTrack: 'Language',
           audioTrackLabel: audioTracksTmp
-        }
+        },
+        seekTime: 5
       } as any));
     });
 
