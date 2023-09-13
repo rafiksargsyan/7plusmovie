@@ -58,9 +58,9 @@ function run() {
             const ffprobeCommand = `ffprobe -v quiet -print_format json -show_streams -i ${videoFileAbsolutePath}`;
             const metadata = JSON.parse((0, child_process_1.execSync)(ffprobeCommand).toString());
             const fps = eval(metadata['streams'].filter((_) => _.index === 0)[0]['r_frame_rate']);
-            const generateThumbnailsCommand = `ffmpeg -i ${videoFileAbsolutePath} -vf "select='isnan(prev_selected_t)+gte(t-floor(prev_selected_t),1)',scale=-2:240,setpts=N/${fps}/TB" -q:v 31 thumbnail-%06d.jpg > /dev/null 2>&1`;
+            const generateThumbnailsCommand = `ffmpeg -i ${videoFileAbsolutePath} -vf "select='isnan(prev_selected_t)+gte(t-floor(prev_selected_t),1)',scale=-2:240,setpts=N/${fps}/TB"  thumbnail-%06d.png > /dev/null 2>&1`;
             (0, child_process_1.execSync)(generateThumbnailsCommand);
-            const { width, height } = (0, image_size_1.default)('thumbnail-000001.jpg');
+            const { width, height } = (0, image_size_1.default)('thumbnail-000001.png');
             if (width == undefined) {
                 throw new FailedToResolveThumbnailWidthError();
             }
@@ -68,7 +68,7 @@ function run() {
                 throw new FailedToResolveThumbnailHeightError();
             }
             const thumbnailsCount = fs_1.default.readdirSync(outputFolderAbsolutePath).filter(_ => _.startsWith('thumbnail')).length;
-            const generateSpritesCommand = `magick montage -geometry +0+0 -tile 5x3 thumbnail-*.jpg sprite.jpg`;
+            const generateSpritesCommand = `magick montage -quality 20 -geometry +0+0 -tile 5x3 thumbnail-*.png sprite.jpg`;
             (0, child_process_1.execSync)(generateSpritesCommand);
             (0, child_process_1.execSync)(`rm thumbnail-*`);
             const webvttFilename = 'thumbnails.vtt';
