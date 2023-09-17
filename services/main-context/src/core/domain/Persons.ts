@@ -75,7 +75,8 @@ export const Persons = {
   RYAN_GOSLING : { EN_US : "Ryan Gosling", RU : "Райан Гослинг" },
   WILL_FERRELL : { EN_US : "Will Ferrell", RU : "Уилл Феррелл" },
   HARRISON_FORD : { EN_US : "Harrison Ford", RU : "Харрисон Форд" },
-  ANTONIO_BANDERAS : { EN_US : "Antonio Banderas", RU : "Антонио Бандерас" }
+  ANTONIO_BANDERAS : { EN_US : "Antonio Banderas", RU : "Антонио Бандерас" },
+  BEN_AFFLECK : { EN_US : "Ben Affleck", RU : "Бен Аффлек" }
 } as const;
 
 export class Person {
