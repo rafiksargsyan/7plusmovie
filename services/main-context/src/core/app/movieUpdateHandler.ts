@@ -221,7 +221,7 @@ async function updateBasedOnTmdbId(movieId: string, tmdbId: string, tmdbApiKey: 
 
   tmdbCredits.cast.forEach(_ => {
     let p: Person | undefined  = tmdbPersonId2Person[_.id];
-    if (p != undefined && movie.addActor(p)) {
+    if (p != undefined && _.known_for_depertment === "Acting" && movie.addActor(p)) {
       updated = true;
     }
   });
