@@ -1,7 +1,6 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { red } from '@mui/material/colors';
-import { useEffect, useState } from 'react';
 import DashPlayer from './DashPlayer';
 
 const darkTheme = createTheme({
@@ -26,6 +25,7 @@ function VideoPlayer(props: {mpdFile: string, m3u8File: string, thumbnailsFile?:
 			   poster={`${imageBaseUrl}h_720,f_auto/${props.backdropImage}`}
 			 /> ) :
 		   ( <DashPlayer
+		       localeCode={props.localeCode}
 			   poster={`${imageBaseUrl}h_720,f_auto/${props.backdropImage}`}
 			   mpdFile={props.mpdFile}
            thumbnailsFile={props.thumbnailsFile}

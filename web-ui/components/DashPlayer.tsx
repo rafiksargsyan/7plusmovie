@@ -4,9 +4,10 @@ import dashjs from 'dashjs';
 import '../node_modules/@antik-web/plyr/dist/plyr.css';
 
 interface DashPlayerProps {
-  mpdFile: string,
+  mpdFile: string;
   thumbnailsFile?: string;
-  poster: string,
+  poster: string;
+  localeCode: string;
 }
 
 function DashPlayer(props: DashPlayerProps) {
@@ -27,8 +28,11 @@ function DashPlayer(props: DashPlayerProps) {
       })
       setAudioTracks(audioTracksTmp);
       const mainAudioTrack = dashAudioTracks.filter(_ => _?.roles?.filter(r => r === 'main')?.length === 1)[0];
-      if (mainAudioTrack != undefined) {
-        dash.setCurrentTrack(mainAudioTrack);
+      const englishAudioTrack = dashAudioTracks.filter(_ => _?.lang === "en-x-1" || _?.lang === "en-x-2"
+      || _?.lang === "en-GB-x-1" || _?.lang === "en-GB-x-2")[0];
+      const selectedAudioTrack = (props.localeCode === 'EN_US' && englishAudioTrack != undefined) ? englishAudioTrack : mainAudioTrack;
+      if (selectedAudioTrack != undefined) {
+        dash.setCurrentTrack(selectedAudioTrack);
       }
       setPlayer(new Plyr(dash as any, {
         quality: {
@@ -40,7 +44,7 @@ function DashPlayer(props: DashPlayerProps) {
         previewThumbnails: {enabled: true, src: props.thumbnailsFile},
         audioTrack: {
           options: Object.keys(audioTracks),
-          selected: mainAudioTrack?.index != undefined ? mainAudioTrack.index.toString() : dash.getCurrentTrackFor('audio')?.index?.toString(),
+          selected: selectedAudioTrack?.index != undefined ? selectedAudioTrack.index.toString() : dash.getCurrentTrackFor('audio')?.index?.toString(),
           onChange: (e: string) => dash.setCurrentTrack(dash.getTracksFor('audio')
           .filter(_ => _.index?.toString() === e)[0]),
         },

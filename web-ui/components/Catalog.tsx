@@ -69,8 +69,8 @@ function L8nSelect(props: {onLocaleChange: (locale: string) => void, currentLoca
             onChange={(e, c) => props.onLocaleChange(e.target.value)}>
       {Object.keys(L8nLangCodes).map((_) => (
         <MenuItem value={_} key={_}>
-          <img src={`https://flagcdn.com/w20/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}.png`}
-               srcSet={`https://flagcdn.com/w40/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}.png 2x`}
+          <img src={`${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}-w20.png`}
+               srcSet={`${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}-w40.png 2x`}
                alt={L8nTable[props.currentLocale as keyof typeof L8nTable][_ as keyof typeof L8nTable['EN_US']]} />{" "}
         </MenuItem>
       ))}
