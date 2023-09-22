@@ -36,6 +36,7 @@ interface TextTranscodeSpec {
 interface MovieTranscodingJobRead {
   movieId?: string;
   textTranscodeSpecs?: TextTranscodeSpec[];
+  outputFolderKey?: string;
 }
 
 interface TvShowTranscodingJobRead {
@@ -43,6 +44,7 @@ interface TvShowTranscodingJobRead {
   season?: number;
   episode?: number;
   textTranscodeSpecs?: TextTranscodeSpec[];
+  outputFolderKey?: string;
 }
 
 export const handler = async (event: HandlerParam): Promise<void> => {
@@ -70,12 +72,12 @@ export const handler = async (event: HandlerParam): Promise<void> => {
 
     // This is not right way to update movie model as there might be extra application logic for validation, etc.
     // Right way would be calling corresponding lambda to the job and avoid app logic duplication.
-    movie.addMpdFile(`${movie.id}/vod/manifest.mpd`);
-    movie.addM3u8File(`${movie.id}/vod/master.m3u8`);
+    movie.addMpdFile(`${movieTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`);
+    movie.addM3u8File(`${movieTranscodingJobRead.outputFolderKey}/vod/master.m3u8`);
     movieTranscodingJobRead.textTranscodeSpecs?.forEach(_ => {
-      movie.addSubtitle(_.lang, `${movie.id}/subtitles/${SubsLangCodes[_.lang.code]['langTag']}.vtt`);
+      movie.addSubtitle(_.lang, `${movieTranscodingJobRead.outputFolderKey}/subtitles/${SubsLangCodes[_.lang.code]['langTag']}.vtt`);
     })
-    movie.addThumbnailsFile(`${movie.id}/thumbnails/thumbnails.vtt`);
+    movie.addThumbnailsFile(`${movieTranscodingJobRead.outputFolderKey}/thumbnails/thumbnails.vtt`);
     await docClient.put({ TableName: dynamodbMovieTableName, Item: movie });
     return;
   }
@@ -106,12 +108,12 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     const episode = tvShowTranscodingJobRead.episode;
     // This is not right way to update tvShow model as there might be extra application logic for validation, etc.
     // Right way would be calling corresponding lambda to the job and avoid app logic duplication. 
-    tvShow.addMpdFile(season, episode, `${tvShow.id}/${season}/${episode}/vod/manifest.mpd`);
-    tvShow.addM3u8File(season, episode, `${tvShow.id}/${season}/${episode}/vod/master.m3u8`);
+    tvShow.addMpdFile(season, episode, `${tvShowTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`);
+    tvShow.addM3u8File(season, episode, `${tvShowTranscodingJobRead.outputFolderKey}/vod/master.m3u8`);
     tvShowTranscodingJobRead.textTranscodeSpecs?.forEach(_ => {
-      tvShow.addSubtitle(season, episode, _.lang, `${tvShow.id}/${season}/${episode}/subtitles/${SubsLangCodes[_.lang.code]['langTag']}.vtt`);
+      tvShow.addSubtitle(season, episode, _.lang, `${tvShowTranscodingJobRead.outputFolderKey}/subtitles/${SubsLangCodes[_.lang.code]['langTag']}.vtt`);
     })
-    tvShow.addThumbnailsFile(season, episode, `${tvShow.id}/${season}/${episode}/thumbnails/thumbnails.vtt`);
+    tvShow.addThumbnailsFile(season, episode, `${tvShowTranscodingJobRead.outputFolderKey}/thumbnails/thumbnails.vtt`);
     await docClient.put({ TableName: dynamodbTvShowTableName, Item: tvShow });
     return;
   }
