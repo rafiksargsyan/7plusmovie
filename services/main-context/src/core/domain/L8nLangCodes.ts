@@ -1,6 +1,7 @@
 export const L8nLangCodes = {
   EN_US : { langTag : "en-US" },
   EN_GB : { langTag : "en-GB" },
+  EN_AU : { langTag : "en-AU" },
   RU : { langTag : "ru" },
   IT : { langTag : "it" },
   FR : { langTag : "fr" },
