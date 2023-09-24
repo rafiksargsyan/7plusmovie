@@ -120,3 +120,42 @@ provider "aws" {
     session_name = "tracenoon_2"
   }
 }
+
+provider "aws" {
+  alias  = "tracenoon_3"
+
+  region = "eu-west-3"
+  access_key = var.aws_workloads_prod_access_key
+  secret_key = var.aws_workloads_prod_secret_key
+
+  assume_role {
+    role_arn     = "arn:aws:iam::523394433783:role/WorkloadsProd1AssumeRole"
+    session_name = "tracenoon_3"
+  }
+}
+
+provider "aws" {
+  alias  = "tracenoon_4"
+
+  region = "eu-west-3"
+  access_key = var.aws_workloads_prod_access_key
+  secret_key = var.aws_workloads_prod_secret_key
+
+  assume_role {
+    role_arn     = "arn:aws:iam::854974172325:role/WorkloadsProd1AssumeRole"
+    session_name = "tracenoon_4"
+  }
+}
+
+provider "aws" {
+  alias  = "tracenoon_5"
+
+  region = "eu-west-3"
+  access_key = var.aws_workloads_prod_access_key
+  secret_key = var.aws_workloads_prod_secret_key
+
+  assume_role {
+    role_arn     = "arn:aws:iam::008105583531:role/WorkloadsProd1AssumeRole"
+    session_name = "tracenoon_5"
+  }
+}
