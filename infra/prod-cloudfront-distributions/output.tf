@@ -117,3 +117,33 @@ output "tracenoon_5" {
     "aws_account_number" : module.cf_distro_tracenoon_5.cf_aws_account_number
   })
 }
+
+output "tracenoon_6" {
+  value = tomap({
+    "cf_domain": module.cf_distro_tracenoon_6.cf_domain,
+    "signer_key_id": module.cf_distro_tracenoon_6.signer_key_id,
+    "cf_arn": module.cf_distro_tracenoon_6.cf_arn,
+    "assume_role_arn_for_main_account" : "arn:aws:iam::634696200032:role/WorkloadsProd1AssumeRole",
+    "aws_account_number" : module.cf_distro_tracenoon_6.cf_aws_account_number
+  })
+}
+
+output "tracenoon_7" {
+  value = tomap({
+    "cf_domain": module.cf_distro_tracenoon_7.cf_domain,
+    "signer_key_id": module.cf_distro_tracenoon_7.signer_key_id,
+    "cf_arn": module.cf_distro_tracenoon_7.cf_arn,
+    "assume_role_arn_for_main_account" : "arn:aws:iam::433060744289:role/WorkloadsProd1AssumeRole",
+    "aws_account_number" : module.cf_distro_tracenoon_7.cf_aws_account_number
+  })
+}
+
+output "tracenoon_8" {
+  value = tomap({
+    "cf_domain": module.cf_distro_tracenoon_8.cf_domain,
+    "signer_key_id": module.cf_distro_tracenoon_8.signer_key_id,
+    "cf_arn": module.cf_distro_tracenoon_8.cf_arn,
+    "assume_role_arn_for_main_account" : "arn:aws:iam::541535291396:role/WorkloadsProd1AssumeRole",
+    "aws_account_number" : module.cf_distro_tracenoon_8.cf_aws_account_number
+  })
+}
