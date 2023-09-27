@@ -177,3 +177,33 @@ module "cf_distro_tracenoon_11" {
   source_bucket_name = "media-assets-prod-e1pjapsk"
   signing_validation_public_key_path = "./resources/public-key.pem"
 }
+
+module "cf_distro_tracenoon_12" {
+  source = "./modules/cloudfront-distro"
+  providers = {
+    aws.cf_account = aws.tracenoon_12
+  }
+
+  source_bucket_name = "media-assets-prod-e1pjapsk"
+  signing_validation_public_key_path = "./resources/public-key.pem"
+}
+
+module "cf_distro_tracenoon_13" {
+  source = "./modules/cloudfront-distro"
+  providers = {
+    aws.cf_account = aws.tracenoon_13
+  }
+
+  source_bucket_name = "media-assets-prod-e1pjapsk"
+  signing_validation_public_key_path = "./resources/public-key.pem"
+}
+
+module "cf_distro_tracenoon_14" {
+  source = "./modules/cloudfront-distro"
+  providers = {
+    aws.cf_account = aws.tracenoon_14
+  }
+
+  source_bucket_name = "media-assets-prod-e1pjapsk"
+  signing_validation_public_key_path = "./resources/public-key.pem"
+}
