@@ -7,7 +7,7 @@ get_usage_for_cf_distro() {
   export AWS_SECRET_ACCESS_KEY=$(jq -r '.Credentials.SecretAccessKey' <<<$ASSUME_ROLE_RESPONSE)
   export AWS_SESSION_TOKEN=$(jq -r '.Credentials.SessionToken' <<<$ASSUME_ROLE_RESPONSE)
 
-  START_TIME=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" $(date +"%Y-%m-%dT%H:%M:%SZ" | sed 's/T.*Z/T00:00:00Z/') "+%s")
+  START_TIME=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" $(date +"%Y-%m-%1T%H:%M:%SZ" | sed 's/T.*Z/T00:00:00Z/') "+%s")
   END_TIME=$(date +%s)
 
   BYTES=$(aws cloudwatch get-metric-statistics --namespace AWS/CloudFront --metric-name BytesDownloaded --dimensions Name=DistributionId,Value=$2 Name=Region,Value=Global  --start-time $START_TIME --end-time $END_TIME --period 86400 --statistics Sum --region us-east-1 | jq ".Datapoints" | jq "[.[] | .Sum]" | jq 'add')
