@@ -79,7 +79,9 @@ export const Persons = {
   BEN_AFFLECK : { EN_US : "Ben Affleck", RU : "Бен Аффлек" },
   GERARD_BUTLER : { EN_US : "Gerard Butler", RU : "Джерард Батлер" },
   SALMA_HAYEK : { EN_US : "Salma Hayek", RU : "Сальма Хайек" },
-  CHANNING_TATUM : { EN_US : "Channing Tatum", RU : "Чаннинг Татум" }
+  CHANNING_TATUM : { EN_US : "Channing Tatum", RU : "Чаннинг Татум" },
+  TOM_CRUISE : { EN_US : "Tom Cruise", RU : "Том Круз" },
+  JENNIFER_CONNELLY : { EN_US : "Jennifer Connelly", RU : "Дженнифер Коннелли" }
 } as const;
 
 export class Person {

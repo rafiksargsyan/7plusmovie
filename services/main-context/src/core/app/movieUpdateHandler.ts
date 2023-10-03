@@ -341,7 +341,9 @@ const tmdbPersonId2Person = {
   "880" : new Person("BEN_AFFLECK"),
   "17276" : new Person("GERARD_BUTLER"),
   "38673" : new Person("CHANNING_TATUM"),
-  "3136" : new Person("SALMA_HAYEK")
+  "3136" : new Person("SALMA_HAYEK"),
+  "500" : new Person("TOM_CRUISE"),
+  "6161" : new Person("JENNIFER_CONNELLY")
 } as const;
 
 
