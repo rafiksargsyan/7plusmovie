@@ -343,7 +343,11 @@ const tmdbPersonId2Person = {
   "38673" : new Person("CHANNING_TATUM"),
   "3136" : new Person("SALMA_HAYEK"),
   "500" : new Person("TOM_CRUISE"),
-  "6161" : new Person("JENNIFER_CONNELLY")
+  "6161" : new Person("JENNIFER_CONNELLY"),
+  "8784" : new Person("DANIEL_CRAIG"),
+  "16828" : new Person("CHRIS_EVANS"),
+  "224513" : new Person("ANA_DE_ARMAS"),
+  "16483" : new Person("SYLVESTER_STALLONE")
 } as const;
 
 
