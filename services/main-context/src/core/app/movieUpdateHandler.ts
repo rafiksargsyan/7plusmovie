@@ -347,7 +347,8 @@ const tmdbPersonId2Person = {
   "8784" : new Person("DANIEL_CRAIG"),
   "16828" : new Person("CHRIS_EVANS"),
   "224513" : new Person("ANA_DE_ARMAS"),
-  "16483" : new Person("SYLVESTER_STALLONE")
+  "16483" : new Person("SYLVESTER_STALLONE"),
+  "5292" : new Person("DENZEL_WASHINGTON")
 } as const;
 
 
