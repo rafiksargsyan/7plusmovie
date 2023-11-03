@@ -1,0 +1,21 @@
+name: Backup media assets s3 bucket
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 15 * * *'
+
+jobs:
+  sync-to-backup-s3-bucket:
+    runs-on: [ 'ubuntu-latest' ]
+    timeout-minutes: 1440
+    env:
+      AWS_ACCESS_KEY_ID: AKIA4DCDKWEBPV4DRJVZ
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_BACKUP_AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: eu-west-3
+      MEDIA_FILES_S3_BUCKET: media-assets-prod-e1pjapsk
+      MEDIA_FILES_S3_BUCKET_BACKUP: media-assets-backup
+    steps:
+      - name: Sync to backup s3 bucket
+        run: |
+          aws s3 sync s3://${MEDIA_FILES_S3_BUCKET} s3://${MEDIA_FILES_S3_BUCKET_BACKUP}
