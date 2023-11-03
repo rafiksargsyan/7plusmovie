@@ -63,6 +63,7 @@ data "aws_iam_policy_document" "media_assets_s3_bucket_policy_document" {
     actions = [
       "s3:ListBucket",
       "s3:GetObject",
+      "s3:GetObjectTagging"
     ]
 
     resources = [
