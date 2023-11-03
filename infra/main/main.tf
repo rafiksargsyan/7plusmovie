@@ -26,12 +26,12 @@ resource "aws_s3_bucket_lifecycle_configuration" "media_assets_lifecycle_config"
   }
 }
 
-resource "aws_s3_bucket_policy" "allow_access_from_cloudfront" {
+resource "aws_s3_bucket_policy" "media_assets_s3_bucket_policy" {
   bucket = aws_s3_bucket.media_assets.id
-  policy = data.aws_iam_policy_document.allow_access_from_cloudfront.json
+  policy = data.aws_iam_policy_document.media_assets_s3_bucket_policy_document.json
 }
 
-data "aws_iam_policy_document" "allow_access_from_cloudfront" {
+data "aws_iam_policy_document" "media_assets_s3_bucket_policy_document" {
   statement {
     principals {
       type        = "Service"
@@ -52,6 +52,23 @@ data "aws_iam_policy_document" "allow_access_from_cloudfront" {
       values   = var.cloudfront_distro_arns
       variable = "aws:SourceArn"
     }
+  }
+
+  statement {
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::831217381634:root"]
+    }
+
+    actions = [
+      "s3:ListBucket",
+      "s3:GetObject",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${aws_s3_bucket.media_assets.bucket}/*",
+      "arn:aws:s3:::${aws_s3_bucket.media_assets.bucket}",
+    ]
   }
 }
 
