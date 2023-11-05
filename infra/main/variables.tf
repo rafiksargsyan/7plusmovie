@@ -15,10 +15,6 @@ variable "deployment_name" {
   type = string
 }
 
-#variable "cloudfront_distro_arns" {
-#  type = list(string)
-#}
-
 variable "dynamodb_deletion_protection_enabled" {
   type    = bool
   default = false
