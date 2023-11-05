@@ -91,6 +91,9 @@ resource "aws_dynamodb_table" "movie" {
   stream_view_type = "NEW_IMAGE"
   billing_mode     = "PAY_PER_REQUEST"
   deletion_protection_enabled = var.dynamodb_deletion_protection_enabled
+  point_in_time_recovery {
+    enabled = true
+  }
 }
 
 resource "aws_dynamodb_table" "cloudfront_distro_metadata" {
@@ -102,6 +105,9 @@ resource "aws_dynamodb_table" "cloudfront_distro_metadata" {
   }
   billing_mode = "PAY_PER_REQUEST"
   deletion_protection_enabled = var.dynamodb_deletion_protection_enabled
+  point_in_time_recovery {
+    enabled = true
+  }
 }
 
 resource "aws_secretsmanager_secret" "secrets" {
@@ -247,6 +253,9 @@ resource "aws_dynamodb_table" "tv_show" {
   stream_view_type = "NEW_IMAGE"
   billing_mode     = "PAY_PER_REQUEST"
   deletion_protection_enabled = var.dynamodb_deletion_protection_enabled
+  point_in_time_recovery {
+    enabled = true
+  }
 }
 
 resource "aws_dynamodb_table" "tv_show_transcoding_job" {
