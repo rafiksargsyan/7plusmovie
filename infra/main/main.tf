@@ -48,8 +48,8 @@ data "aws_iam_policy_document" "media_assets_s3_bucket_policy_document" {
     ]
 
     condition {
-      test     = "StringEquals"
-      values   = var.cloudfront_distro_arns
+      test     = "StringLike"
+      values   = ["*"]
       variable = "aws:SourceArn"
     }
   }
