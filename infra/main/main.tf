@@ -274,4 +274,3 @@ resource "aws_dynamodb_table" "tv_show_transcoding_job" {
     enabled        = true
   }
 }
-
