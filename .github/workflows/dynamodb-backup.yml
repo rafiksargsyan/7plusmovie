@@ -1,0 +1,49 @@
+name: Backup dynamodb tables
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 15 * * *'
+
+jobs:
+  backup-dynamodb-tables:
+    runs-on: [ 'ubuntu-latest' ]
+    timeout-minutes: 1440
+    env:
+      AWS_ACCESS_KEY_ID: AKIAQBPWKPTSTP3HL4UM
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: eu-west-3
+      DYNAMODB_BACKUP_S3_BUCKET: q62-dynamodb-backup
+      MOVIE_TABLE_ARN: arn:aws:dynamodb:eu-west-3:003200941285:table/prod-e1pjapsk-movie
+      TV_SHOW_TABLE_ARN: arn:aws:dynamodb:eu-west-3:003200941285:table/prod-e1pjapsk-tv_show
+      CF_DISTRO_TABLE_ARN: arn:aws:dynamodb:eu-west-3:003200941285:table/prod-e1pjapsk-cloudfront_distro_metadata
+    steps:
+      - name: Backup movie table
+        run: |
+          aws dynamodb export-table-to-point-in-time \
+            --table-arn ${MOVIE_TABLE_ARN} \
+            --s3-bucket ${DYNAMODB_BACKUP_S3_BUCKET} \
+            --s3-prefix movie \
+            --export-format DYNAMODB_JSON \
+            --s3-bucket-owner 831217381634 \
+            --s3-sse-algorithm AES256
+
+      - name: Backup tv_show table
+        run: |
+          aws dynamodb export-table-to-point-in-time \
+            --table-arn ${TV_SHOW_TABLE_ARN} \
+            --s3-bucket ${DYNAMODB_BACKUP_S3_BUCKET} \
+            --s3-prefix tv_show \
+            --export-format DYNAMODB_JSON \
+            --s3-bucket-owner 831217381634 \
+            --s3-sse-algorithm AES256
+
+      - name: Backup CF distro table
+        run: |
+          aws dynamodb export-table-to-point-in-time \
+            --table-arn ${CF_DISTRO_TABLE_ARN} \
+            --s3-bucket ${DYNAMODB_BACKUP_S3_BUCKET} \
+            --s3-prefix cf_distro \
+            --export-format DYNAMODB_JSON \
+            --s3-bucket-owner 831217381634 \
+            --s3-sse-algorithm AES256     
