@@ -17,7 +17,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "media_assets_backup_lifecycle_
 }
 
 resource "aws_s3_bucket" "dynamodb_backup" {
-  bucket = "dynamodb-backup"
+  bucket = "q62-dynamodb-backup"
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "dynamodb_backup_lifecycle_config" {
