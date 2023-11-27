@@ -1,0 +1,121 @@
+services:
+  vpn:
+    container_name: vpn
+    image: qmcgaw/gluetun:v3.36.0
+    cap_add: [ 'NET_ADMIN' ]
+    environment:
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - OPENVPN_USER=${OPENVPN_USER:-""}
+      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD:-""}
+      - SERVER_COUNTRIES=${SERVER_COUNTRIES:-Switzerland}
+    networks: [ 'main-network' ]
+    ports:
+      # qbittorrent ports
+      - 5080:5080
+      - 6881:6881
+      - 6881:6881/udp
+      # prowlarr ports
+      - 9696:9696
+    restart: "unless-stopped"
+
+  ## Default credentials of qBittorrent - Username: admin password: adminadmin ##
+  ## Change password after install from UI --> Tools --> Options --> WebUI ##
+  qbittorrent:
+    container_name: qbittorrent
+    image: lscr.io/linuxserver/qbittorrent:4.6.1
+    depends_on: [ 'vpn' ]
+    network_mode: service:vpn
+    environment:
+      - PUID=${PUID:-"1000"}
+      - PGID=${PGID:-"1000"}
+      - TZ=UTC
+      - WEBUI_PORT=5080
+    volumes:
+      - qbittorrent-config:/config
+      - torrent-downloads:/downloads
+    restart: "unless-stopped"
+
+  radarr:
+    container_name: radarr
+    image: lscr.io/linuxserver/radarr:5.1.3
+    networks:
+      main-network:
+        ipv4_address: 172.18.0.2
+    environment:
+      - PUID=${PUID:-"1000"}
+      - PGID=${PGID:-"1000"}
+      - TZ=UTC
+    ports:
+      - 7878:7878
+    volumes:
+      - radarr-config:/config
+      - torrent-downloads:/downloads
+    restart: "unless-stopped"
+
+  sonarr:
+    image: linuxserver/sonarr:3.0.10
+    container_name: sonarr
+    networks:
+      main-network:
+        ipv4_address: 172.18.0.3
+    environment:
+      - PUID=${PUID:-"1000"}
+      - PGID=${PGID:-"1000"}
+      - TZ=UTC
+    volumes:
+      - sonarr-config:/config
+      - torrent-downloads:/downloads
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+  prowlarr:
+    container_name: prowlarr
+    image: linuxserver/prowlarr:1.10.5
+    depends_on: [ 'vpn' ]
+    network_mode: service:vpn
+    environment:
+      - PUID=${PUID:-"1000"}
+      - PGID=${PGID:-"1000"}
+      - TZ=UTC
+    volumes:
+      - prowlarr-config:/config
+    restart: unless-stopped
+
+  jellyfin:
+    image: linuxserver/jellyfin:10.8.12
+    container_name: jellyfin
+    environment:
+      - PUID=${PUID:-"1000"}
+      - PGID=${PGID:-"1000"}
+      - TZ=UTC
+    volumes:
+      - jellyfin-config:/config
+      - torrent-downloads:/data
+    ports:
+      - 8096:8096
+      - 7359:7359/udp
+      - 8920:8920
+    restart: unless-stopped
+
+  reverse-proxy:
+    build: ./reverse-proxy
+    ports:
+      - 8080:80
+    restart: unless-stopped
+    networks: [ 'main-network' ]
+
+volumes:
+  torrent-downloads:
+  radarr-config:
+  sonarr-config:
+  prowlarr-config:
+  jellyfin-config:
+  qbittorrent-config:
+
+networks:
+  main-network:
+    ipam:
+      driver: bridge
+      config:
+        - subnet: 172.18.0.0/16
