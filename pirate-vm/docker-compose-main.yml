@@ -5,10 +5,12 @@ services:
     cap_add: [ 'NET_ADMIN' ]
     environment:
       - VPN_SERVICE_PROVIDER=protonvpn
-      - OPENVPN_USER=${OPENVPN_USER:-""}
-      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD:-""}
+      - OPENVPN_USER=${OPENVPN_USER:?}
+      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD:?}
       - SERVER_COUNTRIES=${SERVER_COUNTRIES:-Switzerland}
-    networks: [ 'main-network' ]
+    networks:
+      main-network:
+        ipv4_address: 172.18.0.5 
     ports:
       # qbittorrent ports
       - 5080:5080
@@ -16,18 +18,20 @@ services:
       - 6881:6881/udp
       # prowlarr ports
       - 9696:9696
+      # jackett ports
+      - 9117:9117  
     restart: "unless-stopped"
 
   ## Default credentials of qBittorrent - Username: admin password: adminadmin ##
   ## Change password after install from UI --> Tools --> Options --> WebUI ##
   qbittorrent:
     container_name: qbittorrent
-    image: lscr.io/linuxserver/qbittorrent:4.6.1
+    image: lscr.io/linuxserver/qbittorrent:4.6.0
     depends_on: [ 'vpn' ]
     network_mode: service:vpn
     environment:
-      - PUID=${PUID:-"1000"}
-      - PGID=${PGID:-"1000"}
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
       - TZ=UTC
       - WEBUI_PORT=5080
     volumes:
@@ -42,8 +46,8 @@ services:
       main-network:
         ipv4_address: 172.18.0.2
     environment:
-      - PUID=${PUID:-"1000"}
-      - PGID=${PGID:-"1000"}
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
       - TZ=UTC
     ports:
       - 7878:7878
@@ -59,8 +63,8 @@ services:
       main-network:
         ipv4_address: 172.18.0.3
     environment:
-      - PUID=${PUID:-"1000"}
-      - PGID=${PGID:-"1000"}
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
       - TZ=UTC
     volumes:
       - sonarr-config:/config
@@ -75,19 +79,32 @@ services:
     depends_on: [ 'vpn' ]
     network_mode: service:vpn
     environment:
-      - PUID=${PUID:-"1000"}
-      - PGID=${PGID:-"1000"}
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
       - TZ=UTC
     volumes:
       - prowlarr-config:/config
     restart: unless-stopped
+ 
+  jackett:
+    image: linuxserver/jackett:0.21.1264
+    container_name: jackett
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=UTC
+    volumes:
+      - jackett-config:/config
+    network_mode: service:vpn
+    depends_on: [ 'vpn' ]
 
   jellyfin:
     image: linuxserver/jellyfin:10.8.12
     container_name: jellyfin
     environment:
-      - PUID=${PUID:-"1000"}
-      - PGID=${PGID:-"1000"}
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
       - TZ=UTC
     volumes:
       - jellyfin-config:/config
@@ -96,14 +113,22 @@ services:
       - 8096:8096
       - 7359:7359/udp
       - 8920:8920
+    networks:
+      main-network:
+        ipv4_address: 172.18.0.4
     restart: unless-stopped
 
   reverse-proxy:
+    container_name: reverse-proxy       
     build: ./reverse-proxy
     ports:
-      - 8080:80
+      - 80:80
+    volumes:
+      - torrent-downloads:/media-files       
     restart: unless-stopped
-    networks: [ 'main-network' ]
+    networks:
+      main-network:
+        ipv4_address: 172.18.0.6
 
 volumes:
   torrent-downloads:
@@ -112,10 +137,12 @@ volumes:
   prowlarr-config:
   jellyfin-config:
   qbittorrent-config:
+  jackett-config:
 
 networks:
   main-network:
+    name: main-network       
     ipam:
-      driver: bridge
+      driver: default
       config:
         - subnet: 172.18.0.0/16
