@@ -161,6 +161,11 @@ resource "aws_cognito_user_pool" "admin_user_pool" {
   }
 }
 
+resource "aws_cognito_user_pool_domain" "admin_user_pool_domain" {
+  domain       = "${local.deployment_id}-admin"
+  user_pool_id = aws_cognito_user_pool.admin_user_pool.id
+}
+
 resource "aws_cognito_user_pool_client" "admin_client_cli" {
   name         = "${local.deployment_id}-admin-client-cli"
   user_pool_id = aws_cognito_user_pool.admin_user_pool.id
