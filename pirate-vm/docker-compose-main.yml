@@ -130,6 +130,13 @@ services:
       main-network:
         ipv4_address: 172.18.0.6
 
+  media-toolbox:
+    container_name: media-toolbox
+    build: ./media-toolbox
+    volumes:
+      - torrent-downloads:/media-files
+    restart: unless-stopped
+
 volumes:
   torrent-downloads:
   radarr-config:
