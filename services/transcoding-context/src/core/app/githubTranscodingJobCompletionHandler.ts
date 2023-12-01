@@ -36,7 +36,8 @@ interface TranscodingJobRead {
 }
 
 export const handler = async (event: HandlerParam) => {   
-  if (event.headers["content-type"] !== "application/json") {
+  if (event.headers["content-type"] !== "application/json" &&
+      event.headers["Content-Type"] !== "application/json") {
     throw new InvalidContentTypeError();
   }
   const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
