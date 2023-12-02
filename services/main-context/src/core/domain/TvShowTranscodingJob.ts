@@ -49,7 +49,7 @@ export class TvShowTranscodingJob {
       this.setDefaultTextTrack(defaultTextTrack);
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
-      this.ttl = Math.round(this.creationTime / 1000) + 5 * 24 * 60 * 60;
+      this.ttl = Math.round(this.creationTime / 1000) + 15 * 24 * 60 * 60;
     }
   }
 
