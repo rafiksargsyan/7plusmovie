@@ -58,6 +58,10 @@ export default function App({ Component, pageProps }: AppProps) {
           gtag('config', 'G-9F6DBJPMHW');
         `}
       </Script>
+      <Script
+        disable-devtool-auto
+        src='https://cdn.jsdelivr.net/npm/disable-devtool@0.3.6'
+      />
       <Analytics />
       {loading ? (
         <ThemeProvider theme={darkTheme}>
