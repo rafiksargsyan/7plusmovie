@@ -89,7 +89,8 @@ export const Persons = {
   DENZEL_WASHINGTON : { EN_US : "Denzel Washington", RU : "Дензел Вашингтон" },
   EMILY_BLUNT : { EN_US : "Emily Blunt", RU : "Эмили Блант" },
   ROBERT_DOWNEY_JR : { EN_US : "Robert Downey Jr.", RU : "Роберт Дауни-младший." },
-  JOSH_HARNETT : { EN_US : "Josh Hartnett", RU : "Джош Хартнетт" }
+  JOSH_HARNETT : { EN_US : "Josh Hartnett", RU : "Джош Хартнетт" },
+  GUY_PEARCE : { EN_US : "Guy Pearce", RU : "Гай Пирс" }
 } as const;
 
 export class Person {
