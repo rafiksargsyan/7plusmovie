@@ -90,7 +90,11 @@ export const Persons = {
   EMILY_BLUNT : { EN_US : "Emily Blunt", RU : "Эмили Блант" },
   ROBERT_DOWNEY_JR : { EN_US : "Robert Downey Jr.", RU : "Роберт Дауни-младший." },
   JOSH_HARNETT : { EN_US : "Josh Hartnett", RU : "Джош Хартнетт" },
-  GUY_PEARCE : { EN_US : "Guy Pearce", RU : "Гай Пирс" }
+  GUY_PEARCE : { EN_US : "Guy Pearce", RU : "Гай Пирс" },
+  MEL_GIBSON : { EN_US : "Mel Gibson", RU : "Мел Гибсон" },
+  TERESA_PALMER : { EN_US : "Teresa Palmer", RU : "Тереза Палмер" },
+  JAMIE_FOXX : { EN_US : "Jamie Foxx", RU : "Джейми Фокс" },
+  ROSAMUND_PIKE : { EN_US : "Rosamund Pike", RU : "Розамунд Пайк" }
 } as const;
 
 export class Person {

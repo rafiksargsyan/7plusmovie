@@ -352,7 +352,11 @@ const tmdbPersonId2Person = {
   "5081" : new Person("EMILY_BLUNT"),
   "3223" : new Person("ROBERT_DOWNEY_JR"),
   "2299" : new Person("JOSH_HARNETT"),
-  "529" : new Person("GUY_PEARCE")
+  "529" : new Person("GUY_PEARCE"),
+  "2461" : new Person("MEL_GIBSON"),
+  "20374" : new Person("TERESA_PALMER"),
+  "134" : new Person("JAMIE_FOXX"),
+  "10882" : new Person("ROSAMUND_PIKE")
 } as const;
 
 
