@@ -1,4 +1,4 @@
-#/bin/sh
+#!/usr/bin/env sh
 
 get_usage_for_cf_distro() {
   ASSUME_ROLE_RESPONSE=$(aws sts assume-role --role-arn $1 --role-session-name GetCFDistroUsage --region eu-west-3 --profile q62-prod)
