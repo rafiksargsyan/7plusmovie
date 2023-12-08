@@ -49,7 +49,7 @@ export const handler = async (event: CreateMovieTranscodingJobParam): Promise<st
   let movieTranscodingJob = new MovieTranscodingJob(false, event.movieId, event.mkvS3ObjectKey, event.mkvHttpUrl, event.outputFolderKey,
     audioTranscodeSpecParams, textTranscodeSpecParams, event.defaultAudioTrack, event.defaultTextTrack);
   
-  await docClient.put({TableName: dynamodbMovieTranscodingJobTableName, Item: movieTranscodingJob});
+  await docClient.put({TableName: dynamodbMovieTranscodingJobTableName, Item: movieTranscodingJob});docClient.batchWrite
 
   return movieTranscodingJob.id;
 };
