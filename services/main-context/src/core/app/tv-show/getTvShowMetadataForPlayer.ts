@@ -3,6 +3,7 @@ import { DynamoDB } from '@aws-sdk/client-dynamodb';
 
 const dynamodbTvShowTableName = process.env.DYNAMODB_TV_SHOW_TABLE_NAME!;
 const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
+const cfDistroRandomSelectionProportion = Number.parseFloat(process.env.CF_DISTRO_RANDOM_SELECTION_PROPORTION!);
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}));
 
@@ -57,11 +58,20 @@ interface CloudFrontDistro {
   domain: string;
   assumeRoleArnForMainAccount: string;
   signerKeyId: string;
+  usageInBytesForTheMonth: number;
 }
 
 export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataResponse> => {
   const tvShow = await getTvShow(event.tvShowId);
-  const cfDistro = await getRandomCloudFrontDistro();
+  let cfDistro;
+  try {
+    cfDistro = await getCloudFrontDistro2();
+  } catch (e) {
+    console.error('Failed to retrieve CF distro using version 2 algorithm:', e);
+  }
+  if (cfDistro == undefined) {
+    cfDistro = await getRandomCloudFrontDistro();
+  }
   const season = tvShow.seasons.filter(_ => _.seasonNumber == event.season)[0];
   if (season == undefined) {
     throw new TvShowSeasonNotFoundError();
@@ -106,6 +116,7 @@ async function getTvShow(id: string) {
   return tvShow;
 }
 
+// TODO: Remove after making sure version 2 algorithm works reliably
 async function getRandomCloudFrontDistro() {
   const cfDistros: CloudFrontDistro[] = [];
   const params = {
@@ -120,4 +131,26 @@ async function getRandomCloudFrontDistro() {
   } while (typeof items.LastEvaluatedKey != "undefined");
   const randomIndex = Math.floor(Math.random() * cfDistros.length);
   return cfDistros[randomIndex];
+}
+
+async function getCloudFrontDistro2() {
+  const cfDistros: CloudFrontDistro[] = [];
+  const params = {
+    TableName: dynamodbCFDistroMetadataTableName,
+    ExclusiveStartKey: undefined
+  }
+  let items;
+  do {
+    items =  await docClient.scan(params);
+    items.Items.forEach((item) => cfDistros.push(item as unknown as CloudFrontDistro));
+    params.ExclusiveStartKey = items.LastEvaluatedKey;
+  } while (typeof items.LastEvaluatedKey !== "undefined");
+  const randomSelectionSize = Math.round(cfDistros.length * cfDistroRandomSelectionProportion);
+  const candidates = cfDistros.filter(_ => _.usageInBytesForTheMonth != undefined)
+                              .sort((a, b) => a.usageInBytesForTheMonth - b.usageInBytesForTheMonth)
+                              .slice(0, randomSelectionSize);
+  if (candidates.length === 0) {
+    return undefined;
+  }
+  return candidates[Math.floor(Math.random() * candidates.length)];
 }

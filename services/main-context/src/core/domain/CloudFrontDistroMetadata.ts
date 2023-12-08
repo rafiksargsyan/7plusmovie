@@ -9,10 +9,11 @@ export class CloudFrontDistroMetadata {
   private assumeRoleArnForMainAccount: string;  // TODO: create value object
   private awsAccountNumber: string; // TODO: create value object
   private signerKeyId: string; // TODO: create value object
+  private usageInBytesForTheMonth: number;
 
-  public constructor(createEmptyObject: boolean, domain: string | undefined, arn: string | undefined,
-    assumeRoleArnForMainAccount: string | undefined, awsAccountNumber: string | undefined,
-    signerKeyId: string | undefined) {
+  public constructor(createEmptyObject: boolean, domain?: string | undefined, arn?: string | undefined,
+    assumeRoleArnForMainAccount?: string | undefined, awsAccountNumber?: string | undefined,
+    signerKeyId?: string | undefined) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.domain = this.validateDomain(domain);
@@ -23,6 +24,14 @@ export class CloudFrontDistroMetadata {
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
     }
+  }
+
+  public setUsageInBytesForTheMonth(usage: number | undefined) {
+    if (usage == undefined || usage < 0) {
+      throw new InvalidUsageError();
+    }
+    this.usageInBytesForTheMonth = usage;
+    this.lastUpdateTime = Date.now();
   }
 
   private validateDomain(domain: string | undefined) {
@@ -70,3 +79,5 @@ class InvalidAssumeRoleArnError extends Error {}
 class InvalidAwsAccountNumberError extends Error {}
 
 class InvalidSignerKeyIdError extends Error {}
+
+class InvalidUsageError extends Error {}

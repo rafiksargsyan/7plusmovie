@@ -200,6 +200,8 @@ functions:
     environment:
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
       DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME: ${env:DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME}
+      CF_DISTRO_USAGE_THRESHOLD: ${env:CF_DISTRO_USAGE_THRESHOLD}
+      CF_DISTRO_RANDOM_SELECTION_PROPORTION: ${env:CF_DISTRO_RANDOM_SELECTION_PROPORTION}
     handler: src/core/app/getMovieMetadataForPlayer.handler
     events:
       - http:
@@ -544,6 +546,8 @@ functions:
     environment:
       DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
       DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME: ${env:DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME}
+      CF_DISTRO_USAGE_THRESHOLD: ${env:CF_DISTRO_USAGE_THRESHOLD}
+      CF_DISTRO_RANDOM_SELECTION_PROPORTION: ${env:CF_DISTRO_RANDOM_SELECTION_PROPORTION}
     handler: src/core/app/tv-show/getTvShowMetadataForPlayer.handler
     events:
       - http:
@@ -700,6 +704,16 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  cfDistroUsageUpdater:
+    environment:
+      DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME: ${env:DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME}
+    handler: src/core/app/cfDistroUsageUpdater.handler
+    role: createCloudFrontDistroMetadataRole
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):CF_DISTRO_USAGE_UPDATE_INTERVAL_IN_MINUTES} minutes)
+    timeout: 900
+          
 
 resources:
   Resources:
