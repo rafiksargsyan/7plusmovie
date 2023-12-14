@@ -15,7 +15,8 @@ exports.AudioLangCodes = {
     EN_AU: { lang: "en", langTag: "en-AU", displayName: "English (AU)" },
     RU: { lang: "ru", langTag: "ru", displayName: "Русский" },
     FR: { lang: "fr", langTag: "fr", displayName: "Français" },
-    JA: { lang: "ja", langTag: "ja", displayName: "日本" }
+    JA: { lang: "ja", langTag: "ja", displayName: "日本" },
+    PT: { lang: "pt", langTag: "pt", displayName: "Português" }
 };
 class AudioLangCode {
     constructor(code) {
@@ -47,7 +48,8 @@ exports.SubsLangCodes = {
     RU_FORCED: { lang: "ru", langTag: "ru-x-forced", displayName: "Русский (форсированный)" },
     EN_US_FORCED: { lang: "en", langTag: "en-US-x-forced", displayName: "English (US) (forced)" },
     FR: { lang: "fr", langTag: "fr", displayName: "Français" },
-    JA: { lang: "ja", langTag: "ja", displayName: "日本" }
+    JA: { lang: "ja", langTag: "ja", displayName: "日本" },
+    PT: { lang: "pt", langTag: "pt", displayName: "Português" }
 };
 class SubsLangCode {
     constructor(code) {

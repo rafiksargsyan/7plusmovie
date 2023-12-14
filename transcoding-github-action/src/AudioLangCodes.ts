@@ -5,7 +5,8 @@ export const AudioLangCodes = {
   EN_AU : { lang : "en", langTag : "en-AU", displayName : "English (AU)" },
   RU : { lang : "ru", langTag : "ru", displayName : "Русский" },
   FR : { lang : "fr", langTag: "fr", displayName : "Français" },
-  JA : { lang : "ja", langTag: "ja", displayName : "日本" }
+  JA : { lang : "ja", langTag: "ja", displayName : "日本" },
+  PT : { lang : "pt", langTag: "pt", displayName : "Português" }
 } as const;
 
 export class AudioLangCode {
