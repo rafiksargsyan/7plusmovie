@@ -356,7 +356,10 @@ const tmdbPersonId2Person = {
   "2461" : new Person("MEL_GIBSON"),
   "20374" : new Person("TERESA_PALMER"),
   "134" : new Person("JAMIE_FOXX"),
-  "10882" : new Person("ROSAMUND_PIKE")
+  "10882" : new Person("ROSAMUND_PIKE"),
+  "1003" : new Person("JEAN_RENO"),
+  "524" : new Person("NATALIE_PORTMAN"),
+  "59" : new Person("LUC_BESSON")
 } as const;
 
 
