@@ -157,7 +157,9 @@ function run() {
             textTranscodeSpecs.forEach(_ => {
                 transcodeSubsFromMkv(mkvFileAbsolutePath, _.stream, new SubsLangCodes_1.SubsLangCode(_.lang));
             });
-            (0, child_process_1.execSync)(`cp ./*.vtt ${subtitlesFolderAbsolutePath}`);
+            if (textTranscodeSpecs.length !== 0) {
+                (0, child_process_1.execSync)(`cp ./*.vtt ${subtitlesFolderAbsolutePath}`);
+            }
             process.chdir(vodFolderAbsolutePath);
             let shakaPackagerCommand = "shaka-packager ";
             shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, "h264_main_540p_18.mp4")},stream=video,output=h264_main_540p_18.mp4 `;
@@ -182,7 +184,9 @@ function run() {
             }
             shakaPackagerCommand += "--mpd_output manifest.mpd --hls_master_playlist_output master.m3u8";
             (0, child_process_1.execSync)(`eval "${shakaPackagerCommand}"`);
-            (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.vtt');
+            if (textTranscodeSpecs.length !== 0) {
+                (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.vtt');
+            }
             (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.mpd');
             (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.m3u8');
             textTranscodeSpecs.forEach(_ => {

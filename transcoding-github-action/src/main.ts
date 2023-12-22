@@ -65,9 +65,10 @@ async function run(): Promise<void> {
     textTranscodeSpecs.forEach(_ => {
       transcodeSubsFromMkv(mkvFileAbsolutePath, _.stream,  new SubsLangCode(_.lang));
     })
-
-    execSync(`cp ./*.vtt ${subtitlesFolderAbsolutePath}`);
-
+    
+    if (textTranscodeSpecs.length !== 0) {
+      execSync(`cp ./*.vtt ${subtitlesFolderAbsolutePath}`);
+    } 
     process.chdir(vodFolderAbsolutePath);
 
     let shakaPackagerCommand = "shaka-packager ";
@@ -99,7 +100,9 @@ async function run(): Promise<void> {
 
     execSync(`eval "${shakaPackagerCommand}"`);
 
-    execSync('sed -i "/shaka-packager/d" ./*.vtt');
+    if (textTranscodeSpecs.length !== 0) {
+      execSync('sed -i "/shaka-packager/d" ./*.vtt');
+    }
     execSync('sed -i "/shaka-packager/d" ./*.mpd');
     execSync('sed -i "/shaka-packager/d" ./*.m3u8');
 
