@@ -7,7 +7,8 @@ export const SubsLangCodes = {
   EN_US_FORCED : { lang: "en", langTag : "en-US-x-forced", displayName : "English (US) (forced)" },
   FR : { lang : "fr", langTag : "fr", displayName : "Français" },
   JA : { lang : "ja", langTag : "ja", displayName : "日本" },
-  PT : { lang : "pt", langTag: "pt", displayName : "Português" }
+  PT : { lang : "pt", langTag: "pt", displayName : "Português" },
+  KO : { lang : "ko", langTag: "ko", displayName : "한국인" }
 } as const;
 
 export class SubsLangCode {
