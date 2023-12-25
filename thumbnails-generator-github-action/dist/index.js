@@ -80,7 +80,7 @@ function run() {
                 const endTime = i + 1;
                 const spritePositionX = i % 5 * width;
                 const spritePositionY = Math.floor(i % 15 / 5) * height;
-                webvttFile.write(`${srtTimestamp(startTime)} --> ${srtTimestamp(endTime)}\n`);
+                webvttFile.write(`${vttTimestamp(startTime)} --> ${vttTimestamp(endTime)}\n`);
                 webvttFile.write(`sprite-${spriteNumber}.jpg#xywh=${spritePositionX},${spritePositionY},${width},${height}\n\n`);
             }
         }
@@ -90,7 +90,7 @@ function run() {
         }
     });
 }
-function srtTimestamp(seconds) {
+function vttTimestamp(seconds) {
     let milliseconds = seconds * 1000;
     seconds = Math.floor(milliseconds / 1000);
     let minutes = Math.floor(seconds / 60);
@@ -100,7 +100,7 @@ function srtTimestamp(seconds) {
     minutes = minutes % 60;
     return (hours < 10 ? '0' : '') + hours + ':'
         + (minutes < 10 ? '0' : '') + minutes + ':'
-        + (seconds < 10 ? '0' : '') + seconds + ','
+        + (seconds < 10 ? '0' : '') + seconds + '.'
         + (milliseconds < 100 ? '0' : '') + (milliseconds < 10 ? '0' : '') + milliseconds;
 }
 run();

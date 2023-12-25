@@ -45,7 +45,7 @@ async function run(): Promise<void> {
       const spritePositionX = i % 5 * width;
       const spritePositionY = Math.floor(i % 15 / 5) * height;
 
-      webvttFile.write(`${srtTimestamp(startTime)} --> ${srtTimestamp(endTime)}\n`);
+      webvttFile.write(`${vttTimestamp(startTime)} --> ${vttTimestamp(endTime)}\n`);
       webvttFile.write(`sprite-${spriteNumber}.jpg#xywh=${spritePositionX},${spritePositionY},${width},${height}\n\n`);
     }
 
@@ -54,7 +54,7 @@ async function run(): Promise<void> {
   }
 }
 
-function srtTimestamp(seconds: number) {
+function vttTimestamp(seconds: number) {
   let milliseconds = seconds*1000;
   
   seconds = Math.floor(milliseconds / 1000);
@@ -65,7 +65,7 @@ function srtTimestamp(seconds: number) {
   minutes = minutes % 60;
   return (hours < 10 ? '0' : '') + hours + ':'
     + (minutes < 10 ? '0' : '') + minutes + ':'
-    + (seconds < 10 ? '0' : '') + seconds + ','
+    + (seconds < 10 ? '0' : '') + seconds + '.'
     + (milliseconds < 100 ? '0' : '') + (milliseconds < 10 ? '0' : '') + milliseconds;
 }
 
