@@ -289,6 +289,6 @@ resource "cloudflare_page_rule" "foobar" {
   target = "${var.cloudflare_media_assets_prefix}.${var.cloudflare_zone_media_assets}/*"
 
   actions {
-    bypass_cache = true
+    cache_level = "bypass"
   }
 }
