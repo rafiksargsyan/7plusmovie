@@ -4,6 +4,10 @@ import { DynamoDB } from '@aws-sdk/client-dynamodb';
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
 const cfDistroRandomSelectionProportion = Number.parseFloat(process.env.CF_DISTRO_RANDOM_SELECTION_PROPORTION!);
+const cfDistroUsageThreshold = Number.parseFloat(process.env.CF_DISTRO_USAGE_THRESHOLD!);
+const cloudflareMediaAssetsDomain = process.env.CLOUDFLARE_MEDIA_ASSETS_DOMAIN!;
+
+const terabiteInBytes = 1_000_000_000_000; // Max free outgoing traffic for Cloudfront is 1TB
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}));
 
@@ -45,18 +49,21 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   let movie = await getMovie(event.movieId);
   let cfDistro;
   try {
-    cfDistro = await getCloudFrontDistro2();
+    cfDistro = await getCloudFrontDistro();
   } catch (e) {
-    console.error('Failed to retrieve CF distro using version 2 algorithm:', e);
+    console.error('Failed to retrieve CF distro:', e);
   }
+  let mediaAssetsDomain;
   if (cfDistro == undefined) {
-    cfDistro = await getRandomCloudFrontDistro();
+    mediaAssetsDomain = cloudflareMediaAssetsDomain;
+  } else {
+    mediaAssetsDomain = cfDistro.domain;
   }
   return {
-    subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `https://${cfDistro.domain}/${movie.subtitles[key]}`; return acc;}, {}),
-    mpdFile: `https://${cfDistro.domain}/${movie.mpdFile}`,
-    m3u8File: `https://${cfDistro.domain}/${movie.m3u8File}`,
-    thumbnailsFile: movie.thumbnailsFile !== undefined ? `https://${cfDistro.domain}/${movie.thumbnailsFile}` : undefined,
+    subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `https://${mediaAssetsDomain}/${movie.subtitles[key]}`; return acc;}, {}),
+    mpdFile: `https://${mediaAssetsDomain}/${movie.mpdFile}`,
+    m3u8File: `https://${mediaAssetsDomain}/${movie.m3u8File}`,
+    thumbnailsFile: movie.thumbnailsFile !== undefined ? `https://${mediaAssetsDomain}/${movie.thumbnailsFile}` : undefined,
     backdropImage: movie.backdropImage,
     originalTitle: movie.originalTitle,
     titleL8ns: movie.titleL8ns,
@@ -79,24 +86,7 @@ async function getMovie(id: string) {
   return movie;
 }
 
-// TODO: Remove after making sure version 2 algorithm works reliably
-async function getRandomCloudFrontDistro() {
-  const cfDistros: CloudFrontDistro[] = [];
-  const params = {
-    TableName: dynamodbCFDistroMetadataTableName,
-    ExclusiveStartKey: undefined
-  }
-  let items;
-  do {
-    items =  await docClient.scan(params);
-    items.Items.forEach((item) => cfDistros.push(item as unknown as CloudFrontDistro));
-    params.ExclusiveStartKey = items.LastEvaluatedKey;
-  } while (typeof items.LastEvaluatedKey !== "undefined");
-  const randomIndex = Math.floor(Math.random() * cfDistros.length);
-  return cfDistros[randomIndex];
-}
-
-async function getCloudFrontDistro2() {
+async function getCloudFrontDistro() {
   const cfDistros: CloudFrontDistro[] = [];
   const params = {
     TableName: dynamodbCFDistroMetadataTableName,
@@ -115,5 +105,9 @@ async function getCloudFrontDistro2() {
   if (candidates.length === 0) {
     return undefined;
   }
-  return candidates[Math.floor(Math.random() * candidates.length)];
+  const candidate = candidates[Math.floor(Math.random() * candidates.length)];
+  if (candidate.usageInBytesForTheMonth > cfDistroUsageThreshold * terabiteInBytes) {
+    return undefined;
+  }
+  return candidate;
 }
