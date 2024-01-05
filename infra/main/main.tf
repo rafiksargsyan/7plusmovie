@@ -279,3 +279,16 @@ resource "aws_dynamodb_table" "tv_show_transcoding_job" {
     enabled        = true
   }
 }
+
+data "cloudflare_zone" "media_assets" {
+  name = var.cloudflare_zone_media_assets
+}
+
+resource "cloudflare_page_rule" "foobar" {
+  zone_id = data.cloudflare_zone.media_assets.id
+  target = "${var.cloudflare_media_assets_prefix}.${var.cloudflare_zone_media_assets}/*"
+
+  actions {
+    bypass_cache = true
+  }
+}

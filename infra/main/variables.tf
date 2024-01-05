@@ -59,3 +59,11 @@ variable "cloudflare_api_key" {
 variable "cloudflare_account_id" {
   type = string
 }
+
+variable "cloudflare_zone_media_assets" {
+  type = string
+}
+
+variable "cloudflare_media_assets_prefix" {
+  type = string
+}
