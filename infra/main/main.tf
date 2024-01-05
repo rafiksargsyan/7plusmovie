@@ -284,7 +284,7 @@ data "cloudflare_zone" "media_assets" {
   name = var.cloudflare_zone_media_assets
 }
 
-resource "cloudflare_page_rule" "foobar" {
+resource "cloudflare_page_rule" "bypass_cache_media_assets" {
   zone_id = data.cloudflare_zone.media_assets.id
   target = "${var.cloudflare_media_assets_prefix}.${var.cloudflare_zone_media_assets}/*"
 
