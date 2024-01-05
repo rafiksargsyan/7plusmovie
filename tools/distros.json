@@ -1,13 +1,7 @@
 [
 {"assume_role_arn_for_main_account":"arn:aws:iam::863389750426:role/WorkloadsProd1AssumeRole","aws_account_number":"863389750426","cf_arn":"arn:aws:cloudfront::863389750426:distribution/E2OU8VK0KO4LZ6","cf_domain":"d3ezbh7ttypwmz.cloudfront.net","signer_key_id":"K4TSNEKDNQM66"},
-{"assume_role_arn_for_main_account":"arn:aws:iam::139486306394:role/WorkloadsProd1AssumeRole","aws_account_number":"139486306394","cf_arn":"arn:aws:cloudfront::139486306394:distribution/E29OZV46SQ1VM3","cf_domain":"d3v20mzwu2mqju.cloudfront.net","signer_key_id":"K38ZPUYNV80XJQ"},
-{"assume_role_arn_for_main_account":"arn:aws:iam::894612417045:role/WorkloadsProd1AssumeRole","aws_account_number":"894612417045","cf_arn":"arn:aws:cloudfront::894612417045:distribution/E2IT22X4WDJ09J","cf_domain":"d3tycvupy3d7s6.cloudfront.net","signer_key_id":"K2NCQD42QTGZRU"},
 {"assume_role_arn_for_main_account":"arn:aws:iam::309921977173:role/WorkloadsProd1AssumeRole","aws_account_number":"309921977173","cf_arn":"arn:aws:cloudfront::309921977173:distribution/E2R265H3HWNCMA","cf_domain":"d3o4ty4sk1leni.cloudfront.net","signer_key_id":"K1ZD5OQHHI70D2"},
-{"assume_role_arn_for_main_account":"arn:aws:iam::011949300477:role/WorkloadsProd1AssumeRole","aws_account_number":"011949300477","cf_arn":"arn:aws:cloudfront::011949300477:distribution/E2F7PZVQ8O0ONA","cf_domain":"d1jzvs5utalebv.cloudfront.net","signer_key_id":"K3T6GWLBF8NWB"},
-{"assume_role_arn_for_main_account":"arn:aws:iam::386464960221:role/WorkloadsProd1AssumeRole","aws_account_number":"386464960221","cf_arn":"arn:aws:cloudfront::386464960221:distribution/E3ALHSAW3L8INQ","cf_domain":"dey601o6032ly.cloudfront.net","signer_key_id":"KSYLP1QJQ2VQZ"},
-{"assume_role_arn_for_main_account":"arn:aws:iam::694508858683:role/WorkloadsProd1AssumeRole","aws_account_number":"694508858683","cf_arn":"arn:aws:cloudfront::694508858683:distribution/E1LO95WX5QTXYU","cf_domain":"d6v3p7mgzd95s.cloudfront.net","signer_key_id":"K3K4LKGCO946JJ"},
-{"assume_role_arn_for_main_account":"arn:aws:iam::831916282287:role/WorkloadsProd1AssumeRole","aws_account_number":"831916282287","cf_arn":"arn:aws:cloudfront::831916282287:distribution/E36OI055T035WU","cf_domain":"d1tahbitt278pt.cloudfront.net","signer_key_id":"KOMAYYRSO4WKR"},
-{"assume_role_arn_for_main_account":"arn:aws:iam::855101825283:role/WorkloadsProd1AssumeRole","aws_account_number":"855101825283","cf_arn":"arn:aws:cloudfront::855101825283:distribution/E1W52UY2CZEWMP","cf_domain":"d1e9at7b01b1pr.cloudfront.net","signer_key_id":"KMWREKR46SKKQ"}
+{"assume_role_arn_for_main_account":"arn:aws:iam::694508858683:role/WorkloadsProd1AssumeRole","aws_account_number":"694508858683","cf_arn":"arn:aws:cloudfront::694508858683:distribution/E1LO95WX5QTXYU","cf_domain":"d6v3p7mgzd95s.cloudfront.net","signer_key_id":"K3K4LKGCO946JJ"}
 ]
 
 
