@@ -8,26 +8,6 @@ module "cf_distro_chalkhalting" {
   signing_validation_public_key_path = "./resources/public-key.pem"
 }
 
-module "cf_distro_chalkhalting_1" {
-  source = "./modules/cloudfront-distro"
-  providers = {
-    aws.cf_account = aws.chalkhalting-1
-  }
-
-  source_bucket_name = "media-assets-prod-e1pjapsk"
-  signing_validation_public_key_path = "./resources/public-key.pem"
-}
-
-module "cf_distro_chalkhalting_2" {
-  source = "./modules/cloudfront-distro"
-  providers = {
-    aws.cf_account = aws.chalkhalting-2
-  }
-
-  source_bucket_name = "media-assets-prod-e1pjapsk"
-  signing_validation_public_key_path = "./resources/public-key.pem"
-}
-
 module "cf_distro_mutantcandlelight" {
   source = "./modules/cloudfront-distro"
   providers = {
@@ -38,50 +18,10 @@ module "cf_distro_mutantcandlelight" {
   signing_validation_public_key_path = "./resources/public-key.pem"
 }
 
-module "cf_distro_mutantcandlelight_1" {
-  source = "./modules/cloudfront-distro"
-  providers = {
-    aws.cf_account = aws.mutantcandlelight_1
-  }
-
-  source_bucket_name = "media-assets-prod-e1pjapsk"
-  signing_validation_public_key_path = "./resources/public-key.pem"
-}
-
-module "cf_distro_mutantcandlelight_2" {
-  source = "./modules/cloudfront-distro"
-  providers = {
-    aws.cf_account = aws.mutantcandlelight_2
-  }
-
-  source_bucket_name = "media-assets-prod-e1pjapsk"
-  signing_validation_public_key_path = "./resources/public-key.pem"
-}
-
 module "cf_distro_tracenoon" {
   source = "./modules/cloudfront-distro"
   providers = {
     aws.cf_account = aws.tracenoon
-  }
-
-  source_bucket_name = "media-assets-prod-e1pjapsk"
-  signing_validation_public_key_path = "./resources/public-key.pem"
-}
-
-module "cf_distro_tracenoon_1" {
-  source = "./modules/cloudfront-distro"
-  providers = {
-    aws.cf_account = aws.tracenoon_1
-  }
-
-  source_bucket_name = "media-assets-prod-e1pjapsk"
-  signing_validation_public_key_path = "./resources/public-key.pem"
-}
-
-module "cf_distro_tracenoon_2" {
-  source = "./modules/cloudfront-distro"
-  providers = {
-    aws.cf_account = aws.tracenoon_2
   }
 
   source_bucket_name = "media-assets-prod-e1pjapsk"
