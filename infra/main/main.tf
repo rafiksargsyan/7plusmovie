@@ -279,3 +279,9 @@ resource "aws_dynamodb_table" "tv_show_transcoding_job" {
     enabled        = true
   }
 }
+
+resource "cloudflare_r2_bucket" "media_assets" {
+  account_id = var.cloudflare_account_id
+  name       = "media-assets-${local.deployment_id}"
+  location   = "weur"
+}

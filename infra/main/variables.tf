@@ -47,3 +47,15 @@ variable "github_pat" {
 variable "workflow_run_id_provider_hook_secret" {
   type = string
 }
+
+variable "cloudflare_email" {
+  type = string
+}
+
+variable "cloudflare_api_key" {
+  type = string
+}
+
+variable "cloudflare_account_id" {
+  type = string
+}
