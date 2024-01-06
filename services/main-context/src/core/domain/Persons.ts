@@ -100,7 +100,8 @@ export const Persons = {
   LUC_BESSON : { EN_US : "Luc Besson", RU : "Люк Бессон" },
   ALFRED_HITCHCOCK : { EN_US : "Alfred Hitchcock", RU : "Альфред Хичкок" },
   ELIZABETH_OLSEN : { EN_US : "Elizabeth Olsen", RU : "Элизабет Олсен" },
-  BENEDICT_CUMBERBATCH : { EN_US : "Benedict Cumberbatch", RU : "Бенедикт Камбербэтч" }
+  BENEDICT_CUMBERBATCH : { EN_US : "Benedict Cumberbatch", RU : "Бенедикт Камбербэтч" },
+  ZACK_SNYDER : { EN_US : "Zack Snyder", RU : "Зак Снайдер" }
 } as const;
 
 export class Person {
