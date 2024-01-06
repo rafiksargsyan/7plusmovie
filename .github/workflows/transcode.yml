@@ -94,7 +94,7 @@ jobs:
 
       - name: Upload transcoding results to R2
         run: |
-          for i in 1 2 3; do aws s3 cp "${THUMBNAILS_DIR_NAME}" "s3://${MEDIA_FILES_R2_BUCKET}/${OUTPUT_S3_FOLDER_KEY}" --endpoint-url  ${CF_ENDPOINT} --recursive  && break; done
+          for i in 1 2 3; do aws s3 cp "${TRANSCODING_OUTPUT_DIR_NAME}" "s3://${MEDIA_FILES_R2_BUCKET}/${OUTPUT_S3_FOLDER_KEY}" --endpoint-url  ${CF_ENDPOINT} --recursive  && break; done
         env:
           AWS_ACCESS_KEY_ID: {{ env.CF_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ env.CF_SECRET_ACCESS_KEY }}
