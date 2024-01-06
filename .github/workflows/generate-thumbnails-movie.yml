@@ -63,13 +63,10 @@ jobs:
 
       - name: Upload transcoding results to R2
         run: |
-          for i in 1 2 3; do rclone copy "${THUMBNAILS_DIR_NAME}" "cfremote:/${MOVIE_ID}/${THUMBNAILS_DIR_NAME}/" && break; done
+          for i in 1 2 3; do aws s3 cp "${THUMBNAILS_DIR_NAME}" "s3://${MEDIA_FILES_R2_BUCKET}/${MOVIE_ID}/${THUMBNAILS_DIR_NAME}" --endpoint-url  ${CF_ENDPOINT} --recursive  && break; done
         env:
-          RCLONE_CONFIG_CFREMOTE_TYPE: s3
-          RCLONE_CONFIG_CFREMOTE_PROVIDER: Cloudflare
-          RCLONE_CONFIG_CFREMOTE_ACCESS_KEY_ID: ${{ env.CF_ACCESS_KEY_ID }}
-          RCLONE_CONFIG_CFREMOTE_SECRET_ACCESS_KEY: ${{ env.CF_SECRET_ACCESS_KEY }}
-          RCLONE_CONFIG_CFREMOTE_ENDPOINT: ${{ env.CF_ENDPOINT }}/${{ env.MEDIA_FILES_R2_BUCKET }}
+          AWS_ACCESS_KEY_ID: {{ env.CF_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.CF_SECRET_ACCESS_KEY }}
 
       - name: Add thumbnails file path to movie
         run: |
