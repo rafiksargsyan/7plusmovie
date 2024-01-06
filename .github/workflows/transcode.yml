@@ -42,6 +42,7 @@ jobs:
       CF_ENDPOINT: https://dab7e06309a7c1cb8a51557d39d14161.r2.cloudflarestorage.com
       CF_ACCESS_KEY_ID: d2a16978e1e4fb1eb0dcaf352c827c98
       CF_SECRET_ACCESS_KEY: ${{ secrets.PROD_CF_SECRET_ACCESS_KEY }}
+      MEDIA_FILES_R2_BUCKET: media-assets-prod-e1pjapsk
     steps:
       - name: Provide workflow run id to transcoding context
         run: |
@@ -99,7 +100,7 @@ jobs:
           RCLONE_CONFIG_CFREMOTE_PROVIDER: Cloudflare
           RCLONE_CONFIG_CFREMOTE_ACCESS_KEY_ID: ${{ env.CF_ACCESS_KEY_ID }}
           RCLONE_CONFIG_CFREMOTE_SECRET_ACCESS_KEY: ${{ env.CF_SECRET_ACCESS_KEY }}
-          RCLONE_CONFIG_CFREMOTE_ENDPOINT: ${{ env.CF_ENDPOINT }}
+          RCLONE_CONFIG_CFREMOTE_ENDPOINT: ${{ env.CF_ENDPOINT }}/${{ env.MEDIA_FILES_R2_BUCKET }}
 
       - name: Cleanup
         run:
