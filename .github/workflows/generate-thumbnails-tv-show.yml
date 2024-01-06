@@ -69,7 +69,7 @@ jobs:
 
       - name: Upload transcoding results to R2
         run: |
-          for i in 1 2 3; do rclone copy "${THUMBNAILS_DIR_NAME}" "cfremote:/${TV_SHOW_ID}/${SEASON}/${EPISODE}/${THUMBNAILS_DIR_NAME}" && break; done
+          for i in 1 2 3; do rclone copy "${THUMBNAILS_DIR_NAME}" "cfremote:/${TV_SHOW_ID}/${SEASON}/${EPISODE}/${THUMBNAILS_DIR_NAME}/" && break; done
         env:
           RCLONE_CONFIG_CFREMOTE_TYPE: s3
           RCLONE_CONFIG_CFREMOTE_PROVIDER: Cloudflare
