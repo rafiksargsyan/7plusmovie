@@ -10,7 +10,7 @@ on:
 jobs:
   generate-thumbnails-and-publish:
     runs-on: [ 'self-hosted', 'Linux', X64 ]
-    container: q62xyz/transcode:2.1.2
+    container: q62xyz/transcode:2.2.0
     env:
       AWS_ACCESS_KEY_ID: AKIAQBPWKPTSTP3HL4UM
       AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
@@ -23,6 +23,10 @@ jobs:
       GET_MOVIE_METADATA_ENDPOINT: https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${{ github.event.inputs.movie_id }}
       MOVIE_ID: ${{ github.event.inputs.movie_id }}
       ADD_THUMBNAILS_FILE_TO_MOVIE_ENDPOINT: https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/addThumbnailsFileToMovie
+      CF_ENDPOINT: https://dab7e06309a7c1cb8a51557d39d14161.r2.cloudflarestorage.com
+      CF_ACCESS_KEY_ID: d2a16978e1e4fb1eb0dcaf352c827c98
+      CF_SECRET_ACCESS_KEY: ${{ secrets.PROD_CF_SECRET_ACCESS_KEY }}
+      MEDIA_FILES_R2_BUCKET: media-assets-prod-e1pjapsk
     steps:
       - uses: actions/checkout@v3
         with:
@@ -53,9 +57,19 @@ jobs:
           videoFilePath: "./h264_main_540p_18.mp4"
           outputFolder: "./${{ env.THUMBNAILS_DIR_NAME }}"
 
-      - name: Upload thumbnails assets
+      - name: Upload thumbnails assets to S3
         run: |
           for i in 1 2 3; do aws s3 cp "${THUMBNAILS_DIR_NAME}" "s3://${MEDIA_FILES_S3_BUCKET}/${MOVIE_ID}/${THUMBNAILS_DIR_NAME}" --recursive && break; done
+
+      - name: Upload transcoding results to R2
+        run: |
+          for i in 1 2 3; do rclone copy "${THUMBNAILS_DIR_NAME}" "cfremote:/${MOVIE_ID}/${THUMBNAILS_DIR_NAME}" && break; done
+        env:
+          RCLONE_CONFIG_CFREMOTE_TYPE: s3
+          RCLONE_CONFIG_CFREMOTE_PROVIDER: Cloudflare
+          RCLONE_CONFIG_CFREMOTE_ACCESS_KEY_ID: ${{ env.CF_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_CFREMOTE_SECRET_ACCESS_KEY: ${{ env.CF_SECRET_ACCESS_KEY }}
+          RCLONE_CONFIG_CFREMOTE_ENDPOINT: ${{ env.CF_ENDPOINT }}/${{ env.MEDIA_FILES_R2_BUCKET }}
 
       - name: Add thumbnails file path to movie
         run: |
