@@ -98,6 +98,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ env.CF_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ env.CF_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: weur
 
       - name: Cleanup
         run:
