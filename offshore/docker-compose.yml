@@ -1,0 +1,12 @@
+services:
+  web-ui:
+    container_name: web-ui
+    image: q62xyz/web-ui:1.0.0
+    restart: "unless-stopped"
+
+  reverse-proxy:
+    container_name: reverse-proxy
+    build: ./reverse-proxy
+    ports:
+      - 80:80
+    restart: unless-stopped
