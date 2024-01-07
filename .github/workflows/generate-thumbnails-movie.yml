@@ -10,7 +10,7 @@ on:
 jobs:
   generate-thumbnails-and-publish:
     runs-on: [ 'self-hosted', 'Linux', X64 ]
-    container: q62xyz/transcode:2.2.1
+    container: q62xyz/transcode:2.1.2
     env:
       AWS_ACCESS_KEY_ID: AKIAQBPWKPTSTP3HL4UM
       AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
