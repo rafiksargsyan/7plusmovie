@@ -69,7 +69,7 @@ resource "aws_cloudfront_response_headers_policy" "cors_policy" {
     }
 
     access_control_allow_origins {
-      items = ["https://www.q62.xyz", "http://localhost:3000",
+      items = ["https://www.q62.xyz", "http://localhost:3000", "http://web-ui.q62.xyz", "https://web-ui.q62.xyz",
                "https://reference.dashif.org", "https://hlsjs.video-dev.org", "https://bitmovin.com"]
     }
 
