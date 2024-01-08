@@ -33,3 +33,6 @@ RUN chmod -R 644 \
     && sed -i '1iload_module \/usr\/lib\/nginx\/modules\/ngx_http_headers_more_filter_module.so;' /etc/nginx/nginx.conf
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY fake.crt /etc/nginx/fake.crt
+COPY fake.key /etc/nginx/fake.key
