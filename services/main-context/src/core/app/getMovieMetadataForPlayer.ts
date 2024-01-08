@@ -59,11 +59,12 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   } else {
     mediaAssetsDomain = cfDistro.domain;
   }
+  mediaAssetsDomain = masqueradeMediaAssetsDomain(mediaAssetsDomain);
   return {
-    subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `https://${mediaAssetsDomain}/${movie.subtitles[key]}`; return acc;}, {}),
-    mpdFile: `https://${mediaAssetsDomain}/${movie.mpdFile}`,
-    m3u8File: `https://${mediaAssetsDomain}/${movie.m3u8File}`,
-    thumbnailsFile: movie.thumbnailsFile !== undefined ? `https://${mediaAssetsDomain}/${movie.thumbnailsFile}` : undefined,
+    subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `http://${mediaAssetsDomain}/${movie.subtitles[key]}`; return acc;}, {}),
+    mpdFile: `http://${mediaAssetsDomain}/${movie.mpdFile}`,
+    m3u8File: `http://${mediaAssetsDomain}/${movie.m3u8File}`,
+    thumbnailsFile: movie.thumbnailsFile !== undefined ? `http://${mediaAssetsDomain}/${movie.thumbnailsFile}` : undefined,
     backdropImage: movie.backdropImage,
     originalTitle: movie.originalTitle,
     titleL8ns: movie.titleL8ns,
@@ -72,6 +73,13 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
 };
 
 class FailedToGetMovieError extends Error {}
+
+function masqueradeMediaAssetsDomain(domain: string) {
+  if (domain.includes('cloudfront')) {
+    return `${domain.substring(0, domain.indexOf('.'))}.default.cdn.q62.xyz`;
+  }
+  return 'default.cdn2.q62.xyz';
+}
 
 async function getMovie(id: string) {
   const queryParams = {

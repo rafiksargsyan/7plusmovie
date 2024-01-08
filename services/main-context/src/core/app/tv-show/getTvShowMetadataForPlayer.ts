@@ -79,6 +79,7 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
   } else {
     mediaAssetsDomain = cfDistro.domain;
   }
+  mediaAssetsDomain = masqueradeMediaAssetsDomain(mediaAssetsDomain);
   const season = tvShow.seasons.filter(_ => _.seasonNumber == event.season)[0];
   if (season == undefined) {
     throw new TvShowSeasonNotFoundError();
@@ -90,10 +91,10 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
   return {
     releaseYear: tvShow.releaseYear,
     subtitles: Object.keys(episode.subtitles)
-    .reduce((acc, key) => {acc[key] = `https://${mediaAssetsDomain}/${episode.subtitles[key]}`; return acc;}, {}),
-    mpdFile: `https://${mediaAssetsDomain}/${episode.mpdFile}`,
-    m3u8File: `https://${mediaAssetsDomain}/${episode.m3u8File}`,
-    thumbnailsFile: episode.thumbnailsFile !== undefined ? `https://${mediaAssetsDomain}/${episode.thumbnailsFile}` : undefined,
+    .reduce((acc, key) => {acc[key] = `http://${mediaAssetsDomain}/${episode.subtitles[key]}`; return acc;}, {}),
+    mpdFile: `http://${mediaAssetsDomain}/${episode.mpdFile}`,
+    m3u8File: `http://${mediaAssetsDomain}/${episode.m3u8File}`,
+    thumbnailsFile: episode.thumbnailsFile !== undefined ? `http://${mediaAssetsDomain}/${episode.thumbnailsFile}` : undefined,
     stillImage: episode.stillImage,
     originalTitle: tvShow.originalTitle,
     titleL8ns: tvShow.titleL8ns,
@@ -109,6 +110,13 @@ class FailedToGetTvShowError extends Error {}
 class TvShowSeasonNotFoundError extends Error {}
 
 class TvShowEpisodeNotFoundError extends Error {}
+
+function masqueradeMediaAssetsDomain(domain: string) {
+  if (domain.includes('cloudfront')) {
+    return `${domain.substring(0, domain.indexOf('.'))}.default.cdn.q62.xyz`;
+  }
+  return 'default.cdn2.q62.xyz';
+}
 
 async function getTvShow(id: string) {
   const queryParams = {
