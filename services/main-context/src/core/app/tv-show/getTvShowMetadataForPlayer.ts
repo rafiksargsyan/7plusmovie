@@ -74,7 +74,7 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
     console.error('Failed to retrieve CF distro:', e);
   }
   let mediaAssetsDomain;
-  if (cfDistro == undefined) {
+  if (cfDistro == undefined || true) {
     mediaAssetsDomain = cloudflareMediaAssetsDomain;
   } else {
     mediaAssetsDomain = cfDistro.domain;
@@ -91,10 +91,10 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
   return {
     releaseYear: tvShow.releaseYear,
     subtitles: Object.keys(episode.subtitles)
-    .reduce((acc, key) => {acc[key] = `http://${mediaAssetsDomain}/${episode.subtitles[key]}`; return acc;}, {}),
-    mpdFile: `http://${mediaAssetsDomain}/${episode.mpdFile}`,
-    m3u8File: `http://${mediaAssetsDomain}/${episode.m3u8File}`,
-    thumbnailsFile: episode.thumbnailsFile !== undefined ? `http://${mediaAssetsDomain}/${episode.thumbnailsFile}` : undefined,
+    .reduce((acc, key) => {acc[key] = `https://${mediaAssetsDomain}/${episode.subtitles[key]}`; return acc;}, {}),
+    mpdFile: `https://${mediaAssetsDomain}/${episode.mpdFile}`,
+    m3u8File: `https://${mediaAssetsDomain}/${episode.m3u8File}`,
+    thumbnailsFile: episode.thumbnailsFile !== undefined ? `https://${mediaAssetsDomain}/${episode.thumbnailsFile}` : undefined,
     stillImage: episode.stillImage,
     originalTitle: tvShow.originalTitle,
     titleL8ns: tvShow.titleL8ns,

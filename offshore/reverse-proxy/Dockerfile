@@ -34,5 +34,10 @@ RUN chmod -R 644 \
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-COPY fake.crt /etc/nginx/fake.crt
-COPY fake.key /etc/nginx/fake.key
+COPY setup-ssl.sh /docker-entrypoint.d/
+RUN chmod +x /docker-entrypoint.d/setup-ssl.sh
+
+RUN mkdir /etc/nginx/ssl
+RUN mkdir /etc/nginx/ssl/private
+RUN chmod 755 /etc/nginx/ssl
+RUN chmod 710 /etc/nginx/ssl/private

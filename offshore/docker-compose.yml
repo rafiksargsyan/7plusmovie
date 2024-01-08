@@ -11,4 +11,7 @@ services:
       - 443:443
       - 80:80
     restart: unless-stopped
+    environment:
+      - BASE64_ENCODED_CERT=${BASE64_ENCODED_CERT:?}
+      - BASE64_ENCODED_KEY=${BASE64_ENCODED_KEY:?}
 
