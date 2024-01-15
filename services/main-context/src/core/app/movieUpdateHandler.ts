@@ -363,7 +363,10 @@ const tmdbPersonId2Person = {
   "2636" : new Person("ALFRED_HITCHCOCK"),
   "550843" : new Person("ELIZABETH_OLSEN"),
   "71580" : new Person("BENEDICT_CUMBERBATCH"),
-  "15217" : new Person("ZACK_SNYDER")
+  "15217" : new Person("ZACK_SNYDER"),
+  "776" : new Person("EDDIE_MURPHY"),
+  "2176" : new Person("TOMMY_LEE_JONES"),
+  "11107" : new Person("BEN_FOSTER")
 } as const;
 
 

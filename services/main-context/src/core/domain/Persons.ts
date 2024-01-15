@@ -101,7 +101,10 @@ export const Persons = {
   ALFRED_HITCHCOCK : { EN_US : "Alfred Hitchcock", RU : "Альфред Хичкок" },
   ELIZABETH_OLSEN : { EN_US : "Elizabeth Olsen", RU : "Элизабет Олсен" },
   BENEDICT_CUMBERBATCH : { EN_US : "Benedict Cumberbatch", RU : "Бенедикт Камбербэтч" },
-  ZACK_SNYDER : { EN_US : "Zack Snyder", RU : "Зак Снайдер" }
+  ZACK_SNYDER : { EN_US : "Zack Snyder", RU : "Зак Снайдер" },
+  EDDIE_MURPHY : { EN_US : "Eddie Murphy", RU : "Эдди Мерфи" },
+  TOMMY_LEE_JONES : { EN_US : "Tommy Lee Jones", RU : "Томми Ли Джонс" },
+  BEN_FOSTER : { EN_US : "Ben Foster", RU : "Бен Фостер" }
 } as const;
 
 export class Person {
