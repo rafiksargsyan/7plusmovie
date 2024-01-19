@@ -67,3 +67,7 @@ variable "cloudflare_zone_media_assets" {
 variable "cloudflare_media_assets_prefix" {
   type = string
 }
+
+variable "r2_secret_access_key" {
+  type = string
+}
