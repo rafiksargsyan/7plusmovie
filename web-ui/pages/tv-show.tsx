@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import TvShowSeriesList from '../components/TvShowSeriesList';
 
-const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
+const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
 const L8nLangCodes = {
   EN_US : { langTag : "en-US", countryCode: "US" },
@@ -54,7 +54,7 @@ function TvShowPage(props: TvShowPageProps) {
     <>
       <Head>
         <title>{`${props.titleL8ns[props.currentLocale]} (${props.releaseYear})`}</title>
-        <meta property="og:image" content={`${imageBaseUrl}h_720/${props.posterImagesPortrait[props.currentLocale]}`} />
+        <meta property="og:image" content={`${imageBaseUrl}h=720/${props.posterImagesPortrait[props.currentLocale]}`} />
         <meta property="og:title" content={`${props.titleL8ns[props.currentLocale]} (${props.releaseYear})`} />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"></link>
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"></link>

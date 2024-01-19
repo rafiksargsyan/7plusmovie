@@ -8,7 +8,7 @@ import { AppBar, Box, MenuItem, Select, Toolbar, Typography } from '@mui/materia
 import Link from 'next/link';
 import { useState } from 'react';
 
-const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
+const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
 const L8nLangCodes = {
   EN_US : { langTag : "en-US", countryCode: "US" },
@@ -64,8 +64,8 @@ function L8nSelect(props: {onLocaleChange: (locale: string) => void, currentLoca
             onChange={(e, c) => props.onLocaleChange(e.target.value)}>
       {Object.keys(L8nLangCodes).map((_) => (
         <MenuItem value={_} key={_}>
-          <img src={`https://flagcdn.com/w20/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}.png`}
-               srcSet={`https://flagcdn.com/w40/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}.png 2x`}
+          <img src={`/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}-w20.png`}
+               srcSet={`/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}-w40.png 2x`}
                alt={L8nTable[props.currentLocale as keyof typeof L8nTable][_ as keyof typeof L8nTable['EN_US']]} />{" "}
         </MenuItem>
       ))}
@@ -109,8 +109,8 @@ function TvShowSeriesList(props: TvShowSeriesListProps) {
                       <Link href={{pathname: '/player', query: {tvShowId: props.id, season: s.seasonNumber, episode: e.episodeNumber}}}>
                         <CardMedia
                           component="img"
-                          src={`${imageBaseUrl}w_160,f_auto/${e.stillImage}`}
-                          srcSet={`${imageBaseUrl}w_240,f_auto/${e.stillImage} 240w, ${imageBaseUrl}w_160,f_auto/${e.stillImage} 160w`}
+                          src={`${imageBaseUrl}w=160,f=auto/${e.stillImage}`}
+                          srcSet={`${imageBaseUrl}w=240,f=auto/${e.stillImage} 240w, ${imageBaseUrl}w=160,f=auto/${e.stillImage} 160w`}
                           alt={`${episodeName}`}
                           sizes="(max-width: 1200px) 160px, 240px"
                         />

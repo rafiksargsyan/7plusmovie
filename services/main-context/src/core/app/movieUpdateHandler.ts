@@ -2,7 +2,6 @@ import { Marshaller } from '@aws/dynamodb-auto-marshaller';
 import { DynamoDBStreamEvent } from 'aws-lambda';
 import algoliasearch from 'algoliasearch';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
-import { v2 as cloudinary } from 'cloudinary';
 import { S3 } from '@aws-sdk/client-s3';
 import { MovieGenre, MovieGenres } from '../domain/MovieGenres';
 import { Person, Persons } from '../domain/Persons';
@@ -64,9 +63,6 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
     const algoliaClient = algoliasearch(process.env.ALGOLIA_APP_ID!, secret.ALGOLIA_ADMIN_KEY!);
     const algoliaIndex = algoliaClient.initIndex(process.env.ALGOLIA_ALL_INDEX!);
     const tmdbApiKey = secret.TMDB_API_KEY!;
-    cloudinary.config({ cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-                        api_key: process.env.CLOUDINARY_API_KEY,
-                        api_secret: secret.CLOUDINARY_API_SECRET });
   
     for (const record of event.Records) {
       if (record.eventName === 'REMOVE') {
@@ -75,7 +71,6 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
           throw new EmptyObjectIdError();
         }
         await algoliaIndex.deleteBy({filters: `objectID: ${objectID}`});
-        await cloudinary.api.delete_resources_by_prefix(objectID!);
         await emptyS3Directory(mediaAssetsS3Bucket, `${objectID}/`);
       } else {
         let movie: MovieRead = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as MovieRead;

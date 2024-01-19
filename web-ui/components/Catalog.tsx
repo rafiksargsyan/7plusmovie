@@ -69,8 +69,8 @@ function L8nSelect(props: {onLocaleChange: (locale: string) => void, currentLoca
             onChange={(e, c) => props.onLocaleChange(e.target.value)}>
       {Object.keys(L8nLangCodes).map((_) => (
         <MenuItem value={_} key={_}>
-          <img src={`${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}-w20.png`}
-               srcSet={`${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}-w40.png 2x`}
+          <img src={`/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}-w20.png`}
+               srcSet={`/${L8nLangCodes[_ as keyof typeof L8nLangCodes].countryCode.toLowerCase()}-w40.png 2x`}
                alt={L8nTable[props.currentLocale as keyof typeof L8nTable][_ as keyof typeof L8nTable['EN_US']]} />{" "}
         </MenuItem>
       ))}
@@ -126,7 +126,7 @@ function CustomAppBar(props: {onSearchChange: (searchString: string | null) => v
 }
 
 function GridView(props: CatalogProps) {
-  const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
+  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
   const locale = props.currentLocale;
   return (
     <Grid container sx={{p: 2}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 2, sm: 4, md: 5, lg: 7, xl: 9 }}>
@@ -138,8 +138,8 @@ function GridView(props: CatalogProps) {
                 <Link href={_.category == "TV_SHOW" ? {pathname: '/tv-show', query : {id: _.id}} : {pathname: '/player', query: {movieId: _.id}}}>
                   <CardMedia
                     component="img"
-                    src={`${imageBaseUrl}w_160,f_auto/${_.posterImagesPortrait[locale]}`}
-                    srcSet={`${imageBaseUrl}w_240,f_auto/${_.posterImagesPortrait[locale]} 240w, ${imageBaseUrl}w_160,f_auto/${_.posterImagesPortrait[locale]} 160w`}
+                    src={`${imageBaseUrl}w=160,f=auto/${_.posterImagesPortrait[locale]}`}
+                    srcSet={`${imageBaseUrl}w=240,f=auto/${_.posterImagesPortrait[locale]} 240w, ${imageBaseUrl}w=160,f=auto/${_.posterImagesPortrait[locale]} 160w`}
                     alt={`${_.titleL8ns[locale] != null ? _.titleL8ns[locale] : _.originalTitle} (${_.releaseYear})`}
                     sizes="(max-width: 1200px) 160px, 240px"
                   />

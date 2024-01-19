@@ -12,7 +12,7 @@ const darkTheme = createTheme({
   },
 });
 
-const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
+const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
 function VideoPlayer(props: {mpdFile: string, m3u8File: string, thumbnailsFile?: string, backdropImage: string, localeCode: string,
 	                         subtitles: {[key: string]: string}, playerLocale: string, movieTitle: string}) {   
@@ -22,11 +22,11 @@ function VideoPlayer(props: {mpdFile: string, m3u8File: string, thumbnailsFile?:
 	       ( <video width="100%" height="100%"
 		       style={{objectFit: 'contain', position: 'absolute', maxHeight: '100vh'}}
 		       controls src={props.m3u8File}
-			   poster={`${imageBaseUrl}h_720,f_auto/${props.backdropImage}`}
+			   poster={`${imageBaseUrl}h=720,f=auto/${props.backdropImage}`}
 			 /> ) :
 		   ( <DashPlayer
 		       localeCode={props.localeCode}
-			   poster={`${imageBaseUrl}h_720,f_auto/${props.backdropImage}`}
+			   poster={`${imageBaseUrl}h=720,f=auto/${props.backdropImage}`}
 			   mpdFile={props.mpdFile}
            thumbnailsFile={props.thumbnailsFile}
 			 /> );

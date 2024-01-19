@@ -1,10 +1,9 @@
 import { S3Event } from 'aws-lambda';
-import { S3, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { S3, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
-import { v2 as cloudinary } from 'cloudinary';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
+const cloudflareAccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
 
 const secretsManager = new SecretsManager({});
 const s3 = new S3({});
@@ -13,19 +12,27 @@ export const handler = async (event: S3Event): Promise<void> => {
   const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
   const secret = JSON.parse(secretStr.SecretString!);
 
-  cloudinary.config({ cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-                      api_key: process.env.CLOUDINARY_API_KEY,
-                      api_secret: secret.CLOUDINARY_API_SECRET });
+  const r2 = new S3({
+    region: "auto",
+    endpoint: `https://${cloudflareAccountId}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+      secretAccessKey: secret.R2_SECRET_ACCESS_KEY,
+    },
+  });
   
   const bucket = event.Records[0].s3.bucket.name;
   const key = event.Records[0].s3.object.key;
-  const params = { Bucket: bucket, Key: key } as const;
+  const params = { Bucket: bucket, Key: key } as const; 
   const { ContentType } = await s3.headObject(params);
   if (ContentType != undefined && ContentType.startsWith('image') && !key.includes('sprite-')) {
     const command = new GetObjectCommand(params);
-    const url = await getSignedUrl(s3, command);
-    const folder = key.substring(0, key.lastIndexOf("/")+1);
-    const uploadOptions = { use_filename: true, unique_filename: false, folder: folder };
-    await cloudinary.uploader.upload(url, uploadOptions);
+    const response = await s3.send(command);
+    const object = response.Body;
+    const length = response.ContentLength;
+    const contentType = response.ContentType;
+    const putCommand = new PutObjectCommand({ Bucket: process.env.ClOUDFLARE_MEDIA_ASSETS_R2_BUCKET, Key: key, Body: object,
+      ContentLength: length, ContentType: contentType || 'image/jpeg' });
+    await r2.send(putCommand);
   }
 };

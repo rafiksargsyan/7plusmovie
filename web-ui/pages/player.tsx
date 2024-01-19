@@ -87,7 +87,7 @@ const langTagToLangCode = {
   "ru" : "RU"
 } as const;
 
-const imageBaseUrl = process.env.NEXT_PUBLIC_CLOUDINARY_BASE_URL!;
+const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
 function PlayerPage(props : {movie: Movie | TvShow, currentLocaleCode: string, currentLocale: string, isMovie: boolean}) {
   let title = props.movie == undefined ? '' : `${props.movie.titleL8ns[props.currentLocaleCode] != undefined ? props.movie.titleL8ns[props.currentLocaleCode] : props.movie.originalTitle} (${props.movie.releaseYear})`;
@@ -103,7 +103,7 @@ function PlayerPage(props : {movie: Movie | TvShow, currentLocaleCode: string, c
       <Head>
         <title>{title}</title>
         <meta property="og:title" content={title} />
-        <meta property="og:image" content={props.movie == undefined ? undefined : `${imageBaseUrl}h_720/${props.movie.backdropImage}`}/>
+        <meta property="og:image" content={props.movie == undefined ? undefined : `${imageBaseUrl}h=720/${props.movie.backdropImage}`}/>
         <link rel="alternate" href={`https://www.q62.xyz/en-US/player?movieId=${alternateQuery}`} hrefLang='en-US'></link>
         <link rel="alternate" href={`https://www.q62.xyz/ru/player?movieId=${alternateQuery}`} hrefLang='ru'></link>
         <link rel="alternate" href={`https://www.q62.xyz/en-US/player?movieId=${alternateQuery}`} hrefLang='x-default'></link>
