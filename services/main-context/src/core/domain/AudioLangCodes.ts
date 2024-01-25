@@ -7,7 +7,8 @@ export const AudioLangCodes = {
   FR : { lang : "fr", langTag: "fr" },
   JA : { lang : "ja", langTag: "ja" },
   PT : { lang : "pt", langTag: "pt" },
-  KO : { lang : "ko", langTag: "ko" }
+  KO : { lang : "ko", langTag: "ko" },
+  DA : { lang : "da", langTag: "da" }
 } as const;
 
 export class AudioLangCode {

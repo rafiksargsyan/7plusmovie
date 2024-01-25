@@ -17,7 +17,8 @@ exports.AudioLangCodes = {
     FR: { lang: "fr", langTag: "fr", displayName: "Français" },
     JA: { lang: "ja", langTag: "ja", displayName: "日本" },
     PT: { lang: "pt", langTag: "pt", displayName: "Português" },
-    KO: { lang: "ko", langTag: "ko", displayName: "한국인" }
+    KO: { lang: "ko", langTag: "ko", displayName: "한국인" },
+    DA: { lang: "da", langTag: "da", displayName: "dansk" }
 };
 class AudioLangCode {
     constructor(code) {
@@ -51,7 +52,8 @@ exports.SubsLangCodes = {
     FR: { lang: "fr", langTag: "fr", displayName: "Français" },
     JA: { lang: "ja", langTag: "ja", displayName: "日本" },
     PT: { lang: "pt", langTag: "pt", displayName: "Português" },
-    KO: { lang: "ko", langTag: "ko", displayName: "한국인" }
+    KO: { lang: "ko", langTag: "ko", displayName: "한국인" },
+    DA: { lang: "da", langTag: "da", displayName: "dansk" }
 };
 class SubsLangCode {
     constructor(code) {
