@@ -6,6 +6,7 @@ import Script from 'next/script';
 import { useEffect, useState } from 'react';
 import '../components/plyr-overrides.css';
 import { Analytics } from '@vercel/analytics/react';
+import { hotjar } from 'react-hotjar';
 
 const darkTheme = createTheme({
   palette: {
@@ -42,6 +43,10 @@ export default function App({ Component, pageProps }: AppProps) {
       router.events.off("routeChangeError", end);
     };
   }, [router]);
+
+  useEffect(() => {
+    hotjar.initialize(3841658, 6);
+  }, []);
 
   return (
     <>
