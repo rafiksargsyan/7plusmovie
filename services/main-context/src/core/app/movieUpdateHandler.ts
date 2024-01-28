@@ -363,8 +363,9 @@ const tmdbPersonId2Person = {
   "2176" : new Person("TOMMY_LEE_JONES"),
   "11107" : new Person("BEN_FOSTER"),
   "55085" : new Person("AMBER_HEARD"),
-  "2227" : new Person("NICOLE_KIDMAN")
-} as const;
+  "2227" : new Person("NICOLE_KIDMAN"),
+  "2157" : new Person("ROBIN_WILLIAMS")
+ } as const;
 
 
 class FailedToGetMovieError extends Error {}
