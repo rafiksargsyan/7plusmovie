@@ -109,7 +109,8 @@ export const Persons = {
   NICOLE_KIDMAN : { EN_US : "Nicole Kidman", RU : "Николь Кидман" },
   ROBIN_WILLIAMS : { EN_US : "Robin Williams", RU : "Робин Уильямс" },
   SEAN_CONNERY : { EN_US : "Sean Connery", RU : "Шон Коннери" },
-  MICHAEL_FASSBENDER : { EN_US : "Michael Fassbender", RU : "Майкл Фассбендер" }
+  MICHAEL_FASSBENDER : { EN_US : "Michael Fassbender", RU : "Майкл Фассбендер" },
+  KEVIN_HART : { EN_US : "Kevin Hart", RU : "Кевин Харт" }
 } as const;
 
 export class Person {
