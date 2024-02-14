@@ -111,7 +111,8 @@ export const Persons = {
   SEAN_CONNERY : { EN_US : "Sean Connery", RU : "Шон Коннери" },
   MICHAEL_FASSBENDER : { EN_US : "Michael Fassbender", RU : "Майкл Фассбендер" },
   KEVIN_HART : { EN_US : "Kevin Hart", RU : "Кевин Харт" },
-  JOHNY_DEPP : { EN_US : "Johny Depp", RU : "Джонни Депп" }
+  JOHNY_DEPP : { EN_US : "Johny Depp", RU : "Джонни Депп" },
+  RYAN_REYNOLDS : { EN_US : "Ryan Reynolds", RU : "Райан Рейнольдс" }
 } as const;
 
 export class Person {
