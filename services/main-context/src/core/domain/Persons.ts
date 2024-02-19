@@ -112,7 +112,9 @@ export const Persons = {
   MICHAEL_FASSBENDER : { EN_US : "Michael Fassbender", RU : "Майкл Фассбендер" },
   KEVIN_HART : { EN_US : "Kevin Hart", RU : "Кевин Харт" },
   JOHNY_DEPP : { EN_US : "Johny Depp", RU : "Джонни Депп" },
-  RYAN_REYNOLDS : { EN_US : "Ryan Reynolds", RU : "Райан Рейнольдс" }
+  RYAN_REYNOLDS : { EN_US : "Ryan Reynolds", RU : "Райан Рейнольдс" },
+  JAMES_MC_AVOY : { EN_US : "James McAvoy", RU : "Джеймс МакЭвой" },
+  EMMA_STONE : { EN_US : "Emma Stone", RU : "Эмма Стоун" }
 } as const;
 
 export class Person {

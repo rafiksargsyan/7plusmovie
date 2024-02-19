@@ -9,7 +9,9 @@ export const SubsLangCodes = {
   JA : { lang : "ja", langTag : "ja" },
   PT : { lang : "pt", langTag : "pt" },
   KO : { lang : "ko", langTag : "ko" },
-  DA : { lang : "da", langTag : "da" }
+  DA : { lang : "da", langTag : "da" },
+  HI : { lang : "hi", langTag: "hi" },
+  HI_IN : { lang : "hi", langTag: "hi_IN" }
 } as const;
 
 export class SubsLangCode {
