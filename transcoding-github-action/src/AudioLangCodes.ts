@@ -10,8 +10,10 @@ export const AudioLangCodes = {
   KO : { lang : "ko", langTag: "ko", displayName : "한국인" },
   DA : { lang : "da", langTag: "da", displayName : "dansk" },
   HI : { lang : "hi", langTag: "hi", displayName : "हिंदी" },
-  HI_IN : { lang : "hi", langTag: "hi_IN", displayName : "हिंदी (भारत)" },
-  IT : { lang : "it", langTag: "it", displayName : "Italiano" }
+  HI_IN : { lang : "hi", langTag: "hi-IN", displayName : "हिंदी (भारत)" },
+  IT : { lang : "it", langTag: "it", displayName : "Italiano" },
+  RO : { lang : "ro", langTag: "ro", displayName : "Română" },
+  RO_RO : { lang : "ro", langTag: "ro-RO", displayName : "Română (România)" }
 } as const;
 
 export class AudioLangCode {

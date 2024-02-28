@@ -11,7 +11,9 @@ export const L8nLangCodes = {
   KO : { langTag : "ko" },
   DA : { langTag : "da" },
   HI : { langTag : "hi" },
-  HI_IN : { langTag : "hi_IN" }
+  HI_IN : { langTag : "hi-IN" },
+  RO : { langTag: "ro" },
+  RO_RO : { langTag: "ro-RO" }
 } as const;
 
 export class L8nLangCode {
