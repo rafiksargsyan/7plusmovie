@@ -1,13 +1,8 @@
 import { TvShow } from "../core/domain/TvShow";
 import { TvShowRepositoryInterface } from "../core/ports/TvShowRepositoryInterface";
-import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocument, QueryCommandInput } from "@aws-sdk/lib-dynamodb";
 
 const dynamodbTvShowTableName = process.env.DYNAMODB_TV_SHOW_TABLE_NAME!;
-const dynamodbTvShowSeasonTableName = process.env.DYNAMODB_TV_SHOW_SEASON_TABLE_NAME!;
-
-interface TvShowRead {
-  seasonIds: string[];
-}
 
 class TvShowRepository implements TvShowRepositoryInterface {
   private docClient: DynamoDBDocument;
@@ -17,6 +12,27 @@ class TvShowRepository implements TvShowRepositoryInterface {
   }
 
   getTvShowById(id: string): TvShow {
+    const qci : QueryCommandInput = {
+      TableName : dynamodbTvShowTableName,
+
+    }
+    const tvShowAndSeasons: Record<string, any>[] = [];
+    do {
+      const qco = await this.docClient.query(qci);
+      if (qco.Items) {
+        tvShowAndSeasons.push(qco.Items);
+      }
+      if (qco.LastEvaluatedKey) {
+        qci.ExclusiveStartKey = qco.LastEvaluatedKey;
+      } else {
+        delete qci.ExclusiveStartKey;
+      }
+    } while (qci.ExclusiveStartKey);
+    let tvShow;
+    let seasons = [];
+    tvShowAndSeasons.forEach(_ => {
+      if (_.)
+    })
     throw new Error("Method not implemented.");
   }
 
