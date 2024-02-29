@@ -114,7 +114,8 @@ export const Persons = {
   JOHNY_DEPP : { EN_US : "Johny Depp", RU : "Джонни Депп" },
   RYAN_REYNOLDS : { EN_US : "Ryan Reynolds", RU : "Райан Рейнольдс" },
   JAMES_MC_AVOY : { EN_US : "James McAvoy", RU : "Джеймс МакЭвой" },
-  EMMA_STONE : { EN_US : "Emma Stone", RU : "Эмма Стоун" }
+  EMMA_STONE : { EN_US : "Emma Stone", RU : "Эмма Стоун" },
+  DEMI_MOORE : { EN_US : "Demi Moore", RU : "Деми Мур" }
 } as const;
 
 export class Person {
