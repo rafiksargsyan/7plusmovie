@@ -14,7 +14,7 @@ class TvShowRepository implements TvShowRepositoryInterface {
   getTvShowById(id: string): TvShow {
     const qci : QueryCommandInput = {
       TableName : dynamodbTvShowTableName,
-
+      Key
     }
     const tvShowAndSeasons: Record<string, any>[] = [];
     do {
