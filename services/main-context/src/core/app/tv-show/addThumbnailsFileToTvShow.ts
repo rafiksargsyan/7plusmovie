@@ -1,8 +1,7 @@
-import { TvShow } from "../../domain/TvShow";
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
-
-const dynamodbTvShowTableName = process.env.DYNAMODB_TV_SHOW_TABLE_NAME!;
+import { TvShowRepository } from '../../../adapters/TvShowRepository';
+import { TvShowRepositoryInterface } from '../../ports/TvShowRepositoryInterface';
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -12,6 +11,7 @@ const marshallOptions = {
 const translateConfig = { marshallOptions };
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
+const tvShowRepo: TvShowRepositoryInterface = new TvShowRepository(docClient);
 
 interface AddThumbnailsFileParam {
   season: number;
@@ -21,18 +21,7 @@ interface AddThumbnailsFileParam {
 }
 
 export const handler = async (event: AddThumbnailsFileParam): Promise<void> => { 
-  const queryParams = {
-    TableName: dynamodbTvShowTableName,
-    Key: { 'id': event.tvShowId }
-  } as const;
-  let data = await docClient.get(queryParams);
-  if (data === undefined || data.Item === undefined) {
-    throw new FailedToGetTvShowError();
-  }
-  let tvShow = new TvShow(true);
-  Object.assign(tvShow, data.Item);  
+  let tvShow = await tvShowRepo.getTvShowById(event.tvShowId);
   tvShow.addThumbnailsFile(event.season, event.episode, event.relativePath);
-  await docClient.put({ TableName: dynamodbTvShowTableName, Item: tvShow });
+  await tvShowRepo.saveTvShow(tvShow);
 };
-
-class FailedToGetTvShowError extends Error {}

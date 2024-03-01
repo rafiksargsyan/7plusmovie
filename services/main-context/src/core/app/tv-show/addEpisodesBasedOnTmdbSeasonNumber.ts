@@ -4,12 +4,12 @@ import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
 import axios from 'axios';
 import { handler as addEpisodeToTvShow } from './addEpisodeToTvShow';
 import { handler as addTmdbEpisodeNumber } from "./addTmdbEpisodeNumber";
+import { TvShowRepositoryInterface } from '../../ports/TvShowRepositoryInterface';
+import { TvShowRepository } from '../../../adapters/TvShowRepository';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
 const secretsManager = new SecretsManager({});
-
-const dynamodbTvShowTableName = process.env.DYNAMODB_TV_SHOW_TABLE_NAME!;
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -19,6 +19,7 @@ const marshallOptions = {
 const translateConfig = { marshallOptions };
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
+const tvShowRepo: TvShowRepositoryInterface = new TvShowRepository(docClient);
 
 const tmdbClient = axios.create({
   baseURL: 'https://api.themoviedb.org/3/',
@@ -49,15 +50,7 @@ export const handler = async (event: Param): Promise<void> => {
   const secret = JSON.parse(secretStr.SecretString!);  
   const tmdbApiKey = secret.TMDB_API_KEY!;
 
-  const queryParams = {
-    TableName: dynamodbTvShowTableName,
-    Key: { 'id': event.tvShowId }
-  } as const;
-  let data = await docClient.get(queryParams);
-  if (data?.Item === undefined) {
-    throw new FailedToGetTvShowError();
-  }
-  let tvShow: TvShowRead = data.Item as TvShowRead;
+  let tvShow: TvShowRead = await tvShowRepo.getTvShowById(event.tvShowId) as unknown as TvShowRead;
 
   const season = tvShow.seasons.filter(_ => _.seasonNumber === event.seasonNumber)[0];
 
@@ -88,8 +81,6 @@ export const handler = async (event: Param): Promise<void> => {
     }
   }
 }
-
-class FailedToGetTvShowError extends Error {}
 
 class SeasonNotFoundError extends Error {}
 

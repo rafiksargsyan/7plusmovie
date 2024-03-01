@@ -3,8 +3,8 @@ import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { L8nLangCode } from "../../domain/L8nLangCodes";
 import algoliasearch from 'algoliasearch/lite';
-
-const dynamodbTvShowTableName = process.env.DYNAMODB_TV_SHOW_TABLE_NAME!;
+import { TvShowRepositoryInterface } from "../../ports/TvShowRepositoryInterface";
+import { TvShowRepository } from "../../../adapters/TvShowRepository";
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -14,6 +14,7 @@ const marshallOptions = {
 const translateConfig = { marshallOptions };
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
+const tvShowRepo: TvShowRepositoryInterface = new TvShowRepository(docClient);
 
 const algoliaSearchOnlyClient = algoliasearch(process.env.ALGOLIA_APP_ID!, process.env.ALGOLIA_SEARCH_ONLY_KEY!);
 const algoliaIndex = algoliaSearchOnlyClient.initIndex(process.env.ALGOLIA_ALL_INDEX!);
@@ -41,7 +42,7 @@ export const handler = async (event: CreateTvShowParam): Promise<string> => {
         throw new TvShowAlreadyExistsError();
     }
   }
-  await docClient.put({TableName: dynamodbTvShowTableName, Item: tvShow});
+  await tvShowRepo.saveTvShow(tvShow);
 
   return tvShow.id;
 };
