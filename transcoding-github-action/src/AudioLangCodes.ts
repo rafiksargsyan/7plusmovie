@@ -13,7 +13,11 @@ export const AudioLangCodes = {
   HI_IN : { lang : "hi", langTag: "hi-IN", displayName : "हिंदी (भारत)" },
   IT : { lang : "it", langTag: "it", displayName : "Italiano" },
   RO : { lang : "ro", langTag: "ro", displayName : "Română" },
-  RO_RO : { lang : "ro", langTag: "ro-RO", displayName : "Română (România)" }
+  RO_RO : { lang : "ro", langTag: "ro-RO", displayName : "Română (România)" },
+  FA : { lang : "fa", langTag: "fa", displayName : "فارسی" },
+  FA_IR : { lang : "fa", langTag: "fa-IR", displayName : "فارسی (ایران)" },
+  SV : { lang : "sv", langTag: "sv", displayName: "svenska" },
+  SV_SE : { lang : "sv", langTag: "sv-SE", displayName: "svenska (Sverige)" }
 } as const;
 
 export class AudioLangCode {

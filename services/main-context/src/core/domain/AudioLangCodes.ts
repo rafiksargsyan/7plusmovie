@@ -13,7 +13,11 @@ export const AudioLangCodes = {
   HI_IN : { lang : "hi", langTag: "hi-IN" },
   IT : { lang : "it", langTag: "it" },
   RO : { lang : "ro", langTag: "ro" },
-  RO_RO : { lang : "ro", langTag: "ro-RO" }
+  RO_RO : { lang : "ro", langTag: "ro-RO" },
+  FA : { lang : "fa", langTag: "fa" },
+  FA_IR : { lang : "fa", langTag: "fa-IR" },
+  SV : { lang : "sv", langTag: "sv" },
+  SV_SE : { lang : "sv", langTag: "sv-SE" }
 } as const;
 
 export class AudioLangCode {
