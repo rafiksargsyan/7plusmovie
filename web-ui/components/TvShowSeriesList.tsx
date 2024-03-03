@@ -104,13 +104,19 @@ function TvShowSeriesList(props: TvShowSeriesListProps) {
                   <Card sx={{display: 'inline-block', mr: { xs: 2, md: 3 }, borderRadius: 0, width: { xs: '60%', sm: '34%', md: '25%', lg: '17%', xl: '13%' }}} key={e.episodeNumber}>
                     <CardActionArea>
                       <Link href={{pathname: '/player', query: {tvShowId: props.id, season: s.seasonNumber, episode: e.episodeNumber}}}>
-                        <CardMedia
-                          component="img"
-                          src={`${imageBaseUrl}w=160,f=auto/${e.stillImage}`}
-                          srcSet={`${imageBaseUrl}w=240,f=auto/${e.stillImage} 240w, ${imageBaseUrl}w=160,f=auto/${e.stillImage} 160w`}
-                          alt={`${episodeName}`}
-                          sizes="(max-width: 1200px) 160px, 240px"
-                        />
+                        { e.stillImage != undefined ?
+                            (<CardMedia
+                              component="img"
+                              src={`${imageBaseUrl}w=160,f=auto/${e.stillImage}`}
+                              srcSet={`${imageBaseUrl}w=240,f=auto/${e.stillImage} 240w, ${imageBaseUrl}w=160,f=auto/${e.stillImage} 160w`}
+                              alt={`${episodeName}`}
+                              sizes="(max-width: 1200px) 160px, 240px"
+                            />) : (
+                              <CardMedia
+                               component="img"
+                               src={'/no-image-holder.svg'} />
+                            )
+                        }
                       </Link>
                     </CardActionArea>     
                     <Typography variant="subtitle2" noWrap> {`${L8nTable[props.currentLocale as keyof typeof L8nTable]["EPISODE"]} ${e.episodeNumber} (${episodeName})`} </Typography>
