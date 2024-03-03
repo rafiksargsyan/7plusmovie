@@ -91,7 +91,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         await algoliaIndex.deleteBy({filters: `objectID: ${PK}`});
         await emptyS3Directory(mediaAssetsS3Bucket, `${PK}/`);
       } else {
-        let tvShow: TvShowRead = (await tvShowRepo.getTvShowById(record.dynamodb?.Keys?.id.S)) as unknown as TvShowRead;
+        let tvShow: TvShowRead = (await tvShowRepo.getTvShowById(record.dynamodb?.Keys?.PK.S)) as unknown as TvShowRead;
         let updated: boolean = false;
         if (tvShow.tmdbId != undefined) {
           updated = await updateBasedOnTmdbId(tvShow.id, tvShow.tmdbId, tmdbApiKey, tvShow);
