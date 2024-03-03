@@ -6,7 +6,6 @@ import CardActionArea from '@mui/material/CardActionArea';
 import CardMedia from '@mui/material/CardMedia';
 import { AppBar, Box, MenuItem, Select, Toolbar, Typography } from '@mui/material';
 import Link from 'next/link';
-import { useState } from 'react';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
@@ -74,8 +73,6 @@ function L8nSelect(props: {onLocaleChange: (locale: string) => void, currentLoca
 }
 
 function CustomAppBar(props: {onLocaleChange: (locale: string) => void, locale: string, title: string}) {
-  const [state, setState] = useState({options: []});
-
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position='fixed'>

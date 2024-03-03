@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import TvShowSeriesList from '../components/TvShowSeriesList';
+import axios from 'axios';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
@@ -80,6 +81,10 @@ interface AlgoliaQueryItem {
   posterImagesPortrait: { [key: string]: string };
 }
 
+interface TvShowResponse {
+  seasons: Season[];
+}
+
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const algoliaClient = algoliasearch(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
     process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!);
@@ -88,7 +93,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const algoliaSearchResponse = await algoliaIndex.getObject<AlgoliaQueryItem>(tvShowId);
   const locale = (context.locale != null ? context.locale : context.defaultLocale!) as keyof typeof langTagToLangCode;
   const langCode = langTagToLangCode[locale];
-  const seasons = algoliaSearchResponse.seasons.map(s => ({...s,
+  const response = await axios.get<TvShowResponse>(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getTvShowForSeasonsListPage/${tvShowId}`);
+  const seasons = response.data.seasons.map(s => ({...s,
     episodes: s.episodes.sort((a, b) => a.episodeNumber - b.episodeNumber)})).sort((a, b) => a.seasonNumber - b.seasonNumber);
 
   return {

@@ -79,13 +79,17 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
     const tmdbApiKey = secret.TMDB_API_KEY!;
   
     for (const record of event.Records) {
+      let SK = record.dynamodb?.Keys?.SK.S;
+      if (SK !== 'tvshow') {
+        continue;
+      }
       if (record.eventName === 'REMOVE') {
-        let objectID = record.dynamodb?.Keys?.id.S;
-        if (objectID == undefined || ! /\S/.test(objectID)) {
+        let PK = record.dynamodb?.Keys?.PK.S;
+        if (PK == undefined || ! /\S/.test(PK)) {
           throw new EmptyObjectIdError();
         }
-        await algoliaIndex.deleteBy({filters: `objectID: ${objectID}`});
-        await emptyS3Directory(mediaAssetsS3Bucket, `${objectID}/`);
+        await algoliaIndex.deleteBy({filters: `objectID: ${PK}`});
+        await emptyS3Directory(mediaAssetsS3Bucket, `${PK}/`);
       } else {
         let tvShow: TvShowRead = (await tvShowRepo.getTvShowById(record.dynamodb?.Keys?.id.S)) as unknown as TvShowRead;
         let updated: boolean = false;
@@ -114,8 +118,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
                                         posterImagesPortrait: tvShow.posterImagesPortrait,
                                         titleL8ns: tvShow.titleL8ns,
                                         releaseYear: tvShow.releaseYear,
-                                        genres: tvShow.genres.reduce((r, _) => { return { ...r, [_.code] : TvShowGenres[_.code] } }, {}),
-                                        seasons: seasons });
+                                        genres: tvShow.genres.reduce((r, _) => { return { ...r, [_.code] : TvShowGenres[_.code] } }, {})});
       }
     }
   } catch (e) {

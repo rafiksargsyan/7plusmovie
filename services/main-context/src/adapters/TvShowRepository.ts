@@ -29,7 +29,7 @@ export class TvShowRepository implements TvShowRepositoryInterface {
     do {
       const qco = await this.docClient.query(seasonsQueryInput);
       if (qco.Items) {
-        tvShowSeasons.push(qco.Items);
+        tvShowSeasons.push(...qco.Items);
       }
       if (qco.LastEvaluatedKey) {
         seasonsQueryInput.ExclusiveStartKey = qco.LastEvaluatedKey;
