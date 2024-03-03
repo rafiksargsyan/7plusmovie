@@ -1,7 +1,8 @@
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
+import { TvShowRepository } from '../../../adapters/TvShowRepository';
+import { TvShowRepositoryInterface } from '../../ports/TvShowRepositoryInterface';
 
-const dynamodbTvShowTableName = process.env.DYNAMODB_TV_SHOW_TABLE_NAME!;
 const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
 const cfDistroRandomSelectionProportion = Number.parseFloat(process.env.CF_DISTRO_RANDOM_SELECTION_PROPORTION!);
 const cfDistroUsageThreshold = Number.parseFloat(process.env.CF_DISTRO_USAGE_THRESHOLD!);
@@ -10,6 +11,7 @@ const cloudflareMediaAssetsDomain = process.env.CLOUDFLARE_MEDIA_ASSETS_DOMAIN!;
 const terabiteInBytes = 1_000_000_000_000; // Max free outgoing traffic for Cloudfront is 1TB
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}));
+const tvShowRepo: TvShowRepositoryInterface = new TvShowRepository(docClient);
 
 interface GetTvShowParam {
   tvShowId: string;
@@ -66,7 +68,7 @@ interface CloudFrontDistro {
 }
 
 export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataResponse> => {
-  const tvShow = await getTvShow(event.tvShowId);
+  const tvShow = (await getTvShow(event.tvShowId) as unknown as TvShow);
   let cfDistro;
   try {
     cfDistro = await getCloudFrontDistro();
@@ -119,16 +121,7 @@ function masqueradeMediaAssetsDomain(domain: string) {
 }
 
 async function getTvShow(id: string) {
-  const queryParams = {
-    TableName: dynamodbTvShowTableName,
-    Key: { 'id': id }
-  } as const;
-  let data = await docClient.get(queryParams);
-  if (data == undefined || data.Item == undefined) {
-    throw new FailedToGetTvShowError();
-  }
-  let tvShow: TvShow = data.Item as unknown as TvShow;
-  return tvShow;
+  return await tvShowRepo.getTvShowById(id);
 }
 
 async function getCloudFrontDistro() {

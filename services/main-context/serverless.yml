@@ -577,6 +577,28 @@ functions:
                          "episodeNameL8ns": $input.json(''$.episodeNameL8ns''),
                          "thumbnailsFile": $input.json(''$.thumbnailsFile'') }'
   
+  getTvShowForSeasonsListPage:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/getTvShowForSeasonsListPage.handler
+    events:
+      - http:
+          integration: lambda
+          path: /getTvShowForSeasonsListPage/{id}
+          method: get
+          request:
+            template:
+              application/json: '{ "tvShowId" : "$input.params(''id'')"}'
+              application/x-www-form-urlencoded: null
+          response:
+            headers:
+              Access-Control-Allow-Origin: "'*'"
+            template: '{ "originalTitle": $input.json(''$.originalTitle''),
+                         "titleL8ns": $input.json(''$.titleL8ns''),
+                         "releaseYear": $input.json(''$.releaseYear''),
+                         "posterImagesPortrait": $input.json(''$.posterImagesPortrait''),
+                         "seasons": $input.json(''$.seasons'') }'
+  
   createTvShowTranscodingJob:
     handler: src/core/app/tv-show/createTvShowTranscodingJob.handler
     environment:

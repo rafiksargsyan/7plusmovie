@@ -1,9 +1,8 @@
-import { TvShow } from "../../domain/TvShow";
 import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { SubsLangCode } from "../../domain/SubsLangCodes";
-
-const dynamodbTvShowTableName = process.env.DYNAMODB_TV_SHOW_TABLE_NAME!;
+import { TvShowRepositoryInterface } from '../../ports/TvShowRepositoryInterface';
+import { TvShowRepository } from '../../../adapters/TvShowRepository';
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -13,6 +12,7 @@ const marshallOptions = {
 const translateConfig = { marshallOptions };
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
+const tvShowRepo: TvShowRepositoryInterface = new TvShowRepository(docClient);
 
 interface AddSubtitleParam {
   tvShowId: string;
@@ -23,18 +23,7 @@ interface AddSubtitleParam {
 }
 
 export const handler = async (event: AddSubtitleParam): Promise<void> => {
-  const queryParams = {
-    TableName: dynamodbTvShowTableName,
-    Key: { 'id': event.tvShowId }
-  } as const;
-  let data = await docClient.get(queryParams);
-  if (data === undefined || data.Item === undefined) {
-    throw new FailedToGetTvShowError();
-  }
-  let tvShow = new TvShow(true);
-  Object.assign(tvShow, data.Item);  
+  let tvShow = await tvShowRepo.getTvShowById(event.tvShowId) 
   tvShow.addSubtitle(event.season, event.episode, new SubsLangCode(event.lang), event.relativePath);
-  await docClient.put({ TableName: dynamodbTvShowTableName, Item: tvShow });
+  await tvShowRepo.saveTvShow(tvShow);
 };
-
-class FailedToGetTvShowError extends Error {}

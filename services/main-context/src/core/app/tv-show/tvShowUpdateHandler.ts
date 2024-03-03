@@ -1,4 +1,3 @@
-import { Marshaller } from '@aws/dynamodb-auto-marshaller';
 import { DynamoDBStreamEvent } from 'aws-lambda';
 import algoliasearch from 'algoliasearch';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
@@ -6,18 +5,15 @@ import { S3 } from '@aws-sdk/client-s3';
 import { TvShowGenre, TvShowGenres } from '../../domain/TvShowGenres';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
-import { TvShow } from "../../domain/TvShow";
 import axios from 'axios';
 import { L8nLangCode } from '../../domain/L8nLangCodes';
+import { TvShowRepositoryInterface } from '../../ports/TvShowRepositoryInterface';
+import { TvShowRepository } from '../../../adapters/TvShowRepository';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
 const secretsManager = new SecretsManager({});
 const s3 = new S3({});
-
-const marshaller = new Marshaller();
-
-const dynamodbTvShowTableName = process.env.DYNAMODB_TV_SHOW_TABLE_NAME!;
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -27,6 +23,7 @@ const marshallOptions = {
 const translateConfig = { marshallOptions };
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
+const tvShowRepo: TvShowRepositoryInterface = new TvShowRepository(docClient);
 
 const tmdbClient = axios.create({
   baseURL: 'https://api.themoviedb.org/3/',
@@ -82,15 +79,19 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
     const tmdbApiKey = secret.TMDB_API_KEY!;
   
     for (const record of event.Records) {
+      let SK = record.dynamodb?.Keys?.SK.S;
+      if (SK !== 'tvshow') {
+        continue;
+      }
       if (record.eventName === 'REMOVE') {
-        let objectID = record.dynamodb?.Keys?.id.S;
-        if (objectID == undefined || ! /\S/.test(objectID)) {
+        let PK = record.dynamodb?.Keys?.PK.S;
+        if (PK == undefined || ! /\S/.test(PK)) {
           throw new EmptyObjectIdError();
         }
-        await algoliaIndex.deleteBy({filters: `objectID: ${objectID}`});
-        await emptyS3Directory(mediaAssetsS3Bucket, `${objectID}/`);
+        await algoliaIndex.deleteBy({filters: `objectID: ${PK}`});
+        await emptyS3Directory(mediaAssetsS3Bucket, `${PK}/`);
       } else {
-        let tvShow: TvShowRead = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as TvShowRead;
+        let tvShow: TvShowRead = (await tvShowRepo.getTvShowById(record.dynamodb?.Keys?.PK.S)) as unknown as TvShowRead;
         let updated: boolean = false;
         if (tvShow.tmdbId != undefined) {
           updated = await updateBasedOnTmdbId(tvShow.id, tvShow.tmdbId, tmdbApiKey, tvShow);
@@ -117,8 +118,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
                                         posterImagesPortrait: tvShow.posterImagesPortrait,
                                         titleL8ns: tvShow.titleL8ns,
                                         releaseYear: tvShow.releaseYear,
-                                        genres: tvShow.genres.reduce((r, _) => { return { ...r, [_.code] : TvShowGenres[_.code] } }, {}),
-                                        seasons: seasons });
+                                        genres: tvShow.genres.reduce((r, _) => { return { ...r, [_.code] : TvShowGenres[_.code] } }, {})});
       }
     }
   } catch (e) {
@@ -152,16 +152,7 @@ async function emptyS3Directory(bucket, dir) {
 }
 
 async function updateBasedOnTmdbId(tvShowId: string, tmdbId: string, tmdbApiKey: string, tvShowRead: TvShowRead) {
-  const queryParams = {
-    TableName: dynamodbTvShowTableName,
-    Key: { 'id': tvShowId }
-  } as const;
-  let data = await docClient.get(queryParams);
-  if (data === undefined || data.Item === undefined) {
-    throw new FailedToGetTvShowError();
-  }
-  let tvShow = new TvShow(true);
-  Object.assign(tvShow, data.Item);
+  let tvShow = await tvShowRepo.getTvShowById(tvShowId);
   let updated: boolean = false;
 
   const tmdbTvShowEnUs = (await tmdbClient.get(`tv/${tmdbId}?api_key=${tmdbApiKey}&language=en-US`)).data;
@@ -326,7 +317,7 @@ async function updateBasedOnTmdbId(tvShowId: string, tmdbId: string, tmdbApiKey:
   }
 
   if (updated) {
-    await docClient.put({ TableName: dynamodbTvShowTableName, Item: tvShow });
+    await tvShowRepo.saveTvShow(tvShow);
   }
 
   return updated;
@@ -345,8 +336,5 @@ const tmdbTvShowGenreId2TvShowGenre = {
   "37" : new TvShowGenre('WESTERN'),
   "10768" : new TvShowGenre('WAR')
 } as const;
-
-
-class FailedToGetTvShowError extends Error {}
 
 class EmptyObjectIdError extends Error {}
