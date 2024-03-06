@@ -27,7 +27,9 @@ exports.AudioLangCodes = {
     FA: { lang: "fa", langTag: "fa", displayName: "فارسی" },
     FA_IR: { lang: "fa", langTag: "fa-IR", displayName: "فارسی (ایران)" },
     SV: { lang: "sv", langTag: "sv", displayName: "svenska" },
-    SV_SE: { lang: "sv", langTag: "sv-SE", displayName: "svenska (Sverige)" }
+    SV_SE: { lang: "sv", langTag: "sv-SE", displayName: "svenska (Sverige)" },
+    PL: { lang: "pl", langTag: "pl", displayName: "Polski" },
+    PL_PL: { lang: "pl", langTag: "pl-PL", displayName: "Polski (Polska)" }
 };
 class AudioLangCode {
     constructor(code) {
@@ -71,7 +73,9 @@ exports.SubsLangCodes = {
     FA: { lang: "fa", langTag: "fa", displayName: "فارسی" },
     FA_IR: { lang: "fa", langTag: "fa-IR", displayName: "فارسی (ایران)" },
     SV: { lang: "sv", langTag: "sv", displayName: "svenska" },
-    SV_SE: { lang: "sv", langTag: "sv-SE", displayName: "svenska (Sverige)" }
+    SV_SE: { lang: "sv", langTag: "sv-SE", displayName: "svenska (Sverige)" },
+    PL: { lang: "pl", langTag: "pl", displayName: "Polski" },
+    PL_PL: { lang: "pl", langTag: "pl-PL", displayName: "Polski (Polska)" }
 };
 class SubsLangCode {
     constructor(code) {

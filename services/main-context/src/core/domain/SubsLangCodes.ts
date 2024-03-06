@@ -18,7 +18,9 @@ export const SubsLangCodes = {
   FA : { lang : "fa", langTag: "fa" },
   FA_IR : { lang : "fa", langTag: "fa-IR" },
   SV : { lang : "sv", langTag: "sv" },
-  SV_SE : { lang : "sv", langTag: "sv-SE" }
+  SV_SE : { lang : "sv", langTag: "sv-SE" },
+  PL : { lang : "pl", langTag: "pl" },
+  PL_PL : { lang : "pl", langTag: "pl-PL" }
 } as const;
 
 export class SubsLangCode {
