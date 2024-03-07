@@ -7,12 +7,12 @@ import { DynamoDB } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
 import { Movie } from "../domain/Movie";
 import { SubsLangCode, SubsLangCodes } from "../domain/SubsLangCodes";
-import { TvShow } from "../domain/TvShow";
+import { TvShowRepositoryInterface } from "../ports/TvShowRepositoryInterface";
+import { TvShowRepository } from "../../adapters/TvShowRepository";
 
 const dynamodbMovieTranscodingJobTableName = process.env.DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME!;
 const dynamodbTvShowTranscodingJobTableName = process.env.DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME!;
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
-const dynamodbTvShowTableName = process.env.DYNAMODB_TV_SHOW_TABLE_NAME!;
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -22,6 +22,7 @@ const marshallOptions = {
 const translateConfig = { marshallOptions };
   
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
+const tvShowRepo: TvShowRepositoryInterface = new TvShowRepository(docClient);
 
 interface HandlerParam {
   transcodingContextJobId: string;
@@ -92,17 +93,8 @@ export const handler = async (event: HandlerParam): Promise<void> => {
   if (data != undefined && data.Items != undefined && data.Items.length != 0) {
     let tvShowTranscodingJobRead: TvShowTranscodingJobRead = {};
     Object.assign(tvShowTranscodingJobRead, data.Items[0]);
-  
-    const queryParams = {
-      TableName: dynamodbTvShowTableName,
-      Key: { 'id':  tvShowTranscodingJobRead.tvShowId }
-    } as const;
-    let tvShowData = await docClient.get(queryParams);
-    if (tvShowData == undefined || tvShowData.Item == undefined) {
-      throw new FailedToGetTvShowError();
-    }
-    let tvShow = new TvShow(true);
-    Object.assign(tvShow, tvShowData.Item);
+
+    let tvShow = await tvShowRepo.getTvShowById(tvShowTranscodingJobRead.tvShowId);
 
     const season = tvShowTranscodingJobRead.season;
     const episode = tvShowTranscodingJobRead.episode;
@@ -114,7 +106,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
       tvShow.addSubtitle(season, episode, _.lang, `${tvShowTranscodingJobRead.outputFolderKey}/subtitles/${SubsLangCodes[_.lang.code]['langTag']}.vtt`);
     })
     tvShow.addThumbnailsFile(season, episode, `${tvShowTranscodingJobRead.outputFolderKey}/thumbnails/thumbnails.vtt`);
-    await docClient.put({ TableName: dynamodbTvShowTableName, Item: tvShow });
+    await tvShowRepo.saveTvShow(tvShow);
     return;
   }
   
@@ -124,5 +116,3 @@ export const handler = async (event: HandlerParam): Promise<void> => {
 class FailedToGetMovieOrTvShowTranscodingJobError extends Error {};
 
 class FailedToGetMovieError extends Error {};
-
-class FailedToGetTvShowError extends Error {};
