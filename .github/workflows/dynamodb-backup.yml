@@ -15,7 +15,7 @@ jobs:
       AWS_DEFAULT_REGION: eu-west-3
       DYNAMODB_BACKUP_S3_BUCKET: q62-dynamodb-backup
       MOVIE_TABLE_ARN: arn:aws:dynamodb:eu-west-3:003200941285:table/prod-e1pjapsk-movie
-      TV_SHOW_TABLE_ARN: arn:aws:dynamodb:eu-west-3:003200941285:table/prod-e1pjapsk-tv_show
+      TV_SHOW_TABLE_ARN: arn:aws:dynamodb:eu-west-3:003200941285:table/prod-e1pjapsk-tv_show_v2
       CF_DISTRO_TABLE_ARN: arn:aws:dynamodb:eu-west-3:003200941285:table/prod-e1pjapsk-cloudfront_distro_metadata
     steps:
       - name: Backup movie table
