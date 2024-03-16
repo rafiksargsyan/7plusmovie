@@ -76,14 +76,15 @@ function CatalogPage(props: CatalogPageProps) {
   const [search, setSearch] = useState(props.searchString);
   const [items, setItems] = useState(props.movies);
   const [isLoading, setIsLoading] = useState(false);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(props.pageNumber);
 
   const fetchMoreData = async () => {
-    if (isLoading) return;
+    if (isLoading || page + 1 >= props.numOfPages) return;
     setIsLoading(true);
     const newData = await getPage(page + 1, search);
     setItems(items => [...items, ...newData.movies]);
     setPage(prevPage => prevPage + 1);
+    router.replace({ pathname: router.basePath, query: { ...router.query, page: page + 1}});
     setIsLoading(false);
   };
 
@@ -104,9 +105,7 @@ function CatalogPage(props: CatalogPageProps) {
   useEffect(() => {
     const handleScroll = () => {
       const {scrollHeight, clientHeight, scrollTop} = {...document.documentElement};
-      if (
-        scrollHeight > clientHeight + scrollTop || isLoading
-      ) {
+      if (scrollHeight > clientHeight + scrollTop || isLoading) {
         return;
       }
       fetchMoreData();
