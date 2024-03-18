@@ -104,18 +104,21 @@ function TvShowSeriesList(props: TvShowSeriesListProps) {
                   <Card sx={{display: 'inline-block', mr: { xs: 2, md: 3 }, borderRadius: 0, width: { xs: '60%', sm: '34%', md: '25%', lg: '17%', xl: '13%' }}} key={e.episodeNumber}>
                     <CardActionArea>
                       <Link href={{pathname: '/player', query: {tvShowId: props.id, season: s.seasonNumber, episode: e.episodeNumber}}}>
-                        { e.stillImage != undefined ?
-                            (<CardMedia
+                        { e.stillImage ?
+                            <CardMedia
                               component="img"
                               src={`${imageBaseUrl}w=160,f=auto/${e.stillImage}`}
                               srcSet={`${imageBaseUrl}w=240,f=auto/${e.stillImage} 240w, ${imageBaseUrl}w=160,f=auto/${e.stillImage} 160w`}
                               alt={`${episodeName}`}
                               sizes="(max-width: 1200px) 160px, 240px"
-                            />) : (
-                              <CardMedia
-                               component="img"
-                               src={'/no-image-holder.svg'} />
-                            )
+                              sx={{aspectRatio: '7 / 4', objectFit: 'fill', backgroundImage: 'url("/no-image-holder.svg")'}}
+                              loading="lazy"
+                            /> :
+                            <CardMedia
+                              component="img"
+                              src='/no-image-holder.svg'
+                              sx={{aspectRatio: '7 / 4', objectFit: 'fill'}}
+                            /> 
                         }
                       </Link>
                     </CardActionArea>     
