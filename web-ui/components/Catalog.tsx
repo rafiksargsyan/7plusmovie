@@ -142,6 +142,8 @@ function GridView(props: CatalogProps) {
                     srcSet={`${imageBaseUrl}w=240,f=auto/${_.posterImagesPortrait[locale]} 240w, ${imageBaseUrl}w=160,f=auto/${_.posterImagesPortrait[locale]} 160w`}
                     alt={`${_.titleL8ns[locale] != null ? _.titleL8ns[locale] : _.originalTitle} (${_.releaseYear})`}
                     sizes="(max-width: 1200px) 160px, 240px"
+                    loading="lazy"
+                    sx={{aspectRatio: '2 / 3', objectFit: 'fill', backgroundImage: 'url("/no-image-holder.svg")'}}
                   />
                 </Link>
               </CardActionArea>     
