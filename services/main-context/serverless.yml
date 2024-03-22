@@ -625,6 +625,7 @@ functions:
       DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
     events:
       - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_TV_SHOW_STREAM_ARN}
+    timeout: 300
 
   tvShowTranscodingJobUpdateHandler:
     handler: src/core/app/tv-show/tvShowTranscodingJobUpdateHandler.handler
