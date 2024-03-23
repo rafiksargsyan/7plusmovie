@@ -9,6 +9,6 @@ for f in *; do
     season="${BASH_REMATCH[1]}"
     episode="${BASH_REMATCH[2]}"
     touch ${episode}.${extension}
-    mv $f ${episode}.${extension}
+    mv "$f" ${episode}.${extension}
   fi
 done
