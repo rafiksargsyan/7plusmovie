@@ -247,22 +247,6 @@ resource "aws_secretsmanager_secret_version" "transcoding_context_secrets_versio
   )
 }
 
-resource "aws_dynamodb_table" "tv_show" {
-  name     = "${local.deployment_id}-tv_show"
-  hash_key = "id"
-  attribute {
-    name = "id"
-    type = "S"
-  }
-  stream_enabled   = true
-  stream_view_type = "NEW_IMAGE"
-  billing_mode     = "PAY_PER_REQUEST"
-  deletion_protection_enabled = false
-  point_in_time_recovery {
-    enabled = true
-  }
-}
-
 resource "aws_dynamodb_table" "tv_show_transcoding_job" {
   name     = "${local.deployment_id}-tv_show_transcoding_job"
   hash_key = "id"
