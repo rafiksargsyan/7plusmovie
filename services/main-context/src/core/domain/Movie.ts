@@ -3,6 +3,7 @@ import { L8nLangCode } from './L8nLangCodes';
 import { MovieGenre } from './MovieGenres';
 import { Person } from './Persons';
 import { SubsLangCode } from './SubsLangCodes';
+import { Subtitle } from './Subtitle';
 
 type RelativePath = string;
 
@@ -16,7 +17,7 @@ export class Movie {
   private posterImagesPortrait: { [key: string]: RelativePath } = {};
   private posterImagesLandscape: { [key: string]: RelativePath } = {};
   private backdropImage: RelativePath;
-  private subtitles: { [key: string]: RelativePath } = {};
+  private subtitles: Subtitle[] = [];
   private mpdFile: RelativePath;
   private m3u8File: RelativePath;
   private releaseYear: number;
@@ -65,12 +66,12 @@ export class Movie {
     this.posterImagesPortrait[locale.code] = relativePath;
     this.touch();
   }
-
-  public addSubtitle(locale: SubsLangCode, relativePath: RelativePath) {
-    if (! /\S/.test(relativePath)) {
-      throw new InvalidSubtitleRelativePathError();
+ 
+  public addSubtitle(s: Subtitle | undefined) {
+    if (s == undefined) {
+      throw new InvalidSubtitleError();
     }
-    this.subtitles[locale.code] = relativePath;
+    this.subtitles.push(s);
     this.touch();
   }
 
@@ -175,7 +176,7 @@ class InvalidTitleL8nError extends Error {}
 
 class InvalidBackdropImageRelativePathError extends Error {}
 
-class InvalidSubtitleRelativePathError extends Error {}
+class InvalidSubtitleError extends Error {}
 
 class InvalidM3u8FileRelativePathError extends Error {}
 
