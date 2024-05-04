@@ -14,12 +14,12 @@ export const L8nLangCodes = {
   HI_IN : { langTag : "hi-IN" },
   RO : { langTag: "ro" },
   RO_RO : { langTag: "ro-RO" },
-  FA : { lang : "fa", langTag: "fa" },
-  FA_IR : { lang : "fa", langTag: "fa-IR" },
-  SV : { lang : "sv", langTag: "sv" },
-  SV_SE : { lang : "sv", langTag: "sv-SE" },
-  PL : { lang : "pl", langTag: "pl" },
-  PL_PL : { lang : "pl", langTag: "pl-PL" }
+  FA : { langTag: "fa" },
+  FA_IR : { langTag: "fa-IR" },
+  SV : { langTag: "sv" },
+  SV_SE : { langTag: "sv-SE" },
+  PL : { langTag: "pl" },
+  PL_PL : { langTag: "pl-PL" }
 } as const;
 
 export class L8nLangCode {

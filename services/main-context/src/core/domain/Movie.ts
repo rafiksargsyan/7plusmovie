@@ -2,7 +2,6 @@ import { v4 as uuid } from 'uuid';
 import { L8nLangCode } from './L8nLangCodes';
 import { MovieGenre } from './MovieGenres';
 import { Person } from './Persons';
-import { SubsLangCode } from './SubsLangCodes';
 import { Subtitle } from './Subtitle';
 
 type RelativePath = string;
@@ -17,7 +16,7 @@ export class Movie {
   private posterImagesPortrait: { [key: string]: RelativePath } = {};
   private posterImagesLandscape: { [key: string]: RelativePath } = {};
   private backdropImage: RelativePath;
-  private subtitles: Subtitle[] = [];
+  private subtitles: { [key: string]: Subtitle } = {}; // key will also match with labael in MPD or HlS manifest, if subs come from the package
   private mpdFile: RelativePath;
   private m3u8File: RelativePath;
   private releaseYear: number;
@@ -67,11 +66,22 @@ export class Movie {
     this.touch();
   }
  
-  public addSubtitle(s: Subtitle | undefined) {
+  public addSubtitle(id: string | undefined, s: Subtitle | undefined) {
+    if (id == undefined) {
+      throw new InvalidSubtitleIdError();
+    }
     if (s == undefined) {
       throw new InvalidSubtitleError();
     }
-    this.subtitles.push(s);
+    for (var k in this.subtitles) {
+      if (id == k) {
+        throw new SubtitleIdAlreadyExistsError();
+      }
+      if (this.subtitles[k].getName() === s.getName()) {
+        throw new SubtitleWithNameAlreadyExistsError();
+      }
+    }
+    this.subtitles[id] = s;
     this.touch();
   }
 
@@ -183,3 +193,9 @@ class InvalidM3u8FileRelativePathError extends Error {}
 class InvalidTmdbIdError extends Error {}
 
 class InvalidThumbnailsFileRelativePathError extends Error {}
+
+class SubtitleWithNameAlreadyExistsError extends Error {}
+
+class InvalidSubtitleIdError extends Error {}
+
+class SubtitleIdAlreadyExistsError extends Error {}

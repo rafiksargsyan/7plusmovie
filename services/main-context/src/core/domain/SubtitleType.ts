@@ -1,17 +1,17 @@
 export const SubtitleTypes = {
-  FORCED: "FORCED",
-  FULL: "FULL",
-  SDH: "SDH"
+  FORCED: { name : "Forced" },
+  FULL: { name : "Full" },
+  SDH: { name : "SDH" }
 } as const;
 
 export class SubtitleType {
-  readonly type: string;
+  readonly code: string;
     
-  public constructor(type: string | undefined) {
-    if (type == undefined || !(type in SubtitleTypes)) {
+  public constructor(code: string | undefined) {
+    if (code == undefined || !(code in SubtitleTypes)) {
       throw new InvalidSubtitleTypeError();
     }
-    this.type = type;
+    this.code = code;
   }
 }
   

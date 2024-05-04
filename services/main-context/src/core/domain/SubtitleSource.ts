@@ -1,6 +1,6 @@
 export const SubtitleSources = {
-  EXTERNAL: "EXTERNAL", // Coming from torrent, usenet releases
-  ADMIN: "ADMIN" // added by admin
+  EXTERNAL: { key : "EXTERNAL" }, // Coming from torrent, usenet releases
+  ADMIN: { key : "ADMIN" } // added by admin
 } as const;
 
 export class SubtitleSource {
