@@ -1,5 +1,5 @@
 import { SubsLangCode, SubsLangCodes } from "./SubsLangCodes";
-import { SubtitleSource, SubtitleSources } from "./SubtitleSource";
+import { SubtitleSource } from "./SubtitleSource";
 import { SubtitleType, SubtitleTypes } from "./SubtitleType";
 
 export class Subtitle {
@@ -11,7 +11,7 @@ export class Subtitle {
   private source: SubtitleSource = new SubtitleSource('EXTERNAL');
   private audioTrackId: string | undefined = undefined; // if not undefined/null, means text matches speech in the audio track  
   
-  public constructor(id: string | undefined, name: string | undefined, relativePath: string | undefined,
+  public constructor(name: string | undefined, relativePath: string | undefined,
                      lang: SubsLangCode | undefined, type: SubtitleType | undefined) {
     this.type = this.validateType(type);
     this.lang = this.validateLang(lang);
@@ -20,7 +20,6 @@ export class Subtitle {
       name = `${SubsLangCodes[this.lang.code].name} (${SubtitleTypes[this.type.code].name})`;  
     }
     this.name = this.validateName(name);
-    if (id == undefined) id = name;
   }
 
   public getName() {

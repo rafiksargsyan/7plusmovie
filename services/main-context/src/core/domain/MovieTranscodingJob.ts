@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { AudioLangCode } from './AudioLangCodes';
 import { SubsLangCode } from './SubsLangCodes';
+import { SubtitleType } from './SubtitleType';
 
 interface AudioTranscodeSpec {
   stream: number;
@@ -11,7 +12,8 @@ interface AudioTranscodeSpec {
 
 interface TextTranscodeSpec {
   stream: number;
-  forced: boolean;
+  name: string;
+  type: SubtitleType;
   lang: SubsLangCode;
 }
 

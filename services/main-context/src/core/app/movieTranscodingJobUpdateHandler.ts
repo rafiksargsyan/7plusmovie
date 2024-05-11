@@ -6,6 +6,7 @@ import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { SubsLangCode } from '../domain/SubsLangCodes';
 import { AudioLangCode } from '../domain/AudioLangCodes';
+import { SubtitleType } from '../domain/SubtitleType';
 
 const transcodingContextJobCreationLambdaName = process.env.TRANSCODING_CONTEXT_JOB_CREATION_LAMBDA_NAME!;
 const dynamodbMovieTranscodingJobTableName = process.env.DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME!;
@@ -30,8 +31,9 @@ interface AudioTranscodeSpec {
 
 interface TextTranscodeSpec {
   stream: number;
-  forced: boolean;
+  name: string;
   lang: SubsLangCode;
+  type: SubtitleType;
 }
   
 interface MovieTranscodingJobRead {
@@ -42,8 +44,6 @@ interface MovieTranscodingJobRead {
   mkvS3ObjectKey?: string;
   mkvHttpUrl?: string;
   outputFolderKey?: string;
-  defaultAudioTrack?: number | undefined;
-  defaultTextTrack?: number | undefined;
   transcodingContextJobId?: string | undefined;
 }
 
@@ -72,9 +72,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
             mkvHttpUrl: movieTranscodingJobRead.mkvHttpUrl,
             outputFolderKey: movieTranscodingJobRead.outputFolderKey,
             audioTranscodeSpecParams: movieTranscodingJobRead.audioTranscodeSpecs?.map(_ => ({ ..._, lang: _.lang.code })),
-            textTranscodeSpecParams: movieTranscodingJobRead.textTranscodeSpecs?.map(_ => ({ ..._, lang: _.lang.code })),
-            defaultAudioTrack: movieTranscodingJobRead.defaultAudioTrack,
-            defaultTextTrack: movieTranscodingJobRead.defaultTextTrack
+            textTranscodeSpecParams: movieTranscodingJobRead.textTranscodeSpecs?.map(_ => ({ ..._, lang: _.lang.code, type: _.type.code })),
           }
           const lambdaParams = {
             FunctionName: transcodingContextJobCreationLambdaName,

@@ -28,7 +28,7 @@ interface GetMovieMetadataResponse {
 
 interface Movie {
   id: string
-  subtitles: { [key: string]: string };
+  subtitles: { [key: string]: { relativePath : string } };
   mpdFile: string;
   m3u8File: string;
   thumbnailsFile?: string;
@@ -61,7 +61,7 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   }
   mediaAssetsDomain = masqueradeMediaAssetsDomain(mediaAssetsDomain);
   return {
-    subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `https://${mediaAssetsDomain}/${movie.subtitles[key]}`; return acc;}, {}),
+    subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `https://${mediaAssetsDomain}/${movie.subtitles[key].relativePath}`; return acc;}, {}),
     mpdFile: `https://${mediaAssetsDomain}/${movie.mpdFile}`,
     m3u8File: `https://${mediaAssetsDomain}/${movie.m3u8File}`,
     thumbnailsFile: movie.thumbnailsFile !== undefined ? `https://${mediaAssetsDomain}/${movie.thumbnailsFile}` : undefined,

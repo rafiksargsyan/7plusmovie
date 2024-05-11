@@ -4,6 +4,7 @@ import fs from 'fs';
 import { execSync } from 'child_process';
 import { SubsLangCode, SubsLangCodes } from './SubsLangCodes';
 import { AudioLangCode, AudioLangCodes } from './AudioLangCodes';
+import { SubtitleTypes } from './SubtitleType';
 
 const WORKING_DIR_NAME = '.transcoding-job-work-dir';
 
@@ -16,8 +17,9 @@ interface AudioTranscodeSpec {
 
 interface TextTranscodeSpec {
   stream: number;
-  forced: boolean;
+  name: string;
   lang: keyof typeof SubsLangCodes;
+  type: keyof typeof SubtitleTypes;
 }
 
 async function run(): Promise<void> {
@@ -55,8 +57,6 @@ async function run(): Promise<void> {
     if (audioTranscodeSpecs == undefined) audioTranscodeSpecs = [];
     let textTranscodeSpecs: TextTranscodeSpec[] = transcodingSpec['text'];
     if (textTranscodeSpecs == undefined) textTranscodeSpecs = [];
-    const defaultAudioTrack: number | undefined = transcodingSpec['defaultAudioTrack'];
-    const defaultTextTrack: number | undefined = transcodingSpec['defaultTextTrack'];
     
     audioTranscodeSpecs.forEach(_ => {
       transcodeAudioFromMkv(mkvFileAbsolutePath, _.stream, _.channels, _.bitrate, new AudioLangCode(_.lang));
@@ -84,17 +84,9 @@ async function run(): Promise<void> {
     })
     
     textTranscodeSpecs.forEach(_ => {
-      const textFileName = `${SubsLangCodes[_.lang]['langTag']}.vtt`
-      shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, textFileName)},stream=text,output=${textFileName},lang=${SubsLangCodes[_.lang]['langTag']},hls_group_id=subtitle,hls_name='${SubsLangCodes[_.lang]['displayName']}' `;
+      const textFileName = `${SubsLangCodes[_.lang]['langTag']}-${SubtitleTypes[_.type].name}-${_.stream}.vtt`
+      shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, textFileName)},stream=text,output=${textFileName},lang=${SubsLangCodes[_.lang]['lang']},hls_group_id=subtitle,hls_name='${_.name}',dash_label='${_.name}' `;
     })
-
-    if (defaultAudioTrack != undefined) {
-      shakaPackagerCommand += `--default_language ${AudioLangCodes[audioTranscodeSpecs[defaultAudioTrack].lang].langTag}-x-${audioTranscodeSpecs[defaultAudioTrack].channels} `;
-    }
-
-    if (defaultTextTrack != undefined) {
-      shakaPackagerCommand += `--default_text_language ${SubsLangCodes[textTranscodeSpecs[defaultTextTrack].lang].langTag} `;
-    }
 
     shakaPackagerCommand += "--mpd_output manifest.mpd --hls_master_playlist_output master.m3u8";
 
@@ -105,14 +97,6 @@ async function run(): Promise<void> {
     }
     execSync('sed -i "/shaka-packager/d" ./*.mpd');
     execSync('sed -i "/shaka-packager/d" ./*.m3u8');
-
-
-    textTranscodeSpecs.forEach(_ =>  {
-      const langTag = SubsLangCodes[_.lang]['langTag'];
-      const langDisplayName = SubsLangCodes[_.lang]['displayName'];
-      const command = `sed -i 's/.*contentType=\\"text\\".*lang=\\"${langTag}\\".*/&\\n      \\<Label\\>${langDisplayName}\\<\\/Label\\>/' manifest.mpd`;
-      execSync(command);
-    });
 
     audioTranscodeSpecs.forEach(_ => {
       const langTag = AudioLangCodes[_.lang]['langTag'] + `-x-${_.channels}`;

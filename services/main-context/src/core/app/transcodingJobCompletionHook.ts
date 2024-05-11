@@ -9,6 +9,8 @@ import { Movie } from "../domain/Movie";
 import { SubsLangCode, SubsLangCodes } from "../domain/SubsLangCodes";
 import { TvShowRepositoryInterface } from "../ports/TvShowRepositoryInterface";
 import { TvShowRepository } from "../../adapters/TvShowRepository";
+import { SubtitleType, SubtitleTypes } from "../domain/SubtitleType";
+import { Subtitle } from "../domain/Subtitle";
 
 const dynamodbMovieTranscodingJobTableName = process.env.DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME!;
 const dynamodbTvShowTranscodingJobTableName = process.env.DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME!;
@@ -30,7 +32,8 @@ interface HandlerParam {
 
 interface TextTranscodeSpec {
   stream: number;
-  forced: boolean;
+  name: string;
+  type: SubtitleType;
   lang: SubsLangCode;
 }
 
@@ -76,7 +79,8 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     movie.addMpdFile(`${movieTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`);
     movie.addM3u8File(`${movieTranscodingJobRead.outputFolderKey}/vod/master.m3u8`);
     movieTranscodingJobRead.textTranscodeSpecs?.forEach(_ => {
-      movie.addSubtitle(_.lang, `${movieTranscodingJobRead.outputFolderKey}/subtitles/${SubsLangCodes[_.lang.code]['langTag']}.vtt`);
+      const relativePath = `${movieTranscodingJobRead.outputFolderKey}/subtitles/${SubsLangCodes[_.lang.code]['langTag']}-${SubtitleTypes[_.type.code].name}-${_.stream}.vtt`;
+      movie.addSubtitle(_.name, new Subtitle(_.name, relativePath, _.lang, _.type));
     })
     movie.addThumbnailsFile(`${movieTranscodingJobRead.outputFolderKey}/thumbnails/thumbnails.vtt`);
     await docClient.put({ TableName: dynamodbMovieTableName, Item: movie });

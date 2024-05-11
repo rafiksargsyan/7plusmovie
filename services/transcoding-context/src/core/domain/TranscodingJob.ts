@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { AudioLangCode } from './AudioLangCodes';
 import { SubsLangCode } from './SubsLangCodes';
+import { SubtitleType } from './SubtitleType';
 
 interface AudioTranscodeSpec {
   stream: number;
@@ -11,8 +12,9 @@ interface AudioTranscodeSpec {
 
 interface TextTranscodeSpec {
   stream: number;
-  forced: boolean;
   lang: SubsLangCode;
+  type: SubtitleType;
+  name: string | undefined;
 }
 
 export class TranscodingJob {
@@ -108,10 +110,6 @@ export class TranscodingJob {
 }
 
 class InvalidMkvS3ObjectKeyError extends Error {}
-
-class InvalidAudioTranscodeSpecsError extends Error {}
-
-class InvalidTextTranscodeSpecsError extends Error {}
 
 class InvalidDefaultAudioTrackError extends Error {}
 
