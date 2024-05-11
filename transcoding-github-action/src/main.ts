@@ -4,7 +4,6 @@ import fs from 'fs';
 import { execSync } from 'child_process';
 import { SubsLangCode, SubsLangCodes } from './SubsLangCodes';
 import { AudioLangCode, AudioLangCodes } from './AudioLangCodes';
-import { SubtitleTypes } from './SubtitleType';
 
 const WORKING_DIR_NAME = '.transcoding-job-work-dir';
 
@@ -19,7 +18,7 @@ interface TextTranscodeSpec {
   stream: number;
   name: string;
   lang: keyof typeof SubsLangCodes;
-  type: keyof typeof SubtitleTypes;
+  type: string;
 }
 
 async function run(): Promise<void> {
@@ -84,7 +83,7 @@ async function run(): Promise<void> {
     })
     
     textTranscodeSpecs.forEach(_ => {
-      const textFileName = `${SubsLangCodes[_.lang]['langTag']}-${SubtitleTypes[_.type].name}-${_.stream}.vtt`
+      const textFileName = `${SubsLangCodes[_.lang]['langTag']}-${_.type}-${_.stream}.vtt`
       shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, textFileName)},stream=text,output=${textFileName},lang=${SubsLangCodes[_.lang]['lang']},hls_group_id=subtitle,hls_name='${_.name}',dash_label='${_.name}' `;
     })
 
@@ -116,8 +115,6 @@ async function run(): Promise<void> {
 function transcodeSubsFromMkv(mkvFilePath: string, stream: number, lang: SubsLangCode) {
   const fileName = `${SubsLangCodes[lang.code]['langTag']}.vtt`;
   let command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${fileName} > /dev/null 2>&1`;
-  execSync(command);
-  command = `echo >> ${fileName}`; // https://github.com/shaka-project/shaka-packager/issues/1018
   execSync(command);
 }
 
