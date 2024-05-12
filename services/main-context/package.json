@@ -12,6 +12,7 @@
     "@aws-sdk/lib-dynamodb": "^3.386.0",
     "@aws-sdk/s3-request-presigner": "^3.301.0",
     "@aws/dynamodb-auto-marshaller": "^0.7.1",
+    "@serverless/sdk": "^0.5.26",
     "algoliasearch": "^4.15.0",
     "axios": "^1.4.0",
     "cloudinary": "^1.35.0"
