@@ -4,6 +4,7 @@ import fs from 'fs';
 import { execSync } from 'child_process';
 import { SubsLangCode, SubsLangCodes } from './SubsLangCodes';
 import { AudioLangCode, AudioLangCodes } from './AudioLangCodes';
+import { SubtitleType } from './SubtitleType';
 
 const WORKING_DIR_NAME = '.transcoding-job-work-dir';
 
@@ -62,7 +63,7 @@ async function run(): Promise<void> {
     });
 
     textTranscodeSpecs.forEach(_ => {
-      transcodeSubsFromMkv(mkvFileAbsolutePath, _.stream,  new SubsLangCode(_.lang));
+      transcodeSubsFromMkv(mkvFileAbsolutePath, _.stream,  new SubsLangCode(_.lang), new SubtitleType(_.type));
     })
     
     if (textTranscodeSpecs.length !== 0) {
@@ -112,8 +113,8 @@ async function run(): Promise<void> {
   }
 }
 
-function transcodeSubsFromMkv(mkvFilePath: string, stream: number, lang: SubsLangCode) {
-  const fileName = `${SubsLangCodes[lang.code]['langTag']}.vtt`;
+function transcodeSubsFromMkv(mkvFilePath: string, stream: number, lang: SubsLangCode, type: SubtitleType) {
+  const fileName = `${SubsLangCodes[lang.code]['langTag']}-${type.code}-${stream}.vtt`;
   let command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${fileName} > /dev/null 2>&1`;
   execSync(command);
 }

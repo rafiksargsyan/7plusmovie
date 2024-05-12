@@ -92,6 +92,33 @@ class InvalidSubsLangCodeError extends Error {
 
 /***/ }),
 
+/***/ 74:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SubtitleType = exports.SubtitleTypes = void 0;
+exports.SubtitleTypes = {
+    FORCED: "FORCED",
+    FULL: "FULL",
+    SDH: "SDH"
+};
+class SubtitleType {
+    constructor(code) {
+        if (code == undefined || !(code in exports.SubtitleTypes)) {
+            throw new InvalidSubtitleTypeError();
+        }
+        this.code = code;
+    }
+}
+exports.SubtitleType = SubtitleType;
+class InvalidSubtitleTypeError extends Error {
+}
+
+
+/***/ }),
+
 /***/ 109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -139,6 +166,7 @@ const fs_1 = __importDefault(__nccwpck_require__(147));
 const child_process_1 = __nccwpck_require__(81);
 const SubsLangCodes_1 = __nccwpck_require__(466);
 const AudioLangCodes_1 = __nccwpck_require__(707);
+const SubtitleType_1 = __nccwpck_require__(74);
 const WORKING_DIR_NAME = '.transcoding-job-work-dir';
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -179,7 +207,7 @@ function run() {
                 transcodeAudioFromMkv(mkvFileAbsolutePath, _.stream, _.channels, _.bitrate, new AudioLangCodes_1.AudioLangCode(_.lang));
             });
             textTranscodeSpecs.forEach(_ => {
-                transcodeSubsFromMkv(mkvFileAbsolutePath, _.stream, new SubsLangCodes_1.SubsLangCode(_.lang));
+                transcodeSubsFromMkv(mkvFileAbsolutePath, _.stream, new SubsLangCodes_1.SubsLangCode(_.lang), new SubtitleType_1.SubtitleType(_.type));
             });
             if (textTranscodeSpecs.length !== 0) {
                 (0, child_process_1.execSync)(`cp ./*.vtt ${subtitlesFolderAbsolutePath}`);
@@ -223,8 +251,8 @@ function run() {
         }
     });
 }
-function transcodeSubsFromMkv(mkvFilePath, stream, lang) {
-    const fileName = `${SubsLangCodes_1.SubsLangCodes[lang.code]['langTag']}.vtt`;
+function transcodeSubsFromMkv(mkvFilePath, stream, lang, type) {
+    const fileName = `${SubsLangCodes_1.SubsLangCodes[lang.code]['langTag']}-${type.code}-${stream}.vtt`;
     let command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${fileName} > /dev/null 2>&1`;
     (0, child_process_1.execSync)(command);
 }
