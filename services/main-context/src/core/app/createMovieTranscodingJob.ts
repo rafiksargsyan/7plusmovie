@@ -37,8 +37,6 @@ interface CreateMovieTranscodingJobParam {
   outputFolderKey: string;
   audioTranscodeSpecParams: AudioTranscodeSpecParam[] | undefined;
   textTranscodeSpecParams: TextTranscodeSpecParam[] | undefined;
-  defaultAudioTrack: number | undefined;
-  defaultTextTrack: number | undefined;
 }
 
 export const handler = async (event: CreateMovieTranscodingJobParam): Promise<string> => {
@@ -50,7 +48,7 @@ export const handler = async (event: CreateMovieTranscodingJobParam): Promise<st
     return { name: name, stream: _.stream, type: new SubtitleType(_.type), lang: new SubsLangCode(_.lang)}
   });
   let movieTranscodingJob = new MovieTranscodingJob(false, event.movieId, event.mkvS3ObjectKey, event.mkvHttpUrl, event.outputFolderKey,
-    audioTranscodeSpecParams, textTranscodeSpecParams, event.defaultAudioTrack, event.defaultTextTrack);
+    audioTranscodeSpecParams, textTranscodeSpecParams);
   
   await docClient.put({TableName: dynamodbMovieTranscodingJobTableName, Item: movieTranscodingJob});docClient.batchWrite
 

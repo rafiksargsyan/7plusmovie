@@ -28,13 +28,11 @@ export class MovieTranscodingJob {
   private outputFolderKey: string;
   private audioTranscodeSpecs: AudioTranscodeSpec[];
   private textTranscodeSpecs: TextTranscodeSpec[];
-  private defaultAudioTrack: number | undefined;
-  private defaultTextTrack: number | undefined;
   private transcodingContextJobId: string;
 
   public constructor(createEmptyObject: boolean, movieId?: string, mkvS3ObjectKey?: string,
     mkvHttpUrl?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
-    textTranscodeSpecs?: TextTranscodeSpec[], defaultAudioTrack?: number, defaultTextTrack?: number) {
+    textTranscodeSpecs?: TextTranscodeSpec[]) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setMovieId(movieId);
@@ -42,8 +40,6 @@ export class MovieTranscodingJob {
       this.setOutputFolderKey(outputFolderKey)
       this.setAudioTranscodeSpecs(audioTranscodeSpecs);
       this.setTextTranscodeSpecs(textTranscodeSpecs);
-      this.setDefaultAudioTrack(defaultAudioTrack);
-      this.setDefaultTextTrack(defaultTextTrack);
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
       this.ttl = Math.round(this.creationTime / 1000) + 15 * 24 * 60 * 60;
@@ -91,20 +87,6 @@ export class MovieTranscodingJob {
 
   private setTextTranscodeSpecs(textTranscodeSpecs: TextTranscodeSpec[] | undefined) {
     this.textTranscodeSpecs = textTranscodeSpecs !== undefined ? textTranscodeSpecs : [];
-  }
-
-  private setDefaultAudioTrack(defaultAudioTrack: number | undefined) {
-    if (defaultAudioTrack != undefined && (defaultAudioTrack < 0 || defaultAudioTrack >= this.audioTranscodeSpecs.length)) {
-      throw new InvalidDefaultAudioTrackError(); 
-    }
-    this.defaultAudioTrack = defaultAudioTrack;
-  }  
-
-  private setDefaultTextTrack(defaultTextTrack: number | undefined) {
-    if (defaultTextTrack != undefined && (defaultTextTrack < 0 || defaultTextTrack >= this.textTranscodeSpecs.length)) {
-      throw new InvalidDefaultTextTrackError(); 
-    }
-    this.defaultTextTrack = defaultTextTrack;
   }
 
   public setTranscodingContextJobId(transcodingContextJobId: string) {
