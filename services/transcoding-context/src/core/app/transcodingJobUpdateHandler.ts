@@ -4,6 +4,7 @@ import { Octokit } from '@octokit/rest';
 import { AudioLangCode } from '../domain/AudioLangCodes';
 import { SubsLangCode } from '../domain/SubsLangCodes';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
+import { SubtitleType } from '../domain/SubtitleType';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
@@ -20,8 +21,9 @@ interface AudioTranscodeSpec {
   
 interface TextTranscodeSpec {
   stream: number;
-  forced: boolean;
+  type: SubtitleType;
   lang: SubsLangCode;
+  name: string;
 }
 
 interface TranscodingJobRead {
@@ -55,9 +57,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         }
         const transcodingSpec = {
           "audio" : (transcodingJobRead as TranscodingJobRead).audioTranscodeSpecs.map(_ => { return {..._, lang: _.lang.code }}),
-          "text" : (transcodingJobRead as TranscodingJobRead).textTranscodeSpecs.map(_ => { return {..._, lang: _.lang.code }}),
-          "defaultAudioTrack" : (transcodingJobRead as TranscodingJobRead).defaultAudioTrack,
-          "defaultTextTrack"  : (transcodingJobRead as TranscodingJobRead).defaultTextTrack
+          "text" : (transcodingJobRead as TranscodingJobRead).textTranscodeSpecs.map(_ => { return {..._, lang: _.lang.code, type: _.type.code }}),
         }
         const workflowInputParams = {
           mkv_s3_object_key: (transcodingJobRead as TranscodingJobRead).mkvS3ObjectKey,

@@ -14,7 +14,7 @@ interface TextTranscodeSpec {
   stream: number;
   lang: SubsLangCode;
   type: SubtitleType;
-  name: string | undefined;
+  name: string;
 }
 
 export class TranscodingJob {

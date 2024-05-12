@@ -228,7 +228,7 @@ function run() {
                 const textFileName = `${SubsLangCodes_1.SubsLangCodes[_.lang]['langTag']}-${_.type}-${_.stream}.vtt`;
                 shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, textFileName)},stream=text,output=${textFileName},lang=${SubsLangCodes_1.SubsLangCodes[_.lang]['lang']},hls_group_id=subtitle,hls_name='${_.name}',dash_label='${_.name}' `;
             });
-            shakaPackagerCommand += "--mpd_output manifest.mpd --hls_master_playlist_output master.m3u8";
+            shakaPackagerCommand += `--mpd_output ${path_1.default.resolve(vodFolderAbsolutePath, 'manifest.mpd')} --hls_master_playlist_output ${path_1.default.resolve(vodFolderAbsolutePath, 'master.m3u8')}`;
             (0, child_process_1.execSync)(`eval "${shakaPackagerCommand}"`);
             if (textTranscodeSpecs.length !== 0) {
                 (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.vtt');

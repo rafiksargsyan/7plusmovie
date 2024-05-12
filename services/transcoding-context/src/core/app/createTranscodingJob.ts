@@ -3,6 +3,7 @@ import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { TranscodingJob } from "../domain/TranscodingJob";
 import { AudioLangCode } from "../domain/AudioLangCodes";
 import { SubsLangCode } from "../domain/SubsLangCodes";
+import { SubtitleType } from '../domain/SubtitleType';
 
 const dynamodbTranscodingJobTableName = process.env.DYNAMODB_TRANSCODING_JOB_TABLE_NAME!;
 
@@ -24,8 +25,9 @@ interface AudioTranscodeSpecParam {
 
 interface TextTranscodeSpecParam {
   stream: number;
-  forced: boolean;
+  type: string;
   lang: string;
+  name: string;
 }
 
 interface CreateTranscodingJobParam {
@@ -34,8 +36,6 @@ interface CreateTranscodingJobParam {
   outputFolderKey: string;
   audioTranscodeSpecParams: AudioTranscodeSpecParam[] | undefined;
   textTranscodeSpecParams: TextTranscodeSpecParam[] | undefined;
-  defaultAudioTrack: number | undefined;
-  defaultTextTrack: number | undefined;
 }
 
 export const handler = async (event: CreateTranscodingJobParam): Promise<string> => {
@@ -43,10 +43,10 @@ export const handler = async (event: CreateTranscodingJobParam): Promise<string>
     return { stream: _.stream, bitrate: _.bitrate, channels: _.channels, lang: new AudioLangCode(_.lang) }
   });
   let textTranscodeSpecParams = event.textTranscodeSpecParams?.map(_ => {
-    return { stream: _.stream, forced: _.forced, lang: new SubsLangCode(_.lang)}
+    return { stream: _.stream, type: new SubtitleType(_.type), lang: new SubsLangCode(_.lang), name: _.name }
   });
   let transcodingJob = new TranscodingJob(false, event.mkvS3ObjectKey, event.mkvHttpUrl, event.outputFolderKey,
-    audioTranscodeSpecParams, textTranscodeSpecParams, event.defaultAudioTrack, event.defaultTextTrack);
+    audioTranscodeSpecParams, textTranscodeSpecParams);
   
   await docClient.put({TableName: dynamodbTranscodingJobTableName, Item: transcodingJob});
 

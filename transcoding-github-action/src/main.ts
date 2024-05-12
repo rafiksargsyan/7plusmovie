@@ -88,7 +88,7 @@ async function run(): Promise<void> {
       shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, textFileName)},stream=text,output=${textFileName},lang=${SubsLangCodes[_.lang]['lang']},hls_group_id=subtitle,hls_name='${_.name}',dash_label='${_.name}' `;
     })
 
-    shakaPackagerCommand += "--mpd_output manifest.mpd --hls_master_playlist_output master.m3u8";
+    shakaPackagerCommand += `--mpd_output ${path.resolve(vodFolderAbsolutePath, 'manifest.mpd')} --hls_master_playlist_output ${path.resolve(vodFolderAbsolutePath, 'master.m3u8')}`;
 
     execSync(`eval "${shakaPackagerCommand}"`);
 
