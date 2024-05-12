@@ -107,7 +107,8 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     tvShow.addMpdFile(season, episode, `${tvShowTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`);
     tvShow.addM3u8File(season, episode, `${tvShowTranscodingJobRead.outputFolderKey}/vod/master.m3u8`);
     tvShowTranscodingJobRead.textTranscodeSpecs?.forEach(_ => {
-      tvShow.addSubtitle(season, episode, _.lang, `${tvShowTranscodingJobRead.outputFolderKey}/subtitles/${SubsLangCodes[_.lang.code]['langTag']}.vtt`);
+      const relativePath = `${tvShowTranscodingJobRead.outputFolderKey}/subtitles/${SubsLangCodes[_.lang.code]['langTag']}-${SubtitleTypes[_.type.code].name}-${_.stream}.vtt`;
+      tvShow.addSubtitle(season, episode, _.name, new Subtitle(_.name, relativePath, _.lang, _.type));
     })
     tvShow.addThumbnailsFile(season, episode, `${tvShowTranscodingJobRead.outputFolderKey}/thumbnails/thumbnails.vtt`);
     await tvShowRepo.saveTvShow(tvShow);

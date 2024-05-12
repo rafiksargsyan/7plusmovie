@@ -254,6 +254,8 @@ functions:
             template:
               application/json: '{ "movieId" : $input.json(''$.movieId''),
                                    "lang" : $input.json(''$.lang''),
+                                   "type" : $input.json(''$.type''),
+                                   "name" : $input.json(''$.name''),
                                    "relativePath" : $input.json(''$.relativePath'') }'
               application/x-www-form-urlencoded: null
           authorizer:
@@ -500,6 +502,8 @@ functions:
             template:
               application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
                                    "lang" : $input.json(''$.lang''),
+                                   "type" : $input.json(''$.type''),
+                                   "name" : $input.json(''$.name''),
                                    "relativePath" : $input.json(''$.relativePath''),
                                    "season" : $input.json(''$.season''),
                                    "episode" : $input.json(''$.episode'') }'

@@ -33,7 +33,6 @@ interface Episode {
   stillImage: string;
   mpdFile: string;
   m3u8File: string;
-  subtitles: { [key: string]: string };
   episodeNumber: number;
   thumbnailsFile?: string;
 }

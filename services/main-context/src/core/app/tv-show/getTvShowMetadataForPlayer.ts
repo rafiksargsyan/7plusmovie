@@ -48,7 +48,6 @@ interface Episode {
   stillImage: string;
   mpdFile: string;
   m3u8File: string;
-  subtitles: { [key: string]: string };
   episodeNumber: number;
   thumbnailsFile?: string;
 }
@@ -92,8 +91,9 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
   }
   return {
     releaseYear: tvShow.releaseYear,
-    subtitles: Object.keys(episode.subtitles)
-    .reduce((acc, key) => {acc[key] = `https://${mediaAssetsDomain}/${episode.subtitles[key]}`; return acc;}, {}),
+    // subtitles: Object.keys(episode.subtitles)
+    // .reduce((acc, key) => {acc[key] = `https://${mediaAssetsDomain}/${episode.subtitles[key]}`; return acc;}, {}),
+    subtitles: {},
     mpdFile: `https://${mediaAssetsDomain}/${episode.mpdFile}`,
     m3u8File: `https://${mediaAssetsDomain}/${episode.m3u8File}`,
     thumbnailsFile: episode.thumbnailsFile !== undefined ? `https://${mediaAssetsDomain}/${episode.thumbnailsFile}` : undefined,

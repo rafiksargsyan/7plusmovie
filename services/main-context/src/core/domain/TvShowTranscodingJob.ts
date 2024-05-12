@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { AudioLangCode } from './AudioLangCodes';
 import { SubsLangCode } from './SubsLangCodes';
+import { SubtitleType } from './SubtitleType';
 
 interface AudioTranscodeSpec {
   stream: number;
@@ -11,7 +12,8 @@ interface AudioTranscodeSpec {
 
 interface TextTranscodeSpec {
   stream: number;
-  forced: boolean;
+  name: string;
+  type: SubtitleType;
   lang: SubsLangCode;
 }
 
@@ -28,14 +30,11 @@ export class TvShowTranscodingJob {
   private outputFolderKey: string;
   private audioTranscodeSpecs: AudioTranscodeSpec[];
   private textTranscodeSpecs: TextTranscodeSpec[];
-  private defaultAudioTrack: number | undefined;
-  private defaultTextTrack: number | undefined;
   private transcodingContextJobId: string;
 
   public constructor(createEmptyObject: boolean, tvShowId?: string, season?: number, episode?: number,
     mkvS3ObjectKey?: string, mkvHttpUrl?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
-    textTranscodeSpecs?: TextTranscodeSpec[], defaultAudioTrack?: number,
-    defaultTextTrack?: number) {
+    textTranscodeSpecs?: TextTranscodeSpec[]) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setTvShowId(tvShowId);
@@ -45,8 +44,6 @@ export class TvShowTranscodingJob {
       this.setOutputFolderKey(outputFolderKey)
       this.setAudioTranscodeSpecs(audioTranscodeSpecs);
       this.setTextTranscodeSpecs(textTranscodeSpecs);
-      this.setDefaultAudioTrack(defaultAudioTrack);
-      this.setDefaultTextTrack(defaultTextTrack);
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
       this.ttl = Math.round(this.creationTime / 1000) + 15 * 24 * 60 * 60;
@@ -110,20 +107,6 @@ export class TvShowTranscodingJob {
     this.textTranscodeSpecs = textTranscodeSpecs !== undefined ? textTranscodeSpecs : [];
   }
 
-  private setDefaultAudioTrack(defaultAudioTrack: number | undefined) {
-    if (defaultAudioTrack != undefined && (defaultAudioTrack < 0 || defaultAudioTrack >= this.audioTranscodeSpecs.length)) {
-      throw new InvalidDefaultAudioTrackError(); 
-    }
-    this.defaultAudioTrack = defaultAudioTrack;
-  }  
-
-  private setDefaultTextTrack(defaultTextTrack: number | undefined) {
-    if (defaultTextTrack != undefined && (defaultTextTrack < 0 || defaultTextTrack >= this.textTranscodeSpecs.length)) {
-      throw new InvalidDefaultTextTrackError(); 
-    }
-    this.defaultTextTrack = defaultTextTrack;
-  }
-
   public setTranscodingContextJobId(transcodingContextJobId: string | undefined) {
     if (transcodingContextJobId == undefined || ! /\S/.test(transcodingContextJobId)) {
       throw new InvalidTranscodingContextJobIdError();
@@ -136,10 +119,6 @@ export class TvShowTranscodingJob {
 class InvalidTvShowIdError extends Error {}
 
 class InvalidMkvS3ObjectKeyError extends Error {}
-
-class InvalidDefaultAudioTrackError extends Error {}
-
-class InvalidDefaultTextTrackError extends Error {}
 
 class InvalidTranscodingContextJobIdError extends Error {}
 

@@ -2,7 +2,8 @@ import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { TvShowTranscodingJob } from "../../domain/TvShowTranscodingJob";
 import { AudioLangCode } from "../../domain/AudioLangCodes";
-import { SubsLangCode } from "../../domain/SubsLangCodes";
+import { SubsLangCode, SubsLangCodes } from "../../domain/SubsLangCodes";
+import { SubtitleType, SubtitleTypes } from '../../domain/SubtitleType';
 
 const dynamodbTvShowTranscodingJobTableName = process.env.DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME!;
 
@@ -24,8 +25,9 @@ interface AudioTranscodeSpecParam {
 
 interface TextTranscodeSpecParam {
   stream: number;
-  forced: boolean;
+  name: string;
   lang: string;
+  type: string;
 }
 
 interface CreateTvShowTranscodingJobParam {
@@ -46,10 +48,11 @@ export const handler = async (event: CreateTvShowTranscodingJobParam): Promise<s
     return { stream: _.stream, bitrate: _.bitrate, channels: _.channels, lang: new AudioLangCode(_.lang) }
   });
   let textTranscodeSpecParams = event.textTranscodeSpecParams?.map(_ => {
-    return { stream: _.stream, forced: _.forced, lang: new SubsLangCode(_.lang)}
+    const name = _.name != null ? _.name : `${SubsLangCodes[_.lang].name} (${SubtitleTypes[_.type].name})`
+    return { name: name, stream: _.stream, type: new SubtitleType(_.type), lang: new SubsLangCode(_.lang)}
   });
   let tvShowTranscodingJob = new TvShowTranscodingJob(false, event.tvShowId, event.season, event.episode, event.mkvS3ObjectKey,
-    event.mkvHttpUrl, event.outputFolderKey, audioTranscodeSpecParams, textTranscodeSpecParams, event.defaultAudioTrack, event.defaultTextTrack);
+    event.mkvHttpUrl, event.outputFolderKey, audioTranscodeSpecParams, textTranscodeSpecParams);
   
   await docClient.put({TableName: dynamodbTvShowTranscodingJobTableName, Item: tvShowTranscodingJob});
 

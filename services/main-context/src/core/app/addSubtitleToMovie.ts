@@ -2,6 +2,8 @@ import { Movie } from "../domain/Movie";
 import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { SubsLangCode } from "../domain/SubsLangCodes";
+import { Subtitle } from "../domain/Subtitle";
+import { SubtitleType } from "../domain/SubtitleType";
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 
@@ -17,6 +19,8 @@ interface AddSubtitleParam {
   movieId: string;
   lang: string;
   relativePath: string;
+  type: string;
+  name: string;
 }
 
 export const handler = async (event: AddSubtitleParam): Promise<void> => {
@@ -29,8 +33,8 @@ export const handler = async (event: AddSubtitleParam): Promise<void> => {
     throw new FailedToGetMovieError();
   }
   let movie = new Movie(true);
-  Object.assign(movie, data.Item);  
-  movie.addSubtitle(new SubsLangCode(event.lang), event.relativePath);
+  Object.assign(movie, data.Item);
+  movie.addSubtitle(event.name, new Subtitle(event.name, event.relativePath, new SubsLangCode(event.lang), new SubtitleType(event.type)));
   await docClient.put({ TableName: dynamodbMovieTableName, Item: movie });
 };
 

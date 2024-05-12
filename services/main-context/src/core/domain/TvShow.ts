@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { L8nLangCode } from './L8nLangCodes';
 import { TvShowGenre } from './TvShowGenres';
-import { SubsLangCode } from './SubsLangCodes';
+import { Subtitle } from './Subtitle';
 
 interface Episode {
   originalName: string;
@@ -10,7 +10,7 @@ interface Episode {
   mpdFile?: string;
   m3u8File?: string;
   thumbnailsFile?: string;
-  subtitles: { [key: string]: string };
+  subtitles: { [key: string]: Subtitle }; // key will also match with labael in MPD or HlS manifest, if subs come from the package
   tmdbEpisodeNumber?: number;
   episodeNumber: number;
 }
@@ -84,15 +84,23 @@ export class TvShow {
   }
 
   public addSubtitle(seasonNumber: number | undefined, episodeNumber: number | undefined,
-                     locale: SubsLangCode | undefined, relativePath: string | undefined) {
-    if (locale == undefined) {
-      throw new InvalidLocaleError();
-    }        
-    if (relativePath == undefined || ! /\S/.test(relativePath)) {
-      throw new InvalidSubtitleRelativePathError();
-    }
+                     id: string | undefined, s: Subtitle | undefined) {
     const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
-    episode.subtitles[locale.code] = relativePath;
+    if (id == undefined) {
+      throw new InvalidSubtitleIdError();
+    }
+    if (s == undefined) {
+      throw new InvalidSubtitleError();
+    }
+    for (var k in episode.subtitles) {
+      if (id == k) {
+        throw new SubtitleIdAlreadyExistsError();
+      }
+      if (episode.subtitles[k].getName() === s.getName()) {
+        throw new SubtitleWithNameAlreadyExistsError();
+      }
+    }
+    episode.subtitles[id] = s;
     this.touch();
   }
 
@@ -106,7 +114,7 @@ export class TvShow {
 
   public addMpdFile(seasonNumber: number | undefined, episodeNumber: number | undefined, relativePath: string | undefined) {
     if (relativePath == undefined || ! /\S/.test(relativePath)) {
-      throw new InvalidSubtitleRelativePathError();
+      throw new InvalidMpdFileRelativePathError();
     }
     const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
     episode.mpdFile = relativePath;
@@ -327,8 +335,6 @@ class InvalidTitleL8nError extends Error {}
 
 class InvalidBackdropImageRelativePathError extends Error {}
 
-class InvalidSubtitleRelativePathError extends Error {}
-
 class InvalidM3u8FileRelativePathError extends Error {}
 
 class InvalidTmdbIdError extends Error {}
@@ -372,3 +378,11 @@ class SeasonWithSeasonNumberAlreadyExistsError extends Error {}
 class EpisodeWithEpisodeNumberAlreadyExistsError extends Error {}
 
 class InvalidThumbnailsFileRelativePathError extends Error {}
+
+class InvalidSubtitleIdError extends Error {}
+
+class SubtitleIdAlreadyExistsError extends Error {}
+
+class SubtitleWithNameAlreadyExistsError extends Error {}
+
+class InvalidSubtitleError extends Error {}

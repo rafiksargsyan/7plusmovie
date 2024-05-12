@@ -3,6 +3,8 @@ import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { SubsLangCode } from "../../domain/SubsLangCodes";
 import { TvShowRepositoryInterface } from '../../ports/TvShowRepositoryInterface';
 import { TvShowRepository } from '../../../adapters/TvShowRepository';
+import { Subtitle } from '../../domain/Subtitle';
+import { SubtitleType } from '../../domain/SubtitleType';
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -18,12 +20,14 @@ interface AddSubtitleParam {
   tvShowId: string;
   lang: string;
   relativePath: string;
+  type: string;
+  name: string;
   season: number;
   episode: number;
 }
 
 export const handler = async (event: AddSubtitleParam): Promise<void> => {
   let tvShow = await tvShowRepo.getTvShowById(event.tvShowId) 
-  tvShow.addSubtitle(event.season, event.episode, new SubsLangCode(event.lang), event.relativePath);
+  tvShow.addSubtitle(event.season, event.episode, event.name, new Subtitle(event.name, event.relativePath, new SubsLangCode(event.lang), new SubtitleType(event.type)));
   await tvShowRepo.saveTvShow(tvShow);
 };
