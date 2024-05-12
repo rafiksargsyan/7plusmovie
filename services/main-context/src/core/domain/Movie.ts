@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 import { L8nLangCode } from './L8nLangCodes';
 import { MovieGenre } from './MovieGenres';
 import { Person } from './Persons';
-import { SubsLangCode } from './SubsLangCodes';
+import { Subtitle } from './Subtitle';
 
 type RelativePath = string;
 
@@ -16,7 +16,7 @@ export class Movie {
   private posterImagesPortrait: { [key: string]: RelativePath } = {};
   private posterImagesLandscape: { [key: string]: RelativePath } = {};
   private backdropImage: RelativePath;
-  private subtitles: { [key: string]: RelativePath } = {};
+  private subtitles: { [key: string]: Subtitle } = {}; // key will also match with labael in MPD or HlS manifest, if subs come from the package
   private mpdFile: RelativePath;
   private m3u8File: RelativePath;
   private releaseYear: number;
@@ -65,12 +65,23 @@ export class Movie {
     this.posterImagesPortrait[locale.code] = relativePath;
     this.touch();
   }
-
-  public addSubtitle(locale: SubsLangCode, relativePath: RelativePath) {
-    if (! /\S/.test(relativePath)) {
-      throw new InvalidSubtitleRelativePathError();
+ 
+  public addSubtitle(id: string | undefined, s: Subtitle | undefined) {
+    if (id == undefined) {
+      throw new InvalidSubtitleIdError();
     }
-    this.subtitles[locale.code] = relativePath;
+    if (s == undefined) {
+      throw new InvalidSubtitleError();
+    }
+    for (var k in this.subtitles) {
+      if (id == k) {
+        throw new SubtitleIdAlreadyExistsError();
+      }
+      if (this.subtitles[k].getName() === s.getName()) {
+        throw new SubtitleWithNameAlreadyExistsError();
+      }
+    }
+    this.subtitles[id] = s;
     this.touch();
   }
 
@@ -175,10 +186,16 @@ class InvalidTitleL8nError extends Error {}
 
 class InvalidBackdropImageRelativePathError extends Error {}
 
-class InvalidSubtitleRelativePathError extends Error {}
+class InvalidSubtitleError extends Error {}
 
 class InvalidM3u8FileRelativePathError extends Error {}
 
 class InvalidTmdbIdError extends Error {}
 
 class InvalidThumbnailsFileRelativePathError extends Error {}
+
+class SubtitleWithNameAlreadyExistsError extends Error {}
+
+class InvalidSubtitleIdError extends Error {}
+
+class SubtitleIdAlreadyExistsError extends Error {}

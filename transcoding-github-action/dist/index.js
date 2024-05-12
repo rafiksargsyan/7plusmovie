@@ -54,28 +54,28 @@ class InvalidAudioLangCodeError extends Error {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SubsLangCode = exports.SubsLangCodes = void 0;
 exports.SubsLangCodes = {
-    EN: { lang: "en", langTag: "en", displayName: "English" },
-    EN_US: { lang: "en", langTag: "en-US", displayName: "English (US)" },
-    EN_GB: { lang: "en", langTag: "en-GB", displayName: "English (GB)" },
-    RU: { lang: "ru", langTag: "ru", displayName: "Русский" },
-    RU_FORCED: { lang: "ru", langTag: "ru-x-forced", displayName: "Русский (форсированный)" },
-    EN_US_FORCED: { lang: "en", langTag: "en-US-x-forced", displayName: "English (US) (forced)" },
-    FR: { lang: "fr", langTag: "fr", displayName: "Français" },
-    JA: { lang: "ja", langTag: "ja", displayName: "日本" },
-    PT: { lang: "pt", langTag: "pt", displayName: "Português" },
-    KO: { lang: "ko", langTag: "ko", displayName: "한국인" },
-    DA: { lang: "da", langTag: "da", displayName: "dansk" },
-    HI: { lang: "hi", langTag: "hi", displayName: "हिंदी" },
-    HI_IN: { lang: "hi", langTag: "hi-IN", displayName: "हिंदी (भारत)" },
-    IT: { lang: "it", langTag: "it", displayName: "Italiano" },
-    RO: { lang: "ro", langTag: "ro", displayName: "Română" },
-    RO_RO: { lang: "ro", langTag: "ro-RO", displayName: "Română (România)" },
-    FA: { lang: "fa", langTag: "fa", displayName: "فارسی" },
-    FA_IR: { lang: "fa", langTag: "fa-IR", displayName: "فارسی (ایران)" },
-    SV: { lang: "sv", langTag: "sv", displayName: "svenska" },
-    SV_SE: { lang: "sv", langTag: "sv-SE", displayName: "svenska (Sverige)" },
-    PL: { lang: "pl", langTag: "pl", displayName: "Polski" },
-    PL_PL: { lang: "pl", langTag: "pl-PL", displayName: "Polski (Polska)" }
+    EN: { lang: "en", langTag: "en" },
+    EN_US: { lang: "en", langTag: "en-US" },
+    EN_GB: { lang: "en", langTag: "en-GB" },
+    RU: { lang: "ru", langTag: "ru" },
+    //  RU_FORCED : { lang: "ru", langTag : "ru-x-forced" },
+    //  EN_US_FORCED : { lang: "en", langTag : "en-US-x-forced" },
+    FR: { lang: "fr", langTag: "fr" },
+    JA: { lang: "ja", langTag: "ja" },
+    PT: { lang: "pt", langTag: "pt" },
+    KO: { lang: "ko", langTag: "ko" },
+    DA: { lang: "da", langTag: "da" },
+    HI: { lang: "hi", langTag: "hi" },
+    HI_IN: { lang: "hi", langTag: "hi-IN" },
+    IT: { lang: "it", langTag: "it" },
+    RO: { lang: "ro", langTag: "ro" },
+    RO_RO: { lang: "ro", langTag: "ro-RO" },
+    FA: { lang: "fa", langTag: "fa" },
+    FA_IR: { lang: "fa", langTag: "fa-IR" },
+    SV: { lang: "sv", langTag: "sv" },
+    SV_SE: { lang: "sv", langTag: "sv-SE" },
+    PL: { lang: "pl", langTag: "pl" },
+    PL_PL: { lang: "pl", langTag: "pl-PL" }
 };
 class SubsLangCode {
     constructor(code) {
@@ -175,8 +175,6 @@ function run() {
             let textTranscodeSpecs = transcodingSpec['text'];
             if (textTranscodeSpecs == undefined)
                 textTranscodeSpecs = [];
-            const defaultAudioTrack = transcodingSpec['defaultAudioTrack'];
-            const defaultTextTrack = transcodingSpec['defaultTextTrack'];
             audioTranscodeSpecs.forEach(_ => {
                 transcodeAudioFromMkv(mkvFileAbsolutePath, _.stream, _.channels, _.bitrate, new AudioLangCodes_1.AudioLangCode(_.lang));
             });
@@ -199,15 +197,9 @@ function run() {
                 shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, audioFileName)},stream=audio,output=${audioFileName},lang=${AudioLangCodes_1.AudioLangCodes[_.lang]['langTag']}-x-${_.channels},hls_group_id=audio,hls_name='${hlsName}' `;
             });
             textTranscodeSpecs.forEach(_ => {
-                const textFileName = `${SubsLangCodes_1.SubsLangCodes[_.lang]['langTag']}.vtt`;
-                shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, textFileName)},stream=text,output=${textFileName},lang=${SubsLangCodes_1.SubsLangCodes[_.lang]['langTag']},hls_group_id=subtitle,hls_name='${SubsLangCodes_1.SubsLangCodes[_.lang]['displayName']}' `;
+                const textFileName = `${SubsLangCodes_1.SubsLangCodes[_.lang]['langTag']}-${_.type}-${_.stream}.vtt`;
+                shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, textFileName)},stream=text,output=${textFileName},lang=${SubsLangCodes_1.SubsLangCodes[_.lang]['lang']},hls_group_id=subtitle,hls_name='${_.name}',dash_label='${_.name}' `;
             });
-            if (defaultAudioTrack != undefined) {
-                shakaPackagerCommand += `--default_language ${AudioLangCodes_1.AudioLangCodes[audioTranscodeSpecs[defaultAudioTrack].lang].langTag}-x-${audioTranscodeSpecs[defaultAudioTrack].channels} `;
-            }
-            if (defaultTextTrack != undefined) {
-                shakaPackagerCommand += `--default_text_language ${SubsLangCodes_1.SubsLangCodes[textTranscodeSpecs[defaultTextTrack].lang].langTag} `;
-            }
             shakaPackagerCommand += "--mpd_output manifest.mpd --hls_master_playlist_output master.m3u8";
             (0, child_process_1.execSync)(`eval "${shakaPackagerCommand}"`);
             if (textTranscodeSpecs.length !== 0) {
@@ -215,12 +207,6 @@ function run() {
             }
             (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.mpd');
             (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.m3u8');
-            textTranscodeSpecs.forEach(_ => {
-                const langTag = SubsLangCodes_1.SubsLangCodes[_.lang]['langTag'];
-                const langDisplayName = SubsLangCodes_1.SubsLangCodes[_.lang]['displayName'];
-                const command = `sed -i 's/.*contentType=\\"text\\".*lang=\\"${langTag}\\".*/&\\n      \\<Label\\>${langDisplayName}\\<\\/Label\\>/' manifest.mpd`;
-                (0, child_process_1.execSync)(command);
-            });
             audioTranscodeSpecs.forEach(_ => {
                 const langTag = AudioLangCodes_1.AudioLangCodes[_.lang]['langTag'] + `-x-${_.channels}`;
                 let langDisplayName = AudioLangCodes_1.AudioLangCodes[_.lang]['displayName'];
@@ -240,8 +226,6 @@ function run() {
 function transcodeSubsFromMkv(mkvFilePath, stream, lang) {
     const fileName = `${SubsLangCodes_1.SubsLangCodes[lang.code]['langTag']}.vtt`;
     let command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${fileName} > /dev/null 2>&1`;
-    (0, child_process_1.execSync)(command);
-    command = `echo >> ${fileName}`; // https://github.com/shaka-project/shaka-packager/issues/1018
     (0, child_process_1.execSync)(command);
 }
 function transcodeAudioFromMkv(mkvFilePath, stream, channels, bitrate, lang) {
