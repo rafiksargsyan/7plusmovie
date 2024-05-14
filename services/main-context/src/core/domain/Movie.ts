@@ -3,6 +3,7 @@ import { L8nLangCode } from './L8nLangCodes';
 import { MovieGenre } from './MovieGenres';
 import { Person } from './Persons';
 import { Subtitle } from './Subtitle';
+import { Release } from './Release';
 
 type RelativePath = string;
 
@@ -15,16 +16,13 @@ export class Movie {
   private titleL8ns: { [key: string]: string } = {};
   private posterImagesPortrait: { [key: string]: RelativePath } = {};
   private posterImagesLandscape: { [key: string]: RelativePath } = {};
-  private backdropImage: RelativePath;
-  private subtitles: { [key: string]: Subtitle } = {}; // key will also match with labael in MPD or HlS manifest, if subs come from the package
-  private mpdFile: RelativePath;
-  private m3u8File: RelativePath;
+  private backdropImage: RelativePath; 
   private releaseYear: number;
   private genres: MovieGenre[] = [];
   private actors: Person[] = [];
   private directors: Person[] = [];
-  private tmdbId : string;
-  private thumbnailsFile: string;
+  private tmdbId: string;
+  private releases: { [key: string]: Release } = {};
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -169,6 +167,10 @@ export class Movie {
     }
     this.tmdbId = tmdbId;
     this.touch();
+  }
+
+  public addRelease(key: string | undefined, r: Release | undefined) {
+    
   }
 }
 
