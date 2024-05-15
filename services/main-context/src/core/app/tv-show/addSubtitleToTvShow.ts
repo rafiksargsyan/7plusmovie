@@ -3,7 +3,7 @@ import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { SubsLangCode } from "../../domain/SubsLangCodes";
 import { TvShowRepositoryInterface } from '../../ports/TvShowRepositoryInterface';
 import { TvShowRepository } from '../../../adapters/TvShowRepository';
-import { Subtitle } from '../../domain/Subtitle';
+import { Subtitle } from '../../domain/entity/Subtitle';
 import { SubtitleType } from '../../domain/SubtitleType';
 
 const marshallOptions = {

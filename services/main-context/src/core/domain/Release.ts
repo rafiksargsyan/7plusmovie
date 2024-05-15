@@ -1,7 +1,7 @@
 import { AudioLangCode } from "./AudioLangCodes";
 import { AudioSource } from "./AudioSource";
 import { AudioVoiceType } from "./AudioVoiceType";
-import { Subtitle } from "./Subtitle";
+import { Subtitle } from "./entity/Subtitle";
 
 interface Audio {
   name: string;

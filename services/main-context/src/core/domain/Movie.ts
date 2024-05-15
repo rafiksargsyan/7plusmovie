@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 import { L8nLangCode } from './L8nLangCodes';
 import { MovieGenre } from './MovieGenres';
 import { Person } from './Persons';
-import { Subtitle } from './Subtitle';
+import { Subtitle } from './entity/Subtitle';
 import { Release } from './Release';
 
 type RelativePath = string;
@@ -170,7 +170,7 @@ export class Movie {
   }
 
   public addRelease(key: string | undefined, r: Release | undefined) {
-    
+
   }
 }
 

@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { L8nLangCode } from './L8nLangCodes';
 import { TvShowGenre } from './TvShowGenres';
-import { Subtitle } from './Subtitle';
+import { Subtitle } from './entity/Subtitle';
 
 interface Episode {
   originalName: string;

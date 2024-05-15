@@ -10,7 +10,7 @@ import { SubsLangCode, SubsLangCodes } from "../domain/SubsLangCodes";
 import { TvShowRepositoryInterface } from "../ports/TvShowRepositoryInterface";
 import { TvShowRepository } from "../../adapters/TvShowRepository";
 import { SubtitleType, SubtitleTypes } from "../domain/SubtitleType";
-import { Subtitle } from "../domain/Subtitle";
+import { Subtitle } from "../domain/entity/Subtitle";
 
 const dynamodbMovieTranscodingJobTableName = process.env.DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME!;
 const dynamodbTvShowTranscodingJobTableName = process.env.DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME!;

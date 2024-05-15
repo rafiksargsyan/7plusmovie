@@ -1,6 +1,6 @@
-import { SubsLangCode, SubsLangCodes } from "./SubsLangCodes";
-import { SubtitleSource } from "./SubtitleSource";
-import { SubtitleType, SubtitleTypes } from "./SubtitleType";
+import { SubsLangCode, SubsLangCodes } from "../SubsLangCodes";
+import { SubtitleSource } from "../SubtitleSource";
+import { SubtitleType, SubtitleTypes } from "../SubtitleType";
 
 export class Subtitle {
   private name: string;

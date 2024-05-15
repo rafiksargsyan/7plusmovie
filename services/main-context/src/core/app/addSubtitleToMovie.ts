@@ -2,7 +2,7 @@ import { Movie } from "../domain/Movie";
 import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { SubsLangCode } from "../domain/SubsLangCodes";
-import { Subtitle } from "../domain/Subtitle";
+import { Subtitle } from "../domain/entity/Subtitle";
 import { SubtitleType } from "../domain/SubtitleType";
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
