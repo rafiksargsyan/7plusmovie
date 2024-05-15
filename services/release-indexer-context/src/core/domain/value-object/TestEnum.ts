@@ -1,3 +1,3 @@
 import { EnumExample } from "./EnumExample";
 
-let test: EnumExample = EnumExample.from('KEY1');
+let test: EnumExample = EnumExample.KEY1;

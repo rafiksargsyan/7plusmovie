@@ -1,9 +1,12 @@
 import { Nullable } from "../../../Nullable";
 
 export class EnumExample {
+    public static KEY1 = new EnumExample("Name1");
+    public static KEY2 = new EnumExample("Name2");
+
     private static values = {
-      "KEY1": new EnumExample("Name1"),
-      "KEY2": new EnumExample("Name2")
+      KEY1: EnumExample.KEY1,
+      KEY2: EnumExample.KEY2
     } as const;
 
     readonly name: string;
