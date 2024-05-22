@@ -1,12 +1,12 @@
 import { Nullable } from "../../../Nullable";
 
-export class SubsAuthor {
-  public static readonly HDREZKA = new SubsAuthor(0);
-  public static readonly TVSHOWS = new SubsAuthor(1);
+export class AudioAuthor {
+  public static readonly HDREZKA = new AudioAuthor(0);
+  public static readonly TVSHOWS = new AudioAuthor(1);
 
   private static readonly values = {
-    HDREZKA: SubsAuthor.HDREZKA,
-    TVSHOWS: SubsAuthor.TVSHOWS
+    HDREZKA: AudioAuthor.HDREZKA,
+    TVSHOWS: AudioAuthor.TVSHOWS
   } as const;
 
   private readonly priority;
@@ -15,9 +15,9 @@ export class SubsAuthor {
     this.priority = p;
   }
 
-  static from(key: Nullable<string>): SubsAuthor {
+  static from(key: Nullable<string>): AudioAuthor {
     if (key == null || !(key in this.values)) {
-      throw new InvalidSubsAuthorKeyError();
+      throw new InvalidAudioAuthorKeyError();
     }
     return this.values[key];
   }
@@ -29,4 +29,4 @@ export class SubsAuthor {
   }
 }
 
-export class InvalidSubsAuthorKeyError extends Error {}
+export class InvalidAudioAuthorKeyError extends Error {}
