@@ -2,7 +2,7 @@ import { Nullable } from "../../../Nullable";
 import { AudioLang } from "./AudioLang";
 import { AudioVoiceType } from "./AudioVoiceType";
 
-class AudioMetadata {
+export class AudioMetadata {
   public readonly stream: number;
   public readonly channels: number;
   public readonly bitrate: number; // bits/second
