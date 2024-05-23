@@ -18,6 +18,14 @@ export class SubsType {
     return this.values[key];
   }
 
+  static fromTitle(title: Nullable<string>) {
+    if (title == null) return null;
+    const titleLowerCase = title.toLowerCase();
+    if (titleLowerCase.includes("forced") || titleLowerCase.includes("форсирован")) return SubsType.FORCED;
+    if (titleLowerCase.includes("full") || titleLowerCase.includes("полные")) return SubsType.FULL;
+    if (titleLowerCase.includes("sdh")) return SubsType.SDH;
+    return null;
+  }
 }
 
 class InvalidSubsTypeKeyError extends Error {}

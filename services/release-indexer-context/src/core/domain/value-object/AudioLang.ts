@@ -22,6 +22,9 @@ export class AudioLang {
   public static readonly SV_SE = new AudioLang("sv", "sv-SE");
   public static readonly PL = new AudioLang("pl", "pl");
   public static readonly PL_PL = new AudioLang("pl", "pl-PL");
+  public static readonly ES = new AudioLang("es", "es");
+  public static readonly ES_ES = new AudioLang("es", "es-ES");
+  public static readonly ES_419 = new AudioLang("es", "es-419");
 
   private static readonly values = {
     EN: AudioLang.EN,
@@ -44,30 +47,69 @@ export class AudioLang {
     SV: AudioLang.SV,
     SV_SE: AudioLang.SV_SE,
     PL: AudioLang.PL,
-    PL_PL: AudioLang.PL_PL
+    PL_PL: AudioLang.PL_PL,
+    ES: AudioLang.ES,
+    ES_ES: AudioLang.ES_ES,
+    ES_419: AudioLang.ES_419
   } as const;
 
-  private readonly _lang: string;
-  private readonly _langTag: string;
+  private static readonly FROM_ISO_639_2 = {
+    "en" : AudioLang.EN,
+    "ru" : AudioLang.RU,
+    "fr" : AudioLang.FR,
+    "ja" : AudioLang.JA,
+    "pt" : AudioLang.PT,
+    "ko" : AudioLang.KO,
+    "da" : AudioLang.DA,
+    "hi" : AudioLang.HI,
+    "it" : AudioLang.IT,
+    "ro" : AudioLang.RO,
+    "fa" : AudioLang.FA,
+    "sv" : AudioLang.SV,
+    "pl" : AudioLang.PL,
+    "es" : AudioLang.ES
+  } as const;
+   
+  private static readonly FROM_ISO_639_1 = {
+    "eng" : AudioLang.EN,
+    "rus" : AudioLang.RU,
+    "fra" : AudioLang.FR,
+    "jpn" : AudioLang.JA,
+    "por" : AudioLang.PT,
+    "kor" : AudioLang.KO,
+    "dan" : AudioLang.DA,
+    "hin" : AudioLang.HI,
+    "ita" : AudioLang.IT,
+    "ron" : AudioLang.RO,
+    "fas" : AudioLang.FA,
+    "swe" : AudioLang.SV,
+    "pol" : AudioLang.PL,
+    "spa" : AudioLang.ES
+  } as const;
+
+  public readonly lang: string;
+  public readonly langTag: string;
 
   private constructor(lang: string, langTag: string) {
-    this._lang = lang;
-    this._langTag = langTag;
+    this.lang = lang;
+    this.langTag = langTag;
   }
 
-  get lang(): string {
-    return this._lang;
-  }
-
-  get langTag(): string {
-    return this._langTag;
-  }
-
-  static from(key: Nullable<string>): AudioLang {
+  public static from(key: Nullable<string>): AudioLang {
     if (key == null || !(key in this.values)) {
       throw new InvalidAudioLangKeyError();
     }
     return this.values[key];
+  }
+
+  public static fromISO_639_2(code: Nullable<string>) {
+    if (code == null) return null;
+    return this.FROM_ISO_639_2[code];
+  }
+
+  public static fromISO_639_1(code: Nullable<string>) {
+    if (code == null) return null;
+    return this.FROM_ISO_639_1[code];
   }
 }
 

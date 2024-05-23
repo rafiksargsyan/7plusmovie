@@ -6,14 +6,13 @@ import { SubsType } from "./SubsType";
 export class SubsMetadata {
   public readonly stream: number;
   public readonly lang: SubsLang;
-  public readonly type: SubsType;
+  public readonly type: Nullable<SubsType>;
   public readonly author: Nullable<SubsAuthor>;
 
   public constructor(stream: Nullable<number>, lang: Nullable<SubsLang>, type: Nullable<SubsType>,
                      author: Nullable<SubsAuthor>) {
     this.stream = this.validateStream(stream);
     this.lang = this.validateLang(lang);
-    if (type == null) type = SubsType.FULL;
     this.type = type;
     this.author = author;
   }

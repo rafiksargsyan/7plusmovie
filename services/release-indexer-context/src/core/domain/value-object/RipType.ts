@@ -28,7 +28,7 @@ export class RipType {
     if (r1 == null && r2 != null) return -1;
     if (r1 != null && r2 == null) return 1;
     if (r1 == r2) return 0;
-    return (r1 as RipType).priority < (r2 as RipType).priority ? -1 : 1;
+    return (r1 as RipType).priority - (r2 as RipType).priority;
   }
 }
 

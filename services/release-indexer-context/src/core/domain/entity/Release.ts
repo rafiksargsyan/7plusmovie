@@ -1,4 +1,5 @@
 import { AudioMetadata } from "../value-object/AudioMetadata";
+import { AudioVoiceType } from "../value-object/AudioVoiceType";
 import { Resolution } from "../value-object/Resolution";
 import { RipType } from "../value-object/RipType";
 import { SubsMetadata } from "../value-object/SubsMetadata";
@@ -18,5 +19,13 @@ export class Release {
       return Resolution.compare(r1._resolution, r2._resolution);
     }
     
+  }
+
+  private static compareAudio(a1: AudioMetadata, a2: AudioMetadata) {
+    if (a1.lang !== a2.lang) return 0;
+    let ret = AudioVoiceType.compare(a1.voiceType, a2.voiceType);
+    if (ret === 0) {
+      
+    }
   }
 }

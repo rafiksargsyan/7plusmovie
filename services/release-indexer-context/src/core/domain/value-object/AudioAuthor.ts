@@ -1,19 +1,15 @@
 import { Nullable } from "../../../Nullable";
 
 export class AudioAuthor {
-  public static readonly HDREZKA = new AudioAuthor(0);
-  public static readonly TVSHOWS = new AudioAuthor(1);
+  public static readonly HDREZKA = new AudioAuthor();
+  public static readonly TVSHOWS = new AudioAuthor();
+  public static readonly LOSTFILM = new AudioAuthor();
 
   private static readonly values = {
     HDREZKA: AudioAuthor.HDREZKA,
-    TVSHOWS: AudioAuthor.TVSHOWS
+    TVSHOWS: AudioAuthor.TVSHOWS,
+    LOSTFILM: AudioAuthor.LOSTFILM
   } as const;
-
-  private readonly priority;
-
-  private constructor(p: number) {
-    this.priority = p;
-  }
 
   static from(key: Nullable<string>): AudioAuthor {
     if (key == null || !(key in this.values)) {
@@ -22,11 +18,6 @@ export class AudioAuthor {
     return this.values[key];
   }
 
-  static fromTitle(title: string) {
-    if (title.toLowerCase().includes("hdrezka")) return this.HDREZKA;
-    if (title.toLowerCase().includes("tvshows")) return this.TVSHOWS;
-    return null;
-  }
 }
 
 export class InvalidAudioAuthorKeyError extends Error {}
