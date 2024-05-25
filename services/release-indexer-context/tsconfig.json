@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "preserveConstEnums": true,
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "allowJs": true,
+    "target": "ES2015",
+    "outDir": ".build",
+    "moduleResolution": "node",
+    "lib": ["ES2015"],
+    "rootDir": "./"
+  }
+}

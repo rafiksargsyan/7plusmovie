@@ -5,12 +5,16 @@ export class AudioAuthor {
   public static readonly TVSHOWS = new AudioAuthor();
   public static readonly LOSTFILM = new AudioAuthor();
   public static readonly BRAVO_RECORDS_GEORGIA = new AudioAuthor();
+  public static readonly READ_HEAD_SOUND = new AudioAuthor();
+  public static readonly JASKIER = new AudioAuthor();
 
   private static readonly values = {
     HDREZKA: AudioAuthor.HDREZKA,
     TVSHOWS: AudioAuthor.TVSHOWS,
     LOSTFILM: AudioAuthor.LOSTFILM,
-    BRAVO_RECORDS_GEORGIA: AudioAuthor.BRAVO_RECORDS_GEORGIA
+    BRAVO_RECORDS_GEORGIA: AudioAuthor.BRAVO_RECORDS_GEORGIA,
+    READ_HEAD_SOUND: AudioAuthor.READ_HEAD_SOUND,
+    JASKIER: AudioAuthor.JASKIER
   } as const;
 
   static from(key: Nullable<string>): AudioAuthor {

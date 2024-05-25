@@ -1,0 +1,75 @@
+org: 7plusmovie
+app: 7plusmovie
+service: release-indexer-context
+frameworkVersion: '3'
+useDotenv: true
+
+package:
+  individually: true
+  patterns:
+    - '!node_modules/@aws-sdk/**'
+
+provider:
+  name: aws
+  region: eu-west-3
+  runtime: nodejs18.x
+  iam:
+    role:
+      managedPolicies:
+        - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+        - "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+        - "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
+  stage: ${opt:stage}
+  logRetentionInDays: 1
+
+functions:
+  createMovie:
+    handler: src/core/app/createMovie.handler
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    events:
+      - http:
+          integration: lambda
+          path: /movie
+          method: post
+          request:
+            template:
+              application/json: '{ "originalLocale" : $input.json(''$.originalLocale''),
+                                   "originalTitle" : $input.json(''$.originalTitle''),
+                                   "releaseYear" : $input.json(''$.releaseYear'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+
+  movieUpdateHandler:
+    handler: src/core/app/movieUpdateHandler.handler
+    environment:
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    events:
+      - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_MOVIE_STREAM_ARN}
+  
+  addTmdbIdToMovie:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/addTheMovieDbIdToMovie.handler
+    events:
+      - http:
+          integration: lambda
+          path: /movie/{id}
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : $input.params(''id''),
+                                   "tmdbId" : $input.json(''$.tmdbId'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+
+plugins:
+  - serverless-esbuild
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false

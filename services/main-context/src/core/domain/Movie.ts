@@ -20,7 +20,7 @@ export class Movie {
   private releaseYear: number;
   private genres: MovieGenre[] = [];
   private actors: Person[] = [];
-  private directors: Person[] = [];
+  private directors: Person[] = []; 
   private tmdbId: string;
   private releases: { [key: string]: Release } = {};
 

@@ -6,7 +6,9 @@ export class AudioLang {
   public static readonly EN_US = new AudioLang("en", "en-US", []);
   public static readonly EN_GB = new AudioLang("en", "en-GB", []);
   public static readonly EN_AU = new AudioLang("en", "en-AU", []);
-  public static readonly RU = new AudioLang("ru", "ru", [ AudioAuthor.HDREZKA, AudioAuthor.TVSHOWS, AudioAuthor.LOSTFILM, AudioAuthor.BRAVO_RECORDS_GEORGIA ]);
+  public static readonly RU = new AudioLang("ru", "ru",
+  [AudioAuthor.JASKIER, AudioAuthor.HDREZKA, AudioAuthor.TVSHOWS, AudioAuthor.READ_HEAD_SOUND,
+    AudioAuthor.LOSTFILM, AudioAuthor.BRAVO_RECORDS_GEORGIA]);
   public static readonly FR = new AudioLang("fr", "fr", []);
   public static readonly JA = new AudioLang("ja", "ja", []);
   public static readonly PT = new AudioLang("pt", "pt", []);
@@ -90,7 +92,7 @@ export class AudioLang {
 
   public readonly lang: string;
   public readonly langTag: string;
-  public readonly audioAuthorPriorityList: AudioAuthor[];
+  public readonly audioAuthorPriorityList: AudioAuthor[]; // authors comming later have higher priority by default
 
   private constructor(lang: string, langTag: string, audioAuthorPriorityList: AudioAuthor[]) {
     this.lang = lang;

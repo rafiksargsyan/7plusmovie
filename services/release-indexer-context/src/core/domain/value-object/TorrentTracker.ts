@@ -1,9 +1,9 @@
 import { Nullable } from "../../../Nullable";
 
 export class TorrentTracker {
-  public static RUTRACKER = new TorrentTracker();
+  public static readonly RUTRACKER = new TorrentTracker();
 
-  private static values = {
+  private static readonly values = {
     RUTRACKER: TorrentTracker.RUTRACKER,
   } as const;
   

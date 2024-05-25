@@ -1,13 +1,19 @@
 import { Nullable } from "../../../Nullable";
 
 export class SubsAuthor {
-  public static readonly HDREZKA = new SubsAuthor();
-  public static readonly TVSHOWS = new SubsAuthor();
+  public static readonly HDREZKA = new SubsAuthor("HDREZKA");
+  public static readonly TVSHOWS = new SubsAuthor("TVSHOWS");
 
   private static readonly values = {
     HDREZKA: SubsAuthor.HDREZKA,
     TVSHOWS: SubsAuthor.TVSHOWS
   } as const;
+
+  public readonly key;
+
+  private constructor(key: string) {
+    this.key = key;
+  }
 
   static from(key: Nullable<string>): SubsAuthor {
     if (key == null || !(key in this.values)) {
