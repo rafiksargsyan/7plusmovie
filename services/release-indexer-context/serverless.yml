@@ -44,6 +44,7 @@ functions:
   movieUpdateHandler:
     handler: src/core/app/movieUpdateHandler.handler
     environment:
+      RADARR_BASE_URL: ${env:RADARR_BASE_URL}
       SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
     events:
