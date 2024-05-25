@@ -303,7 +303,7 @@ resource "aws_dynamodb_table" "movie_release_indexer_context" {
   name     = "${local.deployment_id}-movie-ric"
   hash_key = "_id"
   attribute {
-    name = "id"
+    name = "_id"
     type = "S"
   }
   stream_enabled   = true
