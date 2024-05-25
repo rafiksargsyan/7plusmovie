@@ -48,6 +48,8 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
       } else {
         let movie: MovieRead = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as MovieRead;
         if (movie._tmdbId == null) return;
+        const getMovieFromRadarrResponse = (await radarrClient.get(`movie/?tmdbId=${movie._tmdbId}`)).data;
+        console.log(JSON.stringify(getMovieFromRadarrResponse));
         const radarrLookupResult = (await radarrClient.get(`movie/lookup/tmdb?tmdbid=${movie._tmdbId}`)).data;
         console.log(JSON.stringify(radarrLookupResult));
         radarrLookupResult.addOptions = { monitor: "none", searchForMovie: false };
