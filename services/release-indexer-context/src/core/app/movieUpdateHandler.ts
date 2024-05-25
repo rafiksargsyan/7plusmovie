@@ -48,15 +48,18 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
       } else {
         let movie: MovieRead = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as MovieRead;
         if (movie._tmdbId == null) return;
-        const getMovieFromRadarrResponse = (await radarrClient.get(`movie/?tmdbId=${movie._tmdbId}`)).data;
-        console.log(JSON.stringify(getMovieFromRadarrResponse));
-        const radarrLookupResult = (await radarrClient.get(`movie/lookup/tmdb?tmdbid=${movie._tmdbId}`)).data;
-        console.log(JSON.stringify(radarrLookupResult));
-        radarrLookupResult.addOptions = { monitor: "none", searchForMovie: false };
-        radarrLookupResult.folder = `${movie._originalTitle} (${movie._releaseYear})`;
-        radarrLookupResult.rootFolderPath = '/downloads/movies';
-        radarrLookupResult.qualityProfileId = 1;
-        console.log((await radarrClient.post('movie', radarrLookupResult)).data);
+        const getMovieFromRadarrResponse: any[] = (await radarrClient.get(`movie/?tmdbId=${movie._tmdbId}`)).data;
+        // check if the movie already exists in radarr
+        if (getMovieFromRadarrResponse.length > 0) {
+          return;
+        }
+        const radarrLookupResponse = (await radarrClient.get(`movie/lookup/tmdb?tmdbid=${movie._tmdbId}`)).data;
+        radarrLookupResponse.addOptions = { monitor: "none", searchForMovie: false };
+        radarrLookupResponse.folder = `${movie._originalTitle} (${movie._releaseYear})`;
+        const rootFolder: string = (await radarrClient.get(`rootfolder/1`)).data.path;
+        radarrLookupResponse.rootFolderPath = rootFolder;
+        radarrLookupResponse.qualityProfileId = 1; // 1 is the id of quality profile 'Any'
+        (await radarrClient.post('movie', radarrLookupResponse));
       }
     }
   } catch (e) {
