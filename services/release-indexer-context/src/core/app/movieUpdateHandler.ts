@@ -38,7 +38,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
     const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
     const secret = JSON.parse(secretStr.SecretString!);
     const radarrApiKey = secret.RADARR_API_KEY!;
-    radarrClient.defaults.headers.post['x-api-key'] = radarrApiKey;
+    radarrClient.defaults.headers.common['x-api-key'] = radarrApiKey;
 
     for (const record of event.Records) {
       if (record.eventName === 'REMOVE') {

@@ -20,7 +20,7 @@ interface AddTmdbIdParam {
 export const handler = async (event: AddTmdbIdParam): Promise<void> => {
   const queryParams = {
     TableName: dynamodbMovieTableName,
-    Key: { 'id': event.movieId }
+    Key: { '_id': event.movieId }
   } as const;
   let data = await docClient.get(queryParams);
   if (data === undefined || data.Item === undefined) {
