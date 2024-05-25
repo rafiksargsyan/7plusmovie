@@ -53,7 +53,7 @@ functions:
   addTmdbIdToMovie:
     environment:
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
-    handler: src/core/app/addTheMovieDbIdToMovie.handler
+    handler: src/core/app/addTmdbIdToMovie.handler
     events:
       - http:
           integration: lambda
@@ -61,7 +61,7 @@ functions:
           method: patch
           request:
             template:
-              application/json: '{ "movieId" : $input.params(''id''),
+              application/json: '{ "movieId" : "$input.params(''id'')",
                                    "tmdbId" : $input.json(''$.tmdbId'') }'
               application/x-www-form-urlencoded: null
           authorizer:
