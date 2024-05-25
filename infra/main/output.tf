@@ -61,3 +61,11 @@ output "ddb_tv_show_transcoding_job_table_name" {
 output "ddb_tv_show_transcoding_job_table_stream_arn" {
   value = aws_dynamodb_table.tv_show_transcoding_job.stream_arn
 }
+
+output "ddb_movie_ric_table_name" {
+  value = aws_dynamodb_table.movie_release_indexer_context.name
+}
+
+output "ddb_movie_ric_table_stream_arn" {
+  value = aws_dynamodb_table.movie_release_indexer_context.stream_arn
+}

@@ -122,6 +122,7 @@ resource "aws_secretsmanager_secret_version" "secrets_version" {
       COOKIE_SIGNING_PRIVATE_KEY_BASE64_ENCODED: var.cookie_signing_private_key_base64_encoded
       TMDB_API_KEY: var.tmdb_api_key
       R2_SECRET_ACCESS_KEY: var.r2_secret_access_key
+      RADARR_API_KEY: var.radarr_api_key
     })
   )
 }
@@ -287,6 +288,22 @@ resource "aws_dynamodb_table" "tv_show_v2" {
   }
   attribute {
     name = "SK"
+    type = "S"
+  }
+  stream_enabled   = true
+  stream_view_type = "NEW_IMAGE"
+  billing_mode     = "PAY_PER_REQUEST"
+  deletion_protection_enabled = var.dynamodb_deletion_protection_enabled
+  point_in_time_recovery {
+    enabled = true
+  }
+}
+
+resource "aws_dynamodb_table" "movie_release_indexer_context" {
+  name     = "${local.deployment_id}-movie-ric"
+  hash_key = "_id"
+  attribute {
+    name = "id"
     type = "S"
   }
   stream_enabled   = true
