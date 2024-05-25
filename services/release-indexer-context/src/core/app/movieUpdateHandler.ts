@@ -31,6 +31,8 @@ const radarrClient = axios.create({
 interface MovieRead {
   _id: string;
   _tmdbId: string;
+  _originalTitle: string;
+  _releaseYear: number;
 }
 
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
@@ -47,7 +49,12 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         let movie: MovieRead = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as MovieRead;
         if (movie._tmdbId == null) return;
         const radarrLookupResult = (await radarrClient.get(`movie/lookup/tmdb?tmdbid=${movie._tmdbId}`)).data;
-        console.log(radarrLookupResult);
+        console.log(JSON.stringify(radarrLookupResult));
+        radarrLookupResult.addOptions = { monitor: "none", searchForMovie: false };
+        radarrLookupResult.folder = `${movie._originalTitle} (${movie._releaseYear})`;
+        radarrLookupResult.rootFolderPath = '/downloads/movies';
+        radarrLookupResult.qualityProfileId = 1;
+        console.log((await radarrClient.post('movie', radarrLookupResult)).data);
       }
     }
   } catch (e) {
