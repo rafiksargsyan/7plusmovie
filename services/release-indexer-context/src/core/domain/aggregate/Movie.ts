@@ -27,6 +27,10 @@ export class Movie {
     return this._id;
   }
 
+  get tmdbId() {
+    return this._tmdbId;
+  }
+
   private validateOriginalLocale(origianlLocale: Nullable<L8nLang>) {
     if (origianlLocale == undefined) {
       throw new InvalidOriginalLocaleError();

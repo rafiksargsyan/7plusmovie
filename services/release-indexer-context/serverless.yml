@@ -66,6 +66,16 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+  
+  movieReleaseCandidateUpdater:
+    environment:
+      RADARR_BASE_URL: ${env:RADARR_BASE_URL}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/movieReleaseCandidateUpdater.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minute)
+    timeout: 900
 
 plugins:
   - serverless-esbuild
