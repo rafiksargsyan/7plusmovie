@@ -2,6 +2,7 @@ import { Nullable } from "../../../Nullable";
 import { Release } from "../entity/Release";
 import { v4 as uuid } from 'uuid';
 import { L8nLang } from "../value-object/L8nLang";
+import { ReleaseCandidate, ReleaseCandidateStatus } from "../entity/ReleaseCandidate";
 
 export class Movie {
   private _id: string;
@@ -11,6 +12,7 @@ export class Movie {
   private _originalTitle: string;
   private _releaseYear: number;
   private _releases: { [releaseId:string]: { equalReleases: Release[], replacedReleaseIds: string[] } } = {};
+  private _releaseCandidates: { [releaseCandidateId:string]: ReleaseCandidate } = {};
 
   public constructor(createEmptyObject: boolean, originalLocale?: Nullable<L8nLang>, originalTitle?: Nullable<string>,
     releaseYear?: Nullable<number>) {
@@ -97,6 +99,23 @@ export class Movie {
       this._releases[id] = { equalReleases: [r], replacedReleaseIds: [] }
     }
   }
+
+  public emptyReleaseCandidates() {
+    this._releaseCandidates = {};
+  }
+
+  get releaseCandidates() {
+    return {...this._releaseCandidates};
+  }
+
+  public setReleaseCandidateStatus(id: string, status: ReleaseCandidateStatus) {
+    if (id == null) throw new NullReleaseCandidateIdError();
+    let rc = this._releaseCandidates[id];
+    if (rc == null) {
+      throw new ReleaseCandidateNotFoundError();
+    }
+    rc.status = status;
+  }
 }
 
 export class NullReleaseIdError extends Error {};
@@ -112,3 +131,7 @@ export class InvalidOriginalLocaleError extends Error {};
 export class InvalidTitleError extends Error {};
 
 export class InvalidReleaseYearError extends Error {};
+
+export class NullReleaseCandidateIdError extends Error {};
+
+export class ReleaseCandidateNotFoundError extends Error {};
