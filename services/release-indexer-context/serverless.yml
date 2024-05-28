@@ -80,14 +80,14 @@ functions:
 
   torrentDownloadHandler:
     environment:
-      QBITTORENT_API_BASE_URL: ${env:QBITTORENT_API_BASE_URL}
-      QBITTORENT_BASE_URL: ${env:QBITTORENT_BASE_URL}
-      QBITTORENT_USERNAME: ${env:QBITTORENT_USERNME}
+      QBITTORRENT_API_BASE_URL: ${env:QBITTORRENT_API_BASE_URL}
+      QBITTORRENT_BASE_URL: ${env:QBITTORRENT_BASE_URL}
+      QBITTORRENT_USERNAME: ${env:QBITTORRENT_USERNAME}
       SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
-    handler: src/core/app/movieReleaseCandidateUpdater.handler
+    handler: src/core/app/torrentDownloadHandler.handler
     events:
-      - schedule: rate(${file(./.env.${sls:stage}.yml):RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minute)
+      - schedule: rate(${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_INTERVAL_IN_MINUTES} minute)
     timeout: 900
 
 plugins:
