@@ -75,3 +75,7 @@ variable "r2_secret_access_key" {
 variable "radarr_api_key" {
   type = string
 }
+
+variable "qbittorrent_password" {
+  type = string
+}

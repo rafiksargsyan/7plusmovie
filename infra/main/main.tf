@@ -123,6 +123,7 @@ resource "aws_secretsmanager_secret_version" "secrets_version" {
       TMDB_API_KEY: var.tmdb_api_key
       R2_SECRET_ACCESS_KEY: var.r2_secret_access_key
       RADARR_API_KEY: var.radarr_api_key
+      QBITTORRENT_PASSWORD: var.qbittorrent_password
     })
   )
 }
