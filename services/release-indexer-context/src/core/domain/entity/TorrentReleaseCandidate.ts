@@ -7,13 +7,15 @@ import { ReleaseCandidate } from "./ReleaseCandidate"
 export class TorrentReleaseCandidate extends ReleaseCandidate {
   private _tracker: TorrentTracker;
   private _infoHash: string;
+  private _downloadUrl: string;
 
-  public constructor(createEmptyObject: boolean, releaseTime?: Nullable<number>,
+  public constructor(createEmptyObject: boolean, releaseTime?: Nullable<number>, downloadUrl?: string,
     sizeInBytes?: Nullable<number>, res?: Resolution, ripType?: RipType, tracker?: TorrentTracker, infoHash?: string) {
     super(createEmptyObject, releaseTime, sizeInBytes, res, ripType);
     if (!createEmptyObject) {
       this._tracker = this.validateTracker(tracker);
       this._infoHash = this.validateInfoHash(infoHash);
+      this._downloadUrl = this.validateDownloadUrl(downloadUrl);
     }
   }
 
@@ -31,6 +33,13 @@ export class TorrentReleaseCandidate extends ReleaseCandidate {
     return hash;
   }
 
+  private validateDownloadUrl(url: Nullable<string>) {
+    if (url == null || ! /\S/.test(url)) {
+      throw new EmptyDownloadUrlError();
+    }
+    return url;
+  }
+
   get infoHash() {
     return this._infoHash;
   }
@@ -43,3 +52,5 @@ export class TorrentReleaseCandidate extends ReleaseCandidate {
 export class EmptyInfoHashError extends Error {}
 
 export class NullTorrentTrackerError extends Error {}
+
+export class EmptyDownloadUrlError extends Error {}

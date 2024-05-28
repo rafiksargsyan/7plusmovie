@@ -16,24 +16,24 @@ export class MovieRepository implements MovieRepositoryInterface {
   async getMovieById(id: string | undefined): Promise<Movie> {
     const queryParams = {
         TableName: dynamodbMovieTableName,
-        Key: { 'id': id }
+        Key: { '_id': id }
       } as const;
       let data = await this.docClient.get(queryParams);
       if (data === undefined || data.Item === undefined) {
         throw new FailedToGetMovieError();
       }
-      let releaseCandidates: ReleaseCandidate[] = [];
-      for (let rcItem of data.Item._releaseCandidates) {
+      let releaseCandidates: { [key:string] : ReleaseCandidate } = {};
+      for (let rcItemKey in data.Item._releaseCandidates) {
+        const rcItem = data.Item._releaseCandidates[rcItemKey];
         if (rcItem._tracker != null) {
           const rc = new TorrentReleaseCandidate(true);
           Object.assign(rc, rcItem);
-          releaseCandidates.push(rc);
+          releaseCandidates[rcItemKey] = rc;
         }
       }
       data.Item._releaseCandidates = releaseCandidates;
       let movie = new Movie(true);
       Object.assign(movie, data.Item);  
-
     return movie;
   }
 
@@ -47,12 +47,13 @@ export class MovieRepository implements MovieRepositoryInterface {
     do {
       items =  await this.docClient.scan(params);
       items.Items.forEach((item) => {
-        let releaseCandidates: ReleaseCandidate[] = [];
-        for (let rcItem of item._releaseCandidates) {
+        let releaseCandidates: { [key:string] : ReleaseCandidate } = {};
+        for (let rcItemKey in item._releaseCandidates) {
+          const rcItem = item._releaseCandidates[rcItemKey];
           if (rcItem._tracker != null) {
             const rc = new TorrentReleaseCandidate(true);
             Object.assign(rc, rcItem);
-            releaseCandidates.push(rc);
+            releaseCandidates[rcItemKey] = rc;
           }
         }
         item._releaseCandidates = releaseCandidates;

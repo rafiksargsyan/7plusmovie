@@ -1,9 +1,9 @@
 import { Nullable } from "../../../Nullable";
 
 export class Resolution {
-  public static readonly SD = new Resolution(1); // under 576p
-  public static readonly HD = new Resolution(2); // under 720p
-  public static readonly FHD = new Resolution(3); // above 1080p
+  public static readonly SD = new Resolution("SD", 1); // under 576p
+  public static readonly HD = new Resolution("HD", 2); // under 720p
+  public static readonly FHD = new Resolution("FHD", 3); // above 1080p
 
   private static readonly values = {
     SD: Resolution.SD,
@@ -11,10 +11,12 @@ export class Resolution {
     FHD: Resolution.FHD
   } as const;
 
+  public readonly key;
   private readonly priority: number;
 
-  private constructor(p: number) {
+  private constructor(k: string, p: number) {
     this.priority = p;
+    this.key = k;
   }
 
   static from(key: Nullable<string>): Resolution {

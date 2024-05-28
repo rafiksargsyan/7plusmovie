@@ -12,7 +12,8 @@ export class Movie {
   private _originalTitle: string;
   private _releaseYear: number;
   private _releases: { [releaseId:string]: { equalReleases: Release[], replacedReleaseIds: string[] } } = {};
-  private _releaseCandidates: { [releaseCandidateId:string]: ReleaseCandidate } = {};
+  private _releaseCandidates: { [key:string]: ReleaseCandidate } = {};
+  private _lastReleaseCandidateScanTimeMillis = 0;
 
   public constructor(createEmptyObject: boolean, originalLocale?: Nullable<L8nLang>, originalTitle?: Nullable<string>,
     releaseYear?: Nullable<number>) {
@@ -24,6 +25,14 @@ export class Movie {
       this._creationTime = Date.now();
     }
   }
+  
+  get releaseYear() {
+    return this._releaseYear;
+  }
+
+  get releases() {
+    return this._releases;
+  }
 
   get id() {
     return this._id;
@@ -31,6 +40,10 @@ export class Movie {
 
   get tmdbId() {
     return this._tmdbId;
+  }
+
+  get creationTime() {
+    return this._creationTime;
   }
 
   private validateOriginalLocale(origianlLocale: Nullable<L8nLang>) {
@@ -100,21 +113,40 @@ export class Movie {
     }
   }
 
-  public emptyReleaseCandidates() {
+  public checkAndEmptyReleaseCandidates(forceEmpty: boolean) {
+    if (forceEmpty) {
+      this._releaseCandidates = {};
+      return;
+    }
+    for (let k in this._releaseCandidates) {
+      if (this._releaseCandidates[k].status == null) return;
+    }
     this._releaseCandidates = {};
   }
 
   get releaseCandidates() {
-    return {...this._releaseCandidates};
+    return this._releaseCandidates;
   }
 
   public setReleaseCandidateStatus(id: string, status: ReleaseCandidateStatus) {
-    if (id == null) throw new NullReleaseCandidateIdError();
+    if (id == null || ! /\S/.test(id)) throw new NullReleaseCandidateIdError();
     let rc = this._releaseCandidates[id];
     if (rc == null) {
       throw new ReleaseCandidateNotFoundError();
     }
     rc.status = status;
+  }
+
+  public addReleaseCandidate(id: string, rc: ReleaseCandidate) {
+    if (id == null || ! /\S/.test(id)) throw new NullReleaseCandidateIdError();
+    if (id in this._releaseCandidates) throw new ReleaseCandidateAlreadyExistsError();
+    if (rc == null) throw new NullReleaseCandidateError();
+    this._releaseCandidates[id] = rc;
+    if (Object.entries(this._releaseCandidates).length === 1) this._lastReleaseCandidateScanTimeMillis = Date.now();
+  }
+
+  get lastRCScanTime() {
+    return this._lastReleaseCandidateScanTimeMillis;
   }
 }
 
@@ -135,3 +167,7 @@ export class InvalidReleaseYearError extends Error {};
 export class NullReleaseCandidateIdError extends Error {};
 
 export class ReleaseCandidateNotFoundError extends Error {};
+
+export class ReleaseCandidateAlreadyExistsError extends Error {};
+
+export class NullReleaseCandidateError extends Error {};
