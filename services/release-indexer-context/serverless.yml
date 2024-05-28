@@ -78,6 +78,18 @@ functions:
       - schedule: rate(${file(./.env.${sls:stage}.yml):RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minute)
     timeout: 900
 
+  torrentDownloadHandler:
+    environment:
+      QBITTORENT_API_BASE_URL: ${env:QBITTORENT_API_BASE_URL}
+      QBITTORENT_BASE_URL: ${env:QBITTORENT_BASE_URL}
+      QBITTORENT_USERNAME: ${env:QBITTORENT_USERNME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/movieReleaseCandidateUpdater.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minute)
+    timeout: 900
+
 plugins:
   - serverless-esbuild
 
