@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
-import { TorrentClientInterface } from "../core/ports/TorrentClientInterface";
+import { TorrentApiError, TorrentClientInterface, TorrentInfo } from "../core/ports/TorrentClientInterface";
+import { Nullable } from "../Nullable";
 
 export class QBittorrentClient implements TorrentClientInterface {
   private _restClient: AxiosInstance;
@@ -16,7 +17,7 @@ export class QBittorrentClient implements TorrentClientInterface {
       baseURL: this._apiBaseUrl,
     });
     this._restClient.defaults.headers.common['Referer'] = `${this._apiBaseUrl}`;
-    this._restClient.defaults.headers.common['Content-Type'] = 'application/json';
+    this._restClient.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded';
   }
 
   private async init() {
@@ -55,4 +56,80 @@ export class QBittorrentClient implements TorrentClientInterface {
       await this._restClient.post('auth/logout');
     }
   }
+
+  public isTaggingSupported() {
+    return true;
+  }
+
+  public async deleteTorrentByHash(hash: string) {
+    if (hash == null || hash.trim().length === 0) {
+      throw new InvalidHashError();
+    }
+    await this.checkAndInit();
+    try {
+      await this._restClient.post('torrents/delete', {
+        hashes: hash,
+        deleteFiles: true
+      });
+    } catch (e) {
+      throw new TorrentApiError((e as Error).message);
+    }
+  }
+
+  public async getTorrentByHash(hash: string): Promise<Nullable<TorrentInfo>> {
+    if (hash == null || hash.trim().length === 0) {
+      throw new InvalidHashError();
+    }
+    await this.checkAndInit();
+    try {
+      await this._restClient.post('torrents/delete', {
+        hashes: hash,
+        deleteFiles: true
+      });
+    } catch (e) {
+      throw new TorrentApiError((e as Error).message);
+    }
+    return null;
+  }
+ 
+  getTorrentByHashOrThrow(hash: string) {
+    throw new Error("Method not implemented.");
+  }
+
+  public async getAllTorrents(): Promise<TorrentInfo[]> {
+    await this.checkAndInit();
+    try {
+      console.log((await this._restClient.get('torrents/info')).data);
+    } catch (e) {
+      throw new TorrentApiError((e as Error).message);
+    }
+    return [];
+  }
+
+  getTorrentsByTag(tag: string): TorrentInfo[] {
+    throw new Error("Method not implemented.");
+  }
+  
+  getEstimatedFreeSpace(): number {
+    throw new Error("Method not implemented.");
+  }
+
+  public async addTorrentByUrl(url: string) {
+    if (url == null || url.trim().length === 0) {
+      throw new InvalidHashError();
+    }
+    await this.checkAndInit();
+    try {
+      await this._restClient.post('torrents/add', {
+        urls: url,
+        paused: true,
+      });
+    } catch (e) {
+      throw new TorrentApiError((e as Error).message);
+    }
+  }
 }
+
+export class InvalidTorrentUrlError extends Error {}
+
+export class InvalidHashError extends Error {}

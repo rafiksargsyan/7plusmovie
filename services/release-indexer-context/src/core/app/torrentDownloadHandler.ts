@@ -3,7 +3,6 @@ import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { MovieRepositoryInterface } from '../ports/MovieRepositoryInterface';
 import { MovieRepository } from '../../adapters/MovieRepository';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
-import axios from 'axios';
 import { QBittorrentClient } from '../../adapters/QBittorrentClient';
 
 const marshallOptions = {
@@ -25,6 +24,7 @@ export const handler = async (): Promise<void> => {
   const secret = JSON.parse(secretStr.SecretString!);
   const qbittorrentPassword = secret.QBITTORRENT_PASSWORD!;
   const qbitClient = new QBittorrentClient(qbittorrentApiBaseUrl, qbittorrentUsername, qbittorrentPassword);
+  await qbitClient.getAllTorrents();
   console.log(await qbitClient.version());
   await qbitClient.destroy();
 };
