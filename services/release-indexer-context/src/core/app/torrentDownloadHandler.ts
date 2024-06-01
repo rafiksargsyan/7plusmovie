@@ -24,7 +24,8 @@ export const handler = async (): Promise<void> => {
   const secret = JSON.parse(secretStr.SecretString!);
   const qbittorrentPassword = secret.QBITTORRENT_PASSWORD!;
   const qbitClient = new QBittorrentClient(qbittorrentApiBaseUrl, qbittorrentUsername, qbittorrentPassword);
-  await qbitClient.getAllTorrents();
+  const freeSpace = await qbitClient.getEstimatedFreeSpace();
+  console.log(`estimatedFreeSpace=${freeSpace}`);
   console.log(await qbitClient.version());
   await qbitClient.destroy();
 };

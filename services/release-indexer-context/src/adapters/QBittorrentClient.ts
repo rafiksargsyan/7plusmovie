@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import { TorrentApiError, TorrentClientInterface, TorrentInfo } from "../core/ports/TorrentClientInterface";
+import { TorrentApiError, TorrentClientInterface, TorrentInfo, TorrentNotFoundError } from "../core/ports/TorrentClientInterface";
 import { Nullable } from "../Nullable";
 
 export class QBittorrentClient implements TorrentClientInterface {
@@ -82,36 +82,96 @@ export class QBittorrentClient implements TorrentClientInterface {
     }
     await this.checkAndInit();
     try {
-      await this._restClient.post('torrents/delete', {
-        hashes: hash,
-        deleteFiles: true
-      });
+      const info = (await this._restClient.get(`torrents/info?hashes=${hash}`)).data;
+      if (info.length === 0) return null;
+      const isStalled = info[0].state === "stalledDL" ? true : false;
+      const addedOn = info[0].added_on;
+      const amountLeft = info[0].amount_left;
+      const files = (await this._restClient.get(`torrents/files?hash=${hash}`)).data;
+      return {
+        hash : hash,
+        addedOn : addedOn,
+        isStalled : isStalled,
+        amountLeft : amountLeft,
+        files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress }))
+      }
     } catch (e) {
       throw new TorrentApiError((e as Error).message);
     }
-    return null;
   }
  
-  getTorrentByHashOrThrow(hash: string) {
-    throw new Error("Method not implemented.");
+  public async getTorrentByHashOrThrow(hash: string): Promise<TorrentInfo> {
+    let ti = await this.getTorrentByHash(hash);
+    if (ti == null) {
+      throw new TorrentNotFoundError();
+    }
+    return ti;
   }
 
   public async getAllTorrents(): Promise<TorrentInfo[]> {
     await this.checkAndInit();
     try {
-      console.log((await this._restClient.get('torrents/info')).data);
+      const info = (await this._restClient.get('torrents/info')).data;
+      let ret: TorrentInfo[] = [];
+      for (let t of info) {
+        const isStalled = t.state === "stalledDL" ? true : false;
+        const addedOn = t.added_on;
+        const amountLeft = t.amount_left;
+        const files = (await this._restClient.get(`torrents/files?hash=${t.hash}`)).data;
+        ret.push({
+          hash : t.hash,
+          addedOn : addedOn,
+          isStalled : isStalled,
+          amountLeft : amountLeft,
+          files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress }))
+        });
+      }
+      return ret;
     } catch (e) {
       throw new TorrentApiError((e as Error).message);
     }
-    return [];
   }
 
-  getTorrentsByTag(tag: string): TorrentInfo[] {
-    throw new Error("Method not implemented.");
+  public async getTorrentsByTag(tag: string): Promise<TorrentInfo[]> {
+    if (tag == null || tag.trim().length === 0) {
+      throw new InvalidTagError();
+    }
+    await this.checkAndInit();
+    try {
+      const info = (await this._restClient.get(`torrents/info?tag=${encodeURIComponent(tag)}`)).data;
+      let ret: TorrentInfo[] = [];
+      for (let t of info) {
+        const isStalled = t.state === "stalledDL" ? true : false;
+        const addedOn = t.added_on;
+        const amountLeft = t.amount_left;
+        const files = (await this._restClient.get(`torrents/files?hash=${t.hash}`)).data;
+        ret.push({
+          hash : t.hash,
+          addedOn : addedOn,
+          isStalled : isStalled,
+          amountLeft : amountLeft,
+          files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress }))
+        });
+      }
+      return ret;
+    } catch (e) {
+      throw new TorrentApiError((e as Error).message);
+    }
   }
   
-  getEstimatedFreeSpace(): number {
-    throw new Error("Method not implemented.");
+  public async getEstimatedFreeSpace(): Promise<number> {
+    await this.checkAndInit();
+    try {
+      const maindata = (await this._restClient.get('sync/maindata')).data;
+      let totalAmountLeft = 0;
+      for (let k of Object.keys(maindata.torrents)) {
+        totalAmountLeft += maindata.torrents[k].amount_left;
+      }
+      const freeSpaceOnDisk = maindata.server_state.free_space_on_disk;
+      return freeSpaceOnDisk - totalAmountLeft;
+    } catch (e) {
+      throw new TorrentApiError((e as Error).message);
+    }
   }
 
   public async addTorrentByUrl(url: string) {
@@ -128,8 +188,25 @@ export class QBittorrentClient implements TorrentClientInterface {
       throw new TorrentApiError((e as Error).message);
     }
   }
+
+  public async addTagToTorrent(hash: string, tag: string) {
+    if (tag == null || tag.trim().length === 0) {
+      throw new InvalidTagError();
+    }
+    await this.checkAndInit();
+    try {
+      await this._restClient.post('torrents/addTags', {
+        hashes: hash,
+        tags: tag
+      });
+    } catch (e) {
+      throw new TorrentApiError((e as Error).message);
+    }
+  }
 }
 
 export class InvalidTorrentUrlError extends Error {}
 
 export class InvalidHashError extends Error {}
+
+export class InvalidTagError extends Error {}

@@ -2,13 +2,14 @@ import { Nullable } from "../../Nullable";
 
 export interface TorrentClientInterface {
   deleteTorrentByHash(hash: string);
-  getTorrentByHash(hash: string): Nullable<TorrentInfo>;
+  getTorrentByHash(hash: string): Promise<Nullable<TorrentInfo>>;
   getTorrentByHashOrThrow(hash: string);
   getAllTorrents(): Promise<TorrentInfo[]>;
-  getTorrentsByTag(tag: string): TorrentInfo[];
+  getTorrentsByTag(tag: string): Promise<TorrentInfo[]>;
   isTaggingSupported(): boolean;
-  getEstimatedFreeSpace(): number;
+  getEstimatedFreeSpace(): Promise<number>;
   addTorrentByUrl(url: string);
+  addTagToTorrent(hash: string, tag: string);
 }
 
 export interface TorrentInfo {
@@ -24,3 +25,5 @@ export class TorrentApiError extends Error {
     super(msg);
   }
 }
+
+export class TorrentNotFoundError extends Error {}
