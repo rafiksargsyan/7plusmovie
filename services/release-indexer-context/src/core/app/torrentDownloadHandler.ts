@@ -89,9 +89,11 @@ export const handler = async (): Promise<void> => {
             continue;
           } else {
             // check available disk space
-            await qbitClient.resumeTorrent(rc.infoHash);
-            await qbitClient.enableFile(rc.infoHash, file.index);
-            break;
+            const estimatedFreeSpace = await qbitClient.getEstimatedFreeSpace();
+            if (estimatedFreeSpace - (file.size * (1 - file.progress)) > 150000000000) {
+              await qbitClient.resumeTorrent(rc.infoHash);
+              await qbitClient.enableFile(rc.infoHash, file.index);
+            }
           }
         }
       }
