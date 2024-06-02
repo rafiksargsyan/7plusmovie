@@ -7,7 +7,7 @@ export class ReleaseCandidate {
   private _sizeInBytes: Nullable<number>;
   private _resolution: Resolution;
   private _ripType: RipType;
-  private _status: ReleaseCandidateStatus;
+  private _status: Nullable<ReleaseCandidateStatus>;
 
   public constructor(createEmptyObject: boolean, releaseTime?: Nullable<number>,
     sizeInBytes?: Nullable<number>, res?: Resolution, ripType?: RipType) {
@@ -54,7 +54,7 @@ export class ReleaseCandidate {
     this._status = status;
   }
 
-  get status() {
+  get status(): Nullable<ReleaseCandidateStatus> {
     return this._status;
   }
 
@@ -100,6 +100,10 @@ export class ReleaseCandidateStatus {
   static fromKey(key: Nullable<string>): Nullable<ReleaseCandidateStatus> {
     if (key == null) return null;
     return ReleaseCandidateStatus[key];
+  }
+
+  static equals(rc1: Nullable<ReleaseCandidateStatus>, rc2: Nullable<ReleaseCandidateStatus>) {
+    return this.fromKey(rc1?.key) == this.fromKey(rc2?.key);
   }
 }
   

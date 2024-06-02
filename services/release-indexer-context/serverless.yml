@@ -85,7 +85,10 @@ functions:
       QBITTORRENT_USERNAME: ${env:QBITTORRENT_USERNAME}
       SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      MEDIA_FILES_BASE_URL: ${env:MEDIA_FILES_BASE_URL}
     handler: src/core/app/torrentDownloadHandler.handler
+    layers:
+      - ${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_FFPROBE_LAYER}
     events:
       - schedule: rate(${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_INTERVAL_IN_MINUTES} minute)
     timeout: 900

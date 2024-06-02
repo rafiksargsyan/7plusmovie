@@ -47,6 +47,10 @@ export class TorrentReleaseCandidate extends ReleaseCandidate {
   get tracker() {
     return this._tracker;
   }
+
+  get downloadUrl() {
+    return this._downloadUrl;
+  }
 }
 
 export class EmptyInfoHashError extends Error {}

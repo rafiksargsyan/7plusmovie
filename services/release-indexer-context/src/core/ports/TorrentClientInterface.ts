@@ -10,6 +10,10 @@ export interface TorrentClientInterface {
   getEstimatedFreeSpace(): Promise<number>;
   addTorrentByUrl(url: string);
   addTagToTorrent(hash: string, tag: string);
+  removeTagFromTorrent(hash: string, tag: string);
+  resumeTorrent(hash: string);
+  disableAllFiles(hash: string);
+  enableFile(hash: string, id: number);
 }
 
 export interface TorrentInfo {
@@ -17,7 +21,8 @@ export interface TorrentInfo {
   addedOn: number; // epoch seconds
   amountLeft: number; // bytes
   isStalled: boolean;
-  files: { name: string, size: number, progress: number } []
+  tags: string[];
+  files: { name: string, size: number, progress: number, index: number } []
 }
 
 export class TorrentApiError extends Error {

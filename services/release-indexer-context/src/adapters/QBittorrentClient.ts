@@ -88,12 +88,15 @@ export class QBittorrentClient implements TorrentClientInterface {
       const addedOn = info[0].added_on;
       const amountLeft = info[0].amount_left;
       const files = (await this._restClient.get(`torrents/files?hash=${hash}`)).data;
+      const tagsStr: string = info[0].tags;
+      const tags: string[] = tagsStr.split(',').map((s) => s.trim());
       return {
         hash : hash,
         addedOn : addedOn,
         isStalled : isStalled,
         amountLeft : amountLeft,
-        files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress }))
+        files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress, index: f.index })),
+        tags: tags
       }
     } catch (e) {
       throw new TorrentApiError((e as Error).message);
@@ -118,12 +121,15 @@ export class QBittorrentClient implements TorrentClientInterface {
         const addedOn = t.added_on;
         const amountLeft = t.amount_left;
         const files = (await this._restClient.get(`torrents/files?hash=${t.hash}`)).data;
+        const tagsStr: string = t.tags;
+        const tags: string[] = tagsStr.split(',').map((s) => s.trim());
         ret.push({
           hash : t.hash,
           addedOn : addedOn,
           isStalled : isStalled,
           amountLeft : amountLeft,
-          files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress }))
+          files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress, index: f.index })),
+          tags: tags
         });
       }
       return ret;
@@ -145,12 +151,15 @@ export class QBittorrentClient implements TorrentClientInterface {
         const addedOn = t.added_on;
         const amountLeft = t.amount_left;
         const files = (await this._restClient.get(`torrents/files?hash=${t.hash}`)).data;
+        const tagsStr: string = t.tags;
+        const tags: string[] = tagsStr.split(',').map((s) => s.trim());
         ret.push({
           hash : t.hash,
           addedOn : addedOn,
           isStalled : isStalled,
           amountLeft : amountLeft,
-          files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress }))
+          files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress, index: f.index })),
+          tags: tags
         });
       }
       return ret;
@@ -193,6 +202,7 @@ export class QBittorrentClient implements TorrentClientInterface {
     if (tag == null || tag.trim().length === 0) {
       throw new InvalidTagError();
     }
+    tag = tag.trim();
     await this.checkAndInit();
     try {
       await this._restClient.post('torrents/addTags', {
@@ -203,6 +213,71 @@ export class QBittorrentClient implements TorrentClientInterface {
       throw new TorrentApiError((e as Error).message);
     }
   }
+
+  public async removeTagFromTorrent(hash: string, tag: string) {
+    if (tag == null || tag.trim().length === 0) {
+      throw new InvalidTagError();
+    }
+    await this.checkAndInit();
+    try {
+      await this._restClient.post('torrents/removeTags', {
+        hashes: hash,
+        tags: tag
+      });
+    } catch (e) {
+      throw new TorrentApiError((e as Error).message);
+    }
+  }
+
+  public async resumeTorrent(hash: string) {
+    if (hash == null || hash.trim().length === 0) {
+      throw new InvalidHashError();
+    }
+    await this.checkAndInit();
+    try {
+      await this._restClient.post('torrents/resume', {
+        hashes: hash
+      });
+    } catch (e) {
+      throw new TorrentApiError((e as Error).message);
+    }
+  }
+
+  public async disableAllFiles(hash: string) {
+    if (hash == null || hash.trim().length === 0) {
+      throw new InvalidHashError();
+    }
+    await this.checkAndInit();
+    try {
+      const files = (await this._restClient.get(`torrents/files?hash=${hash}`)).data;
+      await this._restClient.post(`torrents/filePrio`, {
+        hash: hash,
+        id: files.map((f) => f.index).join('|'),
+        priority: 0
+      })
+    } catch (e) {
+      throw new TorrentApiError((e as Error).message);
+    }
+  }
+
+  public async enableFile(hash: string, index: number) {
+    if (hash == null || hash.trim().length === 0) {
+      throw new InvalidHashError();
+    }
+    if (index == null || index < 0 || !Number.isInteger(index)) {
+      throw new InvalidFileIndexError();
+    }
+    await this.checkAndInit();
+    try {
+      await this._restClient.post(`torrents/filePrio`, {
+        hash: hash,
+        id: index,
+        priority: 1
+      })
+    } catch (e) {
+      throw new TorrentApiError((e as Error).message);
+    }   
+  }
 }
 
 export class InvalidTorrentUrlError extends Error {}
@@ -210,3 +285,5 @@ export class InvalidTorrentUrlError extends Error {}
 export class InvalidHashError extends Error {}
 
 export class InvalidTagError extends Error {}
+
+export class InvalidFileIndexError extends Error {}
