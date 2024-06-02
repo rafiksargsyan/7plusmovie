@@ -54,7 +54,7 @@ export const handler = async (event: { movieId: string }) => {
     if (ripType == null) continue;
     const radarrResolution = rr?.quality?.quality?.resolution;
     const resolution = Resolution.fromPixels(radarrResolution, radarrResolution);
-    if (resolution == null) return;
+    if (resolution == null) continue;
     let releaseTimeInMillis: Nullable<number> = null;
     const radarrAgeMinutes = rr.ageMinutes;
     if (radarrAgeMinutes != null) {
@@ -70,7 +70,6 @@ export const handler = async (event: { movieId: string }) => {
     const decodedTorrentStr = bencode.decode(torrentFile, 'utf-8');
     decodedTorrentStr['info']['piece length'] = undefined;
     decodedTorrentStr['info']['pieces'] = undefined;
-    console.log(JSON.stringify(decodedTorrentStr));
     const info = decodedTorrent['info'];
     const bencodedInfo = bencode.encode(info);
     const infoHash = createHash('sha1').update(bencodedInfo).digest('hex');

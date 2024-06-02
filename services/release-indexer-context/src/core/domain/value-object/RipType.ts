@@ -35,7 +35,7 @@ export class RipType {
 
   static fromRadarrReleaseQualitySource(s: Nullable<string>) {
     if (s == null) return null;
-    if (s.toLowerCase().includes("blueray")) return RipType.BR;
+    if (s.toLowerCase().includes("bluray")) return RipType.BR;
     if (s.toLowerCase().includes("web")) return RipType.WEB;
     return null;
   }

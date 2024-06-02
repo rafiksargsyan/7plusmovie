@@ -59,10 +59,14 @@ export const handler = async (): Promise<void> => {
           let torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash);
           if (torrentInfo == null) {
             await qbitClient.addTorrentByUrl(rc.downloadUrl);
-            await qbitClient.addTagToTorrent(rc.infoHash, m.id);
+            do {
+              torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash);
+              console.log(`torrentInfo=${torrentInfo}`);
+            } while (torrentInfo == null || torrentInfo.hash == null || torrentInfo.files == null || torrentInfo.files.length === 0);
             await qbitClient.disableAllFiles(rc.infoHash);
-            torrentInfo = (await qbitClient.getTorrentByHash(rc.infoHash)) as TorrentInfo;
           }
+          await qbitClient.addTagToTorrent(rc.infoHash, m.id);
+          torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash) as TorrentInfo;
           const fileIndex: Nullable<number> = findMediaFile(torrentInfo);
           if (fileIndex == null) {
             m.setReleaseCandidateStatus(rcKey, ReleaseCandidateStatus.PROCESSED);
