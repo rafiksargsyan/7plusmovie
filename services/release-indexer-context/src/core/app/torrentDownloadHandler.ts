@@ -62,10 +62,13 @@ export const handler = async (): Promise<void> => {
           }
           if (torrentInfo == null) {
             await qbitClient.addTorrentByUrl(rc.downloadUrl);
+            let retry = 3;
             do {
+              await new Promise(r => setTimeout(r, 2000));
               torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash);
-              console.log(`torrentInfo=${torrentInfo}`);
-            } while (torrentInfo == null || torrentInfo.hash == null || torrentInfo.files == null || torrentInfo.files.length === 0);
+              --retry;
+            } while (retry >= 0 || torrentInfo == null || torrentInfo.hash == null || torrentInfo.files == null || torrentInfo.files.length === 0);
+            if (retry === -1) continue;
             await qbitClient.disableAllFiles(rc.infoHash);
           }
           await qbitClient.addTagToTorrent(rc.infoHash, m.id);
