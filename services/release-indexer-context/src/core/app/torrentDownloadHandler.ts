@@ -55,8 +55,11 @@ export const handler = async (): Promise<void> => {
               break;
             }
           }
-          if (betterRCAlreadyPromoted) continue;
           let torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash);
+          if (torrentInfo?.tags.length === 1 && torrentInfo?.tags[0] === m.id && betterRCAlreadyPromoted) {
+            await qbitClient.deleteTorrentByHash(rc.infoHash);
+            continue;
+          }
           if (torrentInfo == null) {
             await qbitClient.addTorrentByUrl(rc.downloadUrl);
             do {
