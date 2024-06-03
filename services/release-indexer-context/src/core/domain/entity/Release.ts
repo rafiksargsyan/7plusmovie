@@ -14,7 +14,7 @@ export class Release {
   private _size: number;
   private _hash: string;
 
-  public constructor(ripType: Nullable<RipType>, res: Nullable<Resolution>, hash: Nullable<string>) {
+  public constructor(ripType: RipType, res: Resolution, hash: string) {
     this._ripType = this.validateRipType(ripType);
     this._resolution= this.validateResolution(res);
     this._hash = this.validateHash(hash);
@@ -55,7 +55,7 @@ export class Release {
     return r1Audios.length - r2Audios.length;
   }
 
-  public addAudioMetadata(am: Nullable<AudioMetadata>) {
+  public addAudioMetadata(am: AudioMetadata) {
     if (am == null) {
       throw new NullAudioMetadataError();
     }
@@ -74,7 +74,7 @@ export class Release {
     this._audios.push(am);
   }
 
-  public addSubsMetadata(sm: Nullable<SubsMetadata>) {
+  public addSubsMetadata(sm: SubsMetadata) {
     if (sm == null) {
       throw new NullSubsMetadataError();
     }
@@ -109,21 +109,21 @@ export class Release {
     return ret;
   }
 
-  private validateRipType(ripType: Nullable<RipType>) {
+  private validateRipType(ripType: RipType) {
     if (ripType == null) {
       throw new NullRipTypError();
     }
     return ripType;
   }
 
-  private validateResolution(res: Nullable<Resolution>) {
+  private validateResolution(res: Resolution) {
     if (res == null) {
       throw new NullResolutionError();
     }
     return res;
   }
 
-  private validateHash(hash: Nullable<string>) {
+  private validateHash(hash: string) {
     if (hash == null) {
       throw new NullHashError();
     }

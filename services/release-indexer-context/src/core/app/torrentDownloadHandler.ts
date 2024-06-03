@@ -5,7 +5,7 @@ import { MovieRepository } from '../../adapters/MovieRepository';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import { QBittorrentClient } from '../../adapters/QBittorrentClient';
 import { execSync } from 'child_process';
-import { ReleaseCandidate, ReleaseCandidateStatus } from '../domain/entity/ReleaseCandidate';
+import { ReleaseCandidate } from '../domain/entity/ReleaseCandidate';
 import { TorrentReleaseCandidate } from '../domain/entity/TorrentReleaseCandidate';
 import { Nullable } from '../../Nullable';
 import { TorrentInfo } from '../ports/TorrentClientInterface';
@@ -19,8 +19,7 @@ import { SubsMetadata } from '../domain/value-object/SubsMetadata';
 import { SubsLang } from '../domain/value-object/SubsLang';
 import { SubsType } from '../domain/value-object/SubsType';
 import { SubsAuthor } from '../domain/value-object/SubsAuthor';
-
-const movieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
+import { TorrentTracker } from '../domain/value-object/TorrentTracker';
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -51,21 +50,20 @@ export const handler = async (): Promise<void> => {
       releaseCandidates.sort((a, b) => ReleaseCandidate.compare(b[1], a[1]));
       for (let i = 0; i < releaseCandidates.length; ++i) {
         const rcKey = releaseCandidates[i][0];
-        const rc = releaseCandidates[i][1];
-        if (ReleaseCandidateStatus.equals(rc.status, ReleaseCandidateStatus.PROCESSED)
-        || ReleaseCandidateStatus.equals(rc.status, ReleaseCandidateStatus.PROMOTED)) continue;
+        const rc = m.releaseCandidates[releaseCandidates[i][0]];
+        if (rc.isProcessed()) continue;
         if (rc instanceof TorrentReleaseCandidate) {
           let betterRCAlreadyPromoted = false;
           let prevRcNotProcessed = false;
           for (let j = 0; j < i; ++j) {
-            const prevRc = releaseCandidates[j][1];
-            if (prevRc.status == null) {
+            const prevRc = m.releaseCandidates[releaseCandidates[j][0]];
+            if (!prevRc.isProcessed()) {
               prevRcNotProcessed = true;
               break;
             }
-            if (prevRc instanceof TorrentReleaseCandidate /*&& rc.tracker === prevRc.tracker*/
-              && ReleaseCandidate.compare(rc, prevRc) < 0 && ReleaseCandidateStatus.equals(prevRc.status, ReleaseCandidateStatus.PROMOTED)) {
-              m.setReleaseCandidateStatus(rcKey, ReleaseCandidateStatus.PROCESSED);
+            if (prevRc instanceof TorrentReleaseCandidate && TorrentTracker.equals(rc.tracker, prevRc.tracker)
+              && ReleaseCandidate.compare(rc, prevRc) < 0 && prevRc.isPromoted()) {
+              m.ignoreRc(rcKey);
               betterRCAlreadyPromoted = true;
               break;
             }
@@ -78,40 +76,34 @@ export const handler = async (): Promise<void> => {
           }
           if (torrentInfo == null) {
             await qbitClient.addTorrentByUrl(rc.downloadUrl);
-            let retry = 3;
-            do {
-              await new Promise(r => setTimeout(r, 2000));
-              torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash);
-              --retry;
-            } while (retry >= 0 || torrentInfo == null || torrentInfo.hash == null || torrentInfo.files == null || torrentInfo.files.length === 0);
-            if (retry === -1) continue;
+            torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash);
+            console.log("torrent after adding")
+            console.log(JSON.stringify(torrentInfo));
             await qbitClient.disableAllFiles(rc.infoHash);
           }
           await qbitClient.addTagToTorrent(rc.infoHash, m.id);
           torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash) as TorrentInfo;
           const fileIndex: Nullable<number> = findMediaFile(torrentInfo);
           if (fileIndex == null) {
-            m.setReleaseCandidateStatus(rcKey, ReleaseCandidateStatus.PROCESSED);
+            m.ignoreRc(rcKey);
             continue;
           }
           const file = torrentInfo.files[fileIndex];
           if (file.progress === 1) {
             processMediaFile(m, file.name, rcKey, rc);
-            console.log("Finished processing media file");
             await qbitClient.removeTagFromTorrent(rc.infoHash, m.id);
             if (torrentInfo.tags.length === 1) {
               await qbitClient.deleteTorrentByHash(rc.infoHash);
             }
             break;
           } if (torrentInfo.isStalled && (Date.now() - torrentInfo.addedOn * 1000) > 60 * 60 * 1000) {
-            m.setReleaseCandidateStatus(rcKey, ReleaseCandidateStatus.PROCESSED);
+            m.ignoreRc(rcKey);
             await qbitClient.removeTagFromTorrent(rc.infoHash, m.id);
             if (torrentInfo.tags.length === 1) {
               await qbitClient.deleteTorrentByHash(rc.infoHash);
             }
             continue;
           } else {
-            // check available disk space
             const estimatedFreeSpace = await qbitClient.getEstimatedFreeSpace();
             if (estimatedFreeSpace - (file.size * (1 - file.progress)) > 150000000000) {
               await qbitClient.resumeTorrent(rc.infoHash);
@@ -120,10 +112,9 @@ export const handler = async (): Promise<void> => {
           }
         }
       }
-      await docClient.put({TableName: movieTableName, Item: m});
+      await movieRepo.saveMovie(m);
     }
     catch (e) {
-      console.log("Failed movie");
       console.log(e);
     }
   }
@@ -146,12 +137,11 @@ function findMediaFile(torrentInfo: Nullable<TorrentInfo>): Nullable<number> {
 
 // add media file name to release
 function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate) {
-  console.log("Starting processing media file");
   const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
-  const release = new TorrentRelease(rc.ripType, rc.resolution, rc.tracker, rc.infoHash);
+  const release = new TorrentRelease(rc.ripType, rc.resolution, rc.infoHash, rc.tracker, rc.downloadUrl);
   for (let s of streams.streams) {
     if (s.index === 0 && s.codec_type !== "video") {
-      m.setReleaseCandidateStatus(rcKey, ReleaseCandidateStatus.PROCESSED);
+      m.ignoreRc(rcKey);
       return;
     }
     if (s.codec_type === "audio") {
@@ -177,7 +167,6 @@ function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentRele
       release.addSubsMetadata(sm);
     }
   }
-  console.log(JSON.stringify(m));
   m.addRelease(rc.infoHash, release);
-  m.setReleaseCandidateStatus(rcKey, ReleaseCandidateStatus.PROMOTED);
+  m.promoteRc(rcKey);
 }

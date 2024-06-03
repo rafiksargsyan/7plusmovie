@@ -1,55 +1,29 @@
 import { Nullable } from "../../../Nullable";
 
 export class SubsLang {
-  public static readonly EN = new SubsLang();
-  public static readonly EN_US = new SubsLang();
-  public static readonly EN_GB = new SubsLang();
-  public static readonly RU = new SubsLang();
-  public static readonly FR = new SubsLang();
-  public static readonly JA = new SubsLang();
-  public static readonly PT = new SubsLang();
-  public static readonly KO = new SubsLang();
-  public static readonly DA = new SubsLang();
-  public static readonly HI = new SubsLang();
-  public static readonly HI_IN = new SubsLang();
-  public static readonly IT = new SubsLang();
-  public static readonly RO = new SubsLang();
-  public static readonly RO_RO = new SubsLang();
-  public static readonly FA = new SubsLang();
-  public static readonly FA_IR = new SubsLang();
-  public static readonly SV = new SubsLang();
-  public static readonly SV_SE = new SubsLang();
-  public static readonly PL = new SubsLang();
-  public static readonly PL_PL = new SubsLang();
-  public static readonly ES = new SubsLang();
-  public static readonly ES_ES = new SubsLang();
-  public static readonly ES_419 = new SubsLang();
-
-  private static readonly values = {
-    EN: SubsLang.EN,
-    EN_US: SubsLang.EN_US,
-    EN_GB: SubsLang.EN_GB,
-    RU: SubsLang.RU,
-    FR: SubsLang.FR,
-    JA: SubsLang.JA,
-    PT: SubsLang.PT,
-    KO: SubsLang.KO,
-    DA: SubsLang.DA,
-    HI: SubsLang.HI,
-    HI_IN: SubsLang.HI_IN,
-    IT: SubsLang.IT,
-    RO: SubsLang.RO,
-    RO_RO: SubsLang.RO_RO,
-    FA: SubsLang.FA,
-    FA_IR: SubsLang.FA_IR,
-    SV: SubsLang.SV,
-    SV_SE: SubsLang.SV_SE,
-    PL: SubsLang.PL,
-    PL_PL: SubsLang.PL_PL,
-    ES: SubsLang.ES,
-    ES_ES: SubsLang.ES_ES,
-    ES_419: SubsLang.ES_419
-  } as const;
+  public static readonly EN = new SubsLang("EN");
+  public static readonly EN_US = new SubsLang("EN_US");
+  public static readonly EN_GB = new SubsLang("EN_GB");
+  public static readonly RU = new SubsLang("RU");
+  public static readonly FR = new SubsLang("FR");
+  public static readonly JA = new SubsLang("JA");
+  public static readonly PT = new SubsLang("PT");
+  public static readonly KO = new SubsLang("KO");
+  public static readonly DA = new SubsLang("DA");
+  public static readonly HI = new SubsLang("HI");
+  public static readonly HI_IN = new SubsLang("HI_IN");
+  public static readonly IT = new SubsLang("IT");
+  public static readonly RO = new SubsLang("RO");
+  public static readonly RO_RO = new SubsLang("RO_RO");
+  public static readonly FA = new SubsLang("FA");
+  public static readonly FA_IR = new SubsLang("FA_IR");
+  public static readonly SV = new SubsLang("SV");
+  public static readonly SV_SE = new SubsLang("SV_SE");
+  public static readonly PL = new SubsLang("PL");
+  public static readonly PL_PL = new SubsLang("PL_PL");
+  public static readonly ES = new SubsLang("ES");
+  public static readonly ES_ES = new SubsLang("ES_ES");
+  public static readonly ES_419 = new SubsLang("ES_419");
 
   private static readonly FROM_ISO_639_2 = {
     "en" : SubsLang.EN,
@@ -85,12 +59,22 @@ export class SubsLang {
     "spa" : SubsLang.ES
   } as const;
 
-  public static from(key: Nullable<string>): Nullable<SubsLang> {
-    if (key == null) return null;
-    if (!(key in this.values)) {
+  public readonly key;
+
+  private constructor(key: string) {
+    this.key = key;
+  }
+
+  static fromKeyOrThrow(key: string): SubsLang {
+    if (key == null || SubsLang[key] == null) {
       throw new InvalidSubsLangKeyError();
     }
-    return this.values[key];
+    return SubsLang[key];
+  }
+
+  static fromKey(key: Nullable<string>): Nullable<SubsLang> {
+    if (key == null) return null;
+    return SubsLang[key];
   }
 
   public static fromISO_639_2(code: Nullable<string>) {

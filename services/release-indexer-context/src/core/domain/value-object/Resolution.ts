@@ -5,12 +5,6 @@ export class Resolution {
   public static readonly HD = new Resolution("HD", 2); // under 720p
   public static readonly FHD = new Resolution("FHD", 3); // above 1080p
 
-  private static readonly values = {
-    SD: Resolution.SD,
-    HD: Resolution.HD,
-    FHD: Resolution.FHD
-  } as const;
-
   public readonly key;
   private readonly priority: number;
 
@@ -19,11 +13,16 @@ export class Resolution {
     this.key = k;
   }
 
-  static from(key: Nullable<string>): Resolution {
-    if (key == null || !(key in this.values)) {
+  static fromKeyOrThrow(key: string): Resolution {
+    if (key == null || Resolution[key] == null) {
       throw new InvalidResolutionKeyError();
     }
-    return this.values[key];
+    return Resolution[key];
+  }
+
+  static fromKey(key: Nullable<string>): Nullable<Resolution> {
+    if (key == null) return null;
+    return Resolution[key];
   }
 
   static fromPixels(d1: Nullable<number>, d2: Nullable<number>): Nullable<Resolution> {
@@ -39,7 +38,7 @@ export class Resolution {
   static compare(r1: Nullable<Resolution>, r2: Nullable<Resolution>) {
     if (r1 == null && r2 != null) return -1;
     if (r1 != null && r2 == null) return 1;
-    if (r1 == r2) return 0;
+    if (r1?.key == r2?.key) return 0;
     return (r1 as Resolution).priority < (r2 as Resolution).priority ? -1 : 1;
   }
 }

@@ -1,21 +1,26 @@
 import { Nullable } from "../../../Nullable";
 
 export class SubsType {
-  public static readonly FORCED = new SubsType();
-  public static readonly FULL = new SubsType();
-  public static readonly SDH = new SubsType();
+  public static readonly FORCED = new SubsType("FORCED");
+  public static readonly FULL = new SubsType("FULL");
+  public static readonly SDH = new SubsType("SDH");
 
-  private static readonly values = {
-    FORCED: SubsType.FORCED,
-    FULL: SubsType.FULL,
-    SDH: SubsType.SDH,
-  } as const;
+  public readonly key;
 
-  static from(key: Nullable<string>): SubsType {
-    if (key == null || !(key in this.values)) {
+  private constructor(key: string) {
+    this.key = key;
+  }
+
+  static fromKeyOrThrow(key: string): SubsType {
+    if (key == null || SubsType[key] == null) {
       throw new InvalidSubsTypeKeyError();
     }
-    return this.values[key];
+    return SubsType[key];
+  }
+
+  static fromKey(key: Nullable<string>): Nullable<SubsType> {
+    if (key == null) return null;
+    return SubsType[key];
   }
 
   static fromTitle(title: Nullable<string>) {
@@ -25,6 +30,10 @@ export class SubsType {
     if (titleLowerCase.includes("full") || titleLowerCase.includes("полные")) return SubsType.FULL;
     if (titleLowerCase.includes("sdh")) return SubsType.SDH;
     return null;
+  }
+
+  static equals(st1: Nullable<SubsType>, st2: Nullable<SubsType>) {
+    return this.fromKey(st1?.key) == this.fromKey(st2?.key);
   }
 }
 

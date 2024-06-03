@@ -16,7 +16,7 @@ export class L8nLang {
     this.lang = lang;
   }
 
-  static fromKeyOrThrow(key: Nullable<string>): L8nLang {
+  static fromKeyOrThrow(key: string): L8nLang {
     if (key == null || L8nLang[key] == null) {
       throw new InvalidL8nLangKeyError();
     }

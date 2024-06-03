@@ -1,37 +1,36 @@
 import { Nullable } from "../../../Nullable";
 
 export class AudioVoiceType {
-  public static readonly DUB = new AudioVoiceType(3);
-  public static readonly MVO = new AudioVoiceType(2);
-  public static readonly DVO = new AudioVoiceType(1);
-  public static readonly SO = new AudioVoiceType(0);
-  public static readonly ORIGINAL = new AudioVoiceType(4);
+  public static readonly DUB = new AudioVoiceType("DUB", 3);
+  public static readonly MVO = new AudioVoiceType("MVO", 2);
+  public static readonly DVO = new AudioVoiceType("DVO", 1);
+  public static readonly SO = new AudioVoiceType("SO", 0);
+  public static readonly ORIGINAL = new AudioVoiceType("ORIGINAL", 4);
 
-  private static readonly values = {
-    DUB: AudioVoiceType.DUB,
-    MVO: AudioVoiceType.MVO,
-    DVO: AudioVoiceType.DVO,
-    SO: AudioVoiceType.SO,
-    ORIGINAL: AudioVoiceType.ORIGINAL
-  } as const;
-
+  private readonly key;
   private readonly priority;
 
-  private constructor(p: number) {
+  private constructor(key: string, p: number) {
+    this.key = key;
     this.priority = p;
   }
 
-  static from(key: Nullable<string>): AudioVoiceType {
-    if (key == null || !(key in this.values)) {
+  static fromKeyOrThrow(key: string): AudioVoiceType {
+    if (key == null || AudioVoiceType[key] == null) {
       throw new InvalidAudioVoiceTypeKeyError();
     }
-    return this.values[key];
+    return AudioVoiceType[key];
+  }
+
+  static fromKey(key: Nullable<string>): Nullable<AudioVoiceType> {
+    if (key == null) return null;
+    return AudioVoiceType[key];
   }
 
   static compare(v1: Nullable<AudioVoiceType>, v2: Nullable<AudioVoiceType>) {
     if (v1 == null && v2 != null) return -1;
     if (v1 != null && v2 == null) return 1;
-    if (v1 == v2) return 0;
+    if (v1?.key == v2?.key) return 0;
     return (v1 as AudioVoiceType).priority < (v2 as AudioVoiceType).priority ? -1 : 1;
   }
 }

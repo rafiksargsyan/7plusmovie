@@ -11,8 +11,8 @@ export class AudioMetadata {
   public readonly voiceType: Nullable<AudioVoiceType>;
   public readonly author: Nullable<AudioAuthor>;
 
-  public constructor(stream: Nullable<number>, channels: Nullable<number>, bitrate: Nullable<number>,
-    lang: Nullable<AudioLang>, voiceType: Nullable<AudioVoiceType>, author: Nullable<AudioAuthor>) {
+  public constructor(stream: Nullable<number>, channels: number, bitrate: number,
+    lang: AudioLang, voiceType: Nullable<AudioVoiceType>, author: Nullable<AudioAuthor>) {
     this.stream = this.validateStream(stream);
     this.channels = this.validateChannels(channels);
     this.bitrate = this.validateBitrate(bitrate);

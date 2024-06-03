@@ -132,13 +132,22 @@ export class Movie {
     return this._releaseCandidates;
   }
 
-  public setReleaseCandidateStatus(id: string, status: ReleaseCandidateStatus) {
+  public ignoreRc(id: string) {
     if (id == null || ! /\S/.test(id)) throw new NullReleaseCandidateIdError();
     let rc = this._releaseCandidates[id];
     if (rc == null) {
       throw new ReleaseCandidateNotFoundError();
     }
-    rc.status = status;
+    rc.status = ReleaseCandidateStatus.IGNORED;
+  }
+
+  public promoteRc(id: string) {
+    if (id == null || ! /\S/.test(id)) throw new NullReleaseCandidateIdError();
+    let rc = this._releaseCandidates[id];
+    if (rc == null) {
+      throw new ReleaseCandidateNotFoundError();
+    }
+    rc.status = ReleaseCandidateStatus.PROMOTED;
   }
 
   public addReleaseCandidate(id: string, rc: ReleaseCandidate) {

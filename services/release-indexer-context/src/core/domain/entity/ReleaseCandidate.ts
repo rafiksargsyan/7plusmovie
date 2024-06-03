@@ -66,6 +66,14 @@ export class ReleaseCandidate {
     return this._resolution;
   }
 
+  public isProcessed() {
+    return this._status != null;
+  }
+
+  public isPromoted() {
+    return ReleaseCandidateStatus.equals(this._status, ReleaseCandidateStatus.PROMOTED);
+  }
+
   public static compare(rc1: ReleaseCandidate, rc2: ReleaseCandidate) {
     if (rc1 == null || rc2 == null) throw new NullReleaseCandidateError();
     if (rc1._ripType != rc2._ripType) {
@@ -90,7 +98,7 @@ export class ReleaseCandidate {
 
 export class ReleaseCandidateStatus {
   public static readonly PROMOTED = new ReleaseCandidateStatus("PROMOTED");
-  public static readonly PROCESSED = new ReleaseCandidateStatus("PROCESSED");
+  public static readonly IGNORED = new ReleaseCandidateStatus("IGNORED");
 
   public readonly key;
 

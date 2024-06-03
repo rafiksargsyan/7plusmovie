@@ -34,6 +34,10 @@ export class TorrentTracker {
     if (name.toLowerCase().includes("rutracker")) return TorrentTracker.RUTRACKER;
     return null;
   }
+
+  static equals(tt1: Nullable<TorrentTracker>, tt2: Nullable<TorrentTracker>) {
+    return this.fromKey(tt1?.key) == this.fromKey(tt2?.key);
+  }
 }
 
 export class InvalidTorrentTrackerKeyError extends Error {}

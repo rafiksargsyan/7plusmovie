@@ -13,6 +13,10 @@ export class MovieRepository implements MovieRepositoryInterface {
     this.docClient = docClient;
   }
 
+  async saveMovie(m: Movie) {
+    await this.docClient.put({TableName: dynamodbMovieTableName, Item: m});
+  }
+
   async getMovieById(id: string | undefined): Promise<Movie> {
     const queryParams = {
         TableName: dynamodbMovieTableName,

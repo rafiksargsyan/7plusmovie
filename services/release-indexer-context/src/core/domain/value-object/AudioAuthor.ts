@@ -1,29 +1,41 @@
 import { Nullable } from "../../../Nullable";
 
 export class AudioAuthor {
-  public static readonly HDREZKA = new AudioAuthor();
-  public static readonly TVSHOWS = new AudioAuthor();
-  public static readonly LOSTFILM = new AudioAuthor();
-  public static readonly BRAVO_RECORDS_GEORGIA = new AudioAuthor();
-  public static readonly READ_HEAD_SOUND = new AudioAuthor();
-  public static readonly JASKIER = new AudioAuthor();
+  public static readonly HDREZKA = new AudioAuthor("HDREZKA");
+  public static readonly TVSHOWS = new AudioAuthor("TVSHOWS");
+  public static readonly LOSTFILM = new AudioAuthor("LOSTFILM");
+  public static readonly BRAVO_RECORDS_GEORGIA = new AudioAuthor("BRAVO_RECORDS_GEORGIA");
+  public static readonly READ_HEAD_SOUND = new AudioAuthor("READ_HEAD_SOUND");
+  public static readonly JASKIER = new AudioAuthor("JASKIER");
+ 
+  public readonly key;
 
-  private static readonly values = {
-    HDREZKA: AudioAuthor.HDREZKA,
-    TVSHOWS: AudioAuthor.TVSHOWS,
-    LOSTFILM: AudioAuthor.LOSTFILM,
-    BRAVO_RECORDS_GEORGIA: AudioAuthor.BRAVO_RECORDS_GEORGIA,
-    READ_HEAD_SOUND: AudioAuthor.READ_HEAD_SOUND,
-    JASKIER: AudioAuthor.JASKIER
-  } as const;
-
-  static from(key: Nullable<string>): AudioAuthor {
-    if (key == null || !(key in this.values)) {
-      throw new InvalidAudioAuthorKeyError();
-    }
-    return this.values[key];
+  private constructor(key: string) {
+    this.key = key;
   }
 
+  static fromKeyOrThrow(key: string): AudioAuthor {
+    if (key == null || AudioAuthor[key] == null) {
+      throw new InvalidAudioAuthorKeyError();
+    }
+    return AudioAuthor[key];
+  }
+
+  static fromKey(key: Nullable<string>): Nullable<AudioAuthor> {
+    if (key == null) return null;
+    return AudioAuthor[key];
+  }
+
+  static fromTitle(title: Nullable<string>) {
+    if (title == null) return null;
+    if (title.toLowerCase().includes('hdrezka')) return AudioAuthor.HDREZKA;
+    if (title.toLowerCase().includes('tvshows')) return AudioAuthor.TVSHOWS;
+    return null;
+  }
+
+  static equals(st1: Nullable<AudioAuthor>, st2: Nullable<AudioAuthor>) {
+    return this.fromKey(st1?.key) == this.fromKey(st2?.key);
+  }
 }
 
 export class InvalidAudioAuthorKeyError extends Error {}

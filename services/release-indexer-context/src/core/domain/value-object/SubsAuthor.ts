@@ -4,28 +4,29 @@ export class SubsAuthor {
   public static readonly HDREZKA = new SubsAuthor("HDREZKA");
   public static readonly TVSHOWS = new SubsAuthor("TVSHOWS");
 
-  private static readonly values = {
-    HDREZKA: SubsAuthor.HDREZKA,
-    TVSHOWS: SubsAuthor.TVSHOWS
-  } as const;
-
   public readonly key;
 
   private constructor(key: string) {
     this.key = key;
   }
 
-  static from(key: Nullable<string>): SubsAuthor {
-    if (key == null || !(key in this.values)) {
+  static fromKeyOrThrow(key: string): SubsAuthor {
+    if (key == null || SubsAuthor[key] == null) {
       throw new InvalidSubsAuthorKeyError();
     }
-    return this.values[key];
+    return SubsAuthor[key];
+  }
+
+  static fromKey(key: Nullable<string>): Nullable<SubsAuthor> {
+    if (key == null) return null;
+    return SubsAuthor[key];
   }
 
   static fromTitle(title: string) {
     if (title == null) return null;
-    if (title.toLowerCase().includes("hdrezka")) return this.HDREZKA;
-    if (title.toLowerCase().includes("tvshows")) return this.TVSHOWS;
+    const titleLowerCase = title.toLowerCase();
+    if (titleLowerCase.includes("hdrezka")) return SubsAuthor.HDREZKA;
+    if (titleLowerCase.includes("tvshows")) return SubsAuthor.TVSHOWS;
     return null;
   }
 }
