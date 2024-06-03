@@ -10,6 +10,18 @@ import { TorrentReleaseCandidate } from '../domain/entity/TorrentReleaseCandidat
 import { Nullable } from '../../Nullable';
 import { TorrentInfo } from '../ports/TorrentClientInterface';
 import { Movie } from '../domain/aggregate/Movie';
+import { TorrentRelease } from '../domain/entity/TorrentRelease';
+import { TorrentTracker } from '../domain/value-object/TorrentTracker';
+import { RipType } from '../domain/value-object/RipType';
+import { AudioMetadata } from '../domain/value-object/AudioMetadata';
+import { AudioLang } from '../domain/value-object/AudioLang';
+import { AudioVoiceType } from '../domain/value-object/AudioVoiceType';
+import { resolveVoiceType } from '../domain/service/resolveVoiceType';
+import { resolveAudioAuthor } from '../domain/service/resolveAudioAuthor';
+import { SubsMetadata } from '../domain/value-object/SubsMetadata';
+import { SubsLang } from '../domain/value-object/SubsLang';
+import { SubsType } from '../domain/value-object/SubsType';
+import { SubsAuthor } from '../domain/value-object/SubsAuthor';
 
 const movieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 
@@ -80,7 +92,7 @@ export const handler = async (): Promise<void> => {
           }
           const file = torrentInfo.files[fileIndex];
           if (file.progress === 1) {
-            processMediaFile(m, file.name, rcKey);
+            processMediaFile(m, file.name, rcKey, rc);
             await qbitClient.removeTagFromTorrent(rc.infoHash, m.id);
             if (torrentInfo.tags.length === 1) {
               await qbitClient.deleteTorrentByHash(rc.infoHash);
@@ -112,6 +124,7 @@ export const handler = async (): Promise<void> => {
   await qbitClient.destroy();
 };
 
+// need to improve the logic by using release year, title to better much media files
 function findMediaFile(torrentInfo: Nullable<TorrentInfo>): Nullable<number> {
   if (torrentInfo == null) return null;
   let fileIndex: Nullable<number> = null;
@@ -125,8 +138,38 @@ function findMediaFile(torrentInfo: Nullable<TorrentInfo>): Nullable<number> {
   return fileIndex;
 }
 
-function processMediaFile(m: Movie, name: string, rcKey: string) {
-  console.log(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
-  // add release to movie
+// add media file name to release
+function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate) {
+  const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
+  const release = new TorrentRelease(rc.ripType, rc.resolution, rc.tracker, rc.infoHash);
+  for (let s of streams.streams) {
+    if (s.index === 0 && s.codec_type !== "video") {
+      m.setReleaseCandidateStatus(rcKey, ReleaseCandidateStatus.PROCESSED);
+      return;
+    }
+    if (s.codec_type === "audio") {
+      let bitRate = s.bit_rate;
+      if (bitRate == null) continue;
+      let langStr = s.tags?.language;
+      let titleStr = s.tags?.title;
+      let lang = AudioLang.fromISO_639_1(langStr);
+      if (lang == null) lang = AudioLang.fromISO_639_2(langStr);
+      if (lang == null) continue;
+      const am = new AudioMetadata(s.index, s.channels, bitRate, lang,
+        resolveVoiceType(titleStr, rc.tracker, langStr), resolveAudioAuthor(titleStr, rc.tracker));
+      release.addAudioMetadata(am);
+    }
+    if (s.codec_type === "subtitle") {
+      if (s.codec_name !== "subrip") continue; // add also other text subtitle formats
+      let langStr = s.tags?.language;
+      let titleStr = s.tags?.title;
+      let lang = SubsLang.fromISO_639_1(langStr);
+      if (lang == null) lang = SubsLang.fromISO_639_2(langStr);
+      if (lang == null) continue;
+      const sm = new SubsMetadata(s.index, lang, SubsType.fromTitle(titleStr), SubsAuthor.fromTitle(titleStr));
+      release.addSubsMetadata(sm);
+    }
+  }
+  m.addRelease(rc.infoHash, release);
   m.setReleaseCandidateStatus(rcKey, ReleaseCandidateStatus.PROMOTED);
 }

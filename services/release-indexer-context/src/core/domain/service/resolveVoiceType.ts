@@ -12,7 +12,7 @@ export function resolveVoiceType(title: Nullable<string>, tracker: Nullable<Torr
   if (title.includes("avo") || title.includes("vo") || title.includes("so")) return AudioVoiceType.SO;
   if (langCode != null && langCode !== "rus" && langCode !== "ru" &&
       langCode !== "uk" && langCode !== "ukr" && tracker === TorrentTracker.RUTRACKER) {
-    return AudioVoiceType.DUB;
+    return AudioVoiceType.ORIGINAL;
   }
   return null;
 }

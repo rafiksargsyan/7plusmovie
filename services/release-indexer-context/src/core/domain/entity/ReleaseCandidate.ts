@@ -58,6 +58,14 @@ export class ReleaseCandidate {
     return this._status;
   }
 
+  get ripType(): RipType {
+    return this._ripType;
+  }
+
+  get resolution(): Resolution {
+    return this._resolution;
+  }
+
   public static compare(rc1: ReleaseCandidate, rc2: ReleaseCandidate) {
     if (rc1 == null || rc2 == null) throw new NullReleaseCandidateError();
     if (rc1._ripType != rc2._ripType) {
