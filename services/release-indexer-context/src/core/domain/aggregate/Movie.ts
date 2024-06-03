@@ -75,7 +75,6 @@ export class Movie {
   }
 
   public addRelease(id: Nullable<string>, r: Nullable<Release>) {
-    console.log("aaaaaaaaaaaaaaa");
     if (id == null) {
       throw new NullReleaseIdError();
     }
@@ -86,7 +85,6 @@ export class Movie {
       throw new ReleaseWithIdAlreadyExistsError();
     }
     for (let k in this._releases) {
-      console.log("bbbbbbbbbbbbbbbbbb")
       const compareResult = Release.compare(this._releases[k].equalReleases[0], r);
       if (compareResult == null) {
         continue;
@@ -107,12 +105,10 @@ export class Movie {
         }
         this._releases[id].replacedReleaseIds.push(k);
         this._releases[id].replacedReleaseIds.push(...this._releases[k].replacedReleaseIds);
-        console.log("cccccccccccccccccccc")
         delete this._releases[k];
       }
     }
     if (!(id in this._releases)) {
-      console.log("console.log ddddddddddd");
       this._releases[id] = { equalReleases: [r], replacedReleaseIds: [] }
     }
   }
