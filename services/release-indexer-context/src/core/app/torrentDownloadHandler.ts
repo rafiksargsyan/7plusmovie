@@ -11,11 +11,8 @@ import { Nullable } from '../../Nullable';
 import { TorrentInfo } from '../ports/TorrentClientInterface';
 import { Movie } from '../domain/aggregate/Movie';
 import { TorrentRelease } from '../domain/entity/TorrentRelease';
-import { TorrentTracker } from '../domain/value-object/TorrentTracker';
-import { RipType } from '../domain/value-object/RipType';
 import { AudioMetadata } from '../domain/value-object/AudioMetadata';
 import { AudioLang } from '../domain/value-object/AudioLang';
-import { AudioVoiceType } from '../domain/value-object/AudioVoiceType';
 import { resolveVoiceType } from '../domain/service/resolveVoiceType';
 import { resolveAudioAuthor } from '../domain/service/resolveAudioAuthor';
 import { SubsMetadata } from '../domain/value-object/SubsMetadata';
@@ -26,7 +23,8 @@ import { SubsAuthor } from '../domain/value-object/SubsAuthor';
 const movieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 
 const marshallOptions = {
-  convertClassInstanceToMap: true
+  convertClassInstanceToMap: true,
+  removeUndefinedValues: true
 };
 
 const translateConfig = { marshallOptions };
@@ -58,8 +56,13 @@ export const handler = async (): Promise<void> => {
         || ReleaseCandidateStatus.equals(rc.status, ReleaseCandidateStatus.PROMOTED)) continue;
         if (rc instanceof TorrentReleaseCandidate) {
           let betterRCAlreadyPromoted = false;
+          let prevRcNotProcessed = false;
           for (let j = 0; j < i; ++j) {
             const prevRc = releaseCandidates[j][1];
+            if (prevRc.status == null) {
+              prevRcNotProcessed = true;
+              break;
+            }
             if (prevRc instanceof TorrentReleaseCandidate /*&& rc.tracker === prevRc.tracker*/
               && ReleaseCandidate.compare(rc, prevRc) < 0 && ReleaseCandidateStatus.equals(prevRc.status, ReleaseCandidateStatus.PROMOTED)) {
               m.setReleaseCandidateStatus(rcKey, ReleaseCandidateStatus.PROCESSED);
@@ -67,6 +70,7 @@ export const handler = async (): Promise<void> => {
               break;
             }
           }
+          if (prevRcNotProcessed) break;
           let torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash);
           if (torrentInfo?.tags.length === 1 && torrentInfo?.tags[0] === m.id && betterRCAlreadyPromoted) {
             await qbitClient.deleteTorrentByHash(rc.infoHash);
@@ -93,6 +97,7 @@ export const handler = async (): Promise<void> => {
           const file = torrentInfo.files[fileIndex];
           if (file.progress === 1) {
             processMediaFile(m, file.name, rcKey, rc);
+            console.log("Finished processing media file");
             await qbitClient.removeTagFromTorrent(rc.infoHash, m.id);
             if (torrentInfo.tags.length === 1) {
               await qbitClient.deleteTorrentByHash(rc.infoHash);
@@ -118,7 +123,8 @@ export const handler = async (): Promise<void> => {
       await docClient.put({TableName: movieTableName, Item: m});
     }
     catch (e) {
-      console.log(JSON.stringify(e));
+      console.log("Failed movie");
+      console.log(e);
     }
   }
   await qbitClient.destroy();
@@ -140,6 +146,7 @@ function findMediaFile(torrentInfo: Nullable<TorrentInfo>): Nullable<number> {
 
 // add media file name to release
 function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate) {
+  console.log("Starting processing media file");
   const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
   const release = new TorrentRelease(rc.ripType, rc.resolution, rc.tracker, rc.infoHash);
   for (let s of streams.streams) {
@@ -170,6 +177,7 @@ function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentRele
       release.addSubsMetadata(sm);
     }
   }
+  console.log(JSON.stringify(m));
   m.addRelease(rc.infoHash, release);
   m.setReleaseCandidateStatus(rcKey, ReleaseCandidateStatus.PROMOTED);
 }

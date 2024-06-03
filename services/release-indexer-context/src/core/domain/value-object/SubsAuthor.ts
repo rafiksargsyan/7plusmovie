@@ -23,6 +23,7 @@ export class SubsAuthor {
   }
 
   static fromTitle(title: string) {
+    if (title == null) return null;
     if (title.toLowerCase().includes("hdrezka")) return this.HDREZKA;
     if (title.toLowerCase().includes("tvshows")) return this.TVSHOWS;
     return null;
