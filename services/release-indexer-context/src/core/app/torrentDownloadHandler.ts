@@ -8,7 +8,7 @@ import { execSync } from 'child_process';
 import { ReleaseCandidate } from '../domain/entity/ReleaseCandidate';
 import { TorrentReleaseCandidate } from '../domain/entity/TorrentReleaseCandidate';
 import { Nullable } from '../../Nullable';
-import { TorrentInfo } from '../ports/TorrentClientInterface';
+import { TorrentClientInterface, TorrentInfo } from '../ports/TorrentClientInterface';
 import { Movie } from '../domain/aggregate/Movie';
 import { TorrentRelease } from '../domain/entity/TorrentRelease';
 import { AudioMetadata } from '../domain/value-object/AudioMetadata';
@@ -75,10 +75,7 @@ export const handler = async (): Promise<void> => {
             continue;
           }
           if (torrentInfo == null) {
-            await qbitClient.addTorrentByUrl(rc.downloadUrl);
-            torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash);
-            console.log("torrent after adding")
-            console.log(JSON.stringify(torrentInfo));
+            torrentInfo = await addTorrentAndWait(qbitClient, rc.downloadUrl, rc.infoHash);
             await qbitClient.disableAllFiles(rc.infoHash);
           }
           await qbitClient.addTagToTorrent(rc.infoHash, m.id);
@@ -170,3 +167,19 @@ function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentRele
   m.addRelease(rc.infoHash, release);
   m.promoteRc(rcKey);
 }
+
+async function addTorrentAndWait(qbitClient: TorrentClientInterface, downloadUrl: string, hash: string): Promise<TorrentInfo> {
+  await qbitClient.addTorrentByUrl(downloadUrl);
+  let torrentInfo;
+  let tryCount = 3;
+  while (torrentInfo == null && tryCount-- > 0) {
+    await new Promise(r => setTimeout(r, 5000));
+    torrentInfo = await qbitClient.getTorrentByHash(hash);
+  }
+  if (torrentInfo == null) {
+    throw new TimedOutWaitingTorrentToBeAdded();
+  }
+  return torrentInfo;
+}
+
+class TimedOutWaitingTorrentToBeAdded extends Error {}

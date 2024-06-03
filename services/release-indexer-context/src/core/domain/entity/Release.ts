@@ -22,8 +22,8 @@ export class Release {
 
   static compare(r1: Release, r2: Release) {
     if (r1._ripType != r2._ripType) {
-      if (r1._ripType === RipType.CAM) return -1;
-      if (r2._ripType === RipType.CAM) return 1;
+      if (RipType.compare(r1._ripType, RipType.CAM) === 0) return -1;
+      if (RipType.compare(r2._ripType, RipType.CAM) === 0) return 1;
     }
     if (Resolution.compare(r1._resolution, r2._resolution) !== 0) {
       return Resolution.compare(r1._resolution, r2._resolution);
@@ -46,7 +46,7 @@ export class Release {
     }
     if (r1Audios.length !== 0 && r2Audios.length !== 0) return null;
     if (r1Audios.length === 0 && r2Audios.length === 0)  {
-      if (r1._ripType === r2._ripType) {
+      if (RipType.compare(r1._ripType, r2._ripType) === 0) {
         return r2._size - r1._size;
       } else {
         return RipType.compare(r1._ripType, r2._ripType);
@@ -104,8 +104,12 @@ export class Release {
       if (a1AuthorIndex === -1 && a2AuthorIndex === -1) return null;
       ret = a1AuthorIndex - a2AuthorIndex;
     }
-    if (a1.voiceType === AudioVoiceType.DUB && a1.author === AudioAuthor.HDREZKA && a2.author === AudioAuthor.LOSTFILM) ret = -1;
-    if (a2.voiceType === AudioVoiceType.DUB && a2.author === AudioAuthor.HDREZKA && a1.author === AudioAuthor.LOSTFILM) ret = 1;
+    if (AudioVoiceType.compare(a1.voiceType, AudioVoiceType.DUB) &&
+        AudioAuthor.equals(a1.author, AudioAuthor.HDREZKA) &&
+        AudioAuthor.equals(a2.author, AudioAuthor.LOSTFILM)) ret = -1;
+    if (AudioVoiceType.compare(a2.voiceType, AudioVoiceType.DUB) === 0 &&
+        AudioAuthor.equals(a2.author, AudioAuthor.HDREZKA) &&
+        AudioAuthor.equals(a1.author, AudioAuthor.LOSTFILM)) ret = 1;
     return ret;
   }
 
