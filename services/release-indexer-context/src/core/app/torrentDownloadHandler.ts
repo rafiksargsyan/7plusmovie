@@ -70,8 +70,13 @@ export const handler = async (): Promise<void> => {
           }
           if (prevRcNotProcessed) break;
           let torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash);
-          if (torrentInfo?.tags.length === 1 && torrentInfo?.tags[0] === m.id && betterRCAlreadyPromoted) {
-            await qbitClient.deleteTorrentByHash(rc.infoHash);
+          console.log("torrentinfo");
+          console.log(JSON.stringify(torrentInfo));
+          console.log(`betterRCAlreadyPromoted=${betterRCAlreadyPromoted}`);
+          if (betterRCAlreadyPromoted) {
+            if (torrentInfo?.tags.length === 1 && torrentInfo?.tags[0] === m.id) {
+              await qbitClient.deleteTorrentByHash(rc.infoHash);
+            }
             continue;
           }
           if (torrentInfo == null) {
@@ -135,6 +140,7 @@ function findMediaFile(torrentInfo: Nullable<TorrentInfo>): Nullable<number> {
 // add media file name to release
 function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate) {
   const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
+  console.log(JSON.stringify(streams));
   const release = new TorrentRelease(rc.ripType, rc.resolution, rc.infoHash, rc.tracker, rc.downloadUrl);
   for (let s of streams.streams) {
     if (s.index === 0 && s.codec_type !== "video") {

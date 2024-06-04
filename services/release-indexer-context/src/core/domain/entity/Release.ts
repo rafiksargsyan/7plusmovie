@@ -1,3 +1,4 @@
+import { commonParams } from "@aws-sdk/client-secrets-manager/dist-types/endpoint/EndpointParameters";
 import { Nullable } from "../../../Nullable";
 import { AudioAuthor } from "../value-object/AudioAuthor";
 import { AudioMetadata } from "../value-object/AudioMetadata";
@@ -5,6 +6,7 @@ import { AudioVoiceType } from "../value-object/AudioVoiceType";
 import { Resolution } from "../value-object/Resolution";
 import { RipType } from "../value-object/RipType";
 import { SubsMetadata } from "../value-object/SubsMetadata";
+import { AudioLang } from "../value-object/AudioLang";
 
 export class Release {
   private _audios: AudioMetadata[] = [];
@@ -34,14 +36,12 @@ export class Release {
       for (let a2 of r2._audios) {
         const compareResult = Release.compareAudio(a1, a2);
         if (compareResult == null) continue;
-        if (compareResult < 0) {
+        if (compareResult <= 0) {
           r1Audios = r1Audios.filter((v) => v != a1);
-        } else if (compareResult > 0) {
+        }
+        if (compareResult >= 0) {
           r2Audios = r2Audios.filter((v) => v != a2);
-        } else {
-          r1Audios = r1Audios.filter((v) => v != a1);
-          r2Audios = r2Audios.filter((v) => v != a2);
-        };
+        }
       }
     }
     if (r1Audios.length !== 0 && r2Audios.length !== 0) return null;
@@ -63,7 +63,8 @@ export class Release {
       if (x.stream === am.stream) {
         throw new AudioMetadataWithSameStreamNumberAlreadyExistsError();
       }
-      if (Release.compareAudio(x, am) === 0) {
+      const compareResult = Release.compareAudio(x, am);
+      if (compareResult != null && compareResult > 0) {
         return;
       }
     }
@@ -93,14 +94,14 @@ export class Release {
   // the streams are considered the same. For example, two streams having same voice type (e.g. MVO) and unknown
   // authors. Only one of them will be added to the final release.
   private static compareAudio(a1: AudioMetadata, a2: AudioMetadata) {
-    if (a1.lang !== a2.lang) return null;
+    if (AudioLang.equals(a1.lang, a2.lang)) return null;
     let ret = AudioVoiceType.compare(a1.voiceType, a2.voiceType);
     if (ret === 0) {
       if (a1.author == null && a2.author == null) return 0;
       if (a1.author == null && a2.author != null) return -1;
       if (a1.author != null && a2.author == null) return 1;
-      const a1AuthorIndex = a1.lang.audioAuthorPriorityList.findIndex((v) => a1.author === v);
-      const a2AuthorIndex = a1.lang.audioAuthorPriorityList.findIndex((v) => a2.author === v);
+      const a1AuthorIndex = a1.lang.audioAuthorPriorityList.findIndex((v) => AudioAuthor.equals(a1.author, v));
+      const a2AuthorIndex = a1.lang.audioAuthorPriorityList.findIndex((v) => AudioAuthor.equals(a2.author, v));
       if (a1AuthorIndex === -1 && a2AuthorIndex === -1) return null;
       ret = a1AuthorIndex - a2AuthorIndex;
     }

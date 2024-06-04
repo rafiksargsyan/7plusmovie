@@ -31,7 +31,7 @@ export class AudioVoiceType {
     if (v1 == null && v2 != null) return -1;
     if (v1 != null && v2 == null) return 1;
     if (v1?.key == v2?.key) return 0;
-    return (v1 as AudioVoiceType).priority < (v2 as AudioVoiceType).priority ? -1 : 1;
+    return (v1 as AudioVoiceType).priority - (v2 as AudioVoiceType).priority;
   }
 }
 

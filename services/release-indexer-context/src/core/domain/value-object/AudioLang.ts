@@ -96,6 +96,10 @@ export class AudioLang {
     if (code == null) return null;
     return this.FROM_ISO_639_1[code];
   }
+
+  static equals(st1: Nullable<AudioAuthor>, st2: Nullable<AudioAuthor>) {
+    return this.fromKey(st1?.key) == this.fromKey(st2?.key);
+  }
 }
 
 export class InvalidAudioLangKeyError extends Error {}

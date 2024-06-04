@@ -7,6 +7,7 @@ export class AudioAuthor {
   public static readonly BRAVO_RECORDS_GEORGIA = new AudioAuthor("BRAVO_RECORDS_GEORGIA");
   public static readonly READ_HEAD_SOUND = new AudioAuthor("READ_HEAD_SOUND");
   public static readonly JASKIER = new AudioAuthor("JASKIER");
+  public static readonly VIRUSEPROJECT = new AudioAuthor("VIRUSEPROJECT");
  
   public readonly key;
 
@@ -30,6 +31,7 @@ export class AudioAuthor {
     if (title == null) return null;
     if (title.toLowerCase().includes('hdrezka')) return AudioAuthor.HDREZKA;
     if (title.toLowerCase().includes('tvshows')) return AudioAuthor.TVSHOWS;
+    if (title.toLowerCase().includes('viruseproject') || title.toLowerCase().includes('viruse project')) return AudioAuthor.VIRUSEPROJECT;
     return null;
   }
 

@@ -3,6 +3,7 @@ import { Nullable } from "../../../Nullable";
 export class SubsAuthor {
   public static readonly HDREZKA = new SubsAuthor("HDREZKA");
   public static readonly TVSHOWS = new SubsAuthor("TVSHOWS");
+  public static readonly VIRUSEPROJECT = new SubsAuthor("VIRUSEPROJECT");
 
   public readonly key;
 
@@ -27,6 +28,7 @@ export class SubsAuthor {
     const titleLowerCase = title.toLowerCase();
     if (titleLowerCase.includes("hdrezka")) return SubsAuthor.HDREZKA;
     if (titleLowerCase.includes("tvshows")) return SubsAuthor.TVSHOWS;
+    if (title.toLowerCase().includes('viruseproject') || title.toLowerCase().includes('viruse project')) return SubsAuthor.VIRUSEPROJECT;
     return null;
   }
 }
