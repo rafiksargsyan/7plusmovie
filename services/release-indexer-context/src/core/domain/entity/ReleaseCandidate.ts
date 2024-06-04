@@ -77,8 +77,8 @@ export class ReleaseCandidate {
   public static compare(rc1: ReleaseCandidate, rc2: ReleaseCandidate) {
     if (rc1 == null || rc2 == null) throw new NullReleaseCandidateError();
     if (RipType.compare(rc1._ripType, rc2._ripType) !== 0) {
-      if (rc1._ripType === RipType.CAM) return -1;
-      if (rc2._ripType === RipType.CAM) return 1;
+      if (RipType.compare(rc1._ripType, RipType.CAM) === 0) return -1;
+      if (RipType.compare(rc2._ripType, RipType.CAM) === 0) return 1;
     }
     if (Resolution.compare(rc1._resolution, rc2._resolution) !== 0) {
       return Resolution.compare(rc1._resolution, rc2._resolution);
@@ -86,7 +86,7 @@ export class ReleaseCandidate {
     if (RipType.compare(rc1._ripType, rc2._ripType) !== 0) {
       return RipType.compare(rc1._ripType, rc2._ripType);  
     }
-    if (rc1._sizeInBytes != null && rc2._sizeInBytes != null) {
+    if (RipType.compare(rc1._ripType, RipType.BR) === 0 && rc1._sizeInBytes != null && rc2._sizeInBytes != null) {
       return rc2._sizeInBytes - rc1._sizeInBytes;
     }
     if (rc1._releaseTimeInMillis != null && rc2._releaseTimeInMillis != null) {
