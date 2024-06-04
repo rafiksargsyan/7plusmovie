@@ -58,7 +58,7 @@ export const handler = async (event: { movieId: string }) => {
     let releaseTimeInMillis: Nullable<number> = null;
     const radarrAgeMinutes = rr.ageMinutes;
     if (radarrAgeMinutes != null) {
-      releaseTimeInMillis = radarrAgeMinutes * 60 * 1000;
+      releaseTimeInMillis = Date.now() - radarrAgeMinutes * 60 * 1000;
     }
     const sizeInBytes = rr.size;
     const radarrDownloadUrl: string = rr.downloadUrl;
