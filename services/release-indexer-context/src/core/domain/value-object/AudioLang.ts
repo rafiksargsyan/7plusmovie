@@ -97,8 +97,8 @@ export class AudioLang {
     return this.FROM_ISO_639_1[code];
   }
 
-  static equals(st1: Nullable<AudioAuthor>, st2: Nullable<AudioAuthor>) {
-    return this.fromKey(st1?.key) == this.fromKey(st2?.key);
+  static equals(al1: Nullable<AudioLang>, al2: Nullable<AudioLang>) {
+    return al1?.key == al2?.key;
   }
 }
 

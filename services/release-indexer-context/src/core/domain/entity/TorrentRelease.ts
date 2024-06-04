@@ -7,8 +7,9 @@ export class TorrentRelease extends Release {
   private _tracker: TorrentTracker;
   private _torrentFileUrl: string;
 
-  public constructor(ripType: RipType, res: Resolution, hash: string, tracker: TorrentTracker, torrentFileUrl: string) {
-    super(ripType, res, hash);
+  public constructor(ripType: RipType, res: Resolution, hash: string, mediaFileRelativePath: string,
+    tracker: TorrentTracker, torrentFileUrl: string) {
+    super(ripType, res, hash, mediaFileRelativePath);
     this._tracker = this.validateTracker(tracker);
     this._torrentFileUrl = this.validateTorrentFileUrl(torrentFileUrl);
   }

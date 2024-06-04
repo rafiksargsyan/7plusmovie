@@ -27,13 +27,13 @@ export class SubsType {
     if (title == null) return null;
     const titleLowerCase = title.toLowerCase();
     if (titleLowerCase.includes("forced") || titleLowerCase.includes("форсирован")) return SubsType.FORCED;
-    if (titleLowerCase.includes("full") || titleLowerCase.includes("полные")) return SubsType.FULL;
     if (titleLowerCase.includes("sdh")) return SubsType.SDH;
+    if (titleLowerCase.includes("full") || titleLowerCase.includes("полные")) return SubsType.FULL;
     return null;
   }
 
   static equals(st1: Nullable<SubsType>, st2: Nullable<SubsType>) {
-    return this.fromKey(st1?.key) == this.fromKey(st2?.key);
+    return st1?.key == st2?.key;
   }
 }
 

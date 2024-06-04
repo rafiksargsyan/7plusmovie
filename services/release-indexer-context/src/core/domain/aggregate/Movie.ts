@@ -46,6 +46,10 @@ export class Movie {
     return this._creationTime;
   }
 
+  get originalLocale() {
+    return this._originalLocale;
+  }
+
   private validateOriginalLocale(origianlLocale: Nullable<L8nLang>) {
     if (origianlLocale == undefined) {
       throw new InvalidOriginalLocaleError();

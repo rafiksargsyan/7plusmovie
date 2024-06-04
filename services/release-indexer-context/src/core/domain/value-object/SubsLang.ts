@@ -86,6 +86,10 @@ export class SubsLang {
     if (code == null) return null;
     return this.FROM_ISO_639_1[code];
   }
+
+  static equals(sl1: Nullable<SubsLang>, sl2: Nullable<SubsLang>) {
+    return sl1?.key == sl2?.key;
+  }
 }
 
 export class InvalidSubsLangKeyError extends Error {}

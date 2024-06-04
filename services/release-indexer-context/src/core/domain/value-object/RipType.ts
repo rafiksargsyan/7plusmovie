@@ -34,9 +34,10 @@ export class RipType {
 
   static fromRadarrReleaseQualitySource(s: Nullable<string>) {
     if (s == null) return null;
-    if (s.toLowerCase().includes("bluray")) return RipType.BR;
-    if (s.toLowerCase().includes("web")) return RipType.WEB;
-    if (s.toLowerCase().includes("cam")) return RipType.CAM;
+    s = s.toLowerCase();
+    if (s.includes("bluray")) return RipType.BR;
+    if (s.includes("web")) return RipType.WEB;
+    if (s.includes("cam") || s.includes("telesync")) return RipType.CAM;
     return null;
   }
 }

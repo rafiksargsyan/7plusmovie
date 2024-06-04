@@ -20,6 +20,8 @@ import { SubsLang } from '../domain/value-object/SubsLang';
 import { SubsType } from '../domain/value-object/SubsType';
 import { SubsAuthor } from '../domain/value-object/SubsAuthor';
 import { TorrentTracker } from '../domain/value-object/TorrentTracker';
+import { resolveAudioLang } from '../domain/service/resolveAudioLang';
+import { resolveSubsLang } from '../domain/service/resolveSubsLang';
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -141,32 +143,36 @@ function findMediaFile(torrentInfo: Nullable<TorrentInfo>): Nullable<number> {
 function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate) {
   const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
   console.log(JSON.stringify(streams));
-  const release = new TorrentRelease(rc.ripType, rc.resolution, rc.infoHash, rc.tracker, rc.downloadUrl);
+  const release = new TorrentRelease(rc.ripType, rc.resolution, rc.infoHash, name, rc.tracker, rc.downloadUrl);
   for (let s of streams.streams) {
     if (s.index === 0 && s.codec_type !== "video") {
       m.ignoreRc(rcKey);
       return;
     }
     if (s.codec_type === "audio") {
+      let channels = s.channels;
+      if (channels == null) continue;
       let bitRate = s.bit_rate;
-      if (bitRate == null) continue;
+      if (bitRate == null) {
+        if (channels >= 6) bitRate = 640000;
+        if (channels >= 2) bitRate = 192000;
+        if (channels === 1) bitRate = 128000;
+      };
       let langStr = s.tags?.language;
       let titleStr = s.tags?.title;
-      let lang = AudioLang.fromISO_639_1(langStr);
-      if (lang == null) lang = AudioLang.fromISO_639_2(langStr);
+      let lang = resolveAudioLang(langStr, m.originalLocale, titleStr);
       if (lang == null) continue;
       const am = new AudioMetadata(s.index, s.channels, bitRate, lang,
-        resolveVoiceType(titleStr, rc.tracker, langStr), resolveAudioAuthor(titleStr, rc.tracker));
+        resolveVoiceType(titleStr, lang, m.originalLocale), resolveAudioAuthor(titleStr, rc.tracker));
       release.addAudioMetadata(am);
     }
     if (s.codec_type === "subtitle") {
       if (s.codec_name !== "subrip") continue; // add also other text subtitle formats
       let langStr = s.tags?.language;
       let titleStr = s.tags?.title;
-      let lang = SubsLang.fromISO_639_1(langStr);
-      if (lang == null) lang = SubsLang.fromISO_639_2(langStr);
+      let lang = resolveSubsLang(titleStr, langStr, m.originalLocale);
       if (lang == null) continue;
-      const sm = new SubsMetadata(s.index, lang, SubsType.fromTitle(titleStr), SubsAuthor.fromTitle(titleStr));
+      const sm = new SubsMetadata(s.index, lang, SubsType.fromTitle(titleStr), SubsAuthor.fromTitle(titleStr)); // todo
       release.addSubsMetadata(sm);
     }
   }

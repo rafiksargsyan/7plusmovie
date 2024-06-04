@@ -15,11 +15,13 @@ export class Release {
   private _ripType: RipType;
   private _size: number;
   private _hash: string;
+  private _mediaFileRelativePath: string;
 
-  public constructor(ripType: RipType, res: Resolution, hash: string) {
+  public constructor(ripType: RipType, res: Resolution, hash: string, mediaFileRelativePath: string) {
     this._ripType = this.validateRipType(ripType);
     this._resolution= this.validateResolution(res);
     this._hash = this.validateHash(hash);
+    this._mediaFileRelativePath = this.validateMediaFileRelativePath(mediaFileRelativePath);
   }
 
   static compare(r1: Release, r2: Release) {
@@ -128,6 +130,13 @@ export class Release {
     return res;
   }
 
+  private validateMediaFileRelativePath(path: string) {
+    if (path == null || path.trim() === "") {
+      throw new InvalidMediaFilePathError();
+    }
+    return path;
+  }
+
   private validateHash(hash: string) {
     if (hash == null) {
       throw new NullHashError();
@@ -153,3 +162,5 @@ export class NullSubsMetadataError extends Error {}
 export class SubsMetadataWithSameStreamNumberAlreadyExistsError extends Error {}
 
 export class NullHashError extends Error {}
+
+export class InvalidMediaFilePathError extends Error {}
