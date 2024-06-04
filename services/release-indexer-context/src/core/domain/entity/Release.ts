@@ -23,7 +23,7 @@ export class Release {
   }
 
   static compare(r1: Release, r2: Release) {
-    if (r1._ripType != r2._ripType) {
+    if (RipType.compare(r1._ripType, r2._ripType) !== 0) {
       if (RipType.compare(r1._ripType, RipType.CAM) === 0) return -1;
       if (RipType.compare(r2._ripType, RipType.CAM) === 0) return 1;
     }
