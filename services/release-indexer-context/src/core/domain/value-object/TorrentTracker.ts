@@ -2,6 +2,7 @@ import { Nullable } from "../../../Nullable";
 
 export class TorrentTracker {
   public static readonly RUTRACKER = new TorrentTracker("RUTRACKER");
+  public static readonly RUTOR = new TorrentTracker("RUTOR");
   
   private constructor(key: string) {
    this.key = key;
@@ -25,13 +26,18 @@ export class TorrentTracker {
 
   static fromRadarrReleaseGuid(guid: Nullable<string>) {
     if (guid == null) return null;
-    if (guid.toLowerCase().includes("rutracker.org")) return TorrentTracker.RUTRACKER;
+    guid = guid.toLowerCase();
+
+    if (guid.includes("rutracker.org")) return TorrentTracker.RUTRACKER;
+    if (guid.includes("rutor.info")) return TorrentTracker.RUTOR
     return null;
   }
 
   static fromRadarrReleaseIndexerName(name: Nullable<string>) {
     if (name == null) return null;
-    if (name.toLowerCase().includes("rutracker")) return TorrentTracker.RUTRACKER;
+    name = name.toLowerCase();
+    if (name.includes("rutracker")) return TorrentTracker.RUTRACKER;
+    if (name.includes("rutor")) return TorrentTracker.RUTOR;
     return null;
   }
 
