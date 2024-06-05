@@ -65,7 +65,7 @@ export const handler = async (event: { movieId: string }) => {
     if (radarrDownloadUrl == null) continue;
     const pathStart = radarrDownloadUrl.indexOf("/", 8) + 1;
     const publicDownloadUrl = `${prowlarrBaseUrl}${radarrDownloadUrl.substring(pathStart)}`;
-    const response = await axios.get(publicDownloadUrl, { responseType: 'arraybuffer' });
+    const response = await axios.get(publicDownloadUrl, { responseType: 'arraybuffer', maxRedirects: 0 });
     let locationHeader: Nullable<string> = response.headers?.Location;
     if (locationHeader == null) locationHeader = response.headers?.location;
     if (locationHeader != null && locationHeader.startsWith("magnet")) {
