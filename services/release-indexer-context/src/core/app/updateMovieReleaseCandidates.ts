@@ -69,10 +69,9 @@ export const handler = async (event: { movieId: string }) => {
     let locationHeader: Nullable<string> = response.headers?.Location;
     if (locationHeader == null) locationHeader = response.headers?.location;
     if (locationHeader != null && locationHeader.startsWith("magnet")) {
-      const hash = locationHeader.substring(locationHeader.indexOf("xt=urn:btih:") + "xt=urn:btih:".length, locationHeader.indexOf('&'));
       const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, locationHeader,
-        sizeInBytes, resolution, ripType, tracker, hash);
-      m.addReleaseCandidate(hash, rc);
+        sizeInBytes, resolution, ripType, tracker, rr.infoHash);
+      m.addReleaseCandidate(rr.infoHash, rc);
     } else {
       const torrentFile = response.data;
       const decodedTorrent = bencode.decode(torrentFile);
