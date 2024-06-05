@@ -7,6 +7,7 @@ import { L8nLang } from "../value-object/L8nLang";
 // Let's say the code is 'eng'. Is it British English or American English? We could make a guess by
 // analyzing the movie details from TMDB.
 export function resolveAudioLang(code: Nullable<string>, locale: L8nLang, title: Nullable<string>) {
+  console.log(`code=${code}`);
   if (title == null) title = "";
   title = title.toLowerCase();
   let audioLang = AudioLang.fromISO_639_1(code);

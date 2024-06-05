@@ -12,11 +12,9 @@ import { TorrentClientInterface, TorrentInfo } from '../ports/TorrentClientInter
 import { Movie } from '../domain/aggregate/Movie';
 import { TorrentRelease } from '../domain/entity/TorrentRelease';
 import { AudioMetadata } from '../domain/value-object/AudioMetadata';
-import { AudioLang } from '../domain/value-object/AudioLang';
 import { resolveVoiceType } from '../domain/service/resolveVoiceType';
 import { resolveAudioAuthor } from '../domain/service/resolveAudioAuthor';
 import { SubsMetadata } from '../domain/value-object/SubsMetadata';
-import { SubsLang } from '../domain/value-object/SubsLang';
 import { SubsType } from '../domain/value-object/SubsType';
 import { SubsAuthor } from '../domain/value-object/SubsAuthor';
 import { TorrentTracker } from '../domain/value-object/TorrentTracker';

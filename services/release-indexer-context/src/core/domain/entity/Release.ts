@@ -96,7 +96,7 @@ export class Release {
   // the streams are considered the same. For example, two streams having same voice type (e.g. MVO) and unknown
   // authors. Only one of them will be added to the final release.
   private static compareAudio(a1: AudioMetadata, a2: AudioMetadata) {
-    if (AudioLang.equals(a1.lang, a2.lang)) return null;
+    if (!AudioLang.equals(a1.lang, a2.lang)) return null;
     let ret = AudioVoiceType.compare(a1.voiceType, a2.voiceType);
     if (ret === 0) {
       if (a1.author == null && a2.author == null) return 0;
