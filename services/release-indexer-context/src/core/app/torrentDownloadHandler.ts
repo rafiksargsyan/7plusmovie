@@ -145,7 +145,6 @@ function findMediaFile(torrentInfo: TorrentInfo, releaseYear: number): Nullable<
 // add media file name to release
 function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate) {
   const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
-  console.log(JSON.stringify(streams));
   const release = new TorrentRelease(rc.ripType, rc.resolution, rc.infoHash, name, rc.tracker, rc.downloadUrl);
   for (let s of streams.streams) {
     if (s.index === 0 && s.codec_type !== "video") {
