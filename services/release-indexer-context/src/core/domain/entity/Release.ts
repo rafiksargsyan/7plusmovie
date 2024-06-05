@@ -7,6 +7,9 @@ import { Resolution } from "../value-object/Resolution";
 import { RipType } from "../value-object/RipType";
 import { SubsMetadata } from "../value-object/SubsMetadata";
 import { AudioLang } from "../value-object/AudioLang";
+import { SubsLang } from "../value-object/SubsLang";
+import { SubsType } from "../value-object/SubsType";
+import { SubsAuthor } from "../value-object/SubsAuthor";
 
 export class Release {
   private _audios: AudioMetadata[] = [];
@@ -72,7 +75,7 @@ export class Release {
     }
     this._audios = this._audios.filter((v) => {
       const compareResult = Release.compareAudio(v, am);
-      return compareResult == null || compareResult > 0;
+      return compareResult == null;
     });
     this._audios.push(am);
   }
@@ -85,12 +88,27 @@ export class Release {
       if (x.stream === sm.stream) {
         throw new SubsMetadataWithSameStreamNumberAlreadyExistsError();
       }
-      if (x.lang === sm.lang && x.type == sm.type) {
+      const compareResult = Release.compareSubs(x, sm);
+      if (compareResult != null && compareResult >= 0) {
         return;
       }
     }
+    this._subs = this._subs.filter((v) => {
+      const compareResult = Release.compareSubs(v, sm);
+      return compareResult == null;
+    })
     this._subs.push(sm);
   }
+
+  private static compareSubs(s1: SubsMetadata, s2: SubsMetadata) {
+    if (!SubsLang.equals(s1.lang, s2.lang) || !SubsType.equals(s1.type, s2.type)) return null;
+    let subsAuthorPriorityList = SubsLang.subsAuthorPriorityList[s1.lang.key];
+    if (subsAuthorPriorityList == null) subsAuthorPriorityList = [];
+    const s1AuthorIndex = subsAuthorPriorityList.findIndex((v) => SubsAuthor.equals(s1.author, v));
+    const s2AuthorIndex = subsAuthorPriorityList.findIndex((v) => SubsAuthor.equals(s2.author, v));
+    return s1AuthorIndex - s2AuthorIndex;
+  }
+
   // null means the audio streams are not comparable and both must be
   // added. For example, if two streams have different languages both must be added to the final release. 0 means
   // the streams are considered the same. For example, two streams having same voice type (e.g. MVO) and unknown
@@ -102,8 +120,10 @@ export class Release {
       if (a1.author == null && a2.author == null) return 0;
       if (a1.author == null && a2.author != null) return -1;
       if (a1.author != null && a2.author == null) return 1;
-      const a1AuthorIndex = a1.lang.audioAuthorPriorityList.findIndex((v) => AudioAuthor.equals(a1.author, v));
-      const a2AuthorIndex = a1.lang.audioAuthorPriorityList.findIndex((v) => AudioAuthor.equals(a2.author, v));
+      let audioAuthorPriorityList = AudioLang.audioAuthorPriorityList[a1.lang.key];
+      if (audioAuthorPriorityList == null) audioAuthorPriorityList = [];
+      const a1AuthorIndex = audioAuthorPriorityList.findIndex((v) => AudioAuthor.equals(a1.author, v));
+      const a2AuthorIndex = audioAuthorPriorityList.findIndex((v) => AudioAuthor.equals(a2.author, v));
       if (a1AuthorIndex === -1 && a2AuthorIndex === -1) return null;
       ret = a1AuthorIndex - a2AuthorIndex;
     }

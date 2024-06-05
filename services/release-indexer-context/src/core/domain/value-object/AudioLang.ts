@@ -2,32 +2,35 @@ import { Nullable } from "../../../Nullable";
 import { AudioAuthor } from "./AudioAuthor";
 
 export class AudioLang {
-  public static readonly EN = new AudioLang("EN", "en", "en", []);
-  public static readonly EN_US = new AudioLang("EN_US","en", "en-US", []);
-  public static readonly EN_GB = new AudioLang("EN_GB", "en", "en-GB", []);
-  public static readonly EN_AU = new AudioLang("EN_AU", "en", "en-AU", []);
-  public static readonly RU = new AudioLang("RU", "ru", "ru",
-  [AudioAuthor.JASKIER, AudioAuthor.HDREZKA, AudioAuthor.TVSHOWS, AudioAuthor.READ_HEAD_SOUND,
-    AudioAuthor.LOSTFILM, AudioAuthor.BRAVO_RECORDS_GEORGIA]);
-  public static readonly FR = new AudioLang("FR", "fr", "fr", []);
-  public static readonly JA = new AudioLang("JA", "ja", "ja", []);
-  public static readonly PT = new AudioLang("PT", "pt", "pt", []);
-  public static readonly KO = new AudioLang("KO", "ko", "ko", []);
-  public static readonly DA = new AudioLang("DA", "da", "da", []);
-  public static readonly HI = new AudioLang("HI", "hi", "hi", []);
-  public static readonly HI_IN = new AudioLang("HI_IN", "hi", "hi-IN", []);
-  public static readonly IT = new AudioLang("IT", "it", "it", []);
-  public static readonly RO = new AudioLang("RO", "ro", "ro", []);
-  public static readonly RO_RO = new AudioLang("RO_RO", "ro", "ro-RO", []);
-  public static readonly FA = new AudioLang("FA", "fa", "fa", []);
-  public static readonly FA_IR = new AudioLang("FA_IR", "fa", "fa-IR", []);
-  public static readonly SV = new AudioLang("SV", "sv", "sv", []);
-  public static readonly SV_SE = new AudioLang("SV_SE", "sv", "sv-SE", []);
-  public static readonly PL = new AudioLang("PL", "pl", "pl", []);
-  public static readonly PL_PL = new AudioLang("PL_PL", "pl", "pl-PL", []);
-  public static readonly ES = new AudioLang("ES", "es", "es", []);
-  public static readonly ES_ES = new AudioLang("ES_ES", "es", "es-ES", []);
-  public static readonly ES_419 = new AudioLang("ES_419", "es", "es-419", []);
+  public static readonly EN = new AudioLang("EN", "en", "en");
+  public static readonly EN_US = new AudioLang("EN_US","en", "en-US");
+  public static readonly EN_GB = new AudioLang("EN_GB", "en", "en-GB");
+  public static readonly EN_AU = new AudioLang("EN_AU", "en", "en-AU");
+  public static readonly RU = new AudioLang("RU", "ru", "ru");
+  public static readonly FR = new AudioLang("FR", "fr", "fr");
+  public static readonly JA = new AudioLang("JA", "ja", "ja");
+  public static readonly PT = new AudioLang("PT", "pt", "pt");
+  public static readonly KO = new AudioLang("KO", "ko", "ko");
+  public static readonly DA = new AudioLang("DA", "da", "da");
+  public static readonly HI = new AudioLang("HI", "hi", "hi");
+  public static readonly HI_IN = new AudioLang("HI_IN", "hi", "hi-IN");
+  public static readonly IT = new AudioLang("IT", "it", "it");
+  public static readonly RO = new AudioLang("RO", "ro", "ro");
+  public static readonly RO_RO = new AudioLang("RO_RO", "ro", "ro-RO");
+  public static readonly FA = new AudioLang("FA", "fa", "fa");
+  public static readonly FA_IR = new AudioLang("FA_IR", "fa", "fa-IR");
+  public static readonly SV = new AudioLang("SV", "sv", "sv");
+  public static readonly SV_SE = new AudioLang("SV_SE", "sv", "sv-SE");
+  public static readonly PL = new AudioLang("PL", "pl", "pl");
+  public static readonly PL_PL = new AudioLang("PL_PL", "pl", "pl-PL");
+  public static readonly ES = new AudioLang("ES", "es", "es");
+  public static readonly ES_ES = new AudioLang("ES_ES", "es", "es-ES");
+  public static readonly ES_419 = new AudioLang("ES_419", "es", "es-419");
+
+  public static readonly audioAuthorPriorityList = {
+    "RU" : [AudioAuthor.JASKIER, AudioAuthor.HDREZKA, AudioAuthor.TVSHOWS, AudioAuthor.READ_HEAD_SOUND,
+      AudioAuthor.LOSTFILM, AudioAuthor.BRAVO_RECORDS_GEORGIA]
+  }
 
   private static readonly FROM_ISO_639_2 = {
     "en" : AudioLang.EN,
@@ -66,13 +69,11 @@ export class AudioLang {
   public readonly key: string;
   public readonly lang: string;
   public readonly langTag: string;
-  public readonly audioAuthorPriorityList: AudioAuthor[]; // authors comming later have higher priority by default
 
-  private constructor(key: string, lang: string, langTag: string, audioAuthorPriorityList: AudioAuthor[]) {
+  private constructor(key: string, lang: string, langTag: string) {
     this.key = key;
     this.lang = lang;
     this.langTag = langTag;
-    this.audioAuthorPriorityList = audioAuthorPriorityList;
   }
 
   static fromKeyOrThrow(key: string): AudioLang {

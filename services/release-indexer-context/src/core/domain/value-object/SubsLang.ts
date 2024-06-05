@@ -1,4 +1,5 @@
 import { Nullable } from "../../../Nullable";
+import { SubsAuthor } from "./SubsAuthor";
 
 export class SubsLang {
   public static readonly EN = new SubsLang("EN");
@@ -58,6 +59,11 @@ export class SubsLang {
     "pol" : SubsLang.PL,
     "spa" : SubsLang.ES
   } as const;
+
+  public static readonly subsAuthorPriorityList = {
+    "RU" : [SubsAuthor.HDREZKA_18PLUS, SubsAuthor.VIRUSEPROJECT_18PLUS, SubsAuthor.COOL_STORY_BLOG_18PLUS,
+      SubsAuthor.HDREZKA, SubsAuthor.VIRUSEPROJECT, SubsAuthor.COOL_STORY_BLOG, SubsAuthor.TVSHOWS]
+  }
 
   public readonly key;
 

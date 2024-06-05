@@ -35,8 +35,8 @@ export class AudioAuthor {
     return null;
   }
 
-  static equals(st1: Nullable<AudioAuthor>, st2: Nullable<AudioAuthor>) {
-    return this.fromKey(st1?.key) == this.fromKey(st2?.key);
+  static equals(a1: Nullable<AudioAuthor>, a2: Nullable<AudioAuthor>) {
+    return a1?.key == a2?.key;
   }
 }
 
