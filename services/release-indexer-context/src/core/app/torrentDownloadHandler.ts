@@ -16,7 +16,6 @@ import { resolveVoiceType } from '../domain/service/resolveVoiceType';
 import { resolveAudioAuthor } from '../domain/service/resolveAudioAuthor';
 import { SubsMetadata } from '../domain/value-object/SubsMetadata';
 import { SubsType } from '../domain/value-object/SubsType';
-import { SubsAuthor } from '../domain/value-object/SubsAuthor';
 import { TorrentTracker } from '../domain/value-object/TorrentTracker';
 import { resolveAudioLang } from '../domain/service/resolveAudioLang';
 import { resolveSubsLang } from '../domain/service/resolveSubsLang';
