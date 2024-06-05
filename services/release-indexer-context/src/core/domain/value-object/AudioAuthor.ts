@@ -10,6 +10,8 @@ export class AudioAuthor {
   public static readonly JASKIER = new AudioAuthor("JASKIER");
   public static readonly VIRUSEPROJECT = new AudioAuthor("VIRUSEPROJECT");
   public static readonly VIRUSEPROJECT_18PLUS = new AudioAuthor("VIRUSEPROJECT_18PLUS");
+  public static readonly MOVIE_DALEN = new AudioAuthor("MOVIE_DALEN");
+  public static readonly POSTMODERN = new AudioAuthor("POSTMODERN");
  
   public readonly key;
 

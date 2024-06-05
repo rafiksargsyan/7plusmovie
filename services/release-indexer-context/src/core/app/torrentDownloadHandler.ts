@@ -164,7 +164,7 @@ function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentRele
       };
       let langStr = s.tags?.language;
       let titleStr = s.tags?.title;
-      let lang = resolveAudioLang(langStr, m.originalLocale, titleStr);
+      let lang = resolveAudioLang(langStr, m.originalLocale, titleStr, resolveAudioAuthor(titleStr, rc.tracker));
       if (lang == null) continue;
       const am = new AudioMetadata(s.index, s.channels, bitRate, lang,
         resolveVoiceType(titleStr, lang, m.originalLocale), resolveAudioAuthor(titleStr, rc.tracker));

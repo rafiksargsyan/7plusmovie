@@ -10,7 +10,7 @@ export function resolveSubsLang(title: Nullable<string>, code: Nullable<string>,
   if (title == null) title = "";
   title = title.toLowerCase();
   let subsLang = SubsLang.fromISO_639_1(code);
-  if (subsLang == null) subsLang = subsLang.fromISO_639_2(code);
+  if (subsLang == null) subsLang = SubsLang.fromISO_639_2(code);
   if (SubsLang.equals(subsLang, SubsLang.EN) && locale.lang === "en") {
     const tmp = SubsLang.fromKey(locale.key); // Increasing specifity using locale
     if (tmp != null) return tmp;

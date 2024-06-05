@@ -5,7 +5,7 @@ import { TorrentTracker } from "../value-object/TorrentTracker";
 export function resolveSubsAuthor(title: Nullable<string>, tracker: Nullable<TorrentTracker>) {
   if (title == null) return null;
   title = title.toLowerCase();
-  if (TorrentTracker.equals(tracker, TorrentTracker.RUTRACKER)) {
+  if (TorrentTracker.equals(tracker, TorrentTracker.RUTRACKER) || TorrentTracker.equals(tracker, TorrentTracker.RUTOR)) {
     const hdrezak18PlusRegex = /hdrezka.*18\+/;
     const coolStoryBlogRegex = /cool.*story.*blog/;
     const coolStoryBlog18PlusRegex = /cool.*story.*blog.*18\+/;

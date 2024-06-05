@@ -30,7 +30,7 @@ export class AudioLang {
 
   public static readonly audioAuthorPriorityList = {
     "RU" : [AudioAuthor.JASKIER, AudioAuthor.HDREZKA, AudioAuthor.TVSHOWS, AudioAuthor.READ_HEAD_SOUND,
-      AudioAuthor.LOSTFILM, AudioAuthor.BRAVO_RECORDS_GEORGIA]
+      AudioAuthor.LOSTFILM, AudioAuthor.BRAVO_RECORDS_GEORGIA, AudioAuthor.MOVIE_DALEN]
   }
 
   private static readonly FROM_ISO_639_2 = {
