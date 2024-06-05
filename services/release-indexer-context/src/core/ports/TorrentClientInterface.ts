@@ -12,6 +12,7 @@ export interface TorrentClientInterface {
   addTagToTorrent(hash: string, tag: string);
   removeTagFromTorrent(hash: string, tag: string);
   resumeTorrent(hash: string);
+  pauseTorrent(hash: string);
   disableAllFiles(hash: string);
   enableFile(hash: string, id: number);
 }

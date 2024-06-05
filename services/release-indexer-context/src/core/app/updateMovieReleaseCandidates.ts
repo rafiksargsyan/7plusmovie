@@ -65,10 +65,20 @@ export const handler = async (event: { movieId: string }) => {
     if (radarrDownloadUrl == null) continue;
     const pathStart = radarrDownloadUrl.indexOf("/", 8) + 1;
     const publicDownloadUrl = `${prowlarrBaseUrl}${radarrDownloadUrl.substring(pathStart)}`;
+    axios.interceptors.response.use(
+      response => response,
+      error => {
+        if (error.response && [301, 302].includes(error.response.status)) {
+          return error.response;
+        }
+        return Promise.reject(error);
+      }
+    );
     const response = await axios.get(publicDownloadUrl, { responseType: 'arraybuffer', maxRedirects: 0 });
     let locationHeader: Nullable<string> = response.headers?.Location;
     if (locationHeader == null) locationHeader = response.headers?.location;
     if (locationHeader != null && locationHeader.startsWith("magnet")) {
+      if (rr.infoHash in m.releaseCandidates) continue;
       const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, locationHeader,
         sizeInBytes, resolution, ripType, tracker, rr.infoHash);
       m.addReleaseCandidate(rr.infoHash, rc);
@@ -78,6 +88,7 @@ export const handler = async (event: { movieId: string }) => {
       const info = decodedTorrent['info'];
       const bencodedInfo = bencode.encode(info);
       const infoHash = createHash('sha1').update(bencodedInfo).digest('hex');
+      if (infoHash in m.releaseCandidates) continue;
       const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, publicDownloadUrl,
         sizeInBytes, resolution, ripType, tracker, infoHash);
       m.addReleaseCandidate(infoHash, rc);

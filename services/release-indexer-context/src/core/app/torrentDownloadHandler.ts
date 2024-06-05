@@ -70,9 +70,6 @@ export const handler = async (): Promise<void> => {
           }
           if (prevRcNotProcessed) break;
           let torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash);
-          console.log("torrentinfo");
-          console.log(JSON.stringify(torrentInfo));
-          console.log(`betterRCAlreadyPromoted=${betterRCAlreadyPromoted}`);
           if (betterRCAlreadyPromoted) {
             if (torrentInfo?.tags.length === 1 && torrentInfo?.tags[0] === m.id) {
               await qbitClient.deleteTorrentByHash(rc.infoHash);
@@ -80,7 +77,12 @@ export const handler = async (): Promise<void> => {
             continue;
           }
           if (torrentInfo == null) {
-            torrentInfo = await addTorrentAndWait(qbitClient, rc.downloadUrl, rc.infoHash);
+            if (rc.downloadUrl.startsWith("magnet")) {
+              torrentInfo = await addMagnetAndWait(qbitClient, rc.downloadUrl, rc.infoHash);
+            } else {
+              torrentInfo = await addTorrentAndWait(qbitClient, rc.downloadUrl, rc.infoHash);
+            }
+            
             await qbitClient.disableAllFiles(rc.infoHash);
           }
           await qbitClient.addTagToTorrent(rc.infoHash, m.id);
@@ -191,9 +193,35 @@ async function addTorrentAndWait(qbitClient: TorrentClientInterface, downloadUrl
     torrentInfo = await qbitClient.getTorrentByHash(hash);
   }
   if (torrentInfo == null) {
-    throw new TimedOutWaitingTorrentToBeAdded();
+    throw new TimedOutWaitingTorrentToBeAddedError();
   }
   return torrentInfo;
 }
 
-class TimedOutWaitingTorrentToBeAdded extends Error {}
+async function addMagnetAndWait(qbitClient: TorrentClientInterface, downloadUrl: string, hash: string): Promise<TorrentInfo> {
+  await qbitClient.addTorrentByUrl(downloadUrl);
+  let torrentInfo;
+  let tryCount = 3;
+  while (torrentInfo == null && tryCount-- > 0) {
+    await new Promise(r => setTimeout(r, 5000));
+    torrentInfo = await qbitClient.getTorrentByHash(hash);
+  }
+  if (torrentInfo == null) {
+    throw new TimedOutWaitingTorrentToBeAddedError();
+  }
+  tryCount = 10;
+  await qbitClient.resumeTorrent(hash);
+  while (torrentInfo.files.length === 0 && tryCount-- > 0) {
+    await new Promise(r => setTimeout(r, 1000));
+    torrentInfo = await qbitClient.getTorrentByHash(hash);
+  }
+  await qbitClient.pauseTorrent(hash);
+  if (torrentInfo.files.length === 0) {
+    throw new TimedOutWaitingTorrentFilesError();
+  }
+  return torrentInfo;
+}
+
+class TimedOutWaitingTorrentToBeAddedError extends Error {}
+
+class TimedOutWaitingTorrentFilesError extends Error {}

@@ -11,7 +11,7 @@ export class Movie {
   private _originalLocale: L8nLang;
   private _originalTitle: string;
   private _releaseYear: number;
-  private _releases: { [releaseId:string]: { equalReleases: Release[], replacedReleaseIds: string[] } } = {};
+  private _releases: { [releaseId:string]: { release: Release, replacedReleaseIds: string[] } } = {};
   private _releaseCandidates: { [key:string]: ReleaseCandidate } = {};
   private _lastReleaseCandidateScanTimeMillis = 0;
 
@@ -89,15 +89,13 @@ export class Movie {
       throw new ReleaseWithIdAlreadyExistsError();
     }
     for (let k in this._releases) {
-      const compareResult = Release.compare(this._releases[k].equalReleases[0], r);
+      const compareResult = Release.compare(this._releases[k].release, r);
       if (compareResult == null) {
         continue;
       }
       if (compareResult === 0) {
-        for (let x of this._releases[k].equalReleases) {
-          if (x.hash === r.hash) return;
-        }
-        this._releases[k].equalReleases.push(r);
+        if (this._releases[k].release.hash === r.hash || Release.compare2(this._releases[k].release, r) >= 0) return;
+        this._releases[k].release = r;
         return;
       }
       if (compareResult > 0) {
@@ -105,7 +103,7 @@ export class Movie {
       }
       if (compareResult < 0) {
         if (!(id in this._releases)) {
-          this._releases[id] = { equalReleases: [r], replacedReleaseIds: [] }
+          this._releases[id] = { release: r, replacedReleaseIds: [] }
         }
         this._releases[id].replacedReleaseIds.push(k);
         this._releases[id].replacedReleaseIds.push(...this._releases[k].replacedReleaseIds);
@@ -113,7 +111,7 @@ export class Movie {
       }
     }
     if (!(id in this._releases)) {
-      this._releases[id] = { equalReleases: [r], replacedReleaseIds: [] }
+      this._releases[id] = { release: r, replacedReleaseIds: [] }
     }
   }
 

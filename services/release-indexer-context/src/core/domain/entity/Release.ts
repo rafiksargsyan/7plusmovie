@@ -17,12 +17,14 @@ export class Release {
   private _size: number;
   private _hash: string;
   private _mediaFileRelativePath: string;
+  private _creationTime;
 
   public constructor(ripType: RipType, res: Resolution, hash: string, mediaFileRelativePath: string) {
     this._ripType = this.validateRipType(ripType);
     this._resolution= this.validateResolution(res);
     this._hash = this.validateHash(hash);
     this._mediaFileRelativePath = this.validateMediaFileRelativePath(mediaFileRelativePath);
+    this._creationTime = Date.now();
   }
 
   static compare(r1: Release, r2: Release) {
@@ -49,13 +51,21 @@ export class Release {
     }
     if (r1Audios.length !== 0 && r2Audios.length !== 0) return null;
     if (r1Audios.length === 0 && r2Audios.length === 0)  {
+      return 0;
+    }  
+    return r1Audios.length - r2Audios.length;
+  }
+
+  static compare2(r1: Release, r2: Release) {
+    if (Math.abs(r1.creationTime - r2.creationTime) < 7 * 24 * 60 * 60 * 1000) {
       if (RipType.compare(r1._ripType, r2._ripType) === 0) {
         return r2._size - r1._size;
       } else {
         return RipType.compare(r1._ripType, r2._ripType);
       }
-    }  
-    return r1Audios.length - r2Audios.length;
+    } else {
+      return r1.creationTime - r2.creationTime;
+    }
   }
 
   public addAudioMetadata(am: AudioMetadata) {
@@ -164,6 +174,10 @@ export class Release {
 
   get hash() {
     return this._hash;
+  }
+
+  get creationTime() {
+    return this._creationTime;
   }
 }
 

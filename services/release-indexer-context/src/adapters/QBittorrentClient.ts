@@ -243,6 +243,20 @@ export class QBittorrentClient implements TorrentClientInterface {
     }
   }
 
+  public async pauseTorrent(hash: string) {
+    if (hash == null || hash.trim().length === 0) {
+      throw new InvalidHashError();
+    }
+    await this.checkAndInit();
+    try {
+      await this._restClient.post('torrents/pause', {
+        hashes: hash
+      });
+    } catch (e) {
+      throw new TorrentApiError((e as Error).message);
+    }
+  }
+
   public async disableAllFiles(hash: string) {
     if (hash == null || hash.trim().length === 0) {
       throw new InvalidHashError();
