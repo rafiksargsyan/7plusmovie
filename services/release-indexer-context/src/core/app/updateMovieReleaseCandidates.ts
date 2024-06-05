@@ -62,20 +62,27 @@ export const handler = async (event: { movieId: string }) => {
     }
     const sizeInBytes = rr.size;
     const radarrDownloadUrl: string = rr.downloadUrl;
-    if (radarrDownloadUrl == null) continue; // handle also magnet urls
+    if (radarrDownloadUrl == null) continue;
     const pathStart = radarrDownloadUrl.indexOf("/", 8) + 1;
     const publicDownloadUrl = `${prowlarrBaseUrl}${radarrDownloadUrl.substring(pathStart)}`;
-    const torrentFile = (await axios.get(publicDownloadUrl, { responseType: 'arraybuffer' })).data;
-    const decodedTorrent = bencode.decode(torrentFile);
-    const decodedTorrentStr = bencode.decode(torrentFile, 'utf-8');
-    decodedTorrentStr['info']['piece length'] = undefined;
-    decodedTorrentStr['info']['pieces'] = undefined;
-    const info = decodedTorrent['info'];
-    const bencodedInfo = bencode.encode(info);
-    const infoHash = createHash('sha1').update(bencodedInfo).digest('hex');
-    const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, publicDownloadUrl,
-      sizeInBytes, resolution, ripType, tracker, infoHash);
-    m.addReleaseCandidate(infoHash, rc);
+    const response = await axios.get(publicDownloadUrl, { responseType: 'arraybuffer' });
+    let locationHeader: Nullable<string> = response.headers?.Location;
+    if (locationHeader == null) locationHeader = response.headers?.location;
+    if (locationHeader != null && locationHeader.startsWith("magnet")) {
+      const hash = locationHeader.substring(locationHeader.indexOf("xt=urn:btih:") + "xt=urn:btih:".length, locationHeader.indexOf('&'));
+      const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, locationHeader,
+        sizeInBytes, resolution, ripType, tracker, hash);
+      m.addReleaseCandidate(hash, rc);
+    } else {
+      const torrentFile = response.data;
+      const decodedTorrent = bencode.decode(torrentFile);
+      const info = decodedTorrent['info'];
+      const bencodedInfo = bencode.encode(info);
+      const infoHash = createHash('sha1').update(bencodedInfo).digest('hex');
+      const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, publicDownloadUrl,
+        sizeInBytes, resolution, ripType, tracker, infoHash);
+      m.addReleaseCandidate(infoHash, rc);
+    }
   }
   await docClient.put({ TableName: movieTableName, Item: m }); 
 };
