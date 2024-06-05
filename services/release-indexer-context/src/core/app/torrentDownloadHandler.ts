@@ -85,7 +85,7 @@ export const handler = async (): Promise<void> => {
           }
           await qbitClient.addTagToTorrent(rc.infoHash, m.id);
           torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash) as TorrentInfo;
-          const fileIndex: Nullable<number> = findMediaFile(torrentInfo);
+          const fileIndex: Nullable<number> = findMediaFile(torrentInfo, m.releaseYear);
           if (fileIndex == null) {
             m.ignoreRc(rcKey);
             continue;
@@ -123,18 +123,23 @@ export const handler = async (): Promise<void> => {
   await qbitClient.destroy();
 };
 
-// need to improve the logic by using release year, title to better much media files
-function findMediaFile(torrentInfo: Nullable<TorrentInfo>): Nullable<number> {
-  if (torrentInfo == null) return null;
-  let fileIndex: Nullable<number> = null;
+// We might also need to use title to better much, but with release year most of the cases
+// should be covered.
+function findMediaFile(torrentInfo: TorrentInfo, releaseYear: number): Nullable<number> {
+  let candidates: { name: string; size: number; progress: number; index: number; } [] = [];
   for (let i = 0; i < torrentInfo.files.length; ++i) {
     const f = torrentInfo.files[i];
     if (f.name.endsWith('.mkv') || f.name.endsWith('.mp4') || f.name.endsWith('.avi')) {
-      if (fileIndex != null) return null; // found two files
-      fileIndex = i;
+      candidates.push(f);
     }
   }
-  return fileIndex;
+  if (candidates.length === 1) return candidates[0].index;
+  let candidates2: { name: string; size: number; progress: number; index: number; } [] = [];
+  for (let c of candidates) {
+    if (c.name.includes(releaseYear.toString())) candidates2.push(c);
+  }
+  if (candidates2.length === 1) return candidates2[0].index;
+  return null;
 }
 
 // add media file name to release
