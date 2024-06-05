@@ -3,7 +3,6 @@ import { AudioLang } from "../value-object/AudioLang";
 import { AudioVoiceType } from "../value-object/AudioVoiceType";
 import { L8nLang } from "../value-object/L8nLang";
 
-// Improve the logic by analyzing the movie details from TMDB
 export function resolveVoiceType(title: Nullable<string>, lang: AudioLang, locale: L8nLang) {
   if (lang.lang === locale.lang) {
     return AudioVoiceType.ORIGINAL;

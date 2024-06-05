@@ -20,6 +20,7 @@ import { SubsAuthor } from '../domain/value-object/SubsAuthor';
 import { TorrentTracker } from '../domain/value-object/TorrentTracker';
 import { resolveAudioLang } from '../domain/service/resolveAudioLang';
 import { resolveSubsLang } from '../domain/service/resolveSubsLang';
+import { resolveSubsAuthor } from '../domain/service/resolveSubsAuthor';
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -170,7 +171,7 @@ function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentRele
       let titleStr = s.tags?.title;
       let lang = resolveSubsLang(titleStr, langStr, m.originalLocale);
       if (lang == null) continue;
-      const sm = new SubsMetadata(s.index, lang, SubsType.fromTitle(titleStr), SubsAuthor.fromTitle(titleStr)); // todo
+      const sm = new SubsMetadata(s.index, lang, SubsType.fromTitle(titleStr), resolveSubsAuthor(titleStr, rc.tracker));
       release.addSubsMetadata(sm);
     }
   }

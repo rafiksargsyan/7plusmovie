@@ -61,8 +61,8 @@ export class SubsLang {
   } as const;
 
   public static readonly subsAuthorPriorityList = {
-    "RU" : [SubsAuthor.HDREZKA_18PLUS, SubsAuthor.VIRUSEPROJECT_18PLUS, SubsAuthor.COOL_STORY_BLOG_18PLUS,
-      SubsAuthor.HDREZKA, SubsAuthor.VIRUSEPROJECT, SubsAuthor.COOL_STORY_BLOG, SubsAuthor.TVSHOWS]
+    "RU" : [SubsAuthor.HDREZKA_18PLUS,  SubsAuthor.COOL_STORY_BLOG_18PLUS,
+      SubsAuthor.HDREZKA, SubsAuthor.COOL_STORY_BLOG, SubsAuthor.TVSHOWS]
   }
 
   public readonly key;
