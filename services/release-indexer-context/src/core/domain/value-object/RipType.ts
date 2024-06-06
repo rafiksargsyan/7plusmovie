@@ -2,9 +2,10 @@ import { Nullable } from "../../../Nullable";
 
 export class RipType {
   public static readonly CAM = new RipType("CAM", 0);
-  public static readonly HDTV = new RipType("HDTV", 1);
-  public static readonly WEB = new RipType("WEB", 2);
-  public static readonly BR = new RipType("BR", 3);
+  public static readonly DVD = new RipType("DVD", 1);
+  public static readonly HDTV = new RipType("HDTV", 2);
+  public static readonly WEB = new RipType("WEB", 3);
+  public static readonly BR = new RipType("BR", 4);
   
   public readonly key;
   private readonly priority: number;
@@ -40,6 +41,7 @@ export class RipType {
     if (s.includes("web")) return RipType.WEB;
     if (s.includes("cam") || s.includes("telesync")) return RipType.CAM;
     if (s.includes("hdtv")) return RipType.HDTV;
+    if (s.includes("dvd")) return RipType.DVD;
     return null;
   }
 }
