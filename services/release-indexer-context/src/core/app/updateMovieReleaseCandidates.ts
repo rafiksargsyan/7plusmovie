@@ -33,6 +33,13 @@ const radarrClient = axios.create({
   baseURL: radarrApiBaseUrl,
 });
 
+const radarrDownloadUrlBaseMapping = {
+  "http://vpn:9117/" : "http://jackett-vpn.q62.xyz/",
+  "http://jackett:9117/" : "http://jackett.q62.xyz/",
+  "http://prowlarr:9696/" : "http://prowlarr.q62.xyz/",
+  "http://vpn:9696/" : "http://prowlarr-vpn.q62.xyz/"
+} as const;
+
 export const handler = async (event: { movieId: string }) => {
   const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
   const secret = JSON.parse(secretStr.SecretString!);

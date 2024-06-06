@@ -9,7 +9,7 @@ export class TorrentTracker {
   public static readonly LIMETORRENT = new TorrentTracker("LIMETORRENT");
   public static readonly DONTORRENT = new TorrentTracker("DONTORRENT");
   public static readonly CORSARO_NERO = new TorrentTracker("CORSARO_NERO");
-  
+
   private constructor(key: string) {
    this.key = key;
   }
