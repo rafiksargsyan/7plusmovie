@@ -8,14 +8,20 @@ export class TorrentReleaseCandidate extends ReleaseCandidate {
   private _tracker: TorrentTracker;
   private _infoHash: string;
   private _downloadUrl: string;
+  private _infoUrl: Nullable<string>;
+  private _seeders: number;
 
   public constructor(createEmptyObject: boolean, releaseTime?: Nullable<number>, downloadUrl?: string,
-    sizeInBytes?: Nullable<number>, res?: Resolution, ripType?: RipType, tracker?: TorrentTracker, infoHash?: string) {
+    sizeInBytes?: Nullable<number>, res?: Resolution, ripType?: RipType, tracker?: TorrentTracker, infoHash?: string,
+    infoUrl?: string, seeders?: number) {
     super(createEmptyObject, releaseTime, sizeInBytes, res, ripType);
     if (!createEmptyObject) {
       this._tracker = this.validateTracker(tracker);
       this._infoHash = this.validateInfoHash(infoHash);
       this._downloadUrl = this.validateDownloadUrl(downloadUrl);
+      this._infoUrl = infoUrl;
+      if (seeders == null) seeders = 0;
+      this._seeders = seeders;
     }
   }
 

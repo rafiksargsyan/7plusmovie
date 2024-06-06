@@ -50,6 +50,8 @@ export const handler = async (event: { movieId: string }) => {
     let tracker = TorrentTracker.fromRadarrReleaseGuid(rr.guid);
     if (tracker == null) tracker = TorrentTracker.fromRadarrReleaseIndexerName(rr.indexer);
     if (tracker == null) continue;
+    const seeders = rr.seeders;
+    if (seeders == null || seeders === 0) continue;
     const ripType = RipType.fromRadarrReleaseQualitySource(rr?.quality?.quality?.source);
     if (ripType == null) continue;
     const radarrResolution = rr?.quality?.quality?.resolution;
@@ -57,7 +59,7 @@ export const handler = async (event: { movieId: string }) => {
     if (resolution == null) continue;
     let releaseTimeInMillis: Nullable<number> = null;
     const radarrAgeMinutes = rr.ageMinutes;
-    if (radarrAgeMinutes != null) {
+    if (radarrAgeMinutes != null && radarrAgeMinutes >= 1) {
       releaseTimeInMillis = Date.now() - radarrAgeMinutes * 60 * 1000;
     }
     const sizeInBytes = rr.size;
@@ -80,7 +82,7 @@ export const handler = async (event: { movieId: string }) => {
     if (locationHeader != null && locationHeader.startsWith("magnet")) {
       if (rr.infoHash in m.releaseCandidates) continue;
       const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, locationHeader,
-        sizeInBytes, resolution, ripType, tracker, rr.infoHash);
+        sizeInBytes, resolution, ripType, tracker, rr.infoHash, rr.infoUrl, seeders);
       m.addReleaseCandidate(rr.infoHash, rc);
     } else {
       const torrentFile = response.data;
@@ -90,7 +92,7 @@ export const handler = async (event: { movieId: string }) => {
       const infoHash = createHash('sha1').update(bencodedInfo).digest('hex');
       if (infoHash in m.releaseCandidates) continue;
       const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, publicDownloadUrl,
-        sizeInBytes, resolution, ripType, tracker, infoHash);
+        sizeInBytes, resolution, ripType, tracker, infoHash, rr.infoUrl, seeders);
       m.addReleaseCandidate(infoHash, rc);
     }
   }
