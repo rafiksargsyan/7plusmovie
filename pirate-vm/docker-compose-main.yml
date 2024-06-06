@@ -19,7 +19,7 @@ services:
       # prowlarr ports
       - 9696:9696
       # jackett ports
-      - 9117:9117  
+      - 9117:9117
     restart: "unless-stopped"
 
   ## Default credentials of qBittorrent - Username: admin password: adminadmin ##
@@ -96,6 +96,13 @@ services:
       - TZ=UTC
     volumes:
       - jackett-config:/config
+    network_mode: service:vpn
+    depends_on: [ 'vpn' ]
+
+  flaresolverr:
+    image: flaresolverr/flaresolverr:v3.3.19
+    container_name: flaresolverr
+    restart: unless-stopped
     network_mode: service:vpn
     depends_on: [ 'vpn' ]
 
