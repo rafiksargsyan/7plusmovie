@@ -18,6 +18,8 @@ services:
       - 6881:6881/udp
       # flaresolverr ports
       - 8191:8191
+      # jackett-vpn port
+      - 9118:9117
     restart: "unless-stopped"
 
   ## Default credentials of qBittorrent - Username: admin password: adminadmin ##
@@ -88,7 +90,7 @@ services:
     restart: unless-stopped
 
   jackett:
-    image: linuxserver/jackett:0.21.1264
+    image: linuxserver/jackett:0.22.71
     container_name: jackett
     restart: unless-stopped
     environment:
@@ -102,6 +104,19 @@ services:
         ipv4_address: 172.18.0.7
     ports:
       - 9117:9117
+
+  jackett-vpn:
+    image: linuxserver/jackett:0.22.71
+    container_name: jackett-vpn
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=UTC
+    volumes:
+      - jackett-vpn-config:/config
+    depends_on: [ 'vpn' ]
+    network_mode: service:vpn
 
   flaresolverr:
     image: flaresolverr/flaresolverr:v3.3.19
@@ -156,6 +171,7 @@ volumes:
   jellyfin-config:
   qbittorrent-config:
   jackett-config:
+  jackett-vpn-config:
 
 networks:
   main-network:
