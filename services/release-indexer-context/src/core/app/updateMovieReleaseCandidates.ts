@@ -13,6 +13,7 @@ import { TorrentTracker } from "../domain/value-object/TorrentTracker";
 import bencode from 'bencode';
 import { createHash } from 'crypto';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
+import { S3 } from '@aws-sdk/client-s3';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const movieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
@@ -33,12 +34,11 @@ const radarrClient = axios.create({
   baseURL: radarrApiBaseUrl,
 });
 
-const radarrDownloadUrlBaseMapping = {
-  "http://vpn:9117/" : "http://jackett-vpn.q62.xyz/",
-  "http://jackett:9117/" : "http://jackett.q62.xyz/",
-  "http://prowlarr:9696/" : "http://prowlarr.q62.xyz/",
-  "http://vpn:9696/" : "http://prowlarr-vpn.q62.xyz/"
-} as const;
+const s3 = new S3({});
+
+const torrentFilesS3Bucket = process.env.TORRENT_FILES_S3_BUCKET!;
+
+const radarrDownloadUrlBaseMapping = process.env.RADARR_DOWNLOAD_URL_BASE_MAPPING!;
 
 export const handler = async (event: { movieId: string }) => {
   const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
