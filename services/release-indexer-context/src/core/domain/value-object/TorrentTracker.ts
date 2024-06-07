@@ -9,6 +9,7 @@ export class TorrentTracker {
   public static readonly LIMETORRENT = new TorrentTracker("LIMETORRENT");
   public static readonly DONTORRENT = new TorrentTracker("DONTORRENT");
   public static readonly CORSARO_NERO = new TorrentTracker("CORSARO_NERO");
+  public static readonly CINECALIDAD = new TorrentTracker("CINECALIDAD");
 
   private constructor(key: string) {
    this.key = key;
@@ -41,6 +42,7 @@ export class TorrentTracker {
     if (guid.includes("dontorrent")) return TorrentTracker.DONTORRENT;
     if (guid.includes("corsaronero")) return TorrentTracker.CORSARO_NERO;
     if (guid.includes("oxtorrent")) return TorrentTracker.OXTORRENT;
+    if (guid.includes("cinecalidad")) return TorrentTracker.CINECALIDAD;
     return null;
   }
 
@@ -55,11 +57,12 @@ export class TorrentTracker {
     if (name.includes("limetorrent")) return TorrentTracker.LIMETORRENT;
     if (name.includes("dontorrent")) return TorrentTracker.DONTORRENT;
     if (name.includes("corsaro nero")) return TorrentTracker.CORSARO_NERO;
+    if (name.includes("cinecalidad")) return TorrentTracker.CINECALIDAD;
     return null;
   }
 
   static equals(tt1: Nullable<TorrentTracker>, tt2: Nullable<TorrentTracker>) {
-    return this.fromKey(tt1?.key) == this.fromKey(tt2?.key);
+    return tt1?.key == tt2?.key;
   }
 }
 

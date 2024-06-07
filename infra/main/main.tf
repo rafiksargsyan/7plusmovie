@@ -315,3 +315,8 @@ resource "aws_dynamodb_table" "movie_release_indexer_context" {
     enabled = true
   }
 }
+
+resource "aws_s3_bucket" "trt_files" {
+  bucket = "trt-files-${local.deployment_id}"
+}
+
