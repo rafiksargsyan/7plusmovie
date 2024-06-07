@@ -10,6 +10,7 @@ export class TorrentTracker {
   public static readonly DONTORRENT = new TorrentTracker("DONTORRENT");
   public static readonly CORSARO_NERO = new TorrentTracker("CORSARO_NERO");
   public static readonly CINECALIDAD = new TorrentTracker("CINECALIDAD");
+  public static readonly RARBG = new TorrentTracker("RARBG")
 
   private constructor(key: string) {
    this.key = key;
@@ -43,6 +44,7 @@ export class TorrentTracker {
     if (guid.includes("corsaronero")) return TorrentTracker.CORSARO_NERO;
     if (guid.includes("oxtorrent")) return TorrentTracker.OXTORRENT;
     if (guid.includes("cinecalidad")) return TorrentTracker.CINECALIDAD;
+    if (guid.includes("therarbg")) return TorrentTracker.RARBG
     return null;
   }
 
@@ -52,12 +54,13 @@ export class TorrentTracker {
     if (name.includes("rutracker")) return TorrentTracker.RUTRACKER;
     if (name.includes("rutor")) return TorrentTracker.RUTOR;
     if (name.includes("1337x")) return TorrentTracker.X1337;
-    if (name.includes("the priate bay")) return TorrentTracker.THE_PIRATE_BAY;
+    if (name.includes("the pirate bay")) return TorrentTracker.THE_PIRATE_BAY;
     if (name.includes("oxtorrent")) return TorrentTracker.OXTORRENT;
     if (name.includes("limetorrent")) return TorrentTracker.LIMETORRENT;
     if (name.includes("dontorrent")) return TorrentTracker.DONTORRENT;
     if (name.includes("corsaro nero")) return TorrentTracker.CORSARO_NERO;
     if (name.includes("cinecalidad")) return TorrentTracker.CINECALIDAD;
+    if (name.includes("rarbg")) return TorrentTracker.RARBG;
     return null;
   }
 

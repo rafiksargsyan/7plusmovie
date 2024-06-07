@@ -34,6 +34,12 @@ export class Resolution {
     if (min <= 720) return this.HD;
     return this.FHD;
   }
+  
+  static fromPixelsOrThrow(d1: Nullable<number>, d2: Nullable<number>): Resolution {
+    const r = this.fromPixels(d1, d2);
+    if (r == null) throw new FailedToResolveResolutionError();
+    return r;
+  }
 
   static compare(r1: Nullable<Resolution>, r2: Nullable<Resolution>) {
     if (r1 == null && r2 != null) return -1;
@@ -44,3 +50,5 @@ export class Resolution {
 }
 
 export class InvalidResolutionKeyError extends Error {}
+
+export class FailedToResolveResolutionError extends Error {}

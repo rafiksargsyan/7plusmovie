@@ -44,6 +44,19 @@ export class RipType {
     if (s.includes("dvd")) return RipType.DVD;
     return null;
   }
+
+  static fromRadarrReleaseQualitySourceOrThrow(s: Nullable<string>) {
+    if (s == null) s = "";
+    s = s.toLowerCase();
+    if (s.includes("bluray")) return RipType.BR;
+    if (s.includes("web")) return RipType.WEB;
+    if (s.includes("cam") || s.includes("telesync")) return RipType.CAM;
+    if (s.includes("hdtv")) return RipType.HDTV;
+    if (s.includes("dvd")) return RipType.DVD;
+    throw new InvalidRadarrQualitySourceError(); 
+  }
 }
 
 class InvalidRipTypeKeyError extends Error {}
+
+class InvalidRadarrQualitySourceError extends Error {}
