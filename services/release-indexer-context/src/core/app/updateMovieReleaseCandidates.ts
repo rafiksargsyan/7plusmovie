@@ -102,8 +102,7 @@ export const handler = async (event: { movieId: string }) => {
           const s3Params = {
             Bucket: torrentFilesS3Bucket,
             Key: s3ObjectKey,
-            Body: torrentFile,
-            ACL: ObjectCannedACL.public_read
+            Body: torrentFile
           };
           await s3.putObject(s3Params);
           const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, s3ObjectKey,

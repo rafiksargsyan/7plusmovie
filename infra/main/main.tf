@@ -320,7 +320,7 @@ resource "aws_s3_bucket" "trt_files" {
   bucket = "trt-files-${local.deployment_id}"
 }
 
-resource "aws_s3_bucket_public_access_block" "example" {
+resource "aws_s3_bucket_public_access_block" "trt_files" {
   bucket = aws_s3_bucket.trt_files.id
 
   block_public_acls       = false
@@ -329,4 +329,11 @@ resource "aws_s3_bucket_public_access_block" "example" {
   restrict_public_buckets = false
 }
 
+resource "aws_s3_bucket_acl" "example" {
+  depends_on = [
+    aws_s3_bucket_public_access_block.trt_files
+  ]
 
+  bucket = aws_s3_bucket.trt_files.id
+  acl    = "public-read"
+}
