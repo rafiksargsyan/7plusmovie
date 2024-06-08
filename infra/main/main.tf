@@ -329,7 +329,7 @@ resource "aws_s3_bucket_public_access_block" "trt_files" {
   restrict_public_buckets = false
 }
 
-resource "aws_s3_bucket_acl" "example" {
+resource "aws_s3_bucket_acl" "trt_files" {
   depends_on = [
     aws_s3_bucket_public_access_block.trt_files
   ]
