@@ -331,9 +331,17 @@ resource "aws_s3_bucket_public_access_block" "trt_files" {
 
 resource "aws_s3_bucket_acl" "trt_files" {
   depends_on = [
-    aws_s3_bucket_public_access_block.trt_files
+    aws_s3_bucket_public_access_block.trt_files,
+    aws_s3_bucket_ownership_controls.trt_files
   ]
 
   bucket = aws_s3_bucket.trt_files.id
   acl    = "public-read"
+}
+
+resource "aws_s3_bucket_ownership_controls" "trt_files" {
+  bucket = aws_s3_bucket.trt_files.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
 }
