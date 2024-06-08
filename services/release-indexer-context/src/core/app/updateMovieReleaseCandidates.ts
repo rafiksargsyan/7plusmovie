@@ -63,7 +63,7 @@ export const handler = async (event: { movieId: string }) => {
     try {
       checkProtocol(rr.protocol);
       checkCustomFormatScore(rr.customFormatScore);
-      const tracker = resolveTorrentTrackerOrThrow(rr.guid, rr.indexer);
+      const tracker = resolveTorrentTrackerOrThrow(rr, rr.indexer);
       if (TorrentTracker.equals(tracker, TorrentTracker.DONTORRENT)) {
         checkReleaseYearFromInfoUrl(rr.infoUrl, m.releaseYear);
       }
@@ -118,12 +118,13 @@ export const handler = async (event: { movieId: string }) => {
   await docClient.put({ TableName: movieTableName, Item: m }); 
 };
 
-function resolveTorrentTrackerOrThrow(guid: Nullable<string>,
+function resolveTorrentTrackerOrThrow(rr: { infoUrl: string, commentUrl: string },
                                       indexerName: Nullable<string>) {
-  let tracker = TorrentTracker.fromRadarrReleaseGuid(guid);
+  const url = rr.infoUrl + rr.commentUrl;
+  let tracker = TorrentTracker.fromRadarrInfoCommentUrl(url);
   if (tracker == null) tracker = TorrentTracker.fromRadarrReleaseIndexerName(indexerName);
   if (tracker == null) {
-    throw new Error(`Failed to resolve the torrent tracker for (raddarrReleaseGuid=${guid}, radarrReleaseIndexerName=${indexerName})`);
+    throw new Error(`Failed to resolve the torrent tracker for (raddarrInfoCommentUrl=${url}, radarrReleaseIndexerName=${indexerName})`);
   }
   return tracker;
 }

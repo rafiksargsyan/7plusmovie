@@ -32,19 +32,19 @@ export class TorrentTracker {
     return TorrentTracker[key];
   }
 
-  static fromRadarrReleaseGuid(guid: Nullable<string>) {
-    if (guid == null) return null;
-    guid = guid.toLowerCase();
-    if (guid.includes("rutracker.org")) return TorrentTracker.RUTRACKER;
-    if (guid.includes("rutor.info")) return TorrentTracker.RUTOR;
-    if (guid.includes("thepiratebay")) return TorrentTracker.THE_PIRATE_BAY;
-    if (guid.includes("limetorrents")) return TorrentTracker.LIMETORRENT;
-    if (guid.includes("1337x")) return TorrentTracker.X1337;
-    if (guid.includes("dontorrent")) return TorrentTracker.DONTORRENT;
-    if (guid.includes("corsaronero")) return TorrentTracker.CORSARO_NERO;
-    if (guid.includes("oxtorrent")) return TorrentTracker.OXTORRENT;
-    if (guid.includes("cinecalidad")) return TorrentTracker.CINECALIDAD;
-    if (guid.includes("therarbg")) return TorrentTracker.RARBG
+  static fromRadarrInfoCommentUrl(url: Nullable<string>) {
+    if (url == null) return null;
+    url = url.toLowerCase();
+    if (url.includes("rutracker.org")) return TorrentTracker.RUTRACKER;
+    if (url.includes("rutor.info")) return TorrentTracker.RUTOR;
+    if (url.includes("thepiratebay")) return TorrentTracker.THE_PIRATE_BAY;
+    if (url.includes("limetorrents")) return TorrentTracker.LIMETORRENT;
+    if (url.includes("1337x")) return TorrentTracker.X1337;
+    if (url.includes("dontorrent")) return TorrentTracker.DONTORRENT;
+    if (url.includes("corsaronero")) return TorrentTracker.CORSARO_NERO;
+    if (url.includes("oxtorrent")) return TorrentTracker.OXTORRENT;
+    if (url.includes("cinecalidad")) return TorrentTracker.CINECALIDAD;
+    if (url.includes("therarbg")) return TorrentTracker.RARBG
     return null;
   }
 
