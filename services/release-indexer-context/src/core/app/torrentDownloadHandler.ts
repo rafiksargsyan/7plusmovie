@@ -36,6 +36,7 @@ const qbittorrentApiBaseUrl = process.env.QBITTORRENT_API_BASE_URL!;
 const qbittorrentUsername = process.env.QBITTORRENT_USERNAME!;
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const mediaFilesBaseUrl = process.env.MEDIA_FILES_BASE_URL!;
+const torrentFilesBaseUrl = process.env.TORRENT_FILES_BASE_URL!;
 
 export const handler = async (): Promise<void> => {
   const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
@@ -46,6 +47,7 @@ export const handler = async (): Promise<void> => {
   const movies = await movieRepo.getAllMovies();
   for (const m of movies) {
     try {
+      if (!m.readyToBeProcessed) continue;
       const releaseCandidates = Object.entries(m.releaseCandidates);
       releaseCandidates.sort((a, b) => ReleaseCandidate.compare(b[1], a[1]));
       for (let i = 0; i < releaseCandidates.length; ++i) {
@@ -80,7 +82,7 @@ export const handler = async (): Promise<void> => {
             if (rc.downloadUrl.startsWith("magnet")) {
               torrentInfo = await addMagnetAndWait(qbitClient, rc.downloadUrl, rc.infoHash);
             } else {
-              torrentInfo = await addTorrentAndWait(qbitClient, rc.downloadUrl, rc.infoHash);
+              torrentInfo = await addTorrentAndWait(qbitClient, `${torrentFilesBaseUrl}/${rc.downloadUrl}`, rc.infoHash);
             }
             
             await qbitClient.disableAllFiles(rc.infoHash);

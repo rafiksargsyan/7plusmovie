@@ -20,6 +20,7 @@ provider:
         - "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
         - "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
         - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        - "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
   stage: ${opt:stage}
   logRetentionInDays: 1
 
@@ -70,11 +71,8 @@ functions:
   
   movieReleaseCandidateUpdater:
     environment:
-      RADARR_API_BASE_URL: ${env:RADARR_API_BASE_URL}
-      RADARR_DOWNLOAD_URL_BASE_MAPPING: ${env:RADARR_DOWNLOAD_URL_BASE_MAPPING}
-      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
-      TORRENT_FILES_S3_BUCKET: ${env:TORRENT_FILES_S3_BUCKET}
+      MOVIE_RELEASE_CANDIDATE_UPDATER_FANOUT_TOPIC: !Ref movieReleaseCandidateUpdaterFanoutTopic
     handler: src/core/app/movieReleaseCandidateUpdater.handler
     events:
       - schedule: rate(${file(./.env.${sls:stage}.yml):RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minute)
@@ -88,12 +86,34 @@ functions:
       SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
       MEDIA_FILES_BASE_URL: ${env:MEDIA_FILES_BASE_URL}
+      TORRENT_FILES_BASE_URL: ${env:TORRENT_FILES_BASE_URL}
     handler: src/core/app/torrentDownloadHandler.handler
     layers:
       - ${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_FFPROBE_LAYER}
     events:
       - schedule: rate(${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_INTERVAL_IN_MINUTES} minute)
     timeout: 900
+
+  updateMovieReleaseCandidates:
+    environment:
+      RADARR_API_BASE_URL: ${env:RADARR_API_BASE_URL}
+      RADARR_DOWNLOAD_URL_BASE_MAPPING: ${env:RADARR_DOWNLOAD_URL_BASE_MAPPING}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      TORRENT_FILES_S3_BUCKET: ${env:TORRENT_FILES_S3_BUCKET}
+    handler: src/core/app/updateMovieReleaseCandidates.handler
+    events:
+      - sns:
+          arn: !Ref movieReleaseCandidateUpdaterFanoutTopic
+          topicName: movieReleaseCandidateUpdaterFanoutTopic_${sls:stage}
+    timeout: 900
+
+resources:
+  Resources:
+    movieReleaseCandidateUpdaterFanoutTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: movieReleaseCandidateUpdaterFanoutTopic_${sls:stage}
 
 plugins:
   - serverless-esbuild

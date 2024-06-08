@@ -13,10 +13,11 @@ export class Movie {
   private _releaseYear: number;
   private _releases: { [releaseId:string]: { release: Release, replacedReleaseIds: string[] } } = {};
   private _releaseCandidates: { [key:string]: ReleaseCandidate } = {};
+  private _alreadyAddedRadarrReleaseGuidList: string[] = [];
   private _lastReleaseCandidateScanTimeMillis = 0;
+  private _readyToBeProcessed = false;
 
-  public constructor(createEmptyObject: boolean, originalLocale?: Nullable<L8nLang>, originalTitle?: Nullable<string>,
-    releaseYear?: Nullable<number>) {
+  public constructor(createEmptyObject: boolean, originalLocale?: L8nLang, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
       this._id = uuid();
       this._originalLocale = this.validateOriginalLocale(originalLocale);
@@ -86,6 +87,7 @@ export class Movie {
       throw new NullReleaseError();
     }
     if (id in this._releases) {
+      console.log(`duplicateId=${id}`)
       throw new ReleaseWithIdAlreadyExistsError();
     }
     for (let k in this._releases) {
@@ -124,10 +126,16 @@ export class Movie {
       if (this._releaseCandidates[k].status == null) return;
     }
     this._releaseCandidates = {};
+    this._alreadyAddedRadarrReleaseGuidList = []
+    this._readyToBeProcessed = false;
   }
 
   get releaseCandidates() {
     return this._releaseCandidates;
+  }
+
+  get readyToBeProcessed() {
+    return this._readyToBeProcessed;
   }
 
   public ignoreRc(id: string) {
@@ -159,6 +167,24 @@ export class Movie {
   get lastRCScanTime() {
     return this._lastReleaseCandidateScanTimeMillis;
   }
+
+  set readyToBeProcessed(flag: boolean) {
+    this._readyToBeProcessed = flag;
+  }
+
+  public addRadarrReleaseGuid(guid: string) {
+    if (guid == null || guid.trim() == "") {
+      throw new EmptyRadarrReleaseGuidError();
+    }
+    this._alreadyAddedRadarrReleaseGuidList.push(guid);
+  }
+
+  public radarrReleaseAlreadyAdded(guid: string) {
+    if (guid == null || guid.trim() == "") {
+      throw new EmptyRadarrReleaseGuidError();
+    }
+    return this._alreadyAddedRadarrReleaseGuidList.includes(guid);
+  }
 }
 
 export class NullReleaseIdError extends Error {};
@@ -182,3 +208,5 @@ export class ReleaseCandidateNotFoundError extends Error {};
 export class ReleaseCandidateAlreadyExistsError extends Error {};
 
 export class NullReleaseCandidateError extends Error {};
+
+export class EmptyRadarrReleaseGuidError extends Error {};

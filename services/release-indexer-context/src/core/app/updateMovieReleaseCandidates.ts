@@ -13,7 +13,7 @@ import { TorrentTracker } from "../domain/value-object/TorrentTracker";
 import bencode from 'bencode';
 import { createHash } from 'crypto';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
-import { ObjectCannedACL, S3 } from '@aws-sdk/client-s3';
+import { S3 } from '@aws-sdk/client-s3';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const movieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
@@ -50,17 +50,25 @@ const torrentFilesS3Bucket = process.env.TORRENT_FILES_S3_BUCKET!;
 
 const radarrDownloadUrlBaseMapping = JSON.parse(process.env.RADARR_DOWNLOAD_URL_BASE_MAPPING!);
 
-export const handler = async (event: { movieId: string }) => {
+export const handler = async (event) => {
+  const startTime = Date.now();
   const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
   const secret = JSON.parse(secretStr.SecretString!);
   const radarrApiKey = secret.RADARR_API_KEY!;
   radarrClient.defaults.headers.common['x-api-key'] = radarrApiKey;
-  const m: Movie = await movieRepo.getMovieById(event.movieId);
-  m.checkAndEmptyReleaseCandidates(true);
+  const m: Movie = await movieRepo.getMovieById(JSON.parse(event.Records[0].Sns.Message).movieId);
   const radarrMovieId = (await radarrClient.get(`movie/?tmdbId=${m.tmdbId}`)).data[0].id;
   const getReleasesResult = (await radarrClient.get(`release/?movieId=${radarrMovieId}`)).data;
+  let allRadarrReleasesProcessed = true;
   for (let rr of getReleasesResult) {
     try {
+      // Exit before lambda timesout
+      if (Date.now() - startTime > 60 * 1000) {
+        allRadarrReleasesProcessed = false;
+        break;
+      }
+      if (m.radarrReleaseAlreadyAdded(rr.guid)) continue;
+      m.addRadarrReleaseGuid(rr.guid);
       checkProtocol(rr.protocol);
       checkCustomFormatScore(rr.customFormatScore);
       const tracker = resolveTorrentTrackerOrThrow(rr, rr.indexer);
@@ -108,10 +116,14 @@ export const handler = async (event: { movieId: string }) => {
             sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders);
           m.addReleaseCandidate(hash, rc);
         }
+        allRadarrReleasesProcessed = false;
       }
     } catch(e) {
       console.log(e);
     }   
+  }
+  if (allRadarrReleasesProcessed) {
+    m.readyToBeProcessed = true;
   }
   await docClient.put({ TableName: movieTableName, Item: m }); 
 };
