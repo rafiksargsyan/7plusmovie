@@ -13,7 +13,7 @@ import { TorrentTracker } from "../domain/value-object/TorrentTracker";
 import bencode from 'bencode';
 import { createHash } from 'crypto';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
-import { S3 } from '@aws-sdk/client-s3';
+import { ObjectCannedACL, S3 } from '@aws-sdk/client-s3';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const movieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
@@ -81,6 +81,7 @@ export const handler = async (event: { movieId: string }) => {
         m.addReleaseCandidate(hash, rc);
       } else {
         const publicDownloadUrl = getTorrentPublicDownloadURLOrThrow(radarrDownloadUrl);
+        console.log(`publicDownloadUrl=${publicDownloadUrl}`);
         const response = await axios.get(publicDownloadUrl, { responseType: 'arraybuffer', maxRedirects: 0 });
         let locationHeader: Nullable<string> = response.headers?.Location;
         if (locationHeader == null) locationHeader = response.headers?.location;
@@ -97,13 +98,15 @@ export const handler = async (event: { movieId: string }) => {
           const bencodedInfo = bencode.encode(info);
           let hash = checkEmptyHash(createHash('sha1').update(bencodedInfo).digest('hex'));
           checkDuplicateHash(hash, m);
+          const s3ObjectKey = `${m.id}/${hash}`;
           const s3Params = {
             Bucket: torrentFilesS3Bucket,
-            Key: hash,
-            Body: torrentFile
+            Key: s3ObjectKey,
+            Body: torrentFile,
+            ACL: ObjectCannedACL.public_read
           };
           await s3.putObject(s3Params);
-          const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, hash,
+          const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, s3ObjectKey,
             sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders);
           m.addReleaseCandidate(hash, rc);
         }
@@ -161,7 +164,6 @@ function checkRadarrDownloadUrl(url: Nullable<string>) {
 }
 
 function getTorrentPublicDownloadURLOrThrow(radarrDownloadUrl: string) {
-  console.log(radarrDownloadUrlBaseMapping);
   for (let k in radarrDownloadUrlBaseMapping) {
     if (radarrDownloadUrl.startsWith(k)) {
       const publicBase = radarrDownloadUrlBaseMapping[k];

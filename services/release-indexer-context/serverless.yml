@@ -19,6 +19,7 @@ provider:
         - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
         - "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
         - "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
   stage: ${opt:stage}
   logRetentionInDays: 1
 
