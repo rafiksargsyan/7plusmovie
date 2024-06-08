@@ -65,7 +65,7 @@ export const handler = async (event: { movieId: string }) => {
       checkCustomFormatScore(rr.customFormatScore);
       const tracker = resolveTorrentTrackerOrThrow(rr, rr.indexer);
       if (TorrentTracker.equals(tracker, TorrentTracker.DONTORRENT)) {
-        checkReleaseYearFromInfoUrl(rr.infoUrl, m.releaseYear);
+        await checkReleaseYearFromInfoUrl(rr.infoUrl, m.releaseYear);
       }
       const seeders = checkSeeders(rr.seeders);
       const ripType = RipType.fromRadarrReleaseQualitySourceOrThrow(rr?.quality?.quality?.source);
@@ -80,8 +80,7 @@ export const handler = async (event: { movieId: string }) => {
           sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders);
         m.addReleaseCandidate(hash, rc);
       } else {
-        const publicDownloadUrl = getTorrentPublicDownloadURLOrThrow(radarrDownloadUrl);
-        console.log(`publicDownloadUrl=${publicDownloadUrl}`);
+        const publicDownloadUrl = checkUrlLength(getTorrentPublicDownloadURLOrThrow(radarrDownloadUrl));
         const response = await axios.get(publicDownloadUrl, { responseType: 'arraybuffer', maxRedirects: 0 });
         let locationHeader: Nullable<string> = response.headers?.Location;
         if (locationHeader == null) locationHeader = response.headers?.location;
@@ -192,4 +191,11 @@ async function checkReleaseYearFromInfoUrl(infoUrl: string, releaseYear: number)
   if (!regex.test(response.data)) {
     throw new Error('Release year didn\'t match for DonTorrent release');
   }
+}
+
+function checkUrlLength(url: string) {
+  if (url.length > 2000) {
+    throw new Error('Url is too big');
+  }
+  return url;
 }
