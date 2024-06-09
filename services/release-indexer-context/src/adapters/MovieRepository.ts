@@ -3,6 +3,7 @@ import { MovieRepositoryInterface } from "../core/ports/MovieRepositoryInterface
 import { Movie } from "../core/domain/aggregate/Movie";
 import { ReleaseCandidate } from "../core/domain/entity/ReleaseCandidate";
 import { TorrentReleaseCandidate } from "../core/domain/entity/TorrentReleaseCandidate";
+import { TorrentRelease } from "../core/domain/entity/TorrentRelease";
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 
@@ -36,6 +37,16 @@ export class MovieRepository implements MovieRepositoryInterface {
         }
       }
       data.Item._releaseCandidates = releaseCandidates;
+      let releases = {};
+      for (let rItemKey in data.Item._releases) {
+        const rItem = data.Item._releases[rItemKey];
+        if (rItem.release._tracker != null) {
+          const release = new TorrentRelease(true);
+          Object.assign(release, rItem.release);
+          releases[rItemKey] = { ...rItem, release: release };
+        }
+      }
+      data.Item._releases = releases;
       let movie = new Movie(true);
       Object.assign(movie, data.Item);  
     return movie;
@@ -61,6 +72,16 @@ export class MovieRepository implements MovieRepositoryInterface {
           }
         }
         item._releaseCandidates = releaseCandidates;
+        let releases = {};
+        for (let rItemKey in item._releases) {
+          const rItem = item._releases[rItemKey];
+          if (rItem.release._tracker != null) {
+            const release = new TorrentRelease(true);
+            Object.assign(release, rItem.release);
+            releases[rItemKey] = { ...rItem, release: release };
+          }
+        }
+        item._releases = releases;
         const movie = new Movie(true);
         Object.assign(movie, item);
         movies.push(movie);

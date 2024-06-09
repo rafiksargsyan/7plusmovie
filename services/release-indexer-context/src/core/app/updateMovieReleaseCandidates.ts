@@ -77,15 +77,31 @@ export const handler = async (event) => {
       }
       const seeders = checkSeeders(rr.seeders);
       const ripType = RipType.fromRadarrReleaseQualitySourceOrThrow(rr?.quality?.quality?.source);
-      const resolution = Resolution.fromPixelsOrThrow(rr?.quality?.quality?.resolution, rr?.quality?.quality?.resolution);
+      let resolution = Resolution.fromPixels(rr?.quality?.quality?.resolution, rr?.quality?.quality?.resolution);
+      if (resolution == null) {
+        if (ripType.isLowQuality()) {
+          resolution = Resolution.SD;
+        } else {
+          throw new Error('Failed to find resolution');
+        }
+      }
+      if (new Date().getFullYear() - m.releaseYear > 1 && (ripType.isLowQuality() || Resolution.compare(resolution, Resolution.SD) === 0)) {
+        continue; 
+      }
       const releaseTimeInMillis = resolveReleaseTimeInMillis(rr.age, rr.ageMinutes, tracker);
       const sizeInBytes = rr.size;
       const radarrDownloadUrl = checkRadarrDownloadUrl(rr.downloadUrl);
+      let radarrLanguages: string[] = [];
+      if (rr.languages != null) {
+        for (let l of rr.languages) {
+          radarrLanguages.push(l.name.toLowerCase());
+        }
+      }
       if (radarrDownloadUrl.startsWith("magnet")) {
         const hash = checkEmptyHash(rr.infoHash);
         checkDuplicateHash(hash, m);
         const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, radarrDownloadUrl,
-          sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders);
+          sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders, radarrLanguages);
         m.addReleaseCandidate(hash, rc);
       } else {
         const publicDownloadUrl = checkUrlLength(getTorrentPublicDownloadURLOrThrow(radarrDownloadUrl));
@@ -93,10 +109,17 @@ export const handler = async (event) => {
         let locationHeader: Nullable<string> = response.headers?.Location;
         if (locationHeader == null) locationHeader = response.headers?.location;
         if (locationHeader != null && locationHeader.startsWith("magnet")) {
-          const hash = checkEmptyHash(rr.infoHash);
+          let hash = rr.infoHash;
+          if (hash == null || hash.trim() === "") {
+            const hashPrefix = "xt=urn:btih:";
+            let hashStartIndex = locationHeader.indexOf(hashPrefix) + hashPrefix.length;
+            let hashEndIndex = locationHeader.indexOf('&', hashStartIndex);
+            hash = locationHeader.substring(hashStartIndex, hashEndIndex);
+          }
+          checkEmptyHash(hash);
           checkDuplicateHash(hash, m);
           const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, locationHeader,
-            sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders);
+            sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders, radarrLanguages);
           m.addReleaseCandidate(hash, rc);
         } else {
           const torrentFile = response.data;
@@ -113,7 +136,7 @@ export const handler = async (event) => {
           };
           await s3.putObject(s3Params);
           const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, s3ObjectKey,
-            sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders);
+            sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders, radarrLanguages);
           m.addReleaseCandidate(hash, rc);
         }
         allRadarrReleasesProcessed = false;

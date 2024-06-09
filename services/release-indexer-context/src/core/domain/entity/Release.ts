@@ -8,6 +8,7 @@ import { AudioLang } from "../value-object/AudioLang";
 import { SubsLang } from "../value-object/SubsLang";
 import { SubsType } from "../value-object/SubsType";
 import { SubsAuthor } from "../value-object/SubsAuthor";
+import { Nullable } from "../../../Nullable";
 
 export class Release {
   private _audios: AudioMetadata[] = [];
@@ -19,18 +20,22 @@ export class Release {
   private _mediaFileRelativePath: string;
   private _creationTime;
 
-  public constructor(ripType: RipType, res: Resolution, hash: string, mediaFileRelativePath: string) {
-    this._ripType = this.validateRipType(ripType);
-    this._resolution= this.validateResolution(res);
-    this._hash = this.validateHash(hash);
-    this._mediaFileRelativePath = this.validateMediaFileRelativePath(mediaFileRelativePath);
-    this._creationTime = Date.now();
+  public constructor(createEmptyObject: boolean, ripType?: RipType, res?: Resolution, hash?: string, mediaFileRelativePath?: string) {
+    if (!createEmptyObject) {
+     this._ripType = this.validateRipType(ripType);
+     this._resolution= this.validateResolution(res);
+     this._hash = this.validateHash(hash);
+     this._mediaFileRelativePath = this.validateMediaFileRelativePath(mediaFileRelativePath);
+     this._creationTime = Date.now();
+    }
   }
 
   static compare(r1: Release, r2: Release) {
-    if (RipType.compare(r1._ripType, r2._ripType) !== 0) {
-      if (RipType.compare(r1._ripType, RipType.CAM) === 0) return -1;
-      if (RipType.compare(r2._ripType, RipType.CAM) === 0) return 1;
+    const r1RipType = RipType.fromKeyOrThrow(r1.ripType.key);
+    const r2RipType = RipType.fromKeyOrThrow(r2.ripType.key);
+    if (r1RipType.isLowQuality() || r2RipType.isLowQuality()) {
+      const compareResult = RipType.compare(r1RipType, r2RipType);
+      if (compareResult !== 0) return compareResult;
     }
     if (Resolution.compare(r1._resolution, r2._resolution) !== 0) {
       return Resolution.compare(r1._resolution, r2._resolution);
@@ -144,28 +149,28 @@ export class Release {
     return ret;
   }
 
-  private validateRipType(ripType: RipType) {
+  private validateRipType(ripType: Nullable<RipType>) {
     if (ripType == null) {
       throw new NullRipTypError();
     }
     return ripType;
   }
 
-  private validateResolution(res: Resolution) {
+  private validateResolution(res: Nullable<Resolution>) {
     if (res == null) {
       throw new NullResolutionError();
     }
     return res;
   }
 
-  private validateMediaFileRelativePath(path: string) {
+  private validateMediaFileRelativePath(path: Nullable<string>) {
     if (path == null || path.trim() === "") {
       throw new InvalidMediaFilePathError();
     }
     return path;
   }
 
-  private validateHash(hash: string) {
+  private validateHash(hash: Nullable<string>) {
     if (hash == null) {
       throw new NullHashError();
     }
@@ -178,6 +183,14 @@ export class Release {
 
   get creationTime() {
     return this._creationTime;
+  }
+
+  get ripType() {
+    return this._ripType;
+  }
+
+  get audios() {
+    return this._audios;
   }
 }
 

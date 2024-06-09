@@ -10,6 +10,8 @@ export class AudioLang {
   public static readonly FR = new AudioLang("FR", "fr", "fr");
   public static readonly JA = new AudioLang("JA", "ja", "ja");
   public static readonly PT = new AudioLang("PT", "pt", "pt");
+  public static readonly PT_BR = new AudioLang("PT_BR", "pt", "pt-BR");
+  public static readonly PT_PT = new AudioLang("PT_PT", "pt", "pt-PT");
   public static readonly KO = new AudioLang("KO", "ko", "ko");
   public static readonly DA = new AudioLang("DA", "da", "da");
   public static readonly HI = new AudioLang("HI", "hi", "hi");

@@ -7,7 +7,26 @@ import { L8nLang } from "../value-object/L8nLang";
 // We might need to improve the logic by adding other parameters (e.g. TMDB id, torrent tracker, etc.).
 // Let's say the code is 'eng'. Is it British English or American English? We could make a guess by
 // analyzing the movie details from TMDB.
-export function resolveAudioLang(code: Nullable<string>, locale: L8nLang, title: Nullable<string>, author: Nullable<AudioAuthor>) {
+export function resolveAudioLang(code: Nullable<string>,
+                                 locale: L8nLang,
+                                 title: Nullable<string>,
+                                 author: Nullable<AudioAuthor>,
+                                 numUndefinedAudios: number,
+                                 numAudioStreams: number,
+                                 radarrLanguages: string[]) {
+  if (numUndefinedAudios > 1) return null;
+  if (numAudioStreams === 1) {
+    if (radarrLanguages.includes("portuguese (brazil)")) return AudioLang.PT_BR;
+    if (radarrLanguages.includes("spanish (latino)")) return AudioLang.ES_419;
+    if (radarrLanguages.includes("hindi")) {
+      if (locale.lang === "hi") return AudioLang.fromKey(locale.key);
+      return AudioLang.HI;
+    }
+    if (radarrLanguages.includes("english")) {
+      if (locale.lang === "en") return AudioLang.fromKey(locale.key);
+      return AudioLang.EN;
+    }
+  }                                
   if (title == null) title = "";
   title = title.toLowerCase();
   let audioLang = AudioLang.fromISO_639_1(code);
@@ -16,7 +35,7 @@ export function resolveAudioLang(code: Nullable<string>, locale: L8nLang, title:
     const tmp = AudioLang.fromKey(locale.key); // Increasing specifity using locale
     if (tmp != null) return tmp;
   }
-  if (AudioLang.equals(audioLang, AudioLang.ES) && title.includes("latin american")) {
+  if (AudioLang.equals(audioLang, AudioLang.ES) && (title.includes("latin american") || radarrLanguages.includes("spanish (latino)"))) {
     return AudioLang.ES_419;
   }
   const ruAudioAuthorList = AudioLang.audioAuthorPriorityList[AudioLang.RU.key];

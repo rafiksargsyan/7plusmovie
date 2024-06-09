@@ -8,14 +8,17 @@ export class ReleaseCandidate {
   private _resolution: Resolution;
   private _ripType: RipType;
   private _status: Nullable<ReleaseCandidateStatus>;
+  private _radarrLanguages: string[] = [];
 
   public constructor(createEmptyObject: boolean, releaseTime?: Nullable<number>,
-    sizeInBytes?: Nullable<number>, res?: Resolution, ripType?: RipType) {
+    sizeInBytes?: Nullable<number>, res?: Resolution, ripType?: RipType, radarrLanguages?: string[]) {
     if (!createEmptyObject) {
       this._releaseTimeInMillis = this.validateReleaseTime(releaseTime);
       this._sizeInBytes = this.validateSizeInBytes(sizeInBytes);
       this._resolution = this.validateResolution(res);
       this._ripType = this.validateRipType(ripType);
+      if (radarrLanguages == null) radarrLanguages = [];
+      this._radarrLanguages = radarrLanguages;
     }
   }
 
@@ -74,6 +77,10 @@ export class ReleaseCandidate {
     return this._releaseTimeInMillis;
   }
 
+  get radarrLanguages() {
+    return this._radarrLanguages;
+  }
+
   public isProcessed() {
     return this._status != null;
   }
@@ -81,7 +88,6 @@ export class ReleaseCandidate {
   public isPromoted() {
     return ReleaseCandidateStatus.equals(this._status, ReleaseCandidateStatus.PROMOTED);
   }
-
 }
 
 export class ReleaseCandidateStatus {

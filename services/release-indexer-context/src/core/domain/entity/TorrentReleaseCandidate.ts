@@ -13,8 +13,8 @@ export class TorrentReleaseCandidate extends ReleaseCandidate {
 
   public constructor(createEmptyObject: boolean, releaseTime?: Nullable<number>, downloadUrl?: string,
     sizeInBytes?: Nullable<number>, res?: Resolution, ripType?: RipType, tracker?: TorrentTracker, infoHash?: string,
-    infoUrl?: string, seeders?: number) {
-    super(createEmptyObject, releaseTime, sizeInBytes, res, ripType);
+    infoUrl?: string, seeders?: number, radarrLanguages?: string[]) {
+    super(createEmptyObject, releaseTime, sizeInBytes, res, ripType, radarrLanguages);
     if (!createEmptyObject) {
       this._tracker = this.validateTracker(tracker);
       this._infoHash = this.validateInfoHash(infoHash);

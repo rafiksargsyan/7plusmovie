@@ -5,9 +5,10 @@ import { RipType } from "../value-object/RipType";
 
 export function compareReleaseCandidates(rc1: ReleaseCandidate, rc2: ReleaseCandidate) {
     if (rc1 == null || rc2 == null) throw new NullReleaseCandidateError();
-    if (RipType.compare(rc1.ripType, rc2.ripType) !== 0) {
-      if (RipType.compare(rc1.ripType, RipType.CAM) === 0) return -1;
-      if (RipType.compare(rc2.ripType, RipType.CAM) === 0) return 1;
+    const rc1RipType = RipType.fromKeyOrThrow(rc1.ripType.key);
+    const rc2RipType = RipType.fromKeyOrThrow(rc2.ripType.key);
+    if (rc1RipType.isLowQuality() || rc2RipType.isLowQuality()) {
+      return RipType.compare(rc1RipType, rc2RipType);
     }
     if (Resolution.compare(rc1.resolution, rc2.resolution) !== 0) {
       return Resolution.compare(rc1.resolution, rc2.resolution);

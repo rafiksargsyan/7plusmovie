@@ -83,7 +83,6 @@ export const handler = async (event): Promise<void> => {
           } else {
             torrentInfo = await addTorrentAndWait(qbitClient, `${torrentFilesBaseUrl}/${rc.downloadUrl}`, rc.infoHash);
           }
-          
           await qbitClient.disableAllFiles(rc.infoHash);
         }
         await qbitClient.addTagToTorrent(rc.infoHash, m.id);
@@ -91,6 +90,9 @@ export const handler = async (event): Promise<void> => {
         const fileIndex: Nullable<number> = findMediaFile(torrentInfo, m.releaseYear);
         if (fileIndex == null) {
           m.ignoreRc(rcKey);
+          if (torrentInfo?.tags.length === 1 && torrentInfo?.tags[0] === m.id) {
+            await qbitClient.deleteTorrentByHash(rc.infoHash);
+          }
           continue;
         }
         const file = torrentInfo.files[fileIndex];
@@ -137,7 +139,7 @@ function findMediaFile(torrentInfo: TorrentInfo, releaseYear: number): Nullable<
   if (candidates.length === 1) return candidates[0].index;
   let candidates2: { name: string; size: number; progress: number; index: number; } [] = [];
   for (let c of candidates) {
-    if (c.name.includes(releaseYear.toString())) candidates2.push(c);
+    if (c.name.includes(releaseYear.toString()) && ! c.name.toLowerCase().includes("sample")) candidates2.push(c);
   }
   if (candidates2.length === 1) return candidates2[0].index;
   return null;
@@ -146,7 +148,18 @@ function findMediaFile(torrentInfo: TorrentInfo, releaseYear: number): Nullable<
 // add media file name to release
 function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate) {
   const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
-  const release = new TorrentRelease(rc.ripType, rc.resolution, rc.infoHash, name, rc.tracker, rc.downloadUrl);
+  const release = new TorrentRelease(false, rc.ripType, rc.resolution, rc.infoHash, name, rc.tracker, rc.downloadUrl);
+  let numAudioStreams = 0;
+  let numUndefinedAudioStreams = 0;
+  let radarrLangues
+  for (let s of streams.streams) {
+    if (s.codec_type === "audio") {
+      ++numAudioStreams
+      if (s.tags?.language == null || s.tags?.language === "und") {
+        ++numUndefinedAudioStreams;
+      }
+    }
+  }
   for (let s of streams.streams) {
     if (s.index === 0 && s.codec_type !== "video") {
       m.ignoreRc(rcKey);
@@ -163,10 +176,11 @@ function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentRele
       };
       let langStr = s.tags?.language;
       let titleStr = s.tags?.title;
-      let lang = resolveAudioLang(langStr, m.originalLocale, titleStr, resolveAudioAuthor(titleStr, rc.tracker));
+      const author = resolveAudioAuthor(titleStr, rc.tracker);
+      let lang = resolveAudioLang(langStr, m.originalLocale, titleStr, author, numUndefinedAudioStreams, numAudioStreams, rc.radarrLanguages);
       if (lang == null) continue;
       const am = new AudioMetadata(s.index, s.channels, bitRate, lang,
-        resolveVoiceType(titleStr, lang, m.originalLocale), resolveAudioAuthor(titleStr, rc.tracker));
+        resolveVoiceType(titleStr, lang, m.originalLocale), author);
       release.addAudioMetadata(am);
     }
     if (s.codec_type === "subtitle") {
@@ -179,8 +193,12 @@ function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentRele
       release.addSubsMetadata(sm);
     }
   }
-  m.addRelease(rc.infoHash, release);
-  m.promoteRc(rcKey);
+  if (release.audios.length === 0) {
+    m.ignoreRc(rcKey);
+  } else {
+    m.addRelease(rc.infoHash, release);
+    m.promoteRc(rcKey);
+  }
 }
 
 async function addTorrentAndWait(qbitClient: TorrentClientInterface, downloadUrl: string, hash: string): Promise<TorrentInfo> {

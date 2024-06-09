@@ -86,11 +86,13 @@ export class Movie {
     if (r == null) { 
       throw new NullReleaseError();
     }
+    if (r.audios.length == 0) {
+      throw new NoAudioReleaseError();
+    }
     if (id in this._releases) {
-      console.log(`duplicateId=${id}`)
       throw new ReleaseWithIdAlreadyExistsError();
     }
-    for (let k in this._releases) {
+    for (let k of Object.keys(this._releases)) {
       const compareResult = Release.compare(this._releases[k].release, r);
       if (compareResult == null) {
         continue;
@@ -210,3 +212,5 @@ export class ReleaseCandidateAlreadyExistsError extends Error {};
 export class NullReleaseCandidateError extends Error {};
 
 export class EmptyRadarrReleaseGuidError extends Error {};
+
+export class NoAudioReleaseError extends Error {};
