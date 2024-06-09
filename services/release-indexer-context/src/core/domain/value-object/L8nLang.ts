@@ -8,6 +8,7 @@ export class L8nLang {
   public static readonly ES_ES = new L8nLang("ES_ES", "es", "es-ES");
   public static readonly ES_419 = new L8nLang("ES_419", "es", "es-419");
   public static readonly HI_IN = new L8nLang("HI_IN", "hi", "hi-IN");
+  public static readonly JA = new L8nLang("JA", "ja", "ja");
 
   public readonly key;
   public readonly lang;
