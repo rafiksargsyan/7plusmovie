@@ -31,6 +31,12 @@ export class TorrentTracker {
     }
     return TorrentTracker[key];
   }
+ 
+  public isLanguageSpecific() {
+    return TorrentTracker.equals(this, TorrentTracker.RUTRACKER) || TorrentTracker.equals(this, TorrentTracker.RUTOR) ||
+      TorrentTracker.equals(this, TorrentTracker.OXTORRENT) || TorrentTracker.equals(this, TorrentTracker.DONTORRENT) ||
+      TorrentTracker.equals(this, TorrentTracker.CORSARO_NERO) || TorrentTracker.equals(this, TorrentTracker.CINECALIDAD);
+  }
 
   static fromRadarrInfoCommentUrl(url: Nullable<string>) {
     if (url == null) return null;

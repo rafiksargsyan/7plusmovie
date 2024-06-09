@@ -78,7 +78,7 @@ functions:
       - schedule: rate(${file(./.env.${sls:stage}.yml):RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minute)
     timeout: 900
 
-  torrentDownloadHandler:
+  movieReleaseDownloadHandler:
     environment:
       QBITTORRENT_API_BASE_URL: ${env:QBITTORRENT_API_BASE_URL}
       QBITTORRENT_BASE_URL: ${env:QBITTORRENT_BASE_URL}
@@ -87,9 +87,20 @@ functions:
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
       MEDIA_FILES_BASE_URL: ${env:MEDIA_FILES_BASE_URL}
       TORRENT_FILES_BASE_URL: ${env:TORRENT_FILES_BASE_URL}
-    handler: src/core/app/torrentDownloadHandler.handler
+    handler: src/core/app/movieReleaseDownloadHandler.handler
     layers:
       - ${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_FFPROBE_LAYER}
+    events:
+      - sns:
+          arn: !Ref movieReleaseDownloadHandlerFanoutTopic
+          topicName: movieReleaseDownloadHandlerFanoutTopic_${sls:stage}
+    timeout: 900
+ 
+  movieReleaseDownloadHandlerFanout:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      MOVIE_RELEASE_DOWNLOAD_HANDLER_FANOUT_TOPIC: !Ref movieReleaseDownloadHandlerFanoutTopic  
+    handler: src/core/app/movieReleaseDownloadHandlerFanout.handler
     events:
       - schedule: rate(${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_INTERVAL_IN_MINUTES} minute)
     timeout: 900
@@ -114,6 +125,10 @@ resources:
       Type: AWS::SNS::Topic
       Properties:
         TopicName: movieReleaseCandidateUpdaterFanoutTopic_${sls:stage}
+    movieReleaseDownloadHandlerFanoutTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: movieReleaseDownloadHandlerFanoutTopic_${sls:stage}
 
 plugins:
   - serverless-esbuild

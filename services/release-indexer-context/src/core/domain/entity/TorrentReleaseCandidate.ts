@@ -57,6 +57,10 @@ export class TorrentReleaseCandidate extends ReleaseCandidate {
   get downloadUrl() {
     return this._downloadUrl;
   }
+
+  get seeders() {
+    return this._seeders;
+  }
 }
 
 export class EmptyInfoHashError extends Error {}
@@ -64,3 +68,5 @@ export class EmptyInfoHashError extends Error {}
 export class NullTorrentTrackerError extends Error {}
 
 export class EmptyDownloadUrlError extends Error {}
+
+export type TorrentReleaseCandidateType = TorrentReleaseCandidate;

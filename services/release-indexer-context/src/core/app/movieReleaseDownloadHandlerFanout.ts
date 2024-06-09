@@ -14,25 +14,16 @@ const movieRepo = new MovieRepository(docClient);
 
 const snsClient = new SNSClient();
 
-const snsTopicArn = process.env.MOVIE_RELEASE_CANDIDATE_UPDATER_FANOUT_TOPIC!;
+const snsTopicArn = process.env.MOVIE_RELEASE_DOWNLOAD_HANDLER_FANOUT_TOPIC!;
 
 export const handler = async (): Promise<void> => {
   const movies = await movieRepo.getAllMovies();
   for (const m of movies) {
-    m.checkAndEmptyReleaseCandidates(false);
-    if (m.readyToBeProcessed) continue;
-    if (Object.entries(m.releases).length !== 0) {
-      if (new Date().getFullYear() - m.releaseYear > 1) {
-        continue; 
-      }
-      if (Date.now() - m.lastRCScanTime < 24 * 60 * 60 * 1000) {
-        continue;
-      }
-    }
+    if (!m.readyToBeProcessed) continue;
     const snsParams = {
       Message: JSON.stringify({ movieId: m.id }),
       TopicArn: snsTopicArn
     }
     await snsClient.send(new PublishCommand(snsParams));
   }
-};
+}

@@ -62,7 +62,7 @@ export const handler = async (event) => {
   let allRadarrReleasesProcessed = true;
   for (let rr of getReleasesResult) {
     try {
-      // Exit before lambda timesout
+      // Exit before lambda times out
       if (Date.now() - startTime > 60 * 1000) {
         allRadarrReleasesProcessed = false;
         break;
@@ -161,7 +161,7 @@ function checkSeeders(seeders: Nullable<number>) {
 function resolveReleaseTimeInMillis(radarrAge: Nullable<number>, radarrAgeMinutes: Nullable<number>, tracker: TorrentTracker) {
   if (radarrAge == null || radarrAgeMinutes == null) return null;
   if (radarrAge === 0 && (TorrentTracker.equals(tracker, TorrentTracker.CINECALIDAD) ||
-  TorrentTracker.equals(tracker, TorrentTracker.DONTORRENT))) {
+  TorrentTracker.equals(tracker, TorrentTracker.DONTORRENT) || TorrentTracker.equals(tracker, TorrentTracker.OXTORRENT))) {
     return null;
   }
   return Math.round(Date.now() - radarrAgeMinutes * 60 * 1000);

@@ -66,6 +66,14 @@ export class ReleaseCandidate {
     return this._resolution;
   }
 
+  get sizeInBytes(): Nullable<number> {
+    return this._sizeInBytes;
+  }
+
+  get releaseTimeInMillis(): Nullable<number> {
+    return this._releaseTimeInMillis;
+  }
+
   public isProcessed() {
     return this._status != null;
   }
@@ -74,26 +82,6 @@ export class ReleaseCandidate {
     return ReleaseCandidateStatus.equals(this._status, ReleaseCandidateStatus.PROMOTED);
   }
 
-  public static compare(rc1: ReleaseCandidate, rc2: ReleaseCandidate) {
-    if (rc1 == null || rc2 == null) throw new NullReleaseCandidateError();
-    if (RipType.compare(rc1._ripType, rc2._ripType) !== 0) {
-      if (RipType.compare(rc1._ripType, RipType.CAM) === 0) return -1;
-      if (RipType.compare(rc2._ripType, RipType.CAM) === 0) return 1;
-    }
-    if (Resolution.compare(rc1._resolution, rc2._resolution) !== 0) {
-      return Resolution.compare(rc1._resolution, rc2._resolution);
-    }
-    if (RipType.compare(rc1._ripType, rc2._ripType) !== 0) {
-      return RipType.compare(rc1._ripType, rc2._ripType);  
-    }
-    if (RipType.compare(rc1._ripType, RipType.BR) === 0 && rc1._sizeInBytes != null && rc2._sizeInBytes != null) {
-      return rc2._sizeInBytes - rc1._sizeInBytes;
-    }
-    if (rc1._releaseTimeInMillis != null && rc2._releaseTimeInMillis != null) {
-      return rc1._releaseTimeInMillis - rc2._releaseTimeInMillis;
-    }
-    return 0;
-  }
 }
 
 export class ReleaseCandidateStatus {
