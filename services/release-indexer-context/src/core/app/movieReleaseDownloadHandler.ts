@@ -147,57 +147,61 @@ function findMediaFile(torrentInfo: TorrentInfo, releaseYear: number): Nullable<
 
 // add media file name to release
 function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate) {
-  const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
-  const release = new TorrentRelease(false, rc.ripType, rc.resolution, rc.infoHash, name, rc.tracker, rc.downloadUrl);
-  let numAudioStreams = 0;
-  let numUndefinedAudioStreams = 0;
-  let radarrLangues
-  for (let s of streams.streams) {
-    if (s.codec_type === "audio") {
-      ++numAudioStreams
-      if (s.tags?.language == null || s.tags?.language === "und") {
-        ++numUndefinedAudioStreams;
+  try {
+    const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
+    const release = new TorrentRelease(false, rc.ripType, rc.resolution, rc.infoHash, name, rc.tracker, rc.downloadUrl);
+    let numAudioStreams = 0;
+    let numUndefinedAudioStreams = 0;
+    for (let s of streams.streams) {
+      if (s.codec_type === "audio") {
+        ++numAudioStreams
+        if (s.tags?.language == null || s.tags?.language === "und") {
+          ++numUndefinedAudioStreams;
+        }
       }
     }
-  }
-  for (let s of streams.streams) {
-    if (s.index === 0 && s.codec_type !== "video") {
+    for (let s of streams.streams) {
+      if (s.index === 0 && s.codec_type !== "video") {
+        m.ignoreRc(rcKey);
+        return;
+      }
+      if (s.codec_type === "audio") {
+        let channels = s.channels;
+        if (channels == null) continue;
+        let bitRate = s.bit_rate;
+        if (bitRate == null) {
+          if (channels >= 6) bitRate = 640000;
+          if (channels >= 2) bitRate = 192000;
+          if (channels === 1) bitRate = 128000;
+        };
+        let langStr = s.tags?.language;
+        let titleStr = s.tags?.title;
+        const author = resolveAudioAuthor(titleStr, rc.tracker);
+        let lang = resolveAudioLang(langStr, m.originalLocale, titleStr, author, numUndefinedAudioStreams, numAudioStreams, rc.radarrLanguages);
+        if (lang == null) continue;
+        const am = new AudioMetadata(s.index, s.channels, bitRate, lang,
+          resolveVoiceType(titleStr, lang, m.originalLocale), author);
+        release.addAudioMetadata(am);
+      }
+      if (s.codec_type === "subtitle") {
+        if (s.codec_name !== "subrip") continue; // add also other text subtitle formats
+        let langStr = s.tags?.language;
+        let titleStr = s.tags?.title;
+        let lang = resolveSubsLang(titleStr, langStr, m.originalLocale);
+        if (lang == null) continue;
+        const sm = new SubsMetadata(s.index, lang, SubsType.fromTitle(titleStr), resolveSubsAuthor(titleStr, rc.tracker));
+        release.addSubsMetadata(sm);
+      }
+    }
+    if (release.audios.length === 0) {
       m.ignoreRc(rcKey);
-      return;
+    } else {
+      m.addRelease(rc.infoHash, release);
+      m.promoteRc(rcKey);
     }
-    if (s.codec_type === "audio") {
-      let channels = s.channels;
-      if (channels == null) continue;
-      let bitRate = s.bit_rate;
-      if (bitRate == null) {
-        if (channels >= 6) bitRate = 640000;
-        if (channels >= 2) bitRate = 192000;
-        if (channels === 1) bitRate = 128000;
-      };
-      let langStr = s.tags?.language;
-      let titleStr = s.tags?.title;
-      const author = resolveAudioAuthor(titleStr, rc.tracker);
-      let lang = resolveAudioLang(langStr, m.originalLocale, titleStr, author, numUndefinedAudioStreams, numAudioStreams, rc.radarrLanguages);
-      if (lang == null) continue;
-      const am = new AudioMetadata(s.index, s.channels, bitRate, lang,
-        resolveVoiceType(titleStr, lang, m.originalLocale), author);
-      release.addAudioMetadata(am);
-    }
-    if (s.codec_type === "subtitle") {
-      if (s.codec_name !== "subrip") continue; // add also other text subtitle formats
-      let langStr = s.tags?.language;
-      let titleStr = s.tags?.title;
-      let lang = resolveSubsLang(titleStr, langStr, m.originalLocale);
-      if (lang == null) continue;
-      const sm = new SubsMetadata(s.index, lang, SubsType.fromTitle(titleStr), resolveSubsAuthor(titleStr, rc.tracker));
-      release.addSubsMetadata(sm);
-    }
-  }
-  if (release.audios.length === 0) {
-    m.ignoreRc(rcKey);
-  } else {
-    m.addRelease(rc.infoHash, release);
-    m.promoteRc(rcKey);
+  } catch (e) {
+    m.ignoreRc(rcKey);;
+    console.log(e);
   }
 }
 

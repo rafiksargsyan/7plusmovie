@@ -68,6 +68,7 @@ export const handler = async (event) => {
         break;
       }
       if (m.radarrReleaseAlreadyAdded(rr.guid)) continue;
+      allRadarrReleasesProcessed = false;
       m.addRadarrReleaseGuid(rr.guid);
       checkProtocol(rr.protocol);
       checkCustomFormatScore(rr.customFormatScore);
@@ -85,8 +86,9 @@ export const handler = async (event) => {
           throw new Error('Failed to find resolution');
         }
       }
-      if (new Date().getFullYear() - m.releaseYear > 1 && (ripType.isLowQuality() || Resolution.compare(resolution, Resolution.SD) === 0)) {
-        continue; 
+      if ((m.creationTime - Date.now() > 30 * 24 * 60 * 60 * 1000 || new Date().getFullYear() - m.releaseYear > 0)
+      && (ripType.isLowQuality() || Resolution.compare(resolution, Resolution.SD) === 0)) {
+        continue;
       }
       const releaseTimeInMillis = resolveReleaseTimeInMillis(rr.age, rr.ageMinutes, tracker);
       const sizeInBytes = rr.size;
@@ -96,6 +98,10 @@ export const handler = async (event) => {
         for (let l of rr.languages) {
           radarrLanguages.push(l.name.toLowerCase());
         }
+      }
+      if ((m.creationTime - Date.now() > 30 * 24 * 60 * 60 * 1000 || new Date().getFullYear() - m.releaseYear > 0) &&
+      !tracker.isLanguageSpecific() && (radarrLanguages.length === 0 || (radarrLanguages.length === 1 && radarrLanguages[0] === "english"))) {
+        continue;
       }
       if (radarrDownloadUrl.startsWith("magnet")) {
         const hash = checkEmptyHash(rr.infoHash);
@@ -139,7 +145,6 @@ export const handler = async (event) => {
             sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders, radarrLanguages);
           m.addReleaseCandidate(hash, rc);
         }
-        allRadarrReleasesProcessed = false;
       }
     } catch(e) {
       console.log(e);
