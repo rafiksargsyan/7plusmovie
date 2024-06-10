@@ -16,6 +16,8 @@ export class Movie {
   private _alreadyAddedRadarrReleaseGuidList: string[] = [];
   private _lastReleaseCandidateScanTimeMillis = 0;
   private _readyToBeProcessed = false;
+  private _releaseTimeInMillis;
+  private _runtimeSeconds;
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLang, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -49,6 +51,22 @@ export class Movie {
 
   get originalLocale() {
     return this._originalLocale;
+  }
+
+  get releaseTimeInMillis() {
+    if (this._releaseTimeInMillis != null) return this._releaseTimeInMillis;
+    return new Date(`${this._releaseYear}-01-01`).getMilliseconds();
+  }
+
+  get runtimeSeconds() {
+    return this._runtimeSeconds;
+  }
+
+  set runtimeSeconds(seconds: number) {
+    if (seconds == null || seconds <= 0) {
+      throw new InvalidRuntimeError();
+    }
+    this._runtimeSeconds = seconds;
   }
 
   private validateOriginalLocale(origianlLocale: Nullable<L8nLang>) {
@@ -174,6 +192,13 @@ export class Movie {
     this._readyToBeProcessed = flag;
   }
 
+  set releaseTimeInMillis(millis: number) {
+    if (millis == null) { 
+      throw new  NullReleaseTimeError();
+    }
+    this._releaseTimeInMillis = millis;
+  }
+
   public addRadarrReleaseGuid(guid: string) {
     if (guid == null || guid.trim() == "") {
       throw new EmptyRadarrReleaseGuidError();
@@ -214,3 +239,7 @@ export class NullReleaseCandidateError extends Error {};
 export class EmptyRadarrReleaseGuidError extends Error {};
 
 export class NoAudioReleaseError extends Error {};
+
+export class NullReleaseTimeError extends Error {};
+
+export class InvalidRuntimeError extends Error {};

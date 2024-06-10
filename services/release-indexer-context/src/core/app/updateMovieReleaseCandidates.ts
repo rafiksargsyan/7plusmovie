@@ -14,6 +14,7 @@ import bencode from 'bencode';
 import { createHash } from 'crypto';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import { S3 } from '@aws-sdk/client-s3';
+import { AudioLang } from "../domain/value-object/AudioLang";
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const movieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
@@ -86,12 +87,16 @@ export const handler = async (event) => {
           throw new Error('Failed to find resolution');
         }
       }
-      if ((m.creationTime - Date.now() > 30 * 24 * 60 * 60 * 1000 || new Date().getFullYear() - m.releaseYear > 0)
+      if ((m.releaseTimeInMillis - Date.now() > 30 * 24 * 60 * 60 * 1000)
       && (ripType.isLowQuality() || Resolution.compare(resolution, Resolution.SD) === 0)) {
         continue;
       }
       const releaseTimeInMillis = resolveReleaseTimeInMillis(rr.age, rr.ageMinutes, tracker);
       const sizeInBytes = rr.size;
+      if (sizeInBytes != null && m.runtimeSeconds != null && sizeInBytes / m.runtimeSeconds < 1500000
+      && RipType.compare(ripType, RipType.BR) === 0) {
+        continue;
+      } 
       const radarrDownloadUrl = checkRadarrDownloadUrl(rr.downloadUrl);
       let radarrLanguages: string[] = [];
       if (rr.languages != null) {
@@ -99,8 +104,10 @@ export const handler = async (event) => {
           radarrLanguages.push(l.name.toLowerCase());
         }
       }
-      if ((m.creationTime - Date.now() > 30 * 24 * 60 * 60 * 1000 || new Date().getFullYear() - m.releaseYear > 0) &&
-      !tracker.isLanguageSpecific() && (radarrLanguages.length === 0 || (radarrLanguages.length === 1 && radarrLanguages[0] === "english"))) {
+      if ((m.releaseTimeInMillis - Date.now() > 30 * 24 * 60 * 60 * 1000) &&
+      !tracker.isLanguageSpecific() && (radarrLanguages.length === 0 ||
+        (radarrLanguages.length === 1 && AudioLang.fromRadarrLanguage(radarrLanguages[0]) != null &&
+        AudioLang.fromRadarrLanguage(radarrLanguages[0])?.lang === m.originalLocale.lang))) {
         continue;
       }
       if (radarrDownloadUrl.startsWith("magnet")) {

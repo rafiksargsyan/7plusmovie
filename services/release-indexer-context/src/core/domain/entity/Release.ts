@@ -20,26 +20,19 @@ export class Release {
   private _mediaFileRelativePath: string;
   private _creationTime;
 
-  public constructor(createEmptyObject: boolean, ripType?: RipType, res?: Resolution, hash?: string, mediaFileRelativePath?: string) {
+  public constructor(createEmptyObject: boolean, ripType?: RipType, res?: Resolution, hash?: string,
+    mediaFileRelativePath?: string, size?: number) {
     if (!createEmptyObject) {
      this._ripType = this.validateRipType(ripType);
      this._resolution= this.validateResolution(res);
      this._hash = this.validateHash(hash);
      this._mediaFileRelativePath = this.validateMediaFileRelativePath(mediaFileRelativePath);
+     this._size = this.validateSize(size);
      this._creationTime = Date.now();
     }
   }
 
   static compare(r1: Release, r2: Release) {
-    const r1RipType = RipType.fromKeyOrThrow(r1.ripType.key);
-    const r2RipType = RipType.fromKeyOrThrow(r2.ripType.key);
-    if (r1RipType.isLowQuality() || r2RipType.isLowQuality()) {
-      const compareResult = RipType.compare(r1RipType, r2RipType);
-      if (compareResult !== 0) return compareResult;
-    }
-    if (Resolution.compare(r1._resolution, r2._resolution) !== 0) {
-      return Resolution.compare(r1._resolution, r2._resolution);
-    }
     let r1Audios = [...r1._audios];
     let r2Audios = [...r2._audios];
     for (let a1 of r1._audios) {
@@ -56,7 +49,15 @@ export class Release {
     }
     if (r1Audios.length !== 0 && r2Audios.length !== 0) return null;
     if (r1Audios.length === 0 && r2Audios.length === 0)  {
-      return 0;
+      const r1RipType = RipType.fromKeyOrThrow(r1.ripType.key);
+      const r2RipType = RipType.fromKeyOrThrow(r2.ripType.key);
+      if (r1RipType.isLowQuality() || r2RipType.isLowQuality()) {
+        const compareResult = RipType.compare(r1RipType, r2RipType);
+        if (compareResult !== 0) return compareResult;
+      }
+      if (Resolution.compare(r1._resolution, r2._resolution) !== 0) {
+        return Resolution.compare(r1._resolution, r2._resolution);
+      }
     }  
     return r1Audios.length - r2Audios.length;
   }
@@ -177,6 +178,13 @@ export class Release {
     return hash;
   }
 
+  private validateSize(size: Nullable<number>) {
+    if (size == null || size < 0) {
+      throw new InvalidSizeError();
+    }
+    return size;
+  }
+
   get hash() {
     return this._hash;
   }
@@ -209,3 +217,5 @@ export class SubsMetadataWithSameStreamNumberAlreadyExistsError extends Error {}
 export class NullHashError extends Error {}
 
 export class InvalidMediaFilePathError extends Error {}
+
+export class InvalidSizeError extends Error {}

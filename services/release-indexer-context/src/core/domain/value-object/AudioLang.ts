@@ -102,6 +102,17 @@ export class AudioLang {
     if (code == null) return null;
     return this.FROM_ISO_639_1[code];
   }
+  
+  public static fromRadarrLanguage(langName: string) {
+    if (langName == null) return null;
+    langName = langName.toLowerCase();
+    if (langName === "english") return AudioLang.EN;
+    if (langName === "portuguese (brazil)") return AudioLang.PT_BR;
+    if (langName === "spanish (latino)") return AudioLang.ES_419;
+    if (langName === "spanish") return AudioLang.ES;
+    if (langName === "hindi") return AudioLang.HI;
+    return null;
+  }
 
   static equals(al1: Nullable<AudioLang>, al2: Nullable<AudioLang>) {
     return al1?.key == al2?.key;

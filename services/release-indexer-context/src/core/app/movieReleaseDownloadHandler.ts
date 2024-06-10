@@ -97,7 +97,7 @@ export const handler = async (event): Promise<void> => {
         }
         const file = torrentInfo.files[fileIndex];
         if (file.progress === 1) {
-          processMediaFile(m, file.name, rcKey, rc);
+          processMediaFile(m, file.name, rcKey, rc, file.size);
           await qbitClient.removeTagFromTorrent(rc.infoHash, m.id);
           if (torrentInfo.tags.length === 1) {
             await qbitClient.deleteTorrentByHash(rc.infoHash);
@@ -147,10 +147,10 @@ function findMediaFile(torrentInfo: TorrentInfo, releaseYear: number): Nullable<
 }
 
 // add media file name to release
-function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate) {
+function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate, size: number) {
   try {
     const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
-    const release = new TorrentRelease(false, rc.ripType, rc.resolution, rc.infoHash, name, rc.tracker, rc.downloadUrl);
+    const release = new TorrentRelease(false, rc.ripType, rc.resolution, rc.infoHash, name, rc.tracker, rc.downloadUrl, size);
     let numAudioStreams = 0;
     let numUndefinedAudioStreams = 0;
     for (let s of streams.streams) {
