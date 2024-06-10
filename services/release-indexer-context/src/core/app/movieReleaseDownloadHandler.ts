@@ -143,6 +143,7 @@ function findMediaFile(torrentInfo: TorrentInfo, releaseYear: number, englishTit
     if (c.name.includes(releaseYear.toString()) && ! c.name.toLowerCase().includes("sample")) candidates2.push(c);
   }
   if (candidates2.length === 1) return candidates2[0].index;
+  if (candidates2.length === 0) return null;
   if (englishTitle != null) {
     const candidateScore: { [key:string]: { score: number, index: number } } = {};
     candidates2.forEach(c => { candidateScore[c.name] = { score: 0, index: c.index } });
@@ -242,6 +243,7 @@ async function addTorrentAndWait(qbitClient: TorrentClientInterface, downloadUrl
 }
 
 async function addMagnetAndWait(qbitClient: TorrentClientInterface, downloadUrl: string, hash: string): Promise<TorrentInfo> {
+  console.log(downloadUrl);
   await qbitClient.addTorrentByUrl(downloadUrl);
   let torrentInfo;
   let tryCount = 3;
