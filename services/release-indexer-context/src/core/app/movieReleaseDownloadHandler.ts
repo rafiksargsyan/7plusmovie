@@ -103,7 +103,8 @@ export const handler = async (event): Promise<void> => {
             await qbitClient.deleteTorrentByHash(rc.infoHash);
           }
           break;
-        } if (torrentInfo.isStalled && (Date.now() - torrentInfo.addedOn * 1000) > 60 * 60 * 1000) {
+        } if (torrentInfo.isStalled && (Date.now() - torrentInfo.addedOn * 1000) > 60 * 60 * 1000
+              || (Date.now() - torrentInfo.addedOn * 1000) > 5 * 60 * 60 * 1000) { // Maybe use ETA
           m.ignoreRc(rcKey);
           await qbitClient.removeTagFromTorrent(rc.infoHash, m.id);
           if (torrentInfo.tags.length === 1) {
