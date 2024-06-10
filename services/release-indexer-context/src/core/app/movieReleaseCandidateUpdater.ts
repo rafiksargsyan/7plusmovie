@@ -20,6 +20,7 @@ export const handler = async (): Promise<void> => {
   const movies = await movieRepo.getAllMovies();
   for (const m of movies) {
     m.checkAndEmptyReleaseCandidates(false);
+    await movieRepo.saveMovie(m);
     if (m.readyToBeProcessed) continue;
     if (Object.entries(m.releases).length !== 0) {
       if (new Date().getFullYear() - m.releaseYear > 1) {
