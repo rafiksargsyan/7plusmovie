@@ -24,6 +24,7 @@ export interface TorrentInfo {
   isStalled: boolean;
   tags: string[];
   files: { name: string, size: number, progress: number, index: number } []
+  eta: Nullable<number>; // seconds
 }
 
 export class TorrentApiError extends Error {

@@ -96,7 +96,8 @@ export class QBittorrentClient implements TorrentClientInterface {
         isStalled : isStalled,
         amountLeft : amountLeft,
         files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress, index: f.index })),
-        tags: tags
+        tags: tags,
+        eta: info[0].eta
       }
     } catch (e) {
       throw new TorrentApiError((e as Error).message);
@@ -129,7 +130,8 @@ export class QBittorrentClient implements TorrentClientInterface {
           isStalled : isStalled,
           amountLeft : amountLeft,
           files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress, index: f.index })),
-          tags: tags
+          tags: tags,
+          eta: t.eta
         });
       }
       return ret;
@@ -159,7 +161,8 @@ export class QBittorrentClient implements TorrentClientInterface {
           isStalled : isStalled,
           amountLeft : amountLeft,
           files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress, index: f.index })),
-          tags: tags
+          tags: tags,
+          eta: t.eta
         });
       }
       return ret;

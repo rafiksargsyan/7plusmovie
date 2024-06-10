@@ -87,7 +87,7 @@ async function updateMovie(movie: Movie, tmdbId: string) {
   let runtime = getMovieData.runtime;
   let updated = false;
   if (releaseDate != null && releaseDate.trim() !== "") {
-    const millis = new Date(releaseDate).getMilliseconds();
+    const millis = new Date(releaseDate).getTime();
     if (movie.releaseTimeInMillis !== millis) {
       movie.releaseTimeInMillis = millis;
       updated = true;

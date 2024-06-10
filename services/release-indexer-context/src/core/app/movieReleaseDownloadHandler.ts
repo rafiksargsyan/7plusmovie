@@ -87,7 +87,7 @@ export const handler = async (event): Promise<void> => {
         }
         await qbitClient.addTagToTorrent(rc.infoHash, m.id);
         torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash) as TorrentInfo;
-        const fileIndex: Nullable<number> = findMediaFile(torrentInfo, m.releaseYear);
+        const fileIndex: Nullable<number> = findMediaFile(torrentInfo, m.releaseYear, m.originalLocale.lang === "en" ? m.originalTitle : null);
         if (fileIndex == null) {
           m.ignoreRc(rcKey);
           if (torrentInfo?.tags.length === 1 && torrentInfo?.tags[0] === m.id) {
@@ -104,7 +104,7 @@ export const handler = async (event): Promise<void> => {
           }
           break;
         } if (torrentInfo.isStalled && (Date.now() - torrentInfo.addedOn * 1000) > 60 * 60 * 1000
-              || (Date.now() - torrentInfo.addedOn * 1000) > 5 * 60 * 60 * 1000) { // Maybe use ETA
+              || (torrentInfo.eta != null && torrentInfo.eta > 5 * 60 * 60)) {
           m.ignoreRc(rcKey);
           await qbitClient.removeTagFromTorrent(rc.infoHash, m.id);
           if (torrentInfo.tags.length === 1) {
@@ -127,9 +127,9 @@ export const handler = async (event): Promise<void> => {
   await qbitClient.destroy();
 };
 
-// We might also need to use title to better much, but with release year most of the cases
-// should be covered.
-function findMediaFile(torrentInfo: TorrentInfo, releaseYear: number): Nullable<number> {
+// You might think searching for release year should be enough, but it is not. For example, there were
+// two matrix movies in the same year 2003
+function findMediaFile(torrentInfo: TorrentInfo, releaseYear: number, englishTitle: Nullable<string>): Nullable<number> {
   let candidates: { name: string; size: number; progress: number; index: number; } [] = [];
   for (let i = 0; i < torrentInfo.files.length; ++i) {
     const f = torrentInfo.files[i];
@@ -143,6 +143,22 @@ function findMediaFile(torrentInfo: TorrentInfo, releaseYear: number): Nullable<
     if (c.name.includes(releaseYear.toString()) && ! c.name.toLowerCase().includes("sample")) candidates2.push(c);
   }
   if (candidates2.length === 1) return candidates2[0].index;
+  if (englishTitle != null) {
+    const candidateScore: { [key:string]: { score: number, index: number } } = {};
+    candidates2.forEach(c => { candidateScore[c.name] = { score: 0, index: c.index } });
+    const tokens = englishTitle.split(/[\s:,'.()-]+/).filter(x => x.length >= 3).map(x => x.toLowerCase());
+    for (let x in candidateScore) {
+      for (let t of tokens) {
+        if (x.toLowerCase().includes(t)) {
+          candidateScore[x].score = candidateScore[x].score + 1;
+        }
+      }
+    }
+    const candidateScoreEntries = Object.entries(candidateScore).sort((a, b) => b[1].score - a[1].score);
+    if (candidateScoreEntries[0][1].score > candidateScoreEntries[1][1].score) {
+      return candidateScoreEntries[0][1].index;
+    }
+  }
   return null;
 }
 
@@ -150,6 +166,11 @@ function findMediaFile(torrentInfo: TorrentInfo, releaseYear: number): Nullable<
 function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate, size: number) {
   try {
     const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
+    const durationStr = execSync(`ffprobe -i '${mediaFilesBaseUrl}${name}' -show_entries format=duration -v quiet -of csv="p=0"`).toString();
+    const duration = Number.parseFloat(durationStr);
+    if (!Number.isNaN(duration) && m.runtimeSeconds != null && Math.abs(duration - m.runtimeSeconds) > 0.2 * m.runtimeSeconds) {
+      throw new Error ('The release candidate duration is considerably different from official runtime');
+    }
     const release = new TorrentRelease(false, rc.ripType, rc.resolution, rc.infoHash, name, rc.tracker, rc.downloadUrl, size);
     let numAudioStreams = 0;
     let numUndefinedAudioStreams = 0;

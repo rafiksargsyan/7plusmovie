@@ -106,8 +106,8 @@ export const handler = async (event) => {
       }
       if ((m.releaseTimeInMillis - Date.now() > 30 * 24 * 60 * 60 * 1000) &&
       !tracker.isLanguageSpecific() && (radarrLanguages.length === 0 ||
-        (radarrLanguages.length === 1 && AudioLang.fromRadarrLanguage(radarrLanguages[0]) != null &&
-        AudioLang.fromRadarrLanguage(radarrLanguages[0])?.lang === m.originalLocale.lang))) {
+        (radarrLanguages.length === 1 && (AudioLang.fromRadarrLanguage(radarrLanguages[0]) != null &&
+        AudioLang.fromRadarrLanguage(radarrLanguages[0])?.lang === m.originalLocale.lang || radarrLanguages[0] === "unknown")))) {
         continue;
       }
       if (radarrDownloadUrl.startsWith("magnet")) {

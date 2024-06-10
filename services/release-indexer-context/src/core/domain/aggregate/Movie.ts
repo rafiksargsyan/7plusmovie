@@ -53,9 +53,13 @@ export class Movie {
     return this._originalLocale;
   }
 
+  get originalTitle() {
+    return this._originalTitle;
+  }
+  
   get releaseTimeInMillis() {
     if (this._releaseTimeInMillis != null) return this._releaseTimeInMillis;
-    return new Date(`${this._releaseYear}-01-01`).getMilliseconds();
+    return new Date(`${this._releaseYear}-01-01`).getTime();
   }
 
   get runtimeSeconds() {
@@ -194,7 +198,7 @@ export class Movie {
 
   set releaseTimeInMillis(millis: number) {
     if (millis == null) { 
-      throw new  NullReleaseTimeError();
+      throw new NullReleaseTimeError();
     }
     this._releaseTimeInMillis = millis;
   }
