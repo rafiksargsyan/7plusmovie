@@ -71,7 +71,9 @@ export class QBittorrentClient implements TorrentClientInterface {
         });
       }
       try {
-        await this._restClient.post(`torrents/deleteTags?tags=${id}`);
+        await this._restClient.post(`torrents/deleteTags`, {
+          tags: id
+        });
       } catch (e) {
         console.log(e);
       }

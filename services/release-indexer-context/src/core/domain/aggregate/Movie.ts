@@ -14,6 +14,7 @@ export class Movie {
   private _releases: { [releaseId:string]: { release: Release, replacedReleaseIds: string[] } } = {};
   private _releaseCandidates: { [key:string]: ReleaseCandidate } = {};
   private _alreadyAddedRadarrReleaseGuidList: string[] = [];
+  private _blackList: string[];
   private _lastReleaseCandidateScanTimeMillis = 0;
   private _readyToBeProcessed = false;
   private _releaseTimeInMillis;
@@ -56,7 +57,7 @@ export class Movie {
   get originalTitle() {
     return this._originalTitle;
   }
-  
+
   get releaseTimeInMillis() {
     if (this._releaseTimeInMillis != null) return this._releaseTimeInMillis;
     return new Date(`${this._releaseYear}-01-01`).getTime();
@@ -162,6 +163,10 @@ export class Movie {
     return this._readyToBeProcessed;
   }
 
+  public isBlackListed(id: string) {
+    return this._blackList.includes(id);
+  }
+
   public ignoreRc(id: string) {
     if (id == null || ! /\S/.test(id)) throw new NullReleaseCandidateIdError();
     let rc = this._releaseCandidates[id];
@@ -169,6 +174,9 @@ export class Movie {
       throw new ReleaseCandidateNotFoundError();
     }
     rc.status = ReleaseCandidateStatus.IGNORED;
+    if (!this._blackList.includes(id)) {
+      this._blackList.push(id);
+    }
   }
 
   public promoteRc(id: string) {

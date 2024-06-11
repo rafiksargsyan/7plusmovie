@@ -52,6 +52,10 @@ export const handler = async (event): Promise<void> => {
     const rc = m.releaseCandidates[releaseCandidates[i][0]];
     try {
       if (rc.isProcessed()) continue;
+      if (m.isBlackListed(rcKey)) {
+        m.ignoreRc(rcKey);
+        continue;
+      }
       if (rc instanceof TorrentReleaseCandidate) {
         let betterRCAlreadyPromoted = false;
         let prevRcNotProcessed = false;
@@ -96,7 +100,7 @@ export const handler = async (event): Promise<void> => {
         } if ((Date.now() - torrentInfo!.addedOn * 1000) > 60 * 60 * 1000 && (torrentInfo!.isStalled ||
               (torrentInfo!.eta != null && torrentInfo!.eta > 23 * 60 * 60))) {
           m.ignoreRc(rcKey);
-          await  qbitClient.deleteTorrentById(torrentInfo!.id);
+          await qbitClient.deleteTorrentById(torrentInfo!.id);
           continue;
         } else {
           const estimatedFreeSpace = await qbitClient.getEstimatedFreeSpace();
@@ -172,7 +176,7 @@ function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentRele
     let numUndefinedAudioStreams = 0;
     for (let s of streams.streams) {
       if (s.codec_type === "audio") {
-        ++numAudioStreams
+        ++numAudioStreams;
         if (s.tags?.language == null || s.tags?.language === "und") {
           ++numUndefinedAudioStreams;
         }
