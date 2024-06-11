@@ -23,7 +23,7 @@ export const handler = async (): Promise<void> => {
     await movieRepo.saveMovie(m);
     if (m.readyToBeProcessed) continue;
     if (Object.entries(m.releases).length !== 0) {
-      if (new Date().getFullYear() - m.releaseYear > 1) {
+      if (Date.now() - m.releaseTimeInMillis > 12 * 30 * 24 * 60 * 60 * 1000) {
         continue; 
       }
       if (Date.now() - m.lastRCScanTime < 24 * 60 * 60 * 1000) {

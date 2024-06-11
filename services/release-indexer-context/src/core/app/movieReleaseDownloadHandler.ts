@@ -104,7 +104,7 @@ export const handler = async (event): Promise<void> => {
           }
           break;
         } if ((Date.now() - torrentInfo.addedOn * 1000) > 60 * 60 * 1000 && (torrentInfo.isStalled ||
-              (torrentInfo.eta != null && torrentInfo.eta > 4 * 60 * 60))) {
+              (torrentInfo.eta != null && torrentInfo.eta > 23 * 60 * 60))) {
           m.ignoreRc(rcKey);
           await qbitClient.removeTagFromTorrent(rc.infoHash, m.id);
           if (torrentInfo.tags.length === 1) {

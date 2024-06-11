@@ -107,6 +107,7 @@ export class AudioLang {
     if (langName == null) return null;
     langName = langName.toLowerCase();
     if (langName === "english") return AudioLang.EN;
+    if (langName === "japanese") return AudioLang.JA;
     if (langName === "portuguese (brazil)") return AudioLang.PT_BR;
     if (langName === "spanish (latino)") return AudioLang.ES_419;
     if (langName === "spanish") return AudioLang.ES;
