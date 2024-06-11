@@ -48,9 +48,9 @@ export const handler = async (event): Promise<void> => {
   releaseCandidates.sort((a, b) => compareReleaseCandidates(b[1], a[1]));
   
   for (let i = 0; i < releaseCandidates.length; ++i) {
+    const rcKey = releaseCandidates[i][0];
+    const rc = m.releaseCandidates[releaseCandidates[i][0]];
     try {
-      const rcKey = releaseCandidates[i][0];
-      const rc = m.releaseCandidates[releaseCandidates[i][0]];
       if (rc.isProcessed()) continue;
       if (rc instanceof TorrentReleaseCandidate) {
         let betterRCAlreadyPromoted = false;
@@ -107,6 +107,14 @@ export const handler = async (event): Promise<void> => {
         }
       }
     } catch (e) {
+      m.ignoreRc(rcKey);
+      if (rc instanceof TorrentReleaseCandidate) {
+        try {
+          await qbitClient.deleteTorrentById(rc.infoHash);
+        } catch (e) {
+          console.log(e);
+        }
+      }
       console.log(e);
     } 
   } 

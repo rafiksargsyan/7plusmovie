@@ -70,6 +70,11 @@ export class QBittorrentClient implements TorrentClientInterface {
           deleteFiles: true
         });
       }
+      try {
+        await this._restClient.post(`torrents/deleteTags?tags=${id}`);
+      } catch (e) {
+        console.log(e);
+      }
     } catch (e) {
       throw new TorrentApiError((e as Error).message);
     }
