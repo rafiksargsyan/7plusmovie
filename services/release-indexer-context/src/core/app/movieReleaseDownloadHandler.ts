@@ -243,7 +243,6 @@ async function addTorrentAndWait(qbitClient: TorrentClientInterface, downloadUrl
 }
 
 async function addMagnetAndWait(qbitClient: TorrentClientInterface, downloadUrl: string, hash: string): Promise<TorrentInfo> {
-  console.log(downloadUrl);
   await qbitClient.addTorrentByUrl(downloadUrl);
   let torrentInfo;
   let tryCount = 3;
