@@ -70,52 +70,39 @@ export const handler = async (event): Promise<void> => {
           }
         }
         if (prevRcNotProcessed) break;
-        let torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash);
         if (betterRCAlreadyPromoted) {
-          if (torrentInfo?.tags.length === 1 && torrentInfo?.tags[0] === m.id) {
-            await qbitClient.deleteTorrentByHash(rc.infoHash);
-          }
           continue;
         }
+        let torrentInfo = await qbitClient.getTorrentById(rc.infoHash);
         if (torrentInfo == null) {
           if (rc.downloadUrl.startsWith("magnet")) {
             torrentInfo = await addMagnetAndWait(qbitClient, rc.downloadUrl, rc.infoHash);
           } else {
-            torrentInfo = await addTorrentAndWait(qbitClient, `${torrentFilesBaseUrl}/${rc.downloadUrl}`, rc.infoHash);
+            torrentInfo = await qbitClient.addTorrentByUrlOrThrow(`${torrentFilesBaseUrl}/${rc.downloadUrl}`, rc.infoHash);
           }
-          await qbitClient.disableAllFiles(rc.infoHash);
+          await qbitClient.disableAllFiles(torrentInfo!.id);
         }
-        await qbitClient.addTagToTorrent(rc.infoHash, m.id);
-        torrentInfo = await qbitClient.getTorrentByHash(rc.infoHash) as TorrentInfo;
-        const fileIndex: Nullable<number> = findMediaFile(torrentInfo, m.releaseYear, m.originalLocale.lang === "en" ? m.originalTitle : null);
+        const fileIndex: Nullable<number> = findMediaFile(torrentInfo!, m.releaseYear, m.originalLocale.lang === "en" ? m.originalTitle : null);
         if (fileIndex == null) {
           m.ignoreRc(rcKey);
-          if (torrentInfo?.tags.length === 1 && torrentInfo?.tags[0] === m.id) {
-            await qbitClient.deleteTorrentByHash(rc.infoHash);
-          }
+          await  qbitClient.deleteTorrentById(torrentInfo!.id);
           continue;
         }
-        const file = torrentInfo.files[fileIndex];
+        const file = torrentInfo!.files[fileIndex];
         if (file.progress === 1) {
           processMediaFile(m, file.name, rcKey, rc, file.size);
-          await qbitClient.removeTagFromTorrent(rc.infoHash, m.id);
-          if (torrentInfo.tags.length === 1) {
-            await qbitClient.deleteTorrentByHash(rc.infoHash);
-          }
+          await qbitClient.deleteTorrentById(torrentInfo!.id);
           break;
-        } if ((Date.now() - torrentInfo.addedOn * 1000) > 60 * 60 * 1000 && (torrentInfo.isStalled ||
-              (torrentInfo.eta != null && torrentInfo.eta > 23 * 60 * 60))) {
+        } if ((Date.now() - torrentInfo!.addedOn * 1000) > 60 * 60 * 1000 && (torrentInfo!.isStalled ||
+              (torrentInfo!.eta != null && torrentInfo!.eta > 23 * 60 * 60))) {
           m.ignoreRc(rcKey);
-          await qbitClient.removeTagFromTorrent(rc.infoHash, m.id);
-          if (torrentInfo.tags.length === 1) {
-            await qbitClient.deleteTorrentByHash(rc.infoHash);
-          }
+          await  qbitClient.deleteTorrentById(torrentInfo!.id);
           continue;
         } else {
           const estimatedFreeSpace = await qbitClient.getEstimatedFreeSpace();
           if (estimatedFreeSpace - (file.size * (1 - file.progress)) > 150000000000) {
-            await qbitClient.resumeTorrent(rc.infoHash);
-            await qbitClient.enableFile(rc.infoHash, file.index);
+            await qbitClient.resumeTorrent(torrentInfo!.id);
+            await qbitClient.enableFile(torrentInfo!.id, file.index);
           }
         }
       }
@@ -228,44 +215,19 @@ function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentRele
   }
 }
 
-async function addTorrentAndWait(qbitClient: TorrentClientInterface, downloadUrl: string, hash: string): Promise<TorrentInfo> {
-  await qbitClient.addTorrentByUrl(downloadUrl);
-  let torrentInfo;
-  let tryCount = 3;
-  while (torrentInfo == null && tryCount-- > 0) {
-    await new Promise(r => setTimeout(r, 5000));
-    torrentInfo = await qbitClient.getTorrentByHash(hash);
-  }
-  if (torrentInfo == null) {
-    throw new TimedOutWaitingTorrentToBeAddedError();
-  }
-  return torrentInfo;
-}
-
 async function addMagnetAndWait(qbitClient: TorrentClientInterface, downloadUrl: string, hash: string): Promise<TorrentInfo> {
-  await qbitClient.addTorrentByUrl(downloadUrl);
-  let torrentInfo;
-  let tryCount = 3;
-  while (torrentInfo == null && tryCount-- > 0) {
-    await new Promise(r => setTimeout(r, 5000));
-    torrentInfo = await qbitClient.getTorrentByHash(hash);
-  }
-  if (torrentInfo == null) {
-    throw new TimedOutWaitingTorrentToBeAddedError();
-  }
-  tryCount = 10;
-  await qbitClient.resumeTorrent(hash);
-  while (torrentInfo.files.length === 0 && tryCount-- > 0) {
+  let torrentInfo: Nullable<TorrentInfo> = await qbitClient.addTorrentByUrlOrThrow(downloadUrl, hash);
+  let tryCount = 10;
+  await qbitClient.resumeTorrent(torrentInfo.id);
+  while (torrentInfo?.files.length === 0 && tryCount-- > 0) {
     await new Promise(r => setTimeout(r, 1000));
-    torrentInfo = await qbitClient.getTorrentByHash(hash);
+    torrentInfo = await qbitClient.getTorrentById(hash);
   }
   await qbitClient.pauseTorrent(hash);
-  if (torrentInfo.files.length === 0) {
+  if (torrentInfo?.files.length === 0) {
     throw new TimedOutWaitingTorrentFilesError();
   }
-  return torrentInfo;
+  return torrentInfo!;
 }
-
-class TimedOutWaitingTorrentToBeAddedError extends Error {}
 
 class TimedOutWaitingTorrentFilesError extends Error {}

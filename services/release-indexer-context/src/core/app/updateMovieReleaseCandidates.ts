@@ -51,6 +51,10 @@ const torrentFilesS3Bucket = process.env.TORRENT_FILES_S3_BUCKET!;
 
 const radarrDownloadUrlBaseMapping = JSON.parse(process.env.RADARR_DOWNLOAD_URL_BASE_MAPPING!);
 
+const MONTH_IN_MILLIS = 30 * 24 * 60 * 60 * 1000;
+
+const BR_MINIUM_BITRATE = 1500000; // byte/seconds
+
 export const handler = async (event) => {
   const startTime = Date.now();
   const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
@@ -87,13 +91,13 @@ export const handler = async (event) => {
           throw new Error('Failed to find resolution');
         }
       }
-      if ((m.releaseTimeInMillis - Date.now() > 30 * 24 * 60 * 60 * 1000)
+      if ((Date.now() - m.releaseTimeInMillis > MONTH_IN_MILLIS)
       && (ripType.isLowQuality() || Resolution.compare(resolution, Resolution.SD) === 0)) {
         continue;
       }
       const releaseTimeInMillis = resolveReleaseTimeInMillis(rr.age, rr.ageMinutes, tracker);
       const sizeInBytes = rr.size;
-      if (sizeInBytes != null && m.runtimeSeconds != null && sizeInBytes / m.runtimeSeconds < 1500000
+      if (sizeInBytes != null && m.runtimeSeconds != null && sizeInBytes / m.runtimeSeconds < BR_MINIUM_BITRATE
       && RipType.compare(ripType, RipType.BR) === 0) {
         continue;
       } 
@@ -104,7 +108,7 @@ export const handler = async (event) => {
           radarrLanguages.push(l.name.toLowerCase());
         }
       }
-      if ((m.releaseTimeInMillis - Date.now() > 30 * 24 * 60 * 60 * 1000) &&
+      if ((Date.now() - m.releaseTimeInMillis > MONTH_IN_MILLIS) &&
       !tracker.isLanguageSpecific() && (radarrLanguages.length === 0 ||
         (radarrLanguages.length === 1 && (AudioLang.fromRadarrLanguage(radarrLanguages[0]) != null &&
         AudioLang.fromRadarrLanguage(radarrLanguages[0])?.lang === m.originalLocale.lang || radarrLanguages[0] === "unknown")))) {

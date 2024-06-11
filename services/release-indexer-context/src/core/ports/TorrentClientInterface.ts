@@ -1,28 +1,23 @@
 import { Nullable } from "../../Nullable";
 
 export interface TorrentClientInterface {
-  deleteTorrentByHash(hash: string);
-  getTorrentByHash(hash: string): Promise<Nullable<TorrentInfo>>;
-  getTorrentByHashOrThrow(hash: string);
-  getAllTorrents(): Promise<TorrentInfo[]>;
-  getTorrentsByTag(tag: string): Promise<TorrentInfo[]>;
-  isTaggingSupported(): boolean;
+  deleteTorrentById(id: string);
+  getTorrentById(id: string): Promise<Nullable<TorrentInfo>>;
+  getTorrentByIdOrThrow(hash: string);
   getEstimatedFreeSpace(): Promise<number>;
-  addTorrentByUrl(url: string);
-  addTagToTorrent(hash: string, tag: string);
-  removeTagFromTorrent(hash: string, tag: string);
-  resumeTorrent(hash: string);
-  pauseTorrent(hash: string);
-  disableAllFiles(hash: string);
-  enableFile(hash: string, id: number);
+  addTorrentByUrlOrThrow(url: string, hash: string): Promise<TorrentInfo>;
+  resumeTorrent(id: string);
+  pauseTorrent(id: string);
+  disableAllFiles(id: string);
+  enableFile(id: string, fileId: number);
 }
 
 export interface TorrentInfo {
-  hash: string;
+  id: string;
+  infoHash: string;
   addedOn: number; // epoch seconds
   amountLeft: number; // bytes
   isStalled: boolean;
-  tags: string[];
   files: { name: string, size: number, progress: number, index: number } []
   eta: Nullable<number>; // seconds
 }

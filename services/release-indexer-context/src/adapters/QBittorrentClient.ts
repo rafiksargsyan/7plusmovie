@@ -57,93 +57,40 @@ export class QBittorrentClient implements TorrentClientInterface {
     }
   }
 
-  public isTaggingSupported() {
-    return true;
-  }
-
-  public async deleteTorrentByHash(hash: string) {
-    if (hash == null || hash.trim().length === 0) {
-      throw new InvalidHashError();
+  public async deleteTorrentById(id: string) {
+    if (id == null || id.trim().length === 0) {
+      throw new InvalidIdError();
     }
     await this.checkAndInit();
     try {
-      await this._restClient.post('torrents/delete', {
-        hashes: hash,
-        deleteFiles: true
-      });
-    } catch (e) {
-      throw new TorrentApiError((e as Error).message);
-    }
-  }
-
-  public async getTorrentByHash(hash: string): Promise<Nullable<TorrentInfo>> {
-    if (hash == null || hash.trim().length === 0) {
-      throw new InvalidHashError();
-    }
-    await this.checkAndInit();
-    try {
-      const info = (await this._restClient.get(`torrents/info?hashes=${hash}`)).data;
-      if (info.length === 0) return null;
-      const isStalled = info[0].state === "stalledDL" ? true : false;
-      const addedOn = info[0].added_on;
-      const amountLeft = info[0].amount_left;
-      const files = (await this._restClient.get(`torrents/files?hash=${hash}`)).data;
-      const tagsStr: string = info[0].tags;
-      const tags: string[] = tagsStr.split(',').map((s) => s.trim());
-      return {
-        hash : hash,
-        addedOn : addedOn,
-        isStalled : isStalled,
-        amountLeft : amountLeft,
-        files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress, index: f.index })),
-        tags: tags,
-        eta: info[0].eta
+      const ti = await this.getTorrentById(id);
+      if (ti != null) {
+        await this._restClient.post('torrents/delete', {
+          hashes: ti.infoHash,
+          deleteFiles: true
+        });
       }
     } catch (e) {
       throw new TorrentApiError((e as Error).message);
     }
   }
+
+  public async getTorrentById(id: string): Promise<Nullable<TorrentInfo>> {
+    if (id == null || id.trim().length === 0) {
+      throw new InvalidIdError();
+    }
+    return (await this.getTorrentsByTag(id))[0];
+  }
  
-  public async getTorrentByHashOrThrow(hash: string): Promise<TorrentInfo> {
-    let ti = await this.getTorrentByHash(hash);
+  public async getTorrentByIdOrThrow(id: string): Promise<TorrentInfo> {
+    let ti = await this.getTorrentById(id);
     if (ti == null) {
       throw new TorrentNotFoundError();
     }
     return ti;
   }
 
-  public async getAllTorrents(): Promise<TorrentInfo[]> {
-    await this.checkAndInit();
-    try {
-      const info = (await this._restClient.get('torrents/info')).data;
-      let ret: TorrentInfo[] = [];
-      for (let t of info) {
-        const isStalled = t.state === "stalledDL" ? true : false;
-        const addedOn = t.added_on;
-        const amountLeft = t.amount_left;
-        const files = (await this._restClient.get(`torrents/files?hash=${t.hash}`)).data;
-        const tagsStr: string = t.tags;
-        const tags: string[] = tagsStr.split(',').map((s) => s.trim());
-        ret.push({
-          hash : t.hash,
-          addedOn : addedOn,
-          isStalled : isStalled,
-          amountLeft : amountLeft,
-          files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress, index: f.index })),
-          tags: tags,
-          eta: t.eta
-        });
-      }
-      return ret;
-    } catch (e) {
-      throw new TorrentApiError((e as Error).message);
-    }
-  }
-
-  public async getTorrentsByTag(tag: string): Promise<TorrentInfo[]> {
-    if (tag == null || tag.trim().length === 0) {
-      throw new InvalidTagError();
-    }
+  private async getTorrentsByTag(tag: string): Promise<TorrentInfo[]> {
     await this.checkAndInit();
     try {
       const info = (await this._restClient.get(`torrents/info?tag=${encodeURIComponent(tag)}`)).data;
@@ -153,15 +100,13 @@ export class QBittorrentClient implements TorrentClientInterface {
         const addedOn = t.added_on;
         const amountLeft = t.amount_left;
         const files = (await this._restClient.get(`torrents/files?hash=${t.hash}`)).data;
-        const tagsStr: string = t.tags;
-        const tags: string[] = tagsStr.split(',').map((s) => s.trim());
         ret.push({
-          hash : t.hash,
+          id : tag,
+          infoHash : t.hash,
           addedOn : addedOn,
           isStalled : isStalled,
           amountLeft : amountLeft,
           files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress, index: f.index })),
-          tags: tags,
           eta: t.eta
         });
       }
@@ -186,89 +131,75 @@ export class QBittorrentClient implements TorrentClientInterface {
     }
   }
 
-  public async addTorrentByUrl(url: string) {
+  public async addTorrentByUrlOrThrow(url: string, fileOrMagnetHash: string) {
     if (url == null || url.trim().length === 0) {
-      throw new InvalidHashError();
+      throw new InvalidTorrentUrlError();
+    }
+    if (fileOrMagnetHash == null || fileOrMagnetHash.trim().length === 0) {
+      throw new InvalidFileOrMagnetHashError();
     }
     await this.checkAndInit();
     try {
       await this._restClient.post('torrents/add', {
         urls: url,
         paused: true,
+        tags: fileOrMagnetHash
       });
+      let torrentInfo;
+      let tryCount = 3;
+      while (torrentInfo == null && tryCount-- > 0) {
+        await new Promise(r => setTimeout(r, 5000));
+        torrentInfo = await this.getTorrentById(fileOrMagnetHash);
+      }
+      if (torrentInfo == null) {
+        throw new TimedOutWaitingTorrentToBeAddedError();
+      }
+      return torrentInfo;
     } catch (e) {
       throw new TorrentApiError((e as Error).message);
     }
   }
 
-  public async addTagToTorrent(hash: string, tag: string) {
-    if (tag == null || tag.trim().length === 0) {
-      throw new InvalidTagError();
-    }
-    tag = tag.trim();
-    await this.checkAndInit();
-    try {
-      await this._restClient.post('torrents/addTags', {
-        hashes: hash,
-        tags: tag
-      });
-    } catch (e) {
-      throw new TorrentApiError((e as Error).message);
-    }
-  }
-
-  public async removeTagFromTorrent(hash: string, tag: string) {
-    if (tag == null || tag.trim().length === 0) {
-      throw new InvalidTagError();
+  public async resumeTorrent(id: string) {
+    if (id == null || id.trim().length === 0) {
+      throw new InvalidIdError();
     }
     await this.checkAndInit();
     try {
-      await this._restClient.post('torrents/removeTags', {
-        hashes: hash,
-        tags: tag
-      });
-    } catch (e) {
-      throw new TorrentApiError((e as Error).message);
-    }
-  }
-
-  public async resumeTorrent(hash: string) {
-    if (hash == null || hash.trim().length === 0) {
-      throw new InvalidHashError();
-    }
-    await this.checkAndInit();
-    try {
+      const ti = await this.getTorrentByIdOrThrow(id);
       await this._restClient.post('torrents/resume', {
-        hashes: hash
+        hashes: ti.infoHash
       });
     } catch (e) {
       throw new TorrentApiError((e as Error).message);
     }
   }
 
-  public async pauseTorrent(hash: string) {
-    if (hash == null || hash.trim().length === 0) {
-      throw new InvalidHashError();
+  public async pauseTorrent(id: string) {
+    if (id == null || id.trim().length === 0) {
+      throw new InvalidIdError();
     }
     await this.checkAndInit();
     try {
+      const ti = await this.getTorrentByIdOrThrow(id);
       await this._restClient.post('torrents/pause', {
-        hashes: hash
+        hashes: ti.infoHash
       });
     } catch (e) {
       throw new TorrentApiError((e as Error).message);
     }
   }
 
-  public async disableAllFiles(hash: string) {
-    if (hash == null || hash.trim().length === 0) {
-      throw new InvalidHashError();
+  public async disableAllFiles(id: string) {
+    if (id == null || id.trim().length === 0) {
+      throw new InvalidIdError();
     }
     await this.checkAndInit();
     try {
-      const files = (await this._restClient.get(`torrents/files?hash=${hash}`)).data;
+      const ti = await this.getTorrentByIdOrThrow(id);
+      const files = (await this._restClient.get(`torrents/files?hash=${ti.infoHash}`)).data;
       await this._restClient.post(`torrents/filePrio`, {
-        hash: hash,
+        hash: ti.infoHash,
         id: files.map((f) => f.index).join('|'),
         priority: 0
       })
@@ -277,17 +208,18 @@ export class QBittorrentClient implements TorrentClientInterface {
     }
   }
 
-  public async enableFile(hash: string, index: number) {
-    if (hash == null || hash.trim().length === 0) {
-      throw new InvalidHashError();
+  public async enableFile(id: string, index: number) {
+    if (id == null || id.trim().length === 0) {
+      throw new InvalidIdError();
     }
     if (index == null || index < 0 || !Number.isInteger(index)) {
       throw new InvalidFileIndexError();
     }
     await this.checkAndInit();
     try {
+      const ti = await this.getTorrentByIdOrThrow(id);
       await this._restClient.post(`torrents/filePrio`, {
-        hash: hash,
+        hash: ti.infoHash,
         id: index,
         priority: 1
       })
@@ -299,8 +231,12 @@ export class QBittorrentClient implements TorrentClientInterface {
 
 export class InvalidTorrentUrlError extends Error {}
 
-export class InvalidHashError extends Error {}
+export class InvalidIdError extends Error {}
 
 export class InvalidTagError extends Error {}
 
 export class InvalidFileIndexError extends Error {}
+
+export class InvalidFileOrMagnetHashError extends Error {}
+
+export class TimedOutWaitingTorrentToBeAddedError extends Error {}
