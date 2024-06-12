@@ -19,6 +19,7 @@ export class Movie {
   private _readyToBeProcessed = false;
   private _releaseTimeInMillis;
   private _runtimeSeconds;
+  private _alternativeTitles: string[] = [];
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLang, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -65,6 +66,17 @@ export class Movie {
 
   get runtimeSeconds() {
     return this._runtimeSeconds;
+  }
+
+  get alternativeTitles() {
+    return this._alternativeTitles;
+  }
+
+  set alternativeTitles(titles: string[]) {
+    if (titles == null) {
+      throw new NullAlternativeTitlesError();
+    }
+    this._alternativeTitles = titles;
   }
 
   set runtimeSeconds(seconds: number) {
@@ -255,3 +267,5 @@ export class NoAudioReleaseError extends Error {};
 export class NullReleaseTimeError extends Error {};
 
 export class InvalidRuntimeError extends Error {};
+
+export class NullAlternativeTitlesError extends Error {};

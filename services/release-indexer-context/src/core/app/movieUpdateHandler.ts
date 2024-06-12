@@ -82,9 +82,25 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
 };
 
 async function updateMovie(movie: Movie, tmdbId: string) {
-  const getMovieData = (await tmdbClient.get(`movie/${tmdbId}`)).data;
-  const releaseDate = getMovieData.release_date;
-  let runtime = getMovieData.runtime;
+  const getMovieDataEnUs = (await tmdbClient.get(`movie/${tmdbId}?language=en-US`)).data;
+  const getMovieDataRu = (await tmdbClient.get(`movie/${tmdbId}?language=ru`)).data;
+  const alternativeTitlesData = (await tmdbClient.get(`movie/${tmdbId}/alternative_titles`)).data;
+  const releaseDate = getMovieDataEnUs.release_date;
+  let runtime = getMovieDataEnUs.runtime;
+  let alternativeTitles: string[] = [];
+  const titleEnUs = getMovieDataEnUs.title;
+  if (titleEnUs != null) {
+    alternativeTitles.push(titleEnUs.toLowerCase());
+  }
+  const titleRu = getMovieDataRu.title;
+  if (titleRu  != null) {
+    alternativeTitles.push(titleRu.toLowerCase());
+  }
+  for (let t of alternativeTitlesData.titles) {
+    if (t.type === "romanized title") {
+      alternativeTitles.push(t.title.toLowerCase());
+    }
+  }
   let updated = false;
   if (releaseDate != null && releaseDate.trim() !== "") {
     const millis = new Date(releaseDate).getTime();
@@ -99,6 +115,10 @@ async function updateMovie(movie: Movie, tmdbId: string) {
       movie.runtimeSeconds = runtime;
       updated = true;
     }
+  }
+  if (movie.alternativeTitles.length === 0) {
+    movie.alternativeTitles = alternativeTitles;
+    updated = true;
   }
   return updated;
 }
