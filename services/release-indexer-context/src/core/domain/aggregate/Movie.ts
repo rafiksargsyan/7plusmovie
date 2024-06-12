@@ -76,7 +76,7 @@ export class Movie {
     if (titles == null) {
       throw new NullAlternativeTitlesError();
     }
-    this._alternativeTitles = titles;
+    this._alternativeTitles = titles.map(t => t.toLowerCase());
   }
 
   set runtimeSeconds(seconds: number) {
@@ -235,6 +235,26 @@ export class Movie {
       throw new EmptyRadarrReleaseGuidError();
     }
     return this._alreadyAddedRadarrReleaseGuidList.includes(guid);
+  }
+
+  public calculateMatchScore(name: string) {
+    if (name == null) return 0;
+    name = name.toLowerCase();
+    let scores: number[] = [];
+    for (let t of this._alternativeTitles) {
+      const tokens = t.split(/[\s:,'.()-]+/).filter(x => x.length >= 3);
+      let score = 0;
+      tokens.forEach(t => {
+        if (name.includes(t)) {
+          ++score;
+        }
+      });
+      if (name.includes(this.releaseYear.toString())) {
+        ++score;
+      }
+      scores.push(score);
+    }
+    return Math.max(...scores);
   }
 }
 

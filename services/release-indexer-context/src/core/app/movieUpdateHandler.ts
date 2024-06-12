@@ -90,15 +90,15 @@ async function updateMovie(movie: Movie, tmdbId: string) {
   let alternativeTitles: string[] = [];
   const titleEnUs = getMovieDataEnUs.title;
   if (titleEnUs != null) {
-    alternativeTitles.push(titleEnUs.toLowerCase());
+    alternativeTitles.push(titleEnUs);
   }
   const titleRu = getMovieDataRu.title;
   if (titleRu  != null) {
-    alternativeTitles.push(titleRu.toLowerCase());
+    alternativeTitles.push(titleRu);
   }
   for (let t of alternativeTitlesData.titles) {
     if (t.type === "romanized title") {
-      alternativeTitles.push(t.title.toLowerCase());
+      alternativeTitles.push(t.title);
     }
   }
   let updated = false;

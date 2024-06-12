@@ -114,11 +114,12 @@ export const handler = async (event) => {
         AudioLang.fromRadarrLanguage(radarrLanguages[0])?.lang === m.originalLocale.lang || radarrLanguages[0] === "unknown")))) {
         continue;
       }
+      const isRadarrUnknown = rr.rejections != null && rr.rejections.map(r => r.toLowerCase()).includes("unknown movie");
       if (radarrDownloadUrl.startsWith("magnet")) {
         const hash = checkEmptyHash(rr.infoHash);
         checkDuplicateHash(hash, m);
         const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, radarrDownloadUrl,
-          sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders, radarrLanguages);
+          sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders, radarrLanguages, isRadarrUnknown);
         m.addReleaseCandidate(hash, rc);
       } else {
         const publicDownloadUrl = checkUrlLength(getTorrentPublicDownloadURLOrThrow(radarrDownloadUrl));
@@ -136,7 +137,7 @@ export const handler = async (event) => {
           checkEmptyHash(hash);
           checkDuplicateHash(hash, m);
           const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, locationHeader,
-            sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders, radarrLanguages);
+            sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders, radarrLanguages, isRadarrUnknown);
           m.addReleaseCandidate(hash, rc);
         } else {
           const torrentFile = response.data;
@@ -153,7 +154,7 @@ export const handler = async (event) => {
           };
           await s3.putObject(s3Params);
           const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, s3ObjectKey,
-            sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders, radarrLanguages);
+            sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders, radarrLanguages, isRadarrUnknown);
           m.addReleaseCandidate(hash, rc);
         }
       }

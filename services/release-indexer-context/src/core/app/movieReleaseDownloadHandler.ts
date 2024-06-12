@@ -20,6 +20,7 @@ import { resolveAudioLang } from '../domain/service/resolveAudioLang';
 import { resolveSubsLang } from '../domain/service/resolveSubsLang';
 import { resolveSubsAuthor } from '../domain/service/resolveSubsAuthor';
 import { compareReleaseCandidates } from '../domain/service/compareReleaseCandidates';
+import { ReleaseCandidate } from '../domain/entity/ReleaseCandidate';
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -86,7 +87,7 @@ export const handler = async (event): Promise<void> => {
           }
           await qbitClient.disableAllFiles(torrentInfo!.id);
         }
-        const fileIndex: Nullable<number> = findMediaFile(torrentInfo!, m.releaseYear, m.originalLocale.lang === "en" ? m.originalTitle : null);
+        const fileIndex: Nullable<number> = findMediaFile(torrentInfo!, m, rc);
         if (fileIndex == null) {
           m.ignoreRc(rcKey);
           await  qbitClient.deleteTorrentById(torrentInfo!.id);
@@ -128,37 +129,22 @@ export const handler = async (event): Promise<void> => {
 
 // You might think searching for release year should be enough, but it is not. For example, there were
 // two matrix movies in the same year 2003
-function findMediaFile(torrentInfo: TorrentInfo, releaseYear: number, englishTitle: Nullable<string>): Nullable<number> {
+function findMediaFile(torrentInfo: TorrentInfo,  movie: Movie, rc: ReleaseCandidate): Nullable<number> {
   let candidates: { name: string; size: number; progress: number; index: number; } [] = [];
   for (let i = 0; i < torrentInfo.files.length; ++i) {
     const f = torrentInfo.files[i];
-    if (f.name.endsWith('.mkv') || f.name.endsWith('.mp4') || f.name.endsWith('.avi')) {
+    const name = f.name.toLowerCase();
+    if ((name.endsWith('.mkv') || name.endsWith('.mp4') || name.endsWith('.avi')) && !name.includes("sample")) {
       candidates.push(f);
     }
   }
-  if (candidates.length === 1) return candidates[0].index;
-  let candidates2: { name: string; size: number; progress: number; index: number; } [] = [];
-  for (let c of candidates) {
-    if (c.name.includes(releaseYear.toString()) && ! c.name.toLowerCase().includes("sample")) candidates2.push(c);
+  if (candidates.length === 1) {
+    if (rc.radarrIsUnknown) return null;
+    return candidates[0].index;
   }
-  if (candidates2.length === 1) return candidates2[0].index;
-  if (candidates2.length === 0) return null;
-  if (englishTitle != null) {
-    const candidateScore: { [key:string]: { score: number, index: number } } = {};
-    candidates2.forEach(c => { candidateScore[c.name] = { score: 0, index: c.index } });
-    const tokens = englishTitle.split(/[\s:,'.()-]+/).filter(x => x.length >= 3).map(x => x.toLowerCase());
-    for (let x in candidateScore) {
-      for (let t of tokens) {
-        if (x.toLowerCase().includes(t)) {
-          candidateScore[x].score = candidateScore[x].score + 1;
-        }
-      }
-    }
-    const candidateScoreEntries = Object.entries(candidateScore).sort((a, b) => b[1].score - a[1].score);
-    if (candidateScoreEntries[0][1].score > candidateScoreEntries[1][1].score) {
-      return candidateScoreEntries[0][1].index;
-    }
-  }
+  const candidateScores = candidates.map(c => ({ index: c.index, score: movie.calculateMatchScore(c.name) }))
+  .sort((a, b) => b.score - a.score);
+  if (candidateScores[0].score > candidateScores[1].score) return candidateScores[0].index;
   return null;
 }
 

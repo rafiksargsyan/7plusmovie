@@ -9,9 +9,10 @@ export class ReleaseCandidate {
   private _ripType: RipType;
   private _status: Nullable<ReleaseCandidateStatus>;
   private _radarrLanguages: string[] = [];
+  private _radarrIsUnknown;
 
   public constructor(createEmptyObject: boolean, releaseTime?: Nullable<number>,
-    sizeInBytes?: Nullable<number>, res?: Resolution, ripType?: RipType, radarrLanguages?: string[]) {
+    sizeInBytes?: Nullable<number>, res?: Resolution, ripType?: RipType, radarrLanguages?: string[], radarrIsUnknown?: boolean) {
     if (!createEmptyObject) {
       this._releaseTimeInMillis = this.validateReleaseTime(releaseTime);
       this._sizeInBytes = this.validateSizeInBytes(sizeInBytes);
@@ -19,7 +20,15 @@ export class ReleaseCandidate {
       this._ripType = this.validateRipType(ripType);
       if (radarrLanguages == null) radarrLanguages = [];
       this._radarrLanguages = radarrLanguages;
+      this._radarrIsUnknown = this.validateRadarrIsUnknown(radarrIsUnknown);
     }
+  }
+
+  private validateRadarrIsUnknown(radarrIsUnknown: Nullable<boolean>) {
+    if (radarrIsUnknown == null) {
+      throw new NullRadarrIsUnknownError();
+    }
+    this._radarrIsUnknown = radarrIsUnknown;
   }
 
   private validateResolution(res: Nullable<Resolution>) {
@@ -81,6 +90,10 @@ export class ReleaseCandidate {
     return this._radarrLanguages;
   }
 
+  get radarrIsUnknown() {
+    return this._radarrIsUnknown;
+  }
+
   public isProcessed() {
     return this._status != null;
   }
@@ -130,3 +143,5 @@ export class NullRipTypeError extends Error {}
 export class NullReleaseCandidateStatusError extends Error {}
 
 export class NullReleaseCandidateError extends Error {}
+
+export class NullRadarrIsUnknownError extends Error {}
