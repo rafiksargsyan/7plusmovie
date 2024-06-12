@@ -17,7 +17,6 @@ import { S3 } from '@aws-sdk/client-s3';
 import { AudioLang } from "../domain/value-object/AudioLang";
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
-const movieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 const radarrApiBaseUrl = process.env.RADARR_API_BASE_URL!;
 
 const marshallOptions = {
@@ -165,7 +164,8 @@ export const handler = async (event) => {
   if (allRadarrReleasesProcessed) {
     m.readyToBeProcessed = true;
   }
-  await docClient.put({ TableName: movieTableName, Item: m }); 
+  console.log(m);
+  await movieRepo.saveMovie(m);
 };
 
 function resolveTorrentTrackerOrThrow(rr: { infoUrl: string, commentUrl: string },

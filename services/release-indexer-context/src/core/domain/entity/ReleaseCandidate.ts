@@ -28,7 +28,7 @@ export class ReleaseCandidate {
     if (radarrIsUnknown == null) {
       throw new NullRadarrIsUnknownError();
     }
-    this._radarrIsUnknown = radarrIsUnknown;
+    return radarrIsUnknown;
   }
 
   private validateResolution(res: Nullable<Resolution>) {
