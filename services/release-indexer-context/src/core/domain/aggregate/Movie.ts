@@ -14,7 +14,7 @@ export class Movie {
   private _releases: { [releaseId:string]: { release: Release, replacedReleaseIds: string[] } } = {};
   private _releaseCandidates: { [key:string]: ReleaseCandidate } = {};
   private _alreadyAddedRadarrReleaseGuidList: string[] = [];
-  private _blackList: string[];
+  private _blackList: string[] = [];
   private _lastReleaseCandidateScanTimeMillis = 0;
   private _readyToBeProcessed = false;
   private _releaseTimeInMillis;
