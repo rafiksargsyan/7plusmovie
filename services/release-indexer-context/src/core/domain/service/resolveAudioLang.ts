@@ -15,6 +15,7 @@ export function resolveAudioLang(code: Nullable<string>,
     if (radarrLanguages.includes("portuguese (brazil)")) return AudioLang.PT_BR;
     if (radarrLanguages.includes("spanish (latino)")) return AudioLang.ES_419;
     if (radarrLanguages.includes("spanish")) return AudioLang.ES;
+    if (radarrLanguages.includes("italian")) return AudioLang.IT;
     if (radarrLanguages.includes("french")) return AudioLang.FR;
     if (radarrLanguages.includes("hindi")) {
       if (locale.lang === "hi") return AudioLang.fromKey(locale.key);

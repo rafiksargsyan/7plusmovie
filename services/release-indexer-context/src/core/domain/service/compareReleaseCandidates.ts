@@ -8,13 +8,20 @@ export function compareReleaseCandidates(rc1: ReleaseCandidate, rc2: ReleaseCand
     const rc1RipType = RipType.fromKeyOrThrow(rc1.ripType.key);
     const rc2RipType = RipType.fromKeyOrThrow(rc2.ripType.key);
     if (rc1RipType.isLowQuality() || rc2RipType.isLowQuality()) {
-      return RipType.compare(rc1RipType, rc2RipType);
+      if (RipType.compare(rc1.ripType, rc2.ripType) !== 0) {
+        return RipType.compare(rc1.ripType, rc2.ripType);  
+      }
     }
     if (Resolution.compare(rc1.resolution, rc2.resolution) !== 0) {
       return Resolution.compare(rc1.resolution, rc2.resolution);
     }
     if (RipType.compare(rc1.ripType, rc2.ripType) !== 0) {
       return RipType.compare(rc1.ripType, rc2.ripType);  
+    }
+    if (rc1.releaseTimeInMillis != null && rc2.releaseTimeInMillis != null) {
+      const d1 = Math.round(rc1.releaseTimeInMillis / (1000 * 60 * 60 * 24));
+      const d2 = Math.round(rc2.releaseTimeInMillis / (1000 * 60 * 60 * 24));
+      if (d1 != d2) return d1 - d2;
     }
     let rc1Seeders = 0;
     let rc2Seeders = 0;
@@ -26,9 +33,6 @@ export function compareReleaseCandidates(rc1: ReleaseCandidate, rc2: ReleaseCand
     }
     if (rc1Seeders !== rc2Seeders) {
       return rc1Seeders - rc2Seeders;
-    }
-    if (rc1.releaseTimeInMillis != null && rc2.releaseTimeInMillis != null) {
-      return rc1.releaseTimeInMillis - rc2.releaseTimeInMillis;
     }
     return 0;
   }
