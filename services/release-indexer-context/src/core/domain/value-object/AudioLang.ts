@@ -118,6 +118,10 @@ export class AudioLang {
   static equals(al1: Nullable<AudioLang>, al2: Nullable<AudioLang>) {
     return al1?.key == al2?.key;
   }
+
+  static looseEquals(al1: Nullable<AudioLang>, al2: Nullable<AudioLang>) {
+    return al1?.lang == al2?.lang;
+  }
 }
 
 export class InvalidAudioLangKeyError extends Error {}

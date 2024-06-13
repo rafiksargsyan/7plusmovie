@@ -164,7 +164,6 @@ export const handler = async (event) => {
   if (allRadarrReleasesProcessed) {
     m.readyToBeProcessed = true;
   }
-  console.log(m);
   await movieRepo.saveMovie(m);
 };
 

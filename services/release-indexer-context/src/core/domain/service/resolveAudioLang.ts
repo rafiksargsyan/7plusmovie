@@ -3,10 +3,6 @@ import { AudioAuthor } from "../value-object/AudioAuthor";
 import { AudioLang } from "../value-object/AudioLang";
 import { L8nLang } from "../value-object/L8nLang";
 
-// The language resolution logic is currently based on subs language code (2 or 3 letter).
-// We might need to improve the logic by adding other parameters (e.g. TMDB id, torrent tracker, etc.).
-// Let's say the code is 'eng'. Is it British English or American English? We could make a guess by
-// analyzing the movie details from TMDB.
 export function resolveAudioLang(code: Nullable<string>,
                                  locale: L8nLang,
                                  title: Nullable<string>,
@@ -19,6 +15,7 @@ export function resolveAudioLang(code: Nullable<string>,
     if (radarrLanguages.includes("portuguese (brazil)")) return AudioLang.PT_BR;
     if (radarrLanguages.includes("spanish (latino)")) return AudioLang.ES_419;
     if (radarrLanguages.includes("spanish")) return AudioLang.ES;
+    if (radarrLanguages.includes("french")) return AudioLang.FR;
     if (radarrLanguages.includes("hindi")) {
       if (locale.lang === "hi") return AudioLang.fromKey(locale.key);
       return AudioLang.HI;
@@ -27,7 +24,7 @@ export function resolveAudioLang(code: Nullable<string>,
       if (locale.lang === "en") return AudioLang.fromKey(locale.key);
       return AudioLang.EN;
     }
-  }                                
+  }                             
   if (title == null) title = "";
   title = title.toLowerCase();
   let audioLang = AudioLang.fromISO_639_1(code);
