@@ -35,7 +35,7 @@ export class RipType {
     return (r1 as RipType).priority - (r2 as RipType).priority;
   }
 
-  static fromRadarrReleaseQualitySource(s: Nullable<string>) {
+  static fromRadarrReleaseQualityName(s: Nullable<string>) {
     if (s == null) return null;
     s = s.toLowerCase();
     if (s.includes("bluray")) return RipType.BR;
@@ -47,8 +47,8 @@ export class RipType {
     return null;
   }
 
-  static fromRadarrReleaseQualitySourceOrThrow(s: Nullable<string>) {
-    const ripType = this.fromRadarrReleaseQualitySource(s);
+  static fromRadarrReleaseQualityNameOrThrow(s: Nullable<string>) {
+    const ripType = this.fromRadarrReleaseQualityName(s);
     if (ripType == null) {
       throw new InvalidRadarrQualitySourceError();
     }

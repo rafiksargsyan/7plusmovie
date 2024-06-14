@@ -103,7 +103,7 @@ export class QBittorrentClient implements TorrentClientInterface {
       const info = (await this._restClient.get(`torrents/info?tag=${encodeURIComponent(tag)}`)).data;
       let ret: TorrentInfo[] = [];
       for (let t of info) {
-        const isStalled = t.state === "stalledDL" ? true : false;
+        const isStalled = t.state === "stalledDL" || t.state === "metaDL" ? true : false;
         const addedOn = t.added_on;
         const amountLeft = t.amount_left;
         const files = (await this._restClient.get(`torrents/files?hash=${t.hash}`)).data;

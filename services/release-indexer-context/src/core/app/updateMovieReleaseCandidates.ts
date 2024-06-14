@@ -81,7 +81,7 @@ export const handler = async (event) => {
         await checkReleaseYearFromInfoUrl(rr.infoUrl, m.releaseYear);
       }
       const seeders = checkSeeders(rr.seeders);
-      const ripType = RipType.fromRadarrReleaseQualitySourceOrThrow(rr?.quality?.quality?.source);
+      const ripType = RipType.fromRadarrReleaseQualityNameOrThrow(rr?.quality?.quality?.name);
       let resolution = Resolution.fromPixels(rr?.quality?.quality?.resolution, rr?.quality?.quality?.resolution);
       if (resolution == null) {
         if (ripType.isLowQuality()) {
