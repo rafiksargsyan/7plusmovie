@@ -152,7 +152,7 @@ function findMediaFile(torrentInfo: TorrentInfo,  movie: Movie, rc: ReleaseCandi
   }
   const candidateScores = candidates.map(c => ({ index: c.index, score: movie.calculateMatchScore(c.name) }))
   .sort((a, b) => b.score - a.score);
-  if (candidateScores[0].score > candidateScores[1].score) return candidateScores[0].index;
+  if (candidateScores[0].score > candidateScores[1].score && candidateScores[0].score > 0) return candidateScores[0].index;
   return null;
 }
 
