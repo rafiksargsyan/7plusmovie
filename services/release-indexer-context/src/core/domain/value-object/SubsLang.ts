@@ -26,6 +26,7 @@ export class SubsLang {
   public static readonly ES_ES = new SubsLang("ES_ES", "es", "es-ES");
   public static readonly ES_419 = new SubsLang("ES_419", "es", "es-419");
   public static readonly UK = new SubsLang("UK", "uk", "uk");
+  public static readonly ZH = new SubsLang("ZH", "zh", "zh");
 
   private static readonly FROM_ISO_639_2 = {
     "en" : SubsLang.EN,
@@ -42,7 +43,8 @@ export class SubsLang {
     "sv" : SubsLang.SV,
     "pl" : SubsLang.PL,
     "es" : SubsLang.ES,
-    "uk" : SubsLang.UK
+    "uk" : SubsLang.UK,
+    "zh" : SubsLang.ZH
   } as const;
    
   private static readonly FROM_ISO_639_1 = {
@@ -61,7 +63,9 @@ export class SubsLang {
     "swe" : SubsLang.SV,
     "pol" : SubsLang.PL,
     "spa" : SubsLang.ES,
-    "ukr" : SubsLang.UK
+    "ukr" : SubsLang.UK,
+    "chi" : SubsLang.ZH,
+    "zho" : SubsLang.ZH
   } as const;
 
   public static readonly subsAuthorPriorityList = {
