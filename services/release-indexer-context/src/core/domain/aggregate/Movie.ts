@@ -133,9 +133,9 @@ export class Movie {
         continue;
       }
       if (compareResult === 0) {
-        if (this._releases[k].release.hash === r.hash || Release.compare2(this._releases[k].release, r) >= 0) return;
+        if (this._releases[k].release.hash === r.hash || Release.compare2(this._releases[k].release, r) >= 0) return false;
         this._releases[k].release = r;
-        return;
+        return true;
       }
       if (compareResult > 0) {
         return;
@@ -152,6 +152,7 @@ export class Movie {
     if (!(id in this._releases)) {
       this._releases[id] = { release: r, replacedReleaseIds: [] }
     }
+    return true;
   }
 
   public checkAndEmptyReleaseCandidates(forceEmpty: boolean) {
@@ -249,9 +250,7 @@ export class Movie {
           ++score;
         }
       });
-      if (name.includes(this.releaseYear.toString())) {
-        ++score;
-      }
+      score = score + (name.match(new RegExp(this.releaseYear.toString(), "g")) || []).length;
       scores.push(score);
     }
     return Math.max(...scores);

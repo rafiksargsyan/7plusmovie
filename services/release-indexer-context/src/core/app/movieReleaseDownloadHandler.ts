@@ -21,6 +21,7 @@ import { resolveSubsLang } from '../domain/service/resolveSubsLang';
 import { resolveSubsAuthor } from '../domain/service/resolveSubsAuthor';
 import { compareReleaseCandidates } from '../domain/service/compareReleaseCandidates';
 import { ReleaseCandidate } from '../domain/entity/ReleaseCandidate';
+import { InvocationType, InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -32,12 +33,14 @@ const translateConfig = { marshallOptions };
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 const movieRepo: MovieRepositoryInterface = new MovieRepository(docClient);
 const secretsManager = new SecretsManager({});
+const lambdaClient = new LambdaClient({});
 
 const qbittorrentApiBaseUrl = process.env.QBITTORRENT_API_BASE_URL!;
 const qbittorrentUsername = process.env.QBITTORRENT_USERNAME!;
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const mediaFilesBaseUrl = process.env.MEDIA_FILES_BASE_URL!;
 const torrentFilesBaseUrl = process.env.TORRENT_FILES_BASE_URL!;
+const mediaFileChacherLambdaName = process.env.MEDIA_FILE_CACHER_LAMBDA_NAME!;
 
 export const handler = async (event): Promise<void> => {
   const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
@@ -92,13 +95,14 @@ export const handler = async (event): Promise<void> => {
         if (fileIndex == null) {
           console.log("ignore22222222222222222222222");
           m.ignoreRc(rcKey);
-          await  qbitClient.deleteTorrentById(torrentInfo!.id);
+          await qbitClient.deleteTorrentById(torrentInfo!.id);
           continue;
         }
         const file = torrentInfo!.files[fileIndex];
         if (file.progress === 1) {
-          processMediaFile(m, file.name, rcKey, rc, file.size);
-          await qbitClient.deleteTorrentById(torrentInfo!.id);
+          if (! (await processMediaFile(m, file.name, rcKey, rc, file.size))) {
+            await qbitClient.deleteTorrentById(torrentInfo!.id);
+          }
           break;
         } if ((Date.now() - torrentInfo!.addedOn * 1000) > 60 * 60 * 1000 && (torrentInfo!.isStalled ||
               (torrentInfo!.eta != null && torrentInfo!.eta > 23 * 60 * 60))) {
@@ -157,7 +161,7 @@ function findMediaFile(torrentInfo: TorrentInfo,  movie: Movie, rc: ReleaseCandi
 }
 
 // add media file name to release
-function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate, size: number) {
+async function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate, size: number) {
   try {
     const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
     const durationStr = execSync(`ffprobe -i '${mediaFilesBaseUrl}${name}' -show_entries format=duration -v quiet -of csv="p=0"`).toString();
@@ -201,7 +205,7 @@ function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentRele
         release.addAudioMetadata(am);
       }
       if (s.codec_type === "subtitle") {
-        if (s.codec_name !== "subrip" || s.codec_name !== "ass" || s.codec_name !== "webvtt") continue;
+        if (s.codec_name !== "subrip" && s.codec_name !== "ass" && s.codec_name !== "webvtt") continue;
         let langStr = s.tags?.language;
         let titleStr = s.tags?.title;
         let lang = resolveSubsLang(titleStr, langStr, m.originalLocale);
@@ -214,14 +218,38 @@ function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentRele
       m.ignoreRc(rcKey);
       console.log("ignore666666666666666");
     } else {
-      m.addRelease(rc.infoHash, release);
-      m.promoteRc(rcKey);
+      release.cachedMediaFileRelativePath = m.id + "/" + rc.infoHash + name.substring(name.lastIndexOf('.'));
+      if (m.addRelease(rc.infoHash, release)) {
+        m.promoteRc(rcKey);
+
+        const cacheLambdaParams = {
+          destinationPath: release.cachedMediaFileRelativePath,
+          sourceUrl: mediaFilesBaseUrl + encodeURIComponent(name),
+          torrentId: rc.infoHash,
+          size: size
+        }
+        const lambdaParams = {
+          FunctionName: mediaFileChacherLambdaName,
+          InvocationType: InvocationType.Event,
+          Payload: JSON.stringify(cacheLambdaParams)
+        };
+        const invokeCommand = new InvokeCommand(lambdaParams);
+        try {
+          await lambdaClient.send(invokeCommand);
+        } catch (e) {
+          console.log(e);
+        }
+
+        return true;
+      } 
+      m.ignoreRc(rcKey);
     }
   } catch (e) {
     m.ignoreRc(rcKey);
     console.log("ignore777777777777777");
     console.log(e);
   }
+  return false;
 }
 
 async function addMagnetAndWait(qbitClient: TorrentClientInterface, downloadUrl: string, hash: string): Promise<TorrentInfo> {

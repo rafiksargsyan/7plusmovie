@@ -57,6 +57,7 @@ export class AudioLang {
     "eng" : AudioLang.EN,
     "rus" : AudioLang.RU,
     "fra" : AudioLang.FR,
+    "fre" : AudioLang.FR,
     "jpn" : AudioLang.JA,
     "por" : AudioLang.PT,
     "kor" : AudioLang.KO,

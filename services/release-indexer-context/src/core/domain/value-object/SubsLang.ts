@@ -49,6 +49,7 @@ export class SubsLang {
     "eng" : SubsLang.EN,
     "rus" : SubsLang.RU,
     "fra" : SubsLang.FR,
+    "fre" : SubsLang.FR,
     "jpn" : SubsLang.JA,
     "por" : SubsLang.PT,
     "kor" : SubsLang.KO,

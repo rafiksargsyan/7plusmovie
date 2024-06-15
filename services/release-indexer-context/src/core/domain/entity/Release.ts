@@ -19,6 +19,7 @@ export class Release {
   private _hash: string;
   private _mediaFileRelativePath: string;
   private _creationTime;
+  private _cachedMediaFileRealativePath;
 
   public constructor(createEmptyObject: boolean, ripType?: RipType, res?: Resolution, hash?: string,
     mediaFileRelativePath?: string, size?: number) {
@@ -185,6 +186,17 @@ export class Release {
     return size;
   }
 
+  set cachedMediaFileRelativePath(path: string) {
+    if (path == null || path.trim() === "") {
+      throw new EmptyPathError();
+    }
+    this._cachedMediaFileRealativePath = path;
+  }
+  
+  get cachedMediaFileRelativePath() {
+    return this._cachedMediaFileRealativePath;
+  }
+
   get hash() {
     return this._hash;
   }
@@ -219,3 +231,5 @@ export class NullHashError extends Error {}
 export class InvalidMediaFilePathError extends Error {}
 
 export class InvalidSizeError extends Error {}
+
+export class EmptyPathError extends Error {}
