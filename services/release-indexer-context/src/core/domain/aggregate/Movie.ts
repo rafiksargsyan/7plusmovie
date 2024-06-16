@@ -169,7 +169,7 @@ export class Movie {
       if (this._releaseCandidates[k].status == null) return;
     }
     this._releaseCandidates = {};
-    this._alreadyAddedRadarrReleaseGuidList = []
+    this._alreadyAddedRadarrReleaseGuidList = [];
     this._readyToBeProcessed = false;
   }
 
@@ -211,7 +211,6 @@ export class Movie {
     if (id in this._releaseCandidates) throw new ReleaseCandidateAlreadyExistsError();
     if (rc == null) throw new NullReleaseCandidateError();
     this._releaseCandidates[id] = rc;
-    if (Object.entries(this._releaseCandidates).length === 1) this._lastReleaseCandidateScanTimeMillis = Date.now();
   }
 
   get lastRCScanTime() {
@@ -220,6 +219,9 @@ export class Movie {
 
   set readyToBeProcessed(flag: boolean) {
     this._readyToBeProcessed = flag;
+    if (flag) {
+      this._lastReleaseCandidateScanTimeMillis = Date.now();
+    }
   }
 
   set releaseTimeInMillis(millis: number) {
