@@ -54,10 +54,6 @@ export const handler = async (event): Promise<void> => {
   for (let i = 0; i < releaseCandidates.length; ++i) {
     const rcKey = releaseCandidates[i][0];
     const rc = m.releaseCandidates[releaseCandidates[i][0]];
-    if (rcKey != '049dd59925ef4da8da0f1a1b2363284839bc0f31') {
-      m.ignoreRc(rcKey);
-      continue;
-    }
     try {
       if (rc.isProcessed()) continue;
       if (m.isBlackListed(rcKey)) {
@@ -76,7 +72,6 @@ export const handler = async (event): Promise<void> => {
           if (prevRc instanceof TorrentReleaseCandidate && TorrentTracker.equals(rc.tracker, prevRc.tracker)
             && TorrentTracker.fromKeyOrThrow(rc.tracker.key).isLanguageSpecific()
             && compareReleaseCandidates(rc, prevRc) < 0 && prevRc.isPromoted()) {
-            console.log("ignore11111111111111111");
             m.ignoreRc(rcKey);
             betterRCAlreadyPromoted = true;
             break;
@@ -97,7 +92,6 @@ export const handler = async (event): Promise<void> => {
         }
         const fileIndex: Nullable<number> = findMediaFile(torrentInfo!, m, rc);
         if (fileIndex == null) {
-          console.log("ignore22222222222222222222222");
           m.ignoreRc(rcKey);
           await qbitClient.deleteTorrentById(torrentInfo!.id);
           continue;
@@ -110,7 +104,6 @@ export const handler = async (event): Promise<void> => {
           break;
         } if ((Date.now() - torrentInfo!.addedOn * 1000) > 60 * 60 * 1000 && (torrentInfo!.isStalled ||
               (torrentInfo!.eta != null && torrentInfo!.eta > 23 * 60 * 60))) {
-          console.log("ignore333333333333333333333333");
           m.ignoreRc(rcKey);
           await qbitClient.deleteTorrentById(torrentInfo!.id);
           continue;
@@ -124,7 +117,6 @@ export const handler = async (event): Promise<void> => {
       }
     } catch (e) {
       m.ignoreRc(rcKey);
-      console.log("ignore444444444444444444444");
       if (rc instanceof TorrentReleaseCandidate) {
         try {
           await qbitClient.deleteTorrentById(rc.infoHash);
@@ -142,9 +134,6 @@ export const handler = async (event): Promise<void> => {
 // You might think searching for release year should be enough, but it is not. For example, there were
 // two matrix movies in the same year 2003
 function findMediaFile(torrentInfo: TorrentInfo,  movie: Movie, rc: ReleaseCandidate): Nullable<number> {
-  console.log(torrentInfo);
-  console.log(movie);
-  console.log(rc);
   let candidates: { name: string; size: number; progress: number; index: number; } [] = [];
   for (let i = 0; i < torrentInfo.files.length; ++i) {
     const f = torrentInfo.files[i];
@@ -186,7 +175,6 @@ async function processMediaFile(m: Movie, name: string, rcKey: string, rc: Torre
     }
     for (let s of streams.streams) {
       if (s.index === 0 && s.codec_type !== "video") {
-        console.log("ignore55555555555555555555555");
         m.ignoreRc(rcKey);
         return;
       }
@@ -220,7 +208,6 @@ async function processMediaFile(m: Movie, name: string, rcKey: string, rc: Torre
     }
     if (release.audios.length === 0) {
       m.ignoreRc(rcKey);
-      console.log("ignore666666666666666");
     } else {
       release.cachedMediaFileRelativePath = m.id + "/" + rc.infoHash + name.substring(name.lastIndexOf('.'));
       if (m.addRelease(rc.infoHash, release)) {
@@ -250,7 +237,6 @@ async function processMediaFile(m: Movie, name: string, rcKey: string, rc: Torre
     }
   } catch (e) {
     m.ignoreRc(rcKey);
-    console.log("ignore777777777777777");
     console.log(e);
   }
   return false;
