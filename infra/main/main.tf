@@ -192,8 +192,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "raw_media_assets_lifecycle_con
   bucket = aws_s3_bucket.raw_media_assets.bucket
 
   rule {
-    id      = "default"
-    enabled = true
+    id = "default"
 
     transition {
       days          = 0
@@ -333,8 +332,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "trt_files_lifecycle_config" {
   bucket = aws_s3_bucket.raw_media_assets.bucket
 
   rule {
-    id      = "default"
-    enabled = true
+    id = "default"
 
     transition {
       days          = 0
