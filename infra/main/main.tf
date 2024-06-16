@@ -329,7 +329,7 @@ resource "aws_s3_bucket" "trt_files" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "trt_files_lifecycle_config" {
-  bucket = aws_s3_bucket.raw_media_assets.bucket
+  bucket = aws_s3_bucket.trt_files.bucket
 
   rule {
     id = "default"
