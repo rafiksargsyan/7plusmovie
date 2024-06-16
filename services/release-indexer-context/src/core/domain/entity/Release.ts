@@ -19,7 +19,7 @@ export class Release {
   private _hash: string;
   private _mediaFileRelativePath: string;
   private _creationTime;
-  private _cachedMediaFileRealativePath;
+  private _cachedMediaFileRelativePath;
 
   public constructor(createEmptyObject: boolean, ripType?: RipType, res?: Resolution, hash?: string,
     mediaFileRelativePath?: string, size?: number) {
@@ -66,6 +66,9 @@ export class Release {
   static compare2(r1: Release, r2: Release) {
     if (Math.abs(r1.creationTime - r2.creationTime) < 7 * 24 * 60 * 60 * 1000) {
       if (RipType.compare(r1._ripType, r2._ripType) === 0) {
+        if (r1._subs.length !== r2._subs.length) {
+          return r1._subs.length - r2._subs.length;
+        }
         return r2._size - r1._size;
       } else {
         return RipType.compare(r1._ripType, r2._ripType);
@@ -190,11 +193,11 @@ export class Release {
     if (path == null || path.trim() === "") {
       throw new EmptyPathError();
     }
-    this._cachedMediaFileRealativePath = path;
+    this._cachedMediaFileRelativePath = path;
   }
   
   get cachedMediaFileRelativePath() {
-    return this._cachedMediaFileRealativePath;
+    return this._cachedMediaFileRelativePath;
   }
 
   get hash() {

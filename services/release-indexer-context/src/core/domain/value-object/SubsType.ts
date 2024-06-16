@@ -28,7 +28,8 @@ export class SubsType {
     const titleLowerCase = title.toLowerCase();
     if (titleLowerCase.includes("forced") || titleLowerCase.includes("форсирован")) return SubsType.FORCED;
     if (titleLowerCase.includes("sdh") || titleLowerCase.includes("non udenti")) return SubsType.SDH;
-    if (titleLowerCase.includes("full") || titleLowerCase.includes("полные") || titleLowerCase.includes("regular")) return SubsType.FULL;
+    if (titleLowerCase.includes("full") || titleLowerCase.includes("полные") ||
+        titleLowerCase.includes("regular")  || titleLowerCase.includes("completi")) return SubsType.FULL;
     return null;
   }
 

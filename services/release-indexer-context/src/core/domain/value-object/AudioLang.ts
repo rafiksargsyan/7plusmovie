@@ -29,7 +29,8 @@ export class AudioLang {
   public static readonly ES_ES = new AudioLang("ES_ES", "es", "es-ES");
   public static readonly ES_419 = new AudioLang("ES_419", "es", "es-419");
   public static readonly UK = new AudioLang("UK", "uk", "uk");
-  public static readonly ZH = new AudioLang("ZH", "zh", "zh")
+  public static readonly ZH = new AudioLang("ZH", "zh", "zh");
+  public static readonly DE = new AudioLang("DE", "de", "de");
 
   public static readonly audioAuthorPriorityList = {
     "RU" : [AudioAuthor.JASKIER, AudioAuthor.HDREZKA, AudioAuthor.TVSHOWS, AudioAuthor.READ_HEAD_SOUND,
@@ -52,7 +53,8 @@ export class AudioLang {
     "pl" : AudioLang.PL,
     "es" : AudioLang.ES,
     "uk" : AudioLang.UK,
-    "zh" : AudioLang.ZH
+    "zh" : AudioLang.ZH,
+    "de" : AudioLang.DE
   } as const;
    
   private static readonly FROM_ISO_639_1 = {
@@ -73,7 +75,8 @@ export class AudioLang {
     "spa" : AudioLang.ES,
     "ukr" : AudioLang.UK,
     "chi" : AudioLang.ZH,
-    "zho" : AudioLang.ZH
+    "zho" : AudioLang.ZH,
+    "ger" : AudioLang.DE
   } as const;
 
   public readonly key: string;
