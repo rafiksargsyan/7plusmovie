@@ -34,7 +34,7 @@ export function resolveAudioLang(code: Nullable<string>,
     const tmp = AudioLang.fromKey(locale.key); // Increasing specifity using locale
     if (tmp != null) return tmp;
   }
-  if (AudioLang.equals(audioLang, AudioLang.ES) && (title.includes("latin american") || radarrLanguages.includes("spanish (latino)"))) {
+  if (AudioLang.equals(audioLang, AudioLang.ES) && (title.includes("latin") || radarrLanguages.includes("spanish (latino)"))) {
     return AudioLang.ES_419;
   }
   const ruAudioAuthorList = AudioLang.audioAuthorPriorityList[AudioLang.RU.key];

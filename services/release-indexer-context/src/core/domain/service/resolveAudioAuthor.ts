@@ -14,6 +14,8 @@ export function resolveAudioAuthor(title: Nullable<string>, tracker: Nullable<To
     if (title.includes('viruseproject')) return AudioAuthor.VIRUSEPROJECT;
     if (title.includes('moviedalen')) return AudioAuthor.MOVIE_DALEN;
     if (title.includes('postmodern')) return AudioAuthor.POSTMODERN;
+    if (title.includes('tvshows')) return AudioAuthor.TVSHOWS;
+    if (title.includes('lostfilm')) return AudioAuthor.LOSTFILM;
   }
   return null;
 }

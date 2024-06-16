@@ -15,7 +15,7 @@ export function resolveSubsLang(title: Nullable<string>, code: Nullable<string>,
     const tmp = SubsLang.fromKey(locale.key); // Increasing specifity using locale
     if (tmp != null) return tmp;
   }
-  if (SubsLang.equals(subsLang, SubsLang.ES) && title.includes("latin american")) {
+  if (SubsLang.equals(subsLang, SubsLang.ES) && title.includes("latin")) {
     return SubsLang.ES_419;
   }
   return subsLang;
