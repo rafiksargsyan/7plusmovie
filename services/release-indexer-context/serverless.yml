@@ -131,6 +131,23 @@ functions:
       - ${file(./.env.${sls:stage}.yml):RELEASE_MEDIA_FILE_CACHING_RCLONE_LAYER}
     timeout: 900
 
+  fantomAssetsCleanupHandlerFanout:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      FANTOM_ASSETS_CLEANUP_LAMBDA_NAME: ${env:FANTOM_ASSETS_CLEANUP_LAMBDA_NAME} 
+    handler: src/core/app/fantomAssetsCleanupHandlerFanout.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):FANTOM_ASSETS_CLEANUP_INTERVAL} minute)
+    timeout: 900
+
+  fantomAssetsCleanupHandler:
+    environment:
+      TORRENT_FILES_S3_BUCKET: ${env:TORRENT_FILES_S3_BUCKET}
+      RAW_MEDIA_FILES_S3_BUCKET: ${env:RAW_MEDIA_FILES_S3_BUCKET}
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/fantomAssetsCleanupHandler.handler
+    timeout: 900  
+
 resources:
   Resources:
     movieReleaseCandidateUpdaterFanoutTopic:

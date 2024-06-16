@@ -28,6 +28,14 @@ export class TorrentRelease extends Release {
     }
     return url;
   }
+
+  get torrentFileUrl() {
+    return this._torrentFileUrl;
+  }
+
+  public isMagnet() {
+    return this._torrentFileUrl.startsWith("magnet");
+  }
 }
 
 export class NullTorrentTrackerError extends Error {};
