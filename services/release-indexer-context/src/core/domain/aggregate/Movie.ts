@@ -20,6 +20,7 @@ export class Movie {
   private _releaseTimeInMillis;
   private _runtimeSeconds;
   private _alternativeTitles: string[] = [];
+  private _forceScan = false;
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLang, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -31,6 +32,10 @@ export class Movie {
     }
   }
   
+  get forceScan() {
+    return this._forceScan;
+  }
+
   get releaseYear() {
     return this._releaseYear;
   }

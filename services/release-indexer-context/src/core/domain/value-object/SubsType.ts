@@ -26,10 +26,10 @@ export class SubsType {
   static fromTitle(title: Nullable<string>) {
     if (title == null) return null;
     const titleLowerCase = title.toLowerCase();
-    if (titleLowerCase.includes("forced") || titleLowerCase.includes("форсирован")) return SubsType.FORCED;
+    if (titleLowerCase.includes("forced") || titleLowerCase.includes("форсирован") || titleLowerCase.includes("forzados")) return SubsType.FORCED;
     if (titleLowerCase.includes("sdh") || titleLowerCase.includes("non udenti")) return SubsType.SDH;
     if (titleLowerCase.includes("full") || titleLowerCase.includes("полные") ||
-        titleLowerCase.includes("regular")  || titleLowerCase.includes("completi")) return SubsType.FULL;
+        titleLowerCase.includes("regular")  || titleLowerCase.includes("completi") || titleLowerCase.includes("completos")) return SubsType.FULL;
     return null;
   }
 
