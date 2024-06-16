@@ -192,10 +192,19 @@ resource "aws_s3_bucket_lifecycle_configuration" "raw_media_assets_lifecycle_con
   bucket = aws_s3_bucket.raw_media_assets.bucket
 
   rule {
-    id = "remove-old-files"
-    expiration {
-      days = 5
+    id      = "default"
+    enabled = true
+
+    transition {
+      days          = 0
+      storage_class = "GLACIER_IR"
     }
+
+    transition {
+      days          = 90
+      storage_class = "DEEP_ARCHIVE"
+    }
+
     status = "Enabled"
   }
 }
@@ -320,22 +329,20 @@ resource "aws_s3_bucket" "trt_files" {
   bucket = "trt-files-${local.deployment_id}"
 }
 
-resource "aws_s3_bucket_public_access_block" "trt_files" {
-  bucket = aws_s3_bucket.trt_files.id
+resource "aws_s3_bucket_lifecycle_configuration" "trt_files_lifecycle_config" {
+  bucket = aws_s3_bucket.raw_media_assets.bucket
 
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
-}
+  rule {
+    id      = "default"
+    enabled = true
 
-resource "aws_s3_bucket_acl" "trt_files" {
-  depends_on = [
-    aws_s3_bucket_public_access_block.trt_files,
-  ]
+    transition {
+      days          = 0
+      storage_class = "GLACIER_IR"
+    }
 
-  bucket = aws_s3_bucket.trt_files.id
-  acl    = "public-read"
+    status = "Enabled"
+  }
 }
 
 resource "aws_s3_bucket_policy" "trt_files_public_access" {
@@ -349,6 +356,22 @@ resource "aws_s3_bucket_policy" "trt_files_public_access" {
         Principal = "*"
         Action = "s3:GetObject"
         Resource = "arn:aws:s3:::${aws_s3_bucket.trt_files.bucket}/*"
+      }
+    ]
+  })
+}
+
+resource "aws_s3_bucket_policy" "raw_media_assets_public_access" {
+  bucket = aws_s3_bucket.raw_media_assets.bucket
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = "*"
+        Action = "s3:GetObject"
+        Resource = "arn:aws:s3:::${aws_s3_bucket.raw_media_assets.bucket}/*"
       }
     ]
   })

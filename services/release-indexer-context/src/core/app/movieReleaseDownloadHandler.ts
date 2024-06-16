@@ -54,6 +54,10 @@ export const handler = async (event): Promise<void> => {
   for (let i = 0; i < releaseCandidates.length; ++i) {
     const rcKey = releaseCandidates[i][0];
     const rc = m.releaseCandidates[releaseCandidates[i][0]];
+    if (rcKey != '049dd59925ef4da8da0f1a1b2363284839bc0f31') {
+      m.ignoreRc(rcKey);
+      continue;
+    }
     try {
       if (rc.isProcessed()) continue;
       if (m.isBlackListed(rcKey)) {
@@ -120,7 +124,7 @@ export const handler = async (event): Promise<void> => {
       }
     } catch (e) {
       m.ignoreRc(rcKey);
-      console.log("ignore444444444444444444444")
+      console.log("ignore444444444444444444444");
       if (rc instanceof TorrentReleaseCandidate) {
         try {
           await qbitClient.deleteTorrentById(rc.infoHash);
