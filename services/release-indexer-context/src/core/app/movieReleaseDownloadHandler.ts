@@ -57,6 +57,7 @@ export const handler = async (event): Promise<void> => {
     try {
       if (rc.isProcessed()) continue;
       if (m.isBlackListed(rcKey)) {
+        console.log(`ignore1=${rcKey}`);
         m.ignoreRc(rcKey);
         continue;
       }
@@ -72,6 +73,8 @@ export const handler = async (event): Promise<void> => {
           if (prevRc instanceof TorrentReleaseCandidate && TorrentTracker.equals(rc.tracker, prevRc.tracker)
             && TorrentTracker.fromKeyOrThrow(rc.tracker.key).isLanguageSpecific()
             && compareReleaseCandidates(rc, prevRc) < 0 && prevRc.isPromoted()) {
+            console.log(`ignore2=${rcKey}`);
+            console.log(`ignore2prev=${prevRc.infoHash}`);
             m.ignoreRc(rcKey);
             betterRCAlreadyPromoted = true;
             break;
@@ -92,6 +95,7 @@ export const handler = async (event): Promise<void> => {
         }
         const fileIndex: Nullable<number> = findMediaFile(torrentInfo!, m, rc);
         if (fileIndex == null) {
+          console.log(`ignore3=${rcKey}`);
           m.ignoreRc(rcKey);
           await qbitClient.deleteTorrentById(torrentInfo!.id);
           continue;
@@ -104,6 +108,7 @@ export const handler = async (event): Promise<void> => {
           break;
         } if ((Date.now() - torrentInfo!.addedOn * 1000) > 60 * 60 * 1000 && (torrentInfo!.isStalled ||
               (torrentInfo!.eta != null && torrentInfo!.eta > 23 * 60 * 60))) {
+          console.log(`ignore4=${rcKey}`);
           m.ignoreRc(rcKey);
           await qbitClient.deleteTorrentById(torrentInfo!.id);
           continue;
@@ -116,6 +121,7 @@ export const handler = async (event): Promise<void> => {
         }
       }
     } catch (e) {
+      console.log(`ignore5=${rcKey}`);
       m.ignoreRc(rcKey);
       if (rc instanceof TorrentReleaseCandidate) {
         try {
@@ -232,7 +238,8 @@ async function processMediaFile(m: Movie, name: string, rcKey: string, rc: Torre
         }
 
         return true;
-      } 
+      }
+      console.log(`ignore6=${rcKey}`);
       m.ignoreRc(rcKey);
     }
   } catch (e) {

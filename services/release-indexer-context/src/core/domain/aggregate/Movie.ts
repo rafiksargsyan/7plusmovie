@@ -221,6 +221,7 @@ export class Movie {
     this._readyToBeProcessed = flag;
     if (flag) {
       this._lastReleaseCandidateScanTimeMillis = Date.now();
+      this._alreadyAddedRadarrReleaseGuidList = [];
     }
   }
 
