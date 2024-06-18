@@ -79,7 +79,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     movie.addMpdFile(`${movieTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`);
     movie.addM3u8File(`${movieTranscodingJobRead.outputFolderKey}/vod/master.m3u8`);
     movieTranscodingJobRead.textTranscodeSpecs?.forEach(_ => {
-      const relativePath = `${movieTranscodingJobRead.outputFolderKey}/subtitles/${SubsLangCodes[_.lang.code]['langTag']}-${SubtitleTypes[_.type.code].name}-${_.stream}.vtt`;
+      const relativePath = `${movieTranscodingJobRead.outputFolderKey}/subtitles/${SubsLangCodes[_.lang.code]['langTag']}-${_.type.code}-${_.stream}.vtt`;
       movie.addSubtitle(_.name, new Subtitle(_.name, relativePath, _.lang, _.type));
     })
     movie.addThumbnailsFile(`${movieTranscodingJobRead.outputFolderKey}/thumbnails/thumbnails.vtt`);
@@ -107,7 +107,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     tvShow.addMpdFile(season, episode, `${tvShowTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`);
     tvShow.addM3u8File(season, episode, `${tvShowTranscodingJobRead.outputFolderKey}/vod/master.m3u8`);
     tvShowTranscodingJobRead.textTranscodeSpecs?.forEach(_ => {
-      const relativePath = `${tvShowTranscodingJobRead.outputFolderKey}/subtitles/${SubsLangCodes[_.lang.code]['langTag']}-${SubtitleTypes[_.type.code].name}-${_.stream}.vtt`;
+      const relativePath = `${tvShowTranscodingJobRead.outputFolderKey}/subtitles/${SubsLangCodes[_.lang.code]['langTag']}-${_.type.code}-${_.stream}.vtt`;
       tvShow.addSubtitle(season, episode, _.name, new Subtitle(_.name, relativePath, _.lang, _.type));
     })
     tvShow.addThumbnailsFile(season, episode, `${tvShowTranscodingJobRead.outputFolderKey}/thumbnails/thumbnails.vtt`);
