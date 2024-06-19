@@ -2,9 +2,7 @@ import * as core from '@actions/core';
 import path from 'path';
 import fs from 'fs';
 import { execSync } from 'child_process';
-import { SubsLangCode, SubsLangCodes } from './SubsLangCodes';
-import { AudioLangCode, AudioLangCodes } from './AudioLangCodes';
-import { SubtitleType } from './SubtitleType';
+import { Lang } from './Lang';
 
 const WORKING_DIR_NAME = '.transcoding-job-work-dir';
 
@@ -12,14 +10,21 @@ interface AudioTranscodeSpec {
   stream: number;
   bitrate: string;
   channels: number;
-  lang: keyof typeof AudioLangCodes;
+  lang: string;
+  fileName: string;
+  name: string;
 }
 
 interface TextTranscodeSpec {
   stream: number;
   name: string;
-  lang: keyof typeof SubsLangCodes;
-  type: string;
+  fileName: string;
+  lang: string;
+}
+
+interface VideoTranscodeSpec {
+  resolutions: { fileName: string, resolution: number } []; // 360, 480, 720, 1080, etc.
+  stream: number;
 }
 
 async function run(): Promise<void> {
@@ -49,9 +54,11 @@ async function run(): Promise<void> {
     const subtitlesFolderAbsolutePath = path.resolve(outputFolderAbsolutePath, 'subtitles');
     fs.mkdirSync(subtitlesFolderAbsolutePath);
 
-    transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 540);
-    transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 720);
-    transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 1080);
+    let videoTranscodeSpec: VideoTranscodeSpec = transcodingSpec['video'];
+    
+    for (let x of videoTranscodeSpec.resolutions) {
+      transcodeVideoFromMkv(mkvFileAbsolutePath, videoTranscodeSpec.stream, x.resolution, x.fileName);
+    }
 
     let audioTranscodeSpecs: AudioTranscodeSpec[] = transcodingSpec['audio'];
     if (audioTranscodeSpecs == undefined) audioTranscodeSpecs = [];
@@ -59,11 +66,11 @@ async function run(): Promise<void> {
     if (textTranscodeSpecs == undefined) textTranscodeSpecs = [];
     
     audioTranscodeSpecs.forEach(_ => {
-      transcodeAudioFromMkv(mkvFileAbsolutePath, _.stream, _.channels, _.bitrate, new AudioLangCode(_.lang));
+      transcodeAudioFromMkv(mkvFileAbsolutePath, _.stream, _.channels, _.bitrate, _.fileName);
     });
 
     textTranscodeSpecs.forEach(_ => {
-      transcodeSubsFromMkv(mkvFileAbsolutePath, _.stream,  new SubsLangCode(_.lang), new SubtitleType(_.type));
+      transcodeSubsFromMkv(mkvFileAbsolutePath, _.stream, _.fileName);
     })
     
     if (textTranscodeSpecs.length !== 0) {
@@ -72,20 +79,18 @@ async function run(): Promise<void> {
     process.chdir(vodFolderAbsolutePath);
 
     let shakaPackagerCommand = "shaka-packager ";
-    shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, "h264_main_540p_18.mp4")},stream=video,output=h264_main_540p_18.mp4 `;
-    shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, "h264_main_720p_18.mp4")},stream=video,output=h264_main_720p_18.mp4 `;
-    shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, "h264_high_1080p_19.mp4")},stream=video,output=h264_high_1080p_19.mp4 `;
+
+    for (let x of videoTranscodeSpec.resolutions) {
+      transcodeVideoFromMkv(mkvFileAbsolutePath, videoTranscodeSpec.stream, x.resolution, x.fileName);
+      shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, x.fileName)},stream=video,output=${x.fileName} `;
+    }
     
     audioTranscodeSpecs.forEach(_ => {
-      const audioFileName = `aac_${_.channels}_${_.bitrate}_${AudioLangCodes[_.lang]['langTag']}.mp4`
-      let hlsName: string = AudioLangCodes[_.lang]['displayName'];
-      if (_.channels === 6) hlsName += ' (5.1)';
-      shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, audioFileName)},stream=audio,output=${audioFileName},lang=${AudioLangCodes[_.lang]['langTag']}-x-${_.channels},hls_group_id=audio,hls_name='${hlsName}' `;
+      shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, _.fileName)},stream=audio,output=${_.fileName},lang=${Lang.fromKeyOrThrow(_.lang).lang},hls_group_id=audio,hls_name='${_.name}',dash_label='${_.name}' `;
     })
     
     textTranscodeSpecs.forEach(_ => {
-      const textFileName = `${SubsLangCodes[_.lang]['langTag']}-${_.type}-${_.stream}.vtt`
-      shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, textFileName)},stream=text,output=${textFileName},lang=${SubsLangCodes[_.lang]['lang']},hls_group_id=subtitle,hls_name='${_.name}',dash_label='${_.name}' `;
+      shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, _.fileName)},stream=text,output=${_.fileName},lang=${Lang.fromKeyOrThrow(_.lang).lang},hls_group_id=subtitle,hls_name='${_.name}',dash_label='${_.name}' `;
     })
 
     shakaPackagerCommand += `--mpd_output ${path.resolve(vodFolderAbsolutePath, 'manifest.mpd')} --hls_master_playlist_output ${path.resolve(vodFolderAbsolutePath, 'master.m3u8')}`;
@@ -98,47 +103,34 @@ async function run(): Promise<void> {
     execSync('sed -i "/shaka-packager/d" ./*.mpd');
     execSync('sed -i "/shaka-packager/d" ./*.m3u8');
 
-    audioTranscodeSpecs.forEach(_ => {
-      const langTag = AudioLangCodes[_.lang]['langTag'] + `-x-${_.channels}`;
-      let langDisplayName = AudioLangCodes[_.lang]['displayName'];
-      if (_.channels === 6) {
-        langDisplayName += ' (5.1)';
-      }
-      const command = `sed -i 's/.*contentType=\\"audio\\".* lang=\\"${langTag}\\".*/&\\n      \\<Label\\>${langDisplayName}\\<\\/Label\\>/' manifest.mpd`;
-      execSync(command);
-    });
-
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
   }
 }
 
-function transcodeSubsFromMkv(mkvFilePath: string, stream: number, lang: SubsLangCode, type: SubtitleType) {
-  const fileName = `${SubsLangCodes[lang.code]['langTag']}-${type.code}-${stream}.vtt`;
+function transcodeSubsFromMkv(mkvFilePath: string, stream: number, fileName: string) {
   let command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${fileName} > /dev/null 2>&1`;
   execSync(command);
 }
 
-function transcodeAudioFromMkv(mkvFilePath: string, stream: number, channels: number, bitrate: string, lang: AudioLangCode) {
+function transcodeAudioFromMkv(mkvFilePath: string, stream: number, channels: number, bitrate: string, fileName: string) {
   let command = `ffmpeg -i ${mkvFilePath} -map 0:${stream} -ac ${channels} -c aac -ab ${bitrate} `;
-  command += `-vn -sn aac_${channels}_${bitrate}_${AudioLangCodes[lang.code]['langTag']}.mp4 > /dev/null 2>&1`;
+  command += `-vn -sn ${fileName} > /dev/null 2>&1`;
   execSync(command);
 }
 
-function transcodeVideoFromMkv(mkvFilePath: string, stream: number, resolution: number) {
+function transcodeVideoFromMkv(mkvFilePath: string, stream: number, resolution: number, fileName: string) {
   let level, profile, crf, maxRate, bufSize;
-  switch (resolution) {
-    case 540:
-      level = '3.1'; profile = 'main'; crf = 18; maxRate = '1500k'; bufSize = '3000k';
-      break;
-    case 720:
-      level = '4.0'; profile = 'main'; crf = 18; maxRate = '3000k'; bufSize = '6000k';
-      break;
-    case 1080:
-      level = '4.2'; profile = 'high'; crf = 19; maxRate = '5000k'; bufSize = '10000k';
-      break;
-    default:
-      throw new UnsupportedVideoResolutionError();
+  if (resolution <= 360) {
+    level = '3.0'; profile = 'baseline'; crf = 18; maxRate = '600k'; bufSize = '1200k';
+  } else if (resolution <= 480) {
+    level = '3.1'; profile = 'main'; crf = 18; maxRate = '1200k'; bufSize = '2400k';
+  } else if (resolution <= 720) {
+    level = '4.0'; profile = 'main'; crf = 18; maxRate = '3000k'; bufSize = '6000k';
+  } else if (resolution <= 1080) {
+    level = '4.2'; profile = 'high'; crf = 19; maxRate = '5000k'; bufSize = '10000k';
+  } else {
+    throw new UnsupportedVideoResolutionError();
   }
   let videoSettings = `scale=-2:${resolution},format=yuv420p`;
   if (isHdr(mkvFilePath)) {
@@ -147,7 +139,7 @@ function transcodeVideoFromMkv(mkvFilePath: string, stream: number, resolution: 
   let command = `ffmpeg -i ${mkvFilePath} -an -sn -c:v:${stream} libx264 -profile:v ${profile} -level:v ${level} `;
   command += `-x264opts 'keyint=120:min-keyint=120:no-scenecut:open_gop=0' -map_chapters -1 -crf ${crf} -maxrate ${maxRate} `;
   command += `-bufsize ${bufSize} -preset veryslow -tune film -vf "${videoSettings}" `;
-  command += `h264_${profile}_${resolution}p_${crf}.mp4 > /dev/null 2>&1`;  
+  command += `${fileName} > /dev/null 2>&1`;  
   execSync(command);
 }
 
