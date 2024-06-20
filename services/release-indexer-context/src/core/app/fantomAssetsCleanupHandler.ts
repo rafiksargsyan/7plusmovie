@@ -61,7 +61,9 @@ async function emptyS3Directory(bucket, dir, exclusionList: string[]) {
     }
   });
   
-  await s3.deleteObjects(deleteParams);
+  if (deleteParams.Delete.Objects.length !== 0) {
+    await s3.deleteObjects(deleteParams);
+  }
   
   if (listedObjects.IsTruncated) await emptyS3Directory(bucket, dir, exclusionList);
 }

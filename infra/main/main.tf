@@ -195,7 +195,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "raw_media_assets_lifecycle_con
     id = "default"
 
     transition {
-      days          = 0
+      days          = 10
       storage_class = "GLACIER_IR"
     }
 
@@ -326,21 +326,6 @@ resource "aws_dynamodb_table" "movie_release_indexer_context" {
 
 resource "aws_s3_bucket" "trt_files" {
   bucket = "trt-files-${local.deployment_id}"
-}
-
-resource "aws_s3_bucket_lifecycle_configuration" "trt_files_lifecycle_config" {
-  bucket = aws_s3_bucket.trt_files.bucket
-
-  rule {
-    id = "default"
-
-    transition {
-      days          = 0
-      storage_class = "GLACIER_IR"
-    }
-
-    status = "Enabled"
-  }
 }
 
 resource "aws_s3_bucket_policy" "trt_files_public_access" {
