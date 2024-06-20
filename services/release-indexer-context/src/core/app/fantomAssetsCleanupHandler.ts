@@ -26,11 +26,11 @@ export const handler = async (event: { movieId: string }): Promise<void> => {
   const rawAssetsExclusionList: string[] = [];
   for (let k in movie.releases) {
     const r = movie.releases[k];
-    if (r instanceof TorrentRelease) {
-      if (!r.isMagnet()) {
-        torrentExclusionList.push(r.torrentFileUrl);
+    if (r.release instanceof TorrentRelease) {
+      if (!r.release.isMagnet()) {
+        torrentExclusionList.push(r.release.torrentFileUrl);
       }
-      rawAssetsExclusionList.push(r.cachedMediaFileRelativePath);
+      rawAssetsExclusionList.push(r.release.cachedMediaFileRelativePath);
     }
   }
   await emptyS3Directory(torrentFilesS3Bucket, movie.id, torrentExclusionList);
@@ -56,7 +56,7 @@ async function emptyS3Directory(bucket, dir, exclusionList: string[]) {
   };
   
   listedObjects.Contents.forEach(({ Key, LastModified }) => {
-    if (LastModified != null /*&& (Date.now() - LastModified.getTime() > ONE_DAY_IN_MILLIS)*/ && Key != undefined && !exclusionList.includes(Key)) {
+    if (LastModified != null && (Date.now() - LastModified.getTime() > ONE_DAY_IN_MILLIS) && Key != undefined && !exclusionList.includes(Key)) {
       deleteParams.Delete.Objects.push({ Key } as never);
     }
   });
