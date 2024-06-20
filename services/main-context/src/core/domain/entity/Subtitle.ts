@@ -1,15 +1,16 @@
-import { SubsLangCode, SubsLangCodes } from "../SubsLangCodes";
-import { SubtitleSource } from "../MediaSource";
-import { SubtitleType, SubtitleTypes } from "../SubtitleType";
+import { SubsLang } from "../SubsLang";
+import { MediaSource } from "../MediaSource";
+import { SubtitleType } from "../SubtitleType";
+import { Nullable } from "../Nullable";
 
 export class Subtitle {
   private name: string;
   private relativePath: string;
-  private lang: SubsLangCode;
-  private type: SubtitleType | undefined;
+  private lang: SubsLang;
+  private type: Nullable<SubtitleType>;
   private recommendedDelay: number = 0; // millis, can be negative
-  private source: SubtitleSource = new SubtitleSource('EXTERNAL');
-  private audioTrackId: string | undefined = undefined; // if not undefined/null, means text matches speech in the audio track  
+  private source: MediaSource = MediaSource.fromKeyOrThrow('EXTERNAL');
+  private audioTrackId: Nullable<string>; // if not undefined/null, means text matches speech in the audio track  
   
   public constructor(name: string | undefined, relativePath: string | undefined,
                      lang: SubsLangCode | undefined, type: SubtitleType | undefined) {

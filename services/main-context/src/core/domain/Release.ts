@@ -1,14 +1,12 @@
-import { AudioLangCode } from "./AudioLangCodes";
-import { AudioSource } from "./AudioSource";
-import { AudioVoiceType } from "./AudioVoiceType";
+import { AudioLang } from "./AudioLang";
+import { MediaSource } from "./MediaSource";
 import { Subtitle } from "./entity/Subtitle";
 
 interface Audio {
   name: string;
-  lang: AudioLangCode;
+  lang: AudioLang;
   channels: number;
-  source: AudioSource;
-  voiceType: AudioVoiceType | undefined;
+  source: MediaSource;
 }
 
 export interface Release {
