@@ -80,7 +80,7 @@ export const handler = async (event: HandlerParam) => {
       Payload: JSON.stringify({ transcodingContextJobId: transcodingJobRead.id })
     };
     const invokeCommand = new InvokeCommand(transcodingJobParams);
-    const response = await lambdaClient.send(invokeCommand);
+    await lambdaClient.send(invokeCommand);
   } 
   return OK;
 };

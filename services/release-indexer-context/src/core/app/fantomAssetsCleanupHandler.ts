@@ -17,6 +17,8 @@ const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 const movieRepo = new MovieRepository(docClient);
 const s3 = new S3({});
 
+const ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
+
 export const handler = async (event: { movieId: string }): Promise<void> => {
   const movie = await movieRepo.getMovieById(event.movieId);
   if (movie.readyToBeProcessed) return;
@@ -54,7 +56,7 @@ async function emptyS3Directory(bucket, dir, exclusionList: string[]) {
   };
   
   listedObjects.Contents.forEach(({ Key, LastModified }) => {
-    if (LastModified != null && (Date.now() - LastModified.getTime() > 24 * 60 * 60 * 1000) && Key != undefined && !exclusionList.includes(Key)) {
+    if (LastModified != null && (Date.now() - LastModified.getTime() > ONE_DAY_IN_MILLIS) && Key != undefined && !exclusionList.includes(Key)) {
       deleteParams.Delete.Objects.push({ Key } as never);
     }
   });

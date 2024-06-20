@@ -54,6 +54,8 @@ const MONTH_IN_MILLIS = 30 * 24 * 60 * 60 * 1000;
 
 const BR_MINIUM_BITRATE = 1500000; // byte/seconds
 
+const MAX_RUNTIME = 13 * 60 * 1000;
+
 export const handler = async (event) => {
   const startTime = Date.now();
   const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
@@ -67,7 +69,7 @@ export const handler = async (event) => {
   for (let rr of getReleasesResult) {
     try {
       // Exit before lambda times out
-      if (Date.now() - startTime > 60 * 1000) {
+      if (Date.now() - startTime > MAX_RUNTIME) {
         allRadarrReleasesProcessed = false;
         break;
       }

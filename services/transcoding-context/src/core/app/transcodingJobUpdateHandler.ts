@@ -1,10 +1,9 @@
 import { Marshaller } from '@aws/dynamodb-auto-marshaller';
 import { DynamoDBStreamEvent } from 'aws-lambda';
 import { Octokit } from '@octokit/rest';
-import { AudioLangCode } from '../domain/AudioLangCodes';
-import { SubsLangCode } from '../domain/SubsLangCodes';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
-import { SubtitleType } from '../domain/SubtitleType';
+import { Lang } from '../domain/Lang';
+import { Nullable } from '../domain/Nullable';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
@@ -16,14 +15,21 @@ interface AudioTranscodeSpec {
   stream: number;
   bitrate: string;
   channels: number;
-  lang: AudioLangCode;
+  lang: Lang;
+  fileName: string;
+  name: string;
 }
-  
+
 interface TextTranscodeSpec {
   stream: number;
-  type: SubtitleType;
-  lang: SubsLangCode;
   name: string;
+  fileName: string;
+  lang: Lang;
+}
+
+interface VideoTranscodeSpec {
+  resolutions: { fileName: string, resolution: number } []; // 360, 480, 720, 1080, etc.
+  stream: number;
 }
 
 interface TranscodingJobRead {
@@ -33,9 +39,8 @@ interface TranscodingJobRead {
   outputFolderKey: string;
   audioTranscodeSpecs: AudioTranscodeSpec[];
   textTranscodeSpecs: TextTranscodeSpec[];
-  defaultAudioTrack: number | undefined;
-  defaultTextTrack: number | undefined;
-  githubWorkflowRunId: number | undefined;
+  videoTranscodeSpec: VideoTranscodeSpec;
+  githubWorkflowRunId: Nullable<number>;
 }
 
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
@@ -56,8 +61,9 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
           return;
         }
         const transcodingSpec = {
-          "audio" : (transcodingJobRead as TranscodingJobRead).audioTranscodeSpecs.map(_ => { return {..._, lang: _.lang.code }}),
-          "text" : (transcodingJobRead as TranscodingJobRead).textTranscodeSpecs.map(_ => { return {..._, lang: _.lang.code, type: _.type.code }}),
+          "audio" : (transcodingJobRead as TranscodingJobRead).audioTranscodeSpecs.map(_ => ({..._, lang: _.lang.key })),
+          "text" : (transcodingJobRead as TranscodingJobRead).textTranscodeSpecs.map(_ => ({..._, lang: _.lang.key })),
+          "video" : (transcodingJobRead as TranscodingJobRead).videoTranscodeSpec
         }
         const workflowInputParams = {
           mkv_s3_object_key: (transcodingJobRead as TranscodingJobRead).mkvS3ObjectKey,

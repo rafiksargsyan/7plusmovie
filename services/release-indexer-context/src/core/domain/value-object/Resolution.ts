@@ -1,7 +1,7 @@
 import { Nullable } from "../../../Nullable";
 
 export class Resolution {
-  public static readonly SD = new Resolution("SD", 1); // under 576p
+  public static readonly SD = new Resolution("SD", 1); // under 480p
   public static readonly HD = new Resolution("HD", 2); // under 720p
   public static readonly FHD = new Resolution("FHD", 3); // above 1080p
 
@@ -30,7 +30,7 @@ export class Resolution {
     if (d2 == null) d2 = 0;
     const min = Math.min(d1, d2);
     if (min === 0) return null;
-    if (min <= 576) return this.SD;
+    if (min <= 480) return this.SD;
     if (min <= 720) return this.HD;
     return this.FHD;
   }

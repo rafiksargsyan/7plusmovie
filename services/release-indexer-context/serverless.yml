@@ -75,7 +75,7 @@ functions:
       MOVIE_RELEASE_CANDIDATE_UPDATER_FANOUT_TOPIC: !Ref movieReleaseCandidateUpdaterFanoutTopic
     handler: src/core/app/movieReleaseCandidateUpdater.handler
     events:
-      - schedule: rate(${file(./.env.${sls:stage}.yml):RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minute)
+      - schedule: rate(${file(./.env.${sls:stage}.yml):RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minutes)
     timeout: 900
 
   movieReleaseDownloadHandler:
@@ -103,7 +103,7 @@ functions:
       MOVIE_RELEASE_DOWNLOAD_HANDLER_FANOUT_TOPIC: !Ref movieReleaseDownloadHandlerFanoutTopic  
     handler: src/core/app/movieReleaseDownloadHandlerFanout.handler
     events:
-      - schedule: rate(${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_INTERVAL_IN_MINUTES} minute)
+      - schedule: rate(${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_INTERVAL_IN_MINUTES} minutes)
     timeout: 900
 
   updateMovieReleaseCandidates:
@@ -137,7 +137,7 @@ functions:
       FANTOM_ASSETS_CLEANUP_LAMBDA_NAME: ${env:FANTOM_ASSETS_CLEANUP_LAMBDA_NAME} 
     handler: src/core/app/fantomAssetsCleanupHandlerFanout.handler
     events:
-      - schedule: rate(${file(./.env.${sls:stage}.yml):FANTOM_ASSETS_CLEANUP_INTERVAL} minute)
+      - schedule: rate(${file(./.env.${sls:stage}.yml):FANTOM_ASSETS_CLEANUP_INTERVAL_IN_DAYS} day)
     timeout: 900
 
   fantomAssetsCleanupHandler:

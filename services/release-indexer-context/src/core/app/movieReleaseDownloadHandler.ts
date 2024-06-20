@@ -42,6 +42,9 @@ const mediaFilesBaseUrl = process.env.MEDIA_FILES_BASE_URL!;
 const torrentFilesBaseUrl = process.env.TORRENT_FILES_BASE_URL!;
 const mediaFileChacherLambdaName = process.env.MEDIA_FILE_CACHER_LAMBDA_NAME!;
 
+const MIN_AVAILABLE_SPACE_IN_BYTES = 150000000000;
+const MAX_FILE_SIZE_IN_BYTES = 45000000000;
+
 export const handler = async (event): Promise<void> => {
   const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
   const secret = JSON.parse(secretStr.SecretString!);
@@ -57,7 +60,6 @@ export const handler = async (event): Promise<void> => {
     try {
       if (rc.isProcessed()) continue;
       if (m.isBlackListed(rcKey)) {
-        console.log(`ignore1=${rcKey}`);
         m.ignoreRc(rcKey);
         continue;
       }
@@ -73,8 +75,6 @@ export const handler = async (event): Promise<void> => {
           if (prevRc instanceof TorrentReleaseCandidate && TorrentTracker.equals(rc.tracker, prevRc.tracker)
             && TorrentTracker.fromKeyOrThrow(rc.tracker.key).isLanguageSpecific()
             && compareReleaseCandidates(rc, prevRc) < 0 && prevRc.isPromoted()) {
-            console.log(`ignore2=${rcKey}`);
-            console.log(`ignore2prev=${prevRc.infoHash}`);
             m.ignoreRc(rcKey);
             betterRCAlreadyPromoted = true;
             break;
@@ -95,7 +95,6 @@ export const handler = async (event): Promise<void> => {
         }
         const fileIndex: Nullable<number> = findMediaFile(torrentInfo!, m, rc);
         if (fileIndex == null) {
-          console.log(`ignore3=${rcKey}`);
           m.ignoreRc(rcKey);
           await qbitClient.deleteTorrentById(torrentInfo!.id);
           continue;
@@ -108,20 +107,18 @@ export const handler = async (event): Promise<void> => {
           break;
         } if ((Date.now() - torrentInfo!.addedOn * 1000) > 60 * 60 * 1000 && (torrentInfo!.isStalled ||
               (torrentInfo!.eta != null && torrentInfo!.eta > 23 * 60 * 60))) {
-          console.log(`ignore4=${rcKey}`);
           m.ignoreRc(rcKey);
           await qbitClient.deleteTorrentById(torrentInfo!.id);
           continue;
         } else {
           const estimatedFreeSpace = await qbitClient.getEstimatedFreeSpace();
-          if (estimatedFreeSpace - (file.size * (1 - file.progress)) > 150000000000) {
+          if (estimatedFreeSpace - (file.size * (1 - file.progress)) > MIN_AVAILABLE_SPACE_IN_BYTES) {
             await qbitClient.resumeTorrent(torrentInfo!.id);
             await qbitClient.enableFile(torrentInfo!.id, file.index);
           }
         }
       }
     } catch (e) {
-      console.log(`ignore5=${rcKey}`);
       m.ignoreRc(rcKey);
       if (rc instanceof TorrentReleaseCandidate) {
         try {
@@ -162,6 +159,9 @@ function findMediaFile(torrentInfo: TorrentInfo,  movie: Movie, rc: ReleaseCandi
 // add media file name to release
 async function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate, size: number) {
   try {
+    if (size > MAX_FILE_SIZE_IN_BYTES) {
+      throw new Error('Too big file');
+    }
     const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
     const durationStr = execSync(`ffprobe -i '${mediaFilesBaseUrl}${name}' -show_entries format=duration -v quiet -of csv="p=0"`).toString();
     const duration = Number.parseFloat(durationStr);
@@ -239,7 +239,6 @@ async function processMediaFile(m: Movie, name: string, rcKey: string, rc: Torre
 
         return true;
       }
-      console.log(`ignore6=${rcKey}`);
       m.ignoreRc(rcKey);
     }
   } catch (e) {

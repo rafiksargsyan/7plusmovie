@@ -16,6 +16,9 @@ const snsClient = new SNSClient();
 
 const snsTopicArn = process.env.MOVIE_RELEASE_CANDIDATE_UPDATER_FANOUT_TOPIC!;
 
+const ONE_YEAR_IN_MILLIS = 12 * 30 * 24 * 60 * 60 * 1000;
+const ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
+
 export const handler = async (): Promise<void> => {
   const movies = await movieRepo.getAllMovies();
   for (const m of movies) {
@@ -23,10 +26,10 @@ export const handler = async (): Promise<void> => {
     await movieRepo.saveMovie(m);
     if (m.readyToBeProcessed) continue;
     if (Object.entries(m.releases).length !== 0) {
-      if (Date.now() - m.releaseTimeInMillis > 12 * 30 * 24 * 60 * 60 * 1000 && !m.forceScan) {
+      if (Date.now() - m.releaseTimeInMillis > ONE_YEAR_IN_MILLIS && !m.forceScan) {
         continue; 
       }
-      if (Date.now() - m.lastRCScanTime < 24 * 60 * 60 * 1000) {
+      if (Date.now() - m.lastRCScanTime < ONE_DAY_IN_MILLIS) {
         continue;
       }
     }
