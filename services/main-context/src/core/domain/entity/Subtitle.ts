@@ -12,16 +12,16 @@ export class Subtitle {
   private source: MediaSource = MediaSource.fromKeyOrThrow('EXTERNAL');
   private audioTrackId: Nullable<string>; // if not undefined/null, means text matches speech in the audio track  
   
-  public constructor(name: string | undefined, relativePath: string | undefined,
-                     lang: SubsLangCode | undefined, type: SubtitleType | undefined) {
+  public constructor(name: Nullable<string>, relativePath: string,
+                     lang: SubsLang, type: Nullable<SubtitleType>) {
     this.type = type;
     this.lang = this.validateLang(lang);
     this.relativePath = this.validateRelativePath(relativePath);
-    if (name == undefined) {
+    if (name == null) {
       if (this.type != null) {
-        name = `${SubsLangCodes[this.lang.code].name} (${SubtitleTypes[this.type.code].name})`;
+        name = `${lang.name} (${this.type.name}})`;
       } else {
-        name = `${SubsLangCodes[this.lang.code].name}`;
+        name = `${lang.name}`;
       }
     }
     this.name = this.validateName(name);
@@ -31,29 +31,27 @@ export class Subtitle {
     return this.name;
   }
 
-  private validateLang(lang: SubsLangCode | undefined) {
-    if (lang == undefined) {
+  private validateLang(lang: SubsLang) {
+    if (lang == null) {
       throw new InvalidSubtitleLangError();
     }
     return lang;
   }
 
-  private validateRelativePath(path: string | undefined) {
-    if (path == undefined || ! /\S/.test(path)) {
+  private validateRelativePath(path: string) {
+    if (path == null || ! /\S/.test(path)) {
       throw new InvalidSubtitleRelativePathError();
     }
     return path;
   }
 
-  private validateName(name: string | undefined) {
-    if (name == undefined || ! /\S/.test(name)) {
+  private validateName(name: string) {
+    if (name == null || ! /\S/.test(name)) {
       throw new InvalidSubtitleNameError();
     }
     return name;
   }
 }
-
-class InvalidSubtitleTypeError extends Error {}
 
 class InvalidSubtitleLangError extends Error {}
 

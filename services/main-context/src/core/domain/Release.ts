@@ -15,6 +15,7 @@ export interface Release {
   mpdFile: string;
   m3u8File: string;
   thumbnailsFile: string
-  releaseIndexerContextId: string | undefined; // This is the id in the release indexer context, if a release is replaced with
-                                               // a better release in the context we will replace it also in the main context.
+  // This is the id in the release indexer context, if a release is replaced with
+  // a better release in the context we will replace it also in the main context.
+  releaseIndexerContextId: string | undefined;
 }

@@ -1,14 +1,16 @@
 import { Nullable } from "./Nullable";
 
 export class SubtitleType {
-  public static readonly FORCED = new SubtitleType("FORCED");
-  public static readonly FULL = new SubtitleType("FULL");
-  public static readonly SDH = new SubtitleType("SDH");
+  public static readonly FORCED = new SubtitleType("FORCED", "Forced");
+  public static readonly FULL = new SubtitleType("FULL", "Full");
+  public static readonly SDH = new SubtitleType("SDH", "SDH");
 
-  readonly key: string;
-    
-  private constructor(key: string) {
+  public readonly key: string;
+  public readonly name: string;
+
+  private constructor(key: string, name: string) {
     this.key = key;
+    this.name = name;
   }
 
   static fromKeyOrThrow(key: string): SubtitleType {
