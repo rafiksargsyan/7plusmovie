@@ -63,6 +63,10 @@ export const handler = async (event): Promise<void> => {
         m.ignoreRc(rcKey);
         continue;
       }
+      if (m.isWhiteListed(rcKey)) {
+        m.promoteRc(rcKey);
+        continue;
+      }
       if (rc instanceof TorrentReleaseCandidate) {
         let betterRCAlreadyPromoted = false;
         let prevRcNotProcessed = false;

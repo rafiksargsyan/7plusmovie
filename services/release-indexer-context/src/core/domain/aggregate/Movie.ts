@@ -15,6 +15,7 @@ export class Movie {
   private _releaseCandidates: { [key:string]: ReleaseCandidate } = {};
   private _alreadyAddedRadarrReleaseGuidList: string[] = [];
   private _blackList: string[] = [];
+  private _whiteList: string[] = [];
   private _lastReleaseCandidateScanTimeMillis = 0;
   private _readyToBeProcessed = false;
   private _releaseTimeInMillis;
@@ -185,6 +186,10 @@ export class Movie {
     return this._blackList.includes(id);
   }
 
+  public isWhiteListed(id: string) {
+    return this._whiteList.includes(id);
+  }
+
   public ignoreRc(id: string) {
     if (id == null || ! /\S/.test(id)) throw new NullReleaseCandidateIdError();
     let rc = this._releaseCandidates[id];
@@ -204,6 +209,9 @@ export class Movie {
       throw new ReleaseCandidateNotFoundError();
     }
     rc.status = ReleaseCandidateStatus.PROMOTED;
+    if (!this.isWhiteListed(id)) {
+      this._whiteList.push(id);
+    }
   }
 
   public addReleaseCandidate(id: string, rc: ReleaseCandidate) {

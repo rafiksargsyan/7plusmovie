@@ -200,7 +200,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "raw_media_assets_lifecycle_con
     }
 
     transition {
-      days          = 90
+      days          = 100
       storage_class = "DEEP_ARCHIVE"
     }
 
