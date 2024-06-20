@@ -1,20 +1,29 @@
 import { v4 as uuid } from 'uuid';
-import { AudioLangCode } from './AudioLangCodes';
-import { SubsLangCode } from './SubsLangCodes';
 import { SubtitleType } from './SubtitleType';
+import { AudioLang } from './AudioLang';
+import { SubsLang } from './SubsLang';
+import { Nullable } from './Nullable';
 
 interface AudioTranscodeSpec {
   stream: number;
   bitrate: string;
   channels: number;
-  lang: AudioLangCode;
+  lang: AudioLang;
+  name: Nullable<string>;
+  fileName: Nullable<string>;
 }
 
 interface TextTranscodeSpec {
   stream: number;
-  name: string;
-  type: SubtitleType;
-  lang: SubsLangCode;
+  name: Nullable<string>;
+  type: Nullable<SubtitleType>;
+  lang: SubsLang;
+  fileName: Nullable<string>;
+}
+
+interface VideoTranscodeSpec {
+  resolutions: { fileName: string, resolution: number }[]; // 360, 480, 720, 1080, etc.
+  stream: number;
 }
 
 export class MovieTranscodingJob {
@@ -28,11 +37,12 @@ export class MovieTranscodingJob {
   private outputFolderKey: string;
   private audioTranscodeSpecs: AudioTranscodeSpec[];
   private textTranscodeSpecs: TextTranscodeSpec[];
+  private videoTranscodeSpec: VideoTranscodeSpec;
   private transcodingContextJobId: string;
 
   public constructor(createEmptyObject: boolean, movieId?: string, mkvS3ObjectKey?: string,
     mkvHttpUrl?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
-    textTranscodeSpecs?: TextTranscodeSpec[]) {
+    textTranscodeSpecs?: TextTranscodeSpec[], videoTranscodeSpec?: VideoTranscodeSpec) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setMovieId(movieId);
@@ -40,6 +50,7 @@ export class MovieTranscodingJob {
       this.setOutputFolderKey(outputFolderKey)
       this.setAudioTranscodeSpecs(audioTranscodeSpecs);
       this.setTextTranscodeSpecs(textTranscodeSpecs);
+      this.setVideoTranscodeSpec(videoTranscodeSpec);
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
       this.ttl = Math.round(this.creationTime / 1000) + 15 * 24 * 60 * 60;
@@ -85,7 +96,24 @@ export class MovieTranscodingJob {
     this.audioTranscodeSpecs = audioTranscodeSpecs !== undefined ? audioTranscodeSpecs : [];
   }
 
-  private setTextTranscodeSpecs(textTranscodeSpecs: TextTranscodeSpec[] | undefined) {
+  private setTextTranscodeSpecs(textTranscodeSpecs: Nullable<TextTranscodeSpec[]>) {
+    if (textTranscodeSpecs == null) textTranscodeSpecs = [];
+    for (let t of textTranscodeSpecs) {
+      if (t.fileName == null) {
+        if (t.type == null) {
+          t.fileName = `${t.lang.key}-${t.stream}.vtt`
+        } else {
+          t.fileName = `${t.lang.key}-${t.type.key}-${t.stream}.vtt`
+        }
+      }
+      if (t.name == null) {
+        if (t.type == null) {
+          t.name = `${t.lang.name}`;
+        } else {
+          t.name = `${t.lang.name} (${t.type.name})`;
+        }
+      }
+    }
     this.textTranscodeSpecs = textTranscodeSpecs !== undefined ? textTranscodeSpecs : [];
   }
 
@@ -96,15 +124,21 @@ export class MovieTranscodingJob {
     this.transcodingContextJobId = transcodingContextJobId;
     this.lastUpdateTime = Date.now();
   }
+
+  private setVideoTranscodeSpec(videoTranscodeSpec: Nullable<VideoTranscodeSpec>) {
+    if (videoTranscodeSpec == null) {
+      throw new NullVideoTranscodeSpecError();
+    }
+    for (let r of videoTranscodeSpec.resolutions) {
+      if (r.fileName == null) r.fileName = `${r.resolution.toString()}.mp4`;
+    }
+    this.videoTranscodeSpec = videoTranscodeSpec;
+  }
 }
 
 class InvalidMovieIdError extends Error {}
 
 class InvalidMkvS3ObjectKeyError extends Error {}
-
-class InvalidDefaultAudioTrackError extends Error {}
-
-class InvalidDefaultTextTrackError extends Error {}
 
 class InvalidTranscodingContextJobIdError extends Error {}
 
@@ -115,3 +149,5 @@ class MultipleMkvLocationsError extends Error {}
 class NoMkvLocationError extends Error {}
 
 class InvalidMkvHttpUrlError extends Error {}
+
+class NullVideoTranscodeSpecError extends Error {}

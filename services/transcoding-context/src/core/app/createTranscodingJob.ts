@@ -41,7 +41,7 @@ interface CreateTranscodingJobParam {
   outputFolderKey: string;
   audioTranscodeSpecParams: AudioTranscodeSpecParam[] | undefined;
   textTranscodeSpecParams: TextTranscodeSpecParam[] | undefined;
-  videoTranscodeSpec: VideoTranscodeSpec
+  videoTranscodeSpec: VideoTranscodeSpec;
 }
 
 export const handler = async (event: CreateTranscodingJobParam): Promise<string> => {

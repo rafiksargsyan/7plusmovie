@@ -27,10 +27,6 @@ export class Subtitle {
     this.name = this.validateName(name);
   }
 
-  public getName() {
-    return this.name;
-  }
-
   private validateLang(lang: SubsLang) {
     if (lang == null) {
       throw new InvalidSubtitleLangError();
@@ -39,14 +35,14 @@ export class Subtitle {
   }
 
   private validateRelativePath(path: string) {
-    if (path == null || ! /\S/.test(path)) {
+    if (path == null || path.trim() === "") {
       throw new InvalidSubtitleRelativePathError();
     }
     return path;
   }
 
   private validateName(name: string) {
-    if (name == null || ! /\S/.test(name)) {
+    if (name == null || name.trim() === "") {
       throw new InvalidSubtitleNameError();
     }
     return name;
