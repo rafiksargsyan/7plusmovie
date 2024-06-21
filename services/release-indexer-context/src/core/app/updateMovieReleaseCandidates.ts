@@ -92,7 +92,7 @@ export const handler = async (event) => {
           throw new Error('Failed to find resolution');
         }
       }
-      if ((Date.now() - m.releaseTimeInMillis > MONTH_IN_MILLIS)
+      if ((Date.now() - m.releaseTimeInMillis > 2 * MONTH_IN_MILLIS)
       && (ripType.isLowQuality() || Resolution.compare(resolution, Resolution.SD) === 0)) {
         continue;
       }
