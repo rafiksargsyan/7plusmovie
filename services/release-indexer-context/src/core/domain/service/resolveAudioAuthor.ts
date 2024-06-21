@@ -8,6 +8,8 @@ export function resolveAudioAuthor(title: Nullable<string>, tracker: Nullable<To
   if (TorrentTracker.equals(tracker, TorrentTracker.RUTRACKER) || TorrentTracker.equals(tracker, TorrentTracker.RUTOR)) {
     const hdrezak18PlusRegex = /hdrezka.*18\+/;
     const viruseProject18PlusRegex = /viruseproject.*18\+/;
+    const bravoRecordsGeorgiaRegex = /bravo.*records.*georgia/;
+    const readHeadSoundRegex = /read.*head.*sound/;
     if (title.match(hdrezak18PlusRegex) != null) return AudioAuthor.HDREZKA_18PLUS;
     if (title.match(viruseProject18PlusRegex) != null) return AudioAuthor.VIRUSEPROJECT_18PLUS;
     if (title.includes("hdrezka")) return AudioAuthor.HDREZKA;
@@ -16,6 +18,8 @@ export function resolveAudioAuthor(title: Nullable<string>, tracker: Nullable<To
     if (title.includes('postmodern')) return AudioAuthor.POSTMODERN;
     if (title.includes('tvshows')) return AudioAuthor.TVSHOWS;
     if (title.includes('lostfilm')) return AudioAuthor.LOSTFILM;
+    if (title.match(bravoRecordsGeorgiaRegex) != null) return AudioAuthor.BRAVO_RECORDS_GEORGIA;
+    if (title.match(readHeadSoundRegex) != null) return AudioAuthor.READ_HEAD_SOUND;
   }
   return null;
 }

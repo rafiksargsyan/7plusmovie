@@ -22,7 +22,7 @@ interface TextTranscodeSpec {
 }
 
 interface VideoTranscodeSpec {
-  resolutions: { fileName: string, resolution: number }[]; // 360, 480, 720, 1080, etc.
+  resolutions: { fileName: string, resolution: number } []; // 360, 480, 720, 1080, etc.
   stream: number;
 }
 

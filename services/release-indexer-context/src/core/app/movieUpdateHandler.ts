@@ -6,8 +6,11 @@ import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
 import { Movie } from "../domain/aggregate/Movie";
 import axios from 'axios';
 import { MovieRepository } from '../../adapters/MovieRepository';
+import { S3 } from '@aws-sdk/client-s3';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
+const torrentFilesS3Bucket = process.env.TORRENT_FILES_S3_BUCKET!;
+const rawMediaFilesS3Bucket = process.env.RAW_MEDIA_FILES_S3_BUCKET!;
 
 const secretsManager = new SecretsManager({});
 
@@ -22,6 +25,7 @@ const translateConfig = { marshallOptions };
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 const movieRepo = new MovieRepository(docClient);
+const s3 = new S3({});
 
 const tmdbClient = axios.create({
   baseURL: 'https://api.themoviedb.org/3/',
@@ -53,7 +57,9 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
 
     for (const record of event.Records) {
       if (record.eventName === 'REMOVE') {
-        // todo
+        let movieId = record.dynamodb?.Keys?._id.S;
+        await emptyS3Directory(rawMediaFilesS3Bucket, movieId);
+        await emptyS3Directory(torrentFilesS3Bucket, movieId);
       } else {
         let movieRead: MovieRead = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as MovieRead;
         if (movieRead._tmdbId == null) return;
@@ -93,7 +99,7 @@ async function updateMovie(movie: Movie, tmdbId: string) {
     alternativeTitles.push(titleEnUs);
   }
   const titleRu = getMovieDataRu.title;
-  if (titleRu  != null) {
+  if (titleRu != null) {
     alternativeTitles.push(titleRu);
   }
   for (let t of alternativeTitlesData.titles) {
@@ -121,4 +127,33 @@ async function updateMovie(movie: Movie, tmdbId: string) {
     updated = true;
   }
   return updated;
+}
+
+async function emptyS3Directory(bucket, dir) {
+  if (dir == null || dir.trim() === "") return;
+
+  const listParams = {
+    Bucket: bucket,
+    Prefix: dir
+  };
+  
+  const listedObjects = await s3.listObjectsV2(listParams);
+  
+  if (listedObjects.Contents == undefined ||
+    listedObjects.Contents.length === 0) return;
+  
+  const deleteParams = {
+    Bucket: bucket,
+    Delete: { Objects: [] }
+  };
+  
+  listedObjects.Contents.forEach(({ Key }) => {
+    deleteParams.Delete.Objects.push({ Key } as never);
+  });
+  
+  if (deleteParams.Delete.Objects.length !== 0) {
+    await s3.deleteObjects(deleteParams);
+  }
+  
+  if (listedObjects.IsTruncated) await emptyS3Directory(bucket, dir);
 }
