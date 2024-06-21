@@ -4,6 +4,8 @@ import { AudioLang } from './AudioLang';
 import { SubsLang } from './SubsLang';
 import { Nullable } from './Nullable';
 
+const ONE_DAY_IN_SECONDS = 24 * 60 * 60;
+
 interface AudioTranscodeSpec {
   stream: number;
   bitrate: string;
@@ -33,27 +35,33 @@ export class MovieTranscodingJob {
   private ttl: number;
   private movieId: string;
   private mkvS3ObjectKey: string;
-  private mkvHttpUrl;
+  private mkvHttpUrl: string;
   private outputFolderKey: string;
   private audioTranscodeSpecs: AudioTranscodeSpec[];
   private textTranscodeSpecs: TextTranscodeSpec[];
   private videoTranscodeSpec: VideoTranscodeSpec;
   private transcodingContextJobId: string;
+  private releaseId: string;
+  private releasesToBeRemoved: string[];
 
   public constructor(createEmptyObject: boolean, movieId?: string, mkvS3ObjectKey?: string,
     mkvHttpUrl?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
-    textTranscodeSpecs?: TextTranscodeSpec[], videoTranscodeSpec?: VideoTranscodeSpec) {
+    textTranscodeSpecs?: TextTranscodeSpec[], videoTranscodeSpec?: VideoTranscodeSpec, releaseId?: string,
+    releasesToBeRemoved?: string[]) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setMovieId(movieId);
+      this.setReleaseId(releaseId);
       this.setMkvLocation(mkvHttpUrl, mkvS3ObjectKey);
+      if (outputFolderKey == null) outputFolderKey = `${movieId}/${releaseId}`;
       this.setOutputFolderKey(outputFolderKey)
       this.setAudioTranscodeSpecs(audioTranscodeSpecs);
       this.setTextTranscodeSpecs(textTranscodeSpecs);
       this.setVideoTranscodeSpec(videoTranscodeSpec);
+      this.setReleasesToBeRemoved(releasesToBeRemoved);
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
-      this.ttl = Math.round(this.creationTime / 1000) + 15 * 24 * 60 * 60;
+      this.ttl = Math.round(this.creationTime / 1000) + 15 * ONE_DAY_IN_SECONDS;
     }
   }
 
@@ -93,7 +101,16 @@ export class MovieTranscodingJob {
   }
 
   private setAudioTranscodeSpecs(audioTranscodeSpecs: AudioTranscodeSpec[] | undefined) {
-    this.audioTranscodeSpecs = audioTranscodeSpecs !== undefined ? audioTranscodeSpecs : [];
+    if (audioTranscodeSpecs == null) audioTranscodeSpecs = [];
+    for (let a of audioTranscodeSpecs) {
+      if (a.fileName == null) {
+        a.fileName = `${a.lang.key}-${a.channels}-${a.bitrate}-${a.stream}.mp4`
+      }
+      if (a.name == null) {
+        a.name = `${a.lang.name} (${a.channels})`
+      }
+    }
+    this.audioTranscodeSpecs = audioTranscodeSpecs;
   }
 
   private setTextTranscodeSpecs(textTranscodeSpecs: Nullable<TextTranscodeSpec[]>) {
@@ -114,7 +131,7 @@ export class MovieTranscodingJob {
         }
       }
     }
-    this.textTranscodeSpecs = textTranscodeSpecs !== undefined ? textTranscodeSpecs : [];
+    this.textTranscodeSpecs = textTranscodeSpecs;
   }
 
   public setTranscodingContextJobId(transcodingContextJobId: string) {
@@ -134,6 +151,18 @@ export class MovieTranscodingJob {
     }
     this.videoTranscodeSpec = videoTranscodeSpec;
   }
+
+  private setReleaseId(releaseId: Nullable<string>) {
+    if (releaseId == null || releaseId.trim() === "") {
+      throw new EmptyReleaseIdError();
+    }
+    this.releaseId = releaseId;
+  }
+
+  private setReleasesToBeRemoved(releasesToBeRemoved: Nullable<string[]>) {
+    if (releasesToBeRemoved == null) releasesToBeRemoved = [];
+    this.releasesToBeRemoved = releasesToBeRemoved;
+  }
 }
 
 class InvalidMovieIdError extends Error {}
@@ -151,3 +180,5 @@ class NoMkvLocationError extends Error {}
 class InvalidMkvHttpUrlError extends Error {}
 
 class NullVideoTranscodeSpecError extends Error {}
+
+class EmptyReleaseIdError extends Error {}
