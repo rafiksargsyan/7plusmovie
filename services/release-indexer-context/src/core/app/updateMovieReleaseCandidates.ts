@@ -109,7 +109,7 @@ export const handler = async (event) => {
           radarrLanguages.push(l.name.toLowerCase());
         }
       }
-      if ((Date.now() - m.releaseTimeInMillis > 2 * MONTH_IN_MILLIS) &&
+      if ((Date.now() - m.releaseTimeInMillis > 3 * MONTH_IN_MILLIS) &&
       !tracker.isLanguageSpecific() && (radarrLanguages.length === 0 ||
         (radarrLanguages.length === 1 && (AudioLang.fromRadarrLanguage(radarrLanguages[0]) != null &&
         AudioLang.fromRadarrLanguage(radarrLanguages[0])?.lang === m.originalLocale.lang || radarrLanguages[0] === "unknown")))) {
