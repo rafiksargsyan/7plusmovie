@@ -1,4 +1,4 @@
-import { Nullable } from "./Nullable";
+import { Nullable } from "../../Nullable";
 
 export class SubsLang {
   public static readonly EN = new SubsLang("EN", "en", "en", "English");

@@ -1,4 +1,4 @@
-import { Nullable } from "./Nullable";
+import { Nullable } from "../../utils";
 
 export class MediaSource {
   public static readonly EXTERNAL = new MediaSource("EXTERNAL");

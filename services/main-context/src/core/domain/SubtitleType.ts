@@ -1,4 +1,4 @@
-import { Nullable } from "./Nullable";
+import { Nullable } from "../../Nullable";
 
 export class SubtitleType {
   public static readonly FORCED = new SubtitleType("FORCED", "Forced");

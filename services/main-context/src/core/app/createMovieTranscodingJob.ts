@@ -1,7 +1,7 @@
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { MovieTranscodingJob } from "../domain/MovieTranscodingJob";
-import { Nullable } from '../domain/Nullable';
+import { Nullable } from '../../Nullable';
 import { AudioLang } from '../domain/AudioLang';
 import { SubtitleType } from '../domain/SubtitleType';
 import { SubsLang } from '../domain/SubsLang';
@@ -52,10 +52,10 @@ interface CreateMovieTranscodingJobParam {
 }
 
 export const handler = async (event: CreateMovieTranscodingJobParam): Promise<string> => {
-  let audioTranscodeSpecParams = event.audioTranscodeSpecParams?.map(_ => {
+  const audioTranscodeSpecParams = event.audioTranscodeSpecParams?.map(_ => {
     return { stream: _.stream, bitrate: _.bitrate, channels: _.channels, lang: AudioLang.fromKeyOrThrow(_.lang), name: _.name, fileName: _.fileName }
   });
-  let textTranscodeSpecParams = event.textTranscodeSpecParams?.map(_ => {
+  const textTranscodeSpecParams = event.textTranscodeSpecParams?.map(_ => {
     return { name: _.name, fileName: _.fileName, stream: _.stream, type: SubtitleType.fromKeyOrThrow(_.type), lang: SubsLang.fromKeyOrThrow(_.lang) }
   });
   let movieTranscodingJob = new MovieTranscodingJob(false, event.movieId, event.mkvS3ObjectKey, event.mkvHttpUrl, event.outputFolderKey,

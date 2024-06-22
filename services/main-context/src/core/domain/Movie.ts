@@ -3,7 +3,7 @@ import { L8nLangCode } from './L8nLangCodes';
 import { MovieGenre } from './MovieGenres';
 import { Person } from './Persons';
 import { Subtitle } from './entity/Subtitle';
-import { Release } from './Release';
+import { Release } from './entity/Release';
 
 type RelativePath = string;
 
