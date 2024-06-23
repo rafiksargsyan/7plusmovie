@@ -7,7 +7,7 @@ import { MovieGenre, MovieGenres } from '../domain/MovieGenres';
 import { Person, Persons } from '../domain/Persons';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
-import { Movie } from "../domain/Movie";
+import { Movie } from "../domain/aggregate/Movie";
 import axios from 'axios';
 import { L8nLangCode } from '../domain/L8nLangCodes';
 

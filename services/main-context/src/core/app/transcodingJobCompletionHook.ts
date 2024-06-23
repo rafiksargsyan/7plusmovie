@@ -5,7 +5,7 @@
 
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
-import { Movie } from "../domain/Movie";
+import { Movie } from "../domain/aggregate/Movie";
 import { SubsLangCode, SubsLangCodes } from "../domain/SubsLangCodes";
 import { TvShowRepositoryInterface } from "../ports/TvShowRepositoryInterface";
 import { TvShowRepository } from "../../adapters/TvShowRepository";
