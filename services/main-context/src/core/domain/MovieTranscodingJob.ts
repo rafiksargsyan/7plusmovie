@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 import { SubtitleType } from './SubtitleType';
 import { AudioLang } from './AudioLang';
 import { SubsLang } from './SubsLang';
-import { Nullable } from '../../Nullable';
+import { Nullable } from '../../utils';
 
 const ONE_DAY_IN_SECONDS = 24 * 60 * 60;
 

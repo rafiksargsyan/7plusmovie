@@ -4,15 +4,101 @@ import { MediaSource } from "../MediaSource";
 import { SubsLang } from "../SubsLang";
 import { SubtitleType } from "../SubtitleType";
 
-export interface Release {
-  subtitles: { [key: string]: Subtitle }; // key will also match with labael in MPD/HlS manifest if subs come from the package
-  audios: { [key: string]: Audio }; // key will also match with label in MPD or HlS manifest
-  mpdFile: string;
-  m3u8File: string;
-  thumbnailsFile: string;
+export class Release {
+  private subtitles: { [key: string]: Subtitle }; // key will also match with labael in MPD/HlS manifest if subs come from the package
+  private audios: { [key: string]: Audio }; // key will also match with label in MPD or HlS manifest
+  private video: Video;
+  private mpdFile: string;
+  private m3u8File: string;
+  private thumbnailsFile: string;
   // This is the id in the release indexer context, if a release is replaced with
   // a better release in the context we will replace it also in the main context.
-  releaseIndexerContextId: string | undefined;
+  private releaseIndexerContextId: Nullable<string>;
+
+  private constructor(createEmptyObject: boolean, subtitles?: { [key: string]: Subtitle }, audios?: { [key: string]: Audio },
+                      video?: Video, mpdFile?: string, m3u8File?: string, thumbnailsFile?: string, releaseIndexerContextId?: Nullable<string>) {
+    if (!createEmptyObject) {
+      if (subtitles == null) subtitles = {};
+      this.subtitles = subtitles;
+      this.audios = this.validateAudios(audios);
+      this.video = this.validateVideo(video);
+      this.mpdFile = this.validateMpdFile(mpdFile);
+      this.m3u8File = this.validateM3U8File(m3u8File);
+      this.thumbnailsFile = this.validateThumbnailsFile(thumbnailsFile);
+      this.releaseIndexerContextId = releaseIndexerContextId;
+    }
+  }
+
+  private validateAudios(audios?: { [key: string]: Audio }) {
+    if (audios == null || Object.entries(audios).length === 0) {
+      throw new EmptyAudiosError();
+    }
+    return audios;
+  }
+
+  private validateVideo(video?: Video) {
+    if (video == null) {
+      throw new NullVideoError();
+    }
+    return video;
+  }
+
+  private validateMpdFile(mpdFile?: string) {
+    if (mpdFile == null || mpdFile.trim() == "") {
+      throw new NullMpdFileError();
+    }
+    return mpdFile;
+  }
+
+  private validateM3U8File(m3u8File?: string) {
+    if (m3u8File == null || m3u8File.trim() == "") {
+      throw new NullM3U8FileError();
+    }
+    return m3u8File;
+  }
+
+  private validateThumbnailsFile(thumbnailsFile?: string) {
+    if (thumbnailsFile == null || thumbnailsFile.trim() == "") {
+      throw new NullThumbnailsFileError();
+    }
+    return thumbnailsFile;
+  }
+
+  public static createEmpty() {
+    return new Release(true);
+  }
+
+  public static create(subtitles: { [key: string]: Subtitle }, audios: { [key: string]: Audio }, video: Video,
+                       mpdFile: string, m3u8File: string, thumbnailsFile: string, releaseIndexerContextId: Nullable<string>) {
+    return new Release(false, subtitles, audios, video, mpdFile, m3u8File, thumbnailsFile, releaseIndexerContextId);
+  }
+}
+
+type Resolution = { resolution: number, size: number, relativePath: string };
+
+export class Video {
+  private resolutions: Resolution[];
+
+  private constructor(createEmptyObject: boolean, resolutions?: Resolution[]) {
+    if (!createEmptyObject) {
+      this.resolutions = this.validateResolutions(resolutions);
+    }
+  }
+
+  private validateResolutions(resolutions?: Resolution[]) {
+    if (resolutions == null) {
+      throw new NullVideoResolutionsError();
+    }
+    return resolutions;
+  }
+
+  public static createEmpty() {
+    return new Video(true);
+  }
+
+  public static create(resolutions: Resolution[]) {
+    return new Video(false, resolutions);
+  }
 }
 
 export class Audio {
@@ -132,3 +218,15 @@ export class BlankAudioRelativePathError extends Error {}
 export class NullAudioChannelsError extends Error {}
 
 export class NullAudioLangError extends Error {}
+
+export class NullVideoResolutionsError extends Error {}
+
+export class EmptyAudiosError extends Error {}
+
+export class NullVideoError extends Error {}
+
+export class NullMpdFileError extends Error {}
+
+export class NullM3U8FileError extends Error {}
+
+export class NullThumbnailsFileError extends Error {}
