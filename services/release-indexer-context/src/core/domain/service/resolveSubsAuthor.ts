@@ -13,6 +13,7 @@ export function resolveSubsAuthor(title: Nullable<string>, tracker: Nullable<Tor
     if (title.match(coolStoryBlog18PlusRegex) != null) return SubsAuthor.COOL_STORY_BLOG_18PLUS;
     if (title.includes("hdrezka")) return SubsAuthor.HDREZKA;
     if (title.includes("tvshows")) return SubsAuthor.TVSHOWS;
+    if (title.includes('киномания')) return SubsAuthor.KINOMANIA;
     if (title.match(coolStoryBlogRegex)) return SubsAuthor.COOL_STORY_BLOG;
   }
   return null;

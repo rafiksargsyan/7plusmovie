@@ -11,7 +11,7 @@ export function resolveAudioLang(code: Nullable<string>,
                                  numAudioStreams: number,
                                  radarrLanguages: string[]) {
   if (numUndefinedAudios > 1) return null;
-  if (numAudioStreams === 1) {
+  if (numAudioStreams === 1 && radarrLanguages.length === 1) {
     if (radarrLanguages.includes("portuguese (brazil)")) return AudioLang.PT_BR;
     if (radarrLanguages.includes("spanish (latino)")) return AudioLang.ES_419;
     if (radarrLanguages.includes("spanish")) return AudioLang.ES;

@@ -8,11 +8,17 @@ export class AudioAuthor {
   public static readonly BRAVO_RECORDS_GEORGIA = new AudioAuthor("BRAVO_RECORDS_GEORGIA");
   public static readonly READ_HEAD_SOUND = new AudioAuthor("READ_HEAD_SOUND");
   public static readonly JASKIER = new AudioAuthor("JASKIER");
+  public static readonly JASKIER_18PLUS = new AudioAuthor("JASKIER_18PLUS");
   public static readonly VIRUSEPROJECT = new AudioAuthor("VIRUSEPROJECT");
   public static readonly VIRUSEPROJECT_18PLUS = new AudioAuthor("VIRUSEPROJECT_18PLUS");
   public static readonly MOVIE_DALEN = new AudioAuthor("MOVIE_DALEN");
   public static readonly POSTMODERN = new AudioAuthor("POSTMODERN");
- 
+  public static readonly KIRILLICA = new AudioAuthor("KIRILLICA");
+  public static readonly IVI = new AudioAuthor("IVI");
+  public static readonly KINOMANIA = new AudioAuthor("KINOMANIA");
+  public static readonly ONE_PLUS_ONE = new AudioAuthor("ONE_PLUS_ONE");
+  public static readonly KINAKONG = new AudioAuthor("KINAKONG");
+
   public readonly key;
 
   private constructor(key: string) {

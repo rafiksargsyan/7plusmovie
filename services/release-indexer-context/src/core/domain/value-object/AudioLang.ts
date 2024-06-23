@@ -31,10 +31,15 @@ export class AudioLang {
   public static readonly UK = new AudioLang("UK", "uk", "uk");
   public static readonly ZH = new AudioLang("ZH", "zh", "zh");
   public static readonly DE = new AudioLang("DE", "de", "de");
+  public static readonly BE = new AudioLang("BE", "be", "be");
 
   public static readonly audioAuthorPriorityList = {
-    "RU" : [AudioAuthor.JASKIER, AudioAuthor.HDREZKA, AudioAuthor.TVSHOWS, AudioAuthor.READ_HEAD_SOUND,
-      AudioAuthor.LOSTFILM, AudioAuthor.BRAVO_RECORDS_GEORGIA, AudioAuthor.MOVIE_DALEN]
+    "RU" : [ AudioAuthor.JASKIER_18PLUS, AudioAuthor.VIRUSEPROJECT_18PLUS, AudioAuthor.HDREZKA_18PLUS,
+      AudioAuthor.JASKIER, AudioAuthor.VIRUSEPROJECT, AudioAuthor.HDREZKA, AudioAuthor.TVSHOWS, AudioAuthor.KINOMANIA, 
+      AudioAuthor.IVI,AudioAuthor.KIRILLICA, AudioAuthor.READ_HEAD_SOUND, AudioAuthor.LOSTFILM,
+      AudioAuthor.BRAVO_RECORDS_GEORGIA, AudioAuthor.MOVIE_DALEN],
+    "UK" : [AudioAuthor.ONE_PLUS_ONE],
+    "BE" : [AudioAuthor.KINAKONG]
   }
 
   private static readonly FROM_ISO_639_2 = {
@@ -54,7 +59,8 @@ export class AudioLang {
     "es" : AudioLang.ES,
     "uk" : AudioLang.UK,
     "zh" : AudioLang.ZH,
-    "de" : AudioLang.DE
+    "de" : AudioLang.DE,
+    "be" : AudioLang.BE
   } as const;
    
   private static readonly FROM_ISO_639_1 = {
@@ -76,7 +82,8 @@ export class AudioLang {
     "ukr" : AudioLang.UK,
     "chi" : AudioLang.ZH,
     "zho" : AudioLang.ZH,
-    "ger" : AudioLang.DE
+    "ger" : AudioLang.DE,
+    "bel" : AudioLang.BE
   } as const;
 
   public readonly key: string;

@@ -6,6 +6,7 @@ export class SubsAuthor {
   public static readonly TVSHOWS = new SubsAuthor("TVSHOWS");
   public static readonly COOL_STORY_BLOG = new SubsAuthor("COOL_STORY_BLOG");
   public static readonly COOL_STORY_BLOG_18PLUS = new SubsAuthor("COOL_STORY_BLOG_18PLUS");
+  public static readonly KINOMANIA = new SubsAuthor("KINOMANIA");
 
   public readonly key;
 

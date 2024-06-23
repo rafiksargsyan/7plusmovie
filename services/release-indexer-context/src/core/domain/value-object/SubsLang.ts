@@ -28,6 +28,7 @@ export class SubsLang {
   public static readonly UK = new SubsLang("UK", "uk", "uk");
   public static readonly ZH = new SubsLang("ZH", "zh", "zh");
   public static readonly DE = new SubsLang("DE", "de", "de");
+  public static readonly BE = new SubsLang("BE", "be", "be");
 
   private static readonly FROM_ISO_639_2 = {
     "en" : SubsLang.EN,
@@ -46,7 +47,8 @@ export class SubsLang {
     "es" : SubsLang.ES,
     "uk" : SubsLang.UK,
     "zh" : SubsLang.ZH,
-    "de" : SubsLang.DE
+    "de" : SubsLang.DE,
+    "be" : SubsLang.BE
   } as const;
    
   private static readonly FROM_ISO_639_1 = {
@@ -68,12 +70,13 @@ export class SubsLang {
     "ukr" : SubsLang.UK,
     "chi" : SubsLang.ZH,
     "zho" : SubsLang.ZH,
-    "ger" : SubsLang.DE
+    "ger" : SubsLang.DE,
+    "bel" : SubsLang.BE
   } as const;
 
   public static readonly subsAuthorPriorityList = {
     "RU" : [SubsAuthor.HDREZKA_18PLUS,  SubsAuthor.COOL_STORY_BLOG_18PLUS,
-      SubsAuthor.HDREZKA, SubsAuthor.COOL_STORY_BLOG, SubsAuthor.TVSHOWS]
+      SubsAuthor.HDREZKA, SubsAuthor.COOL_STORY_BLOG, SubsAuthor.TVSHOWS, SubsAuthor.KINOMANIA]
   }
 
   public readonly key;

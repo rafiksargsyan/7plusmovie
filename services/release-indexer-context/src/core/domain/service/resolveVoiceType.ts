@@ -16,9 +16,10 @@ export function resolveVoiceType(title: Nullable<string>, lang: AudioLang, local
   const voRegex = /(^vo$)|(^vo[^a-zA-Z0-9]+)|([^a-zA-Z0-9]+vo$)|([^a-zA-Z0-9]vo[^a-zA-Z0-9])/;
   const soRegex = /(^so$)|(^so[^a-zA-Z0-9]+)|([^a-zA-Z0-9]+so$)|([^a-zA-Z0-9]so[^a-zA-Z0-9])/;
   if (title.includes("дубляж") || title.includes("дублированный") || title.match(dubRegex) != null) return AudioVoiceType.DUB;
-  if (title.match(mvoRegex) != null) return AudioVoiceType.MVO;
-  if (title.match(dvoRegex) != null) return AudioVoiceType.DVO;
-  if (title.match(avoRegex) != null || title.match(voRegex) != null || title.match(soRegex) != null) return AudioVoiceType.SO;
+  if (title.match(mvoRegex) != null || title.includes("многоголосый")) return AudioVoiceType.MVO;
+  if (title.match(dvoRegex) != null || title.includes("двухголосый")) return AudioVoiceType.DVO;
+  if (title.match(avoRegex) != null || title.match(voRegex) != null || title.match(soRegex) != null ||
+      title.includes("одноголосый")) return AudioVoiceType.SO;
   if (title.includes("original")) return AudioVoiceType.ORIGINAL;
   return null;
 }

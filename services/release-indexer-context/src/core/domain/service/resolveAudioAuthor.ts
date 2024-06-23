@@ -8,10 +8,12 @@ export function resolveAudioAuthor(title: Nullable<string>, tracker: Nullable<To
   if (TorrentTracker.equals(tracker, TorrentTracker.RUTRACKER) || TorrentTracker.equals(tracker, TorrentTracker.RUTOR)) {
     const hdrezak18PlusRegex = /hdrezka.*18\+/;
     const viruseProject18PlusRegex = /viruseproject.*18\+/;
+    const jaskier18PlusRegex = /jaskier.*18\+/;
     const bravoRecordsGeorgiaRegex = /bravo.*records.*georgia/;
     const readHeadSoundRegex = /read.*head.*sound/;
     if (title.match(hdrezak18PlusRegex) != null) return AudioAuthor.HDREZKA_18PLUS;
     if (title.match(viruseProject18PlusRegex) != null) return AudioAuthor.VIRUSEPROJECT_18PLUS;
+    if (title.match(jaskier18PlusRegex) != null) return AudioAuthor.JASKIER_18PLUS;
     if (title.includes("hdrezka")) return AudioAuthor.HDREZKA;
     if (title.includes('viruseproject')) return AudioAuthor.VIRUSEPROJECT;
     if (title.includes('moviedalen')) return AudioAuthor.MOVIE_DALEN;
@@ -20,6 +22,12 @@ export function resolveAudioAuthor(title: Nullable<string>, tracker: Nullable<To
     if (title.includes('lostfilm')) return AudioAuthor.LOSTFILM;
     if (title.match(bravoRecordsGeorgiaRegex) != null) return AudioAuthor.BRAVO_RECORDS_GEORGIA;
     if (title.match(readHeadSoundRegex) != null) return AudioAuthor.READ_HEAD_SOUND;
+    if (title.includes('кириллица')) return AudioAuthor.KIRILLICA;
+    if (title.includes('киномания')) return AudioAuthor.KINOMANIA;
+    if (title.includes('1+1')) return AudioAuthor.ONE_PLUS_ONE;
+    if (title.includes('ivi')) return AudioAuthor.IVI;
+    if (title.includes('jaskier')) return AudioAuthor.JASKIER;
+    if (title.includes('кінаконг')) return AudioAuthor.KINAKONG;
   }
   return null;
 }
