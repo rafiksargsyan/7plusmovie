@@ -1,10 +1,10 @@
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { MovieTranscodingJob } from "../domain/MovieTranscodingJob";
-import { Nullable } from '../../Nullable';
 import { AudioLang } from '../domain/AudioLang';
 import { SubtitleType } from '../domain/SubtitleType';
 import { SubsLang } from '../domain/SubsLang';
+import { Nullable } from '../../utils';
 
 const dynamodbMovieTranscodingJobTableName = process.env.DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME!;
 

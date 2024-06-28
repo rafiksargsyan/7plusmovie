@@ -1,4 +1,4 @@
-import { Nullable } from "../../Nullable";
+import { Nullable } from "../../utils";
 
 export class AudioLang {
   public static readonly EN = new AudioLang("EN", "en", "en", "English");

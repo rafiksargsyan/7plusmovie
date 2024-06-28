@@ -74,7 +74,7 @@ export class Release {
   }
 }
 
-type Resolution = { resolution: number, size: number, relativePath: string };
+export type Resolution = { resolution: number, size: Nullable<number>, relativePath: string };
 
 export class Video {
   private resolutions: Resolution[];
@@ -122,8 +122,7 @@ export class Audio {
     return new Audio(true);
   }
 
-  public static create(name: string, relativePath: string, lang: AudioLang, channels: number,
-                       source: MediaSource) {
+  public static create(name: string, relativePath: string, lang: AudioLang, channels: number) {
     return new Audio(false, name, relativePath, lang, channels);
   }
 

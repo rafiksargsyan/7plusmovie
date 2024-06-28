@@ -6,7 +6,7 @@ import { Nullable } from '../../utils';
 
 const ONE_DAY_IN_SECONDS = 24 * 60 * 60;
 
-interface AudioTranscodeSpec {
+export interface AudioTranscodeSpec {
   stream: number;
   bitrate: string;
   channels: number;
@@ -15,7 +15,7 @@ interface AudioTranscodeSpec {
   fileName: Nullable<string>;
 }
 
-interface TextTranscodeSpec {
+export interface TextTranscodeSpec {
   stream: number;
   name: Nullable<string>;
   type: Nullable<SubtitleType>;
@@ -23,9 +23,24 @@ interface TextTranscodeSpec {
   fileName: Nullable<string>;
 }
 
-interface VideoTranscodeSpec {
+export interface VideoTranscodeSpec {
   resolutions: { fileName: string, resolution: number } []; // 360, 480, 720, 1080, etc.
   stream: number;
+}
+
+export interface MovieTranscodingJobRead {
+  id: string;
+  movieId: string;
+  mkvS3ObjectKey: Nullable<string>;
+  mkvHttpUrl: Nullable<string>;
+  outputFolderKey: string;
+  audioTranscodeSpecs: AudioTranscodeSpec[];
+  textTranscodeSpecs: TextTranscodeSpec[];
+  videoTranscodeSpec: VideoTranscodeSpec;
+  transcodingContextJobId: Nullable<string>;
+  releaseId: string;
+  releasesToBeRemoved: string[];
+  releaseIndexerContextReleaseId: Nullable<string>;
 }
 
 export class MovieTranscodingJob {
@@ -43,6 +58,7 @@ export class MovieTranscodingJob {
   private transcodingContextJobId: string;
   private releaseId: string;
   private releasesToBeRemoved: string[];
+  private releaseIndexerContextReleaseId: string;
 
   public constructor(createEmptyObject: boolean, movieId?: string, mkvS3ObjectKey?: string,
     mkvHttpUrl?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
@@ -165,20 +181,22 @@ export class MovieTranscodingJob {
   }
 }
 
-class InvalidMovieIdError extends Error {}
+export class InvalidMovieIdError extends Error {}
 
-class InvalidMkvS3ObjectKeyError extends Error {}
+export class InvalidMkvS3ObjectKeyError extends Error {}
 
-class InvalidTranscodingContextJobIdError extends Error {}
+export class InvalidTranscodingContextJobIdError extends Error {}
 
-class InvalidOutputFolderKeyError extends Error {}
+export class InvalidOutputFolderKeyError extends Error {}
 
-class MultipleMkvLocationsError extends Error {}
+export class MultipleMkvLocationsError extends Error {}
 
-class NoMkvLocationError extends Error {}
+export class NoMkvLocationError extends Error {}
 
-class InvalidMkvHttpUrlError extends Error {}
+export class InvalidMkvHttpUrlError extends Error {}
 
-class NullVideoTranscodeSpecError extends Error {}
+export class NullVideoTranscodeSpecError extends Error {}
 
-class EmptyReleaseIdError extends Error {}
+export class EmptyReleaseIdError extends Error {}
+
+export type { MovieTranscodingJob as MovieTranscodingJobType };

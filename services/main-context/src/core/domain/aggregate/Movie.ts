@@ -3,6 +3,7 @@ import { L8nLangCode } from '../L8nLangCodes';
 import { MovieGenre } from '../MovieGenres';
 import { Person } from '../Persons';
 import { Release } from '../entity/Release';
+import { strIsBlank } from '../../../utils';
 
 type RelativePath = string;
 
@@ -22,6 +23,8 @@ export class Movie {
   private directors: Person[] = [];
   private tmdbId: string;
   private releases: { [key: string]: Release } = {};
+  private monitorReleases: boolean;
+  private releaseIndexerContextMovieId: string;
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -125,10 +128,35 @@ export class Movie {
     this.touch();
   }
 
-  public addRelease(key: string | undefined, r: Release | undefined) {
+  public addRelease(key?: string, r?: Release) {
+    if (strIsBlank(key)) {
+      throw new NullReleaseKeyError();
+    }
+    if (r == null) {
+      throw new NullReleaseError();
+    }
+    const trimmedKey = key!.trim();
+    if (trimmedKey in this.releases) {
+      throw new ReleaseWithKeyAlreadyExistsError();
+    }
+    this.releases[trimmedKey] = r;
+    this.touch();
+  }
 
+  public removeRelease(key?: string) {
+    if (strIsBlank(key)) {
+      throw new NullReleaseKeyError();
+    }
+    delete this.releases[key!.trim()];
+    this.touch();
   }
 }
+
+class NullReleaseKeyError extends Error {}
+
+class NullReleaseError extends Error {}
+
+class ReleaseWithKeyAlreadyExistsError extends Error {}
 
 class InvalidTitleError extends Error {}
 
@@ -136,24 +164,10 @@ class InvalidReleaseYearError extends Error {}
 
 class InvalidPosterImageRelativePathError extends Error {}
 
-class InvalidMpdFileRelativePathError extends Error {}
-
 class InvalidOriginalLocaleError extends Error {}
 
 class InvalidTitleL8nError extends Error {}
 
 class InvalidBackdropImageRelativePathError extends Error {}
 
-class InvalidSubtitleError extends Error {}
-
-class InvalidM3u8FileRelativePathError extends Error {}
-
 class InvalidTmdbIdError extends Error {}
-
-class InvalidThumbnailsFileRelativePathError extends Error {}
-
-class SubtitleWithNameAlreadyExistsError extends Error {}
-
-class InvalidSubtitleIdError extends Error {}
-
-class SubtitleIdAlreadyExistsError extends Error {}
