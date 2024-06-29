@@ -1,8 +1,21 @@
 import { Nullable } from "../../../Nullable";
-import { Release } from "../entity/Release";
+import { Release, ReleaseRead } from "../entity/Release";
 import { v4 as uuid } from 'uuid';
 import { L8nLang } from "../value-object/L8nLang";
 import { ReleaseCandidate, ReleaseCandidateStatus } from "../entity/ReleaseCandidate";
+import { TorrentReleaseRead } from "../entity/TorrentRelease";
+
+export interface MovieRead {
+  _id: string;
+  _creationTime: number;
+  _originalLocale: L8nLang;
+  _originalTitle: string;
+  _releaseYear: number;
+  _releases: { [releaseId:string]: { release: TorrentReleaseRead, replacedReleaseIds: string[] }};
+  _readyToBeProcessed: boolean;
+  _releaseTimeInMillis: number;
+  _runtimeSeconds: number;
+}
 
 export class Movie {
   private _id: string;

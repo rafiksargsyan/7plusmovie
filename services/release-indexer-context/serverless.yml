@@ -149,6 +149,23 @@ functions:
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
     handler: src/core/app/fantomAssetsCleanupHandler.handler
     timeout: 900  
+  
+  getMovieById:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/getMovieById.handler
+    events:
+      - http:
+          integration: lambda
+          path: /movie/{id}
+          method: get
+          request:
+            template:
+              application/json: '{ "movieId" : "$input.params(''id'')" }'
+              application/x-www-form-urlencoded: null
+          response:
+            headers:
+              Access-Control-Allow-Origin: "'*'"
 
 resources:
   Resources:

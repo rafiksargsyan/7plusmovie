@@ -10,6 +10,18 @@ import { SubsType } from "../value-object/SubsType";
 import { SubsAuthor } from "../value-object/SubsAuthor";
 import { Nullable } from "../../../Nullable";
 
+export interface ReleaseRead {
+  _audios: AudioMetadata[];
+  _subs: SubsMetadata[];
+  _resolution: Resolution;
+  _ripType: RipType;
+  _size: number;
+  _hash: string;
+  _mediaFileRelativePath: string;
+  _creationTime;
+  _cachedMediaFileRelativePath;
+}
+
 export class Release {
   private _audios: AudioMetadata[] = [];
   private _subs: SubsMetadata[] = [];

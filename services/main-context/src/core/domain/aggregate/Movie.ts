@@ -155,6 +155,12 @@ export class Movie {
     if (strIsBlank(key)) return null;
     return this.releases[key!];
   }
+
+  public addRICMovieId(id: string) {
+    if (strIsBlank(id)) {
+      throw new BlankRICMovieIdError();
+    }
+  }
 }
 
 class NullReleaseKeyError extends Error {}
@@ -176,3 +182,5 @@ class InvalidTitleL8nError extends Error {}
 class InvalidBackdropImageRelativePathError extends Error {}
 
 class InvalidTmdbIdError extends Error {}
+
+class BlankRICMovieIdError extends Error {}

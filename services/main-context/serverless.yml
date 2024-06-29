@@ -629,7 +629,24 @@ functions:
     events:
       - schedule: rate(${file(./.env.${sls:stage}.yml):CF_DISTRO_USAGE_UPDATE_INTERVAL_IN_MINUTES} minutes)
     timeout: 900
-          
+
+  addRICMovieIdToMovie:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/addRICMovieIdToMovie.handler
+    events:
+      - http:
+          integration: lambda
+          path: //movie/{id}/ricId
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : "$input.params(''id'')",
+                                   "ricId" : $input.json(''$.ricId'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6  
+
 
 resources:
   Resources:

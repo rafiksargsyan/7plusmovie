@@ -2,7 +2,11 @@ import { Nullable } from "../../../Nullable";
 import { Resolution } from "../value-object/Resolution";
 import { RipType } from "../value-object/RipType";
 import { TorrentTracker } from "../value-object/TorrentTracker";
-import { Release } from "./Release";
+import { Release, ReleaseRead } from "./Release";
+
+export interface TorrentReleaseRead extends ReleaseRead {
+  _torrentFileUrl: string;
+}
 
 export class TorrentRelease extends Release {
   private _tracker: TorrentTracker;
