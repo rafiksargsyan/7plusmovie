@@ -18,6 +18,22 @@ export class Lang {
   static readonly UK = new Lang('UK', 'uk')
   static readonly ZH = new Lang('ZH', 'zh')
   static readonly DE = new Lang('DE', 'de')
+  static readonly BE = new Lang('BE', 'be')
+  static readonly BG = new Lang('BG', 'bg')
+  static readonly CS = new Lang('CS', 'cs')
+  static readonly ET = new Lang('ET', 'et')
+  static readonly FI = new Lang('FI', 'fi')
+  static readonly HR = new Lang('HR', 'hr')
+  static readonly HU = new Lang('HU', 'hu')
+  static readonly HY = new Lang('HY', 'hy')
+  static readonly LT = new Lang('LT', 'lt')
+  static readonly LV = new Lang('LV', 'lv')
+  static readonly MK = new Lang('MK', 'mk')
+  static readonly NB = new Lang('NB', 'nb')
+  static readonly NL = new Lang('NL', 'nl')
+  static readonly SL = new Lang('SL', 'sl')
+  static readonly SK = new Lang('SK', 'sk')
+  static readonly SR = new Lang('SR', 'sr')
 
   readonly key: string
   readonly lang: string

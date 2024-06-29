@@ -42,6 +42,22 @@ Lang.ES = new Lang('ES', 'es');
 Lang.UK = new Lang('UK', 'uk');
 Lang.ZH = new Lang('ZH', 'zh');
 Lang.DE = new Lang('DE', 'de');
+Lang.BE = new Lang('BE', 'be');
+Lang.BG = new Lang('BG', 'bg');
+Lang.CS = new Lang('CS', 'cs');
+Lang.ET = new Lang('ET', 'et');
+Lang.FI = new Lang('FI', 'fi');
+Lang.HR = new Lang('HR', 'hr');
+Lang.HU = new Lang('HU', 'hu');
+Lang.HY = new Lang('HY', 'hy');
+Lang.LT = new Lang('LT', 'lt');
+Lang.LV = new Lang('LV', 'lv');
+Lang.MK = new Lang('MK', 'mk');
+Lang.NB = new Lang('NB', 'nb');
+Lang.NL = new Lang('NL', 'nl');
+Lang.SL = new Lang('SL', 'sl');
+Lang.SK = new Lang('SK', 'sk');
+Lang.SR = new Lang('SR', 'sr');
 exports.Lang = Lang;
 class InvalidLangKeyError extends Error {
 }
