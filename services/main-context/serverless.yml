@@ -647,7 +647,6 @@ functions:
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6  
 
-
 resources:
   Resources:
     createCloudFrontDistroMetadataRole:

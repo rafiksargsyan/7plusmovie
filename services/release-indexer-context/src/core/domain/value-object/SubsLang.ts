@@ -2,33 +2,48 @@ import { Nullable } from "../../../Nullable";
 import { SubsAuthor } from "./SubsAuthor";
 
 export class SubsLang {
-  public static readonly EN = new SubsLang("EN", "en", "en");
-  public static readonly EN_US = new SubsLang("EN_US", "en", "en-US");
-  public static readonly EN_GB = new SubsLang("EN_GB", "en", "en-GB");
-  public static readonly RU = new SubsLang("RU", "ru", "ru");
-  public static readonly FR = new SubsLang("FR", "fr", "fr");
-  public static readonly JA = new SubsLang("JA", "ja", "ja");
-  public static readonly PT = new SubsLang("PT", "pt", "pt");
-  public static readonly KO = new SubsLang("KO", "ko", "ko");
-  public static readonly DA = new SubsLang("DA", "da", "da");
-  public static readonly HI = new SubsLang("HI", "hi", "hi");
-  public static readonly HI_IN = new SubsLang("HI_IN", "hi", "hi-IN");
-  public static readonly IT = new SubsLang("IT", "it", "it");
-  public static readonly RO = new SubsLang("RO", "ro", "ro");
-  public static readonly RO_RO = new SubsLang("RO_RO", "ro", "ro-RO");
-  public static readonly FA = new SubsLang("FA", "fa", "fa");
-  public static readonly FA_IR = new SubsLang("FA_IR", "fa", "fa-IR");
-  public static readonly SV = new SubsLang("SV", "sv", "sv");
-  public static readonly SV_SE = new SubsLang("SV_SE", "sv", "sv-SE");
-  public static readonly PL = new SubsLang("PL", "pl", "pl");
-  public static readonly PL_PL = new SubsLang("PL_PL", "pl", "pl-PL");
-  public static readonly ES = new SubsLang("ES", "es", "es");
-  public static readonly ES_ES = new SubsLang("ES_ES", "es", "es-ES");
-  public static readonly ES_419 = new SubsLang("ES_419", "es", "es-419");
-  public static readonly UK = new SubsLang("UK", "uk", "uk");
-  public static readonly ZH = new SubsLang("ZH", "zh", "zh");
-  public static readonly DE = new SubsLang("DE", "de", "de");
-  public static readonly BE = new SubsLang("BE", "be", "be");
+  static readonly EN = new SubsLang("EN", "en", "en");
+  static readonly EN_US = new SubsLang("EN_US", "en", "en-US");
+  static readonly EN_GB = new SubsLang("EN_GB", "en", "en-GB");
+  static readonly RU = new SubsLang("RU", "ru", "ru");
+  static readonly FR = new SubsLang("FR", "fr", "fr");
+  static readonly JA = new SubsLang("JA", "ja", "ja");
+  static readonly PT = new SubsLang("PT", "pt", "pt");
+  static readonly KO = new SubsLang("KO", "ko", "ko");
+  static readonly DA = new SubsLang("DA", "da", "da");
+  static readonly HI = new SubsLang("HI", "hi", "hi");
+  static readonly HI_IN = new SubsLang("HI_IN", "hi", "hi-IN");
+  static readonly IT = new SubsLang("IT", "it", "it");
+  static readonly RO = new SubsLang("RO", "ro", "ro");
+  static readonly RO_RO = new SubsLang("RO_RO", "ro", "ro-RO");
+  static readonly FA = new SubsLang("FA", "fa", "fa");
+  static readonly FA_IR = new SubsLang("FA_IR", "fa", "fa-IR");
+  static readonly SV = new SubsLang("SV", "sv", "sv");
+  static readonly SV_SE = new SubsLang("SV_SE", "sv", "sv-SE");
+  static readonly PL = new SubsLang("PL", "pl", "pl");
+  static readonly PL_PL = new SubsLang("PL_PL", "pl", "pl-PL");
+  static readonly ES = new SubsLang("ES", "es", "es");
+  static readonly ES_ES = new SubsLang("ES_ES", "es", "es-ES");
+  static readonly ES_419 = new SubsLang("ES_419", "es", "es-419");
+  static readonly UK = new SubsLang("UK", "uk", "uk");
+  static readonly ZH = new SubsLang("ZH", "zh", "zh");
+  static readonly DE = new SubsLang("DE", "de", "de");
+  static readonly BE = new SubsLang("BE", "be", "be");
+  static readonly BG = new SubsLang('BG', 'bg', 'bg');
+  static readonly CS = new SubsLang('CS', 'cs', 'cs');
+  static readonly ET = new SubsLang('ET', 'et', 'et');
+  static readonly FI = new SubsLang('FI', 'fi', 'fi');
+  static readonly HR = new SubsLang('HR', 'hr', 'hr');
+  static readonly HU = new SubsLang('HU', 'hu', 'hu');
+  static readonly HY = new SubsLang('HY', 'hy', 'hy');
+  static readonly LT = new SubsLang('LT', 'lt', 'lt');
+  static readonly LV = new SubsLang('LV', 'lv', 'lv');
+  static readonly MK = new SubsLang('MK', 'mk', 'mk');
+  static readonly NB = new SubsLang('NB', 'nb', 'nb');
+  static readonly NL = new SubsLang('NL', 'nl', 'nl');
+  static readonly SL = new SubsLang('SL', 'sl', 'sl');
+  static readonly SK = new SubsLang('SK', 'sk', 'sk');
+  static readonly SR = new SubsLang('SR', 'sr', 'sr');
 
   private static readonly FROM_ISO_639_2 = {
     "en" : SubsLang.EN,
@@ -48,9 +63,24 @@ export class SubsLang {
     "uk" : SubsLang.UK,
     "zh" : SubsLang.ZH,
     "de" : SubsLang.DE,
-    "be" : SubsLang.BE
-  } as const;
-   
+    "be" : SubsLang.BE,
+    "bg" : SubsLang.BG,
+    "cs" : SubsLang.CS,
+    "et" : SubsLang.ET,
+    "fi" : SubsLang.FI,
+    "hr" : SubsLang.HR,
+    "hu" : SubsLang.HU,
+    "hy" : SubsLang.HY,
+    "lt" : SubsLang.LT,
+    "lv" : SubsLang.LV,
+    "mk" : SubsLang.MK,
+    "nb" : SubsLang.NB,
+    "nl" : SubsLang.NL,
+    "sl" : SubsLang.SL,
+    "sk" : SubsLang.SK,
+    "sr" : SubsLang.SR,
+  }
+
   private static readonly FROM_ISO_639_1 = {
     "eng" : SubsLang.EN,
     "rus" : SubsLang.RU,
@@ -71,17 +101,37 @@ export class SubsLang {
     "chi" : SubsLang.ZH,
     "zho" : SubsLang.ZH,
     "ger" : SubsLang.DE,
-    "bel" : SubsLang.BE
+    "bel" : SubsLang.BE,
+    "bul" : SubsLang.BG,
+    "cze" : SubsLang.CS,
+    "ces" : SubsLang.CS,
+    "est" : SubsLang.ET,
+    "fin" : SubsLang.FI,
+    "hrv" : SubsLang.HR,
+    "hun" : SubsLang.HU,
+    "arm" : SubsLang.HY,
+    "hye" : SubsLang.HY,
+    "lit" : SubsLang.LT,
+    "lav" : SubsLang.LV,
+    "mac" : SubsLang.MK,
+    "mkd" : SubsLang.MK,
+    "nob" : SubsLang.NB,
+    "nld" : SubsLang.NL,
+    "dut" : SubsLang.NL,
+    "slv" : SubsLang.SL,
+    "slk" : SubsLang.SK,
+    "slo" : SubsLang.SK,
+    "srp" : SubsLang.SR,
   } as const;
 
-  public static readonly subsAuthorPriorityList = {
+  static readonly subsAuthorPriorityList = {
     "RU" : [SubsAuthor.HDREZKA_18PLUS,  SubsAuthor.COOL_STORY_BLOG_18PLUS,
       SubsAuthor.HDREZKA, SubsAuthor.COOL_STORY_BLOG, SubsAuthor.TVSHOWS, SubsAuthor.KINOMANIA]
   }
 
-  public readonly key;
-  public readonly lang: string;
-  public readonly langTag: string;
+  readonly key;
+  readonly lang: string;
+  readonly langTag: string;
 
   private constructor(key: string, lang: string, langTag: string) {
     this.key = key;

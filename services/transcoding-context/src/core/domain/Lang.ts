@@ -1,26 +1,42 @@
 import { Nullable } from "./Nullable";
 
 export class Lang {
-  public static readonly EN = new Lang("EN", "en");
-  public static readonly RU = new Lang("RU", "ru");
-  public static readonly FR = new Lang("FR", "fr");
-  public static readonly JA = new Lang("JA", "ja");
-  public static readonly PT = new Lang("PT", "pt");
-  public static readonly KO = new Lang("KO", "ko");
-  public static readonly DA = new Lang("DA", "da");
-  public static readonly HI = new Lang("HI", "hi");
-  public static readonly IT = new Lang("IT", "it");
-  public static readonly RO = new Lang("RO", "ro");
-  public static readonly FA = new Lang("FA", "fa");
-  public static readonly SV = new Lang("SV", "sv");
-  public static readonly PL = new Lang("PL", "pl");
-  public static readonly ES = new Lang("ES", "es");
-  public static readonly UK = new Lang("UK", "uk");
-  public static readonly ZH = new Lang("ZH", "zh");
-  public static readonly DE = new Lang("DE", "de");
+  static readonly EN = new Lang('EN', 'en')
+  static readonly RU = new Lang('RU', 'ru')
+  static readonly FR = new Lang('FR', 'fr')
+  static readonly JA = new Lang('JA', 'ja')
+  static readonly PT = new Lang('PT', 'pt')
+  static readonly KO = new Lang('KO', 'ko')
+  static readonly DA = new Lang('DA', 'da')
+  static readonly HI = new Lang('HI', 'hi')
+  static readonly IT = new Lang('IT', 'it')
+  static readonly RO = new Lang('RO', 'ro')
+  static readonly FA = new Lang('FA', 'fa')
+  static readonly SV = new Lang('SV', 'sv')
+  static readonly PL = new Lang('PL', 'pl')
+  static readonly ES = new Lang('ES', 'es')
+  static readonly UK = new Lang('UK', 'uk')
+  static readonly ZH = new Lang('ZH', 'zh')
+  static readonly DE = new Lang('DE', 'de')
+  static readonly BE = new Lang('BE', 'be')
+  static readonly BG = new Lang('BG', 'bg')
+  static readonly CS = new Lang('CS', 'cs')
+  static readonly ET = new Lang('ET', 'et')
+  static readonly FI = new Lang('FI', 'fi')
+  static readonly HR = new Lang('HR', 'hr')
+  static readonly HU = new Lang('HU', 'hu')
+  static readonly HY = new Lang('HY', 'hy')
+  static readonly LT = new Lang('LT', 'lt')
+  static readonly LV = new Lang('LV', 'lv')
+  static readonly MK = new Lang('MK', 'mk')
+  static readonly NB = new Lang('NB', 'nb')
+  static readonly NL = new Lang('NL', 'nl')
+  static readonly SL = new Lang('SL', 'sl')
+  static readonly SK = new Lang('SK', 'sk')
+  static readonly SR = new Lang('SR', 'sr')
 
-  public readonly key: string;
-  public readonly lang: string;
+  readonly key: string;
+  readonly lang: string;
 
   private constructor(key: string, lang: string) {
     this.key = key;

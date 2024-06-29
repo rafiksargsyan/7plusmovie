@@ -1,33 +1,49 @@
 import { Nullable } from "../../utils";
 
 export class AudioLang {
-  public static readonly EN = new AudioLang("EN", "en", "en", "English");
-  public static readonly EN_US = new AudioLang("EN_US", "en", "en-US", "English (US)");
-  public static readonly EN_GB = new AudioLang("EN_GB", "en", "en-GB", "English (GB)");
-  public static readonly EN_AU = new AudioLang("EN_AU", "en", "en-AU", "English (AU)");
-  public static readonly RU = new AudioLang("RU", "ru", "ru", "Russian");
-  public static readonly FR = new AudioLang("FR", "fr", "fr", "French");
-  public static readonly JA = new AudioLang("JA", "ja", "ja", "Japanese");
-  public static readonly PT = new AudioLang("PT", "pt", "pt", "Portuguese");
-  public static readonly KO = new AudioLang("KO", "ko", "ko", "Korean");
-  public static readonly DA = new AudioLang("DA", "da", "da", "Danish");
-  public static readonly HI = new AudioLang("HI", "hi", "hi", "Hindi");
-  public static readonly HI_IN = new AudioLang("HI_IN", "hi", "hi-IN", "Hindi (India)");
-  public static readonly IT = new AudioLang("IT", "it", "it", "Italian");
-  public static readonly RO = new AudioLang("RO", "ro", "ro", "Romanian");
-  public static readonly RO_RO = new AudioLang("RO_RO", "ro", "ro-RO", "Romanian (Romania)");
-  public static readonly FA = new AudioLang("FA", "fa", "fa", "Farsi");
-  public static readonly FA_IR = new AudioLang("FA_IR", "fa", "fa-IR", "Farsi (Iran)");
-  public static readonly SV = new AudioLang("SV", "sv", "sv", "Swedish");
-  public static readonly SV_SE = new AudioLang("SV_SE", "sv", "sv-SE", "Swedish (Sweden)");
-  public static readonly PL = new AudioLang("PL", "pl", "pl", "Polish");
-  public static readonly PL_PL = new AudioLang("PL_PL", "pl", "pl-PL", "Polish (Poland)");
-  public static readonly ES = new AudioLang("ES", "es", "es", "Spanish");
-  public static readonly ES_ES = new AudioLang("ES_ES", "es", "es-ES", "Spanish (Spain)");
-  public static readonly ES_419 = new AudioLang("ES_419", "es", "es-419", "Spanish (Latin American)");
-  public static readonly UK = new AudioLang("UK", "uk", "uk", "Ukrainian");
-  public static readonly ZH = new AudioLang("ZH", "zh", "zh", "Chinese");
-  public static readonly DE = new AudioLang("DE", "de", "de", "German");
+  static readonly EN = new AudioLang("EN", "en", "en", "English");
+  static readonly EN_US = new AudioLang("EN_US", "en", "en-US", "English (US)");
+  static readonly EN_GB = new AudioLang("EN_GB", "en", "en-GB", "English (GB)");
+  static readonly EN_AU = new AudioLang("EN_AU", "en", "en-AU", "English (AU)");
+  static readonly RU = new AudioLang("RU", "ru", "ru", "Russian");
+  static readonly FR = new AudioLang("FR", "fr", "fr", "French");
+  static readonly JA = new AudioLang("JA", "ja", "ja", "Japanese");
+  static readonly PT = new AudioLang("PT", "pt", "pt", "Portuguese");
+  static readonly KO = new AudioLang("KO", "ko", "ko", "Korean");
+  static readonly DA = new AudioLang("DA", "da", "da", "Danish");
+  static readonly HI = new AudioLang("HI", "hi", "hi", "Hindi");
+  static readonly HI_IN = new AudioLang("HI_IN", "hi", "hi-IN", "Hindi (India)");
+  static readonly IT = new AudioLang("IT", "it", "it", "Italian");
+  static readonly RO = new AudioLang("RO", "ro", "ro", "Romanian");
+  static readonly RO_RO = new AudioLang("RO_RO", "ro", "ro-RO", "Romanian (Romania)");
+  static readonly FA = new AudioLang("FA", "fa", "fa", "Farsi");
+  static readonly FA_IR = new AudioLang("FA_IR", "fa", "fa-IR", "Farsi (Iran)");
+  static readonly SV = new AudioLang("SV", "sv", "sv", "Swedish");
+  static readonly SV_SE = new AudioLang("SV_SE", "sv", "sv-SE", "Swedish (Sweden)");
+  static readonly PL = new AudioLang("PL", "pl", "pl", "Polish");
+  static readonly PL_PL = new AudioLang("PL_PL", "pl", "pl-PL", "Polish (Poland)");
+  static readonly ES = new AudioLang("ES", "es", "es", "Spanish");
+  static readonly ES_ES = new AudioLang("ES_ES", "es", "es-ES", "Spanish (Spain)");
+  static readonly ES_419 = new AudioLang("ES_419", "es", "es-419", "Spanish (Latin American)");
+  static readonly UK = new AudioLang("UK", "uk", "uk", "Ukrainian");
+  static readonly ZH = new AudioLang("ZH", "zh", "zh", "Chinese");
+  static readonly DE = new AudioLang("DE", "de", "de", "German");
+  static readonly BE = new AudioLang("BE", "be", "be", "Belarusian");
+  static readonly BG = new AudioLang('BG', 'bg', 'bg', "Bulgarian");
+  static readonly CS = new AudioLang('CS', 'cs', 'cs', "Czech");
+  static readonly ET = new AudioLang('ET', 'et', 'et', "Estonian");
+  static readonly FI = new AudioLang('FI', 'fi', 'fi', "Finnish");
+  static readonly HR = new AudioLang('HR', 'hr', 'hr', "Croatian");
+  static readonly HU = new AudioLang('HU', 'hu', 'hu', "Hungarian");
+  static readonly HY = new AudioLang('HY', 'hy', 'hy', "Armenian");
+  static readonly LT = new AudioLang('LT', 'lt', 'lt', "Lithuanian");
+  static readonly LV = new AudioLang('LV', 'lv', 'lv', "Latvian");
+  static readonly MK = new AudioLang('MK', 'mk', 'mk', "Macedonian");
+  static readonly NB = new AudioLang('NB', 'nb', 'nb', "Norwegian (Bokm?l)");
+  static readonly NL = new AudioLang('NL', 'nl', 'nl', "Dutch");
+  static readonly SL = new AudioLang('SL', 'sl', 'sl', "Slovenian");
+  static readonly SK = new AudioLang('SK', 'sk', 'sk', "Slovak");
+  static readonly SR = new AudioLang('SR', 'sr', 'sr', "Serbian");
 
   private static readonly FROM_ISO_639_2 = {
     "en" : AudioLang.EN,
@@ -46,7 +62,23 @@ export class AudioLang {
     "es" : AudioLang.ES,
     "uk" : AudioLang.UK,
     "zh" : AudioLang.ZH,
-    "de" : AudioLang.DE
+    "de" : AudioLang.DE,
+    "be" : AudioLang.BE,
+    "bg" : AudioLang.BG,
+    "cs" : AudioLang.CS,
+    "et" : AudioLang.ET,
+    "fi" : AudioLang.FI,
+    "hr" : AudioLang.HR,
+    "hu" : AudioLang.HU,
+    "hy" : AudioLang.HY,
+    "lt" : AudioLang.LT,
+    "lv" : AudioLang.LV,
+    "mk" : AudioLang.MK,
+    "nb" : AudioLang.NB,
+    "nl" : AudioLang.NL,
+    "sl" : AudioLang.SL,
+    "sk" : AudioLang.SK,
+    "sr" : AudioLang.SR,
   } as const;
    
   private static readonly FROM_ISO_639_1 = {
@@ -68,13 +100,34 @@ export class AudioLang {
     "ukr" : AudioLang.UK,
     "chi" : AudioLang.ZH,
     "zho" : AudioLang.ZH,
-    "ger" : AudioLang.DE
+    "ger" : AudioLang.DE,
+    "bel" : AudioLang.BE,
+    "bul" : AudioLang.BG,
+    "cze" : AudioLang.CS,
+    "ces" : AudioLang.CS,
+    "est" : AudioLang.ET,
+    "fin" : AudioLang.FI,
+    "hrv" : AudioLang.HR,
+    "hun" : AudioLang.HU,
+    "arm" : AudioLang.HY,
+    "hye" : AudioLang.HY,
+    "lit" : AudioLang.LT,
+    "lav" : AudioLang.LV,
+    "mac" : AudioLang.MK,
+    "mkd" : AudioLang.MK,
+    "nob" : AudioLang.NB,
+    "nld" : AudioLang.NL,
+    "dut" : AudioLang.NL,
+    "slv" : AudioLang.SL,
+    "slk" : AudioLang.SK,
+    "slo" : AudioLang.SK,
+    "srp" : AudioLang.SR,
   } as const;
 
-  public readonly key: string;
-  public readonly lang: string;
-  public readonly langTag: string;
-  public readonly name: string
+  readonly key: string;
+  readonly lang: string;
+  readonly langTag: string;
+  readonly name: string
 
   private constructor(key: string, lang: string, langTag: string, name: string) {
     this.key = key;
