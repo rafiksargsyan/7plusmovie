@@ -13,6 +13,7 @@ import { Audio, Release, Resolution, Subtitle, Video } from "../domain/entity/Re
 import { S3 } from '@aws-sdk/client-s3';
 import { strIsBlank } from "../../utils";
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
+import { TvShowTranscodingJobRead } from "../domain/TvShowTranscodingJob";
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const cloudflareAccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
@@ -95,7 +96,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     
     const rootFolders: string[] = [];
     movieTranscodingJobRead.releasesToBeRemoved.forEach(k => {
-      const rootFolder = movie.getRelease(k)?.rootFolder;
+      const rootFolder = (movie.getRelease(k) as { _rootFolder: string } | null)?._rootFolder;
       if (!strIsBlank(rootFolder)) {
         rootFolders.push(rootFolder!);
       }
@@ -116,33 +117,66 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     return;
   }
   
-  // scanParams = {
-  //   TableName: dynamodbTvShowTranscodingJobTableName,
-  //   FilterExpression: '#transcodingContextJobId = :value',
-  //   ExpressionAttributeNames: { '#transcodingContextJobId': 'transcodingContextJobId' },
-  //   ExpressionAttributeValues: { ':value': event.transcodingContextJobId }
-  // } as const;
-  // data = await docClient.scan(scanParams);
-  // if (data != undefined && data.Items != undefined && data.Items.length != 0) {
-  //   let tvShowTranscodingJobRead: TvShowTranscodingJobRead = {};
-  //   Object.assign(tvShowTranscodingJobRead, data.Items[0]);
+  scanParams = {
+    TableName: dynamodbTvShowTranscodingJobTableName,
+    FilterExpression: '#transcodingContextJobId = :value',
+    ExpressionAttributeNames: { '#transcodingContextJobId': 'transcodingContextJobId' },
+    ExpressionAttributeValues: { ':value': event.transcodingContextJobId }
+  } as const;
+  data = await docClient.scan(scanParams);
+  if (data != undefined && data.Items != undefined && data.Items.length != 0) {
+    let tvShowTranscodingJobRead = data.Items[0] as TvShowTranscodingJobRead;
+    Object.assign(tvShowTranscodingJobRead, data.Items[0]);
 
-  //   let tvShow = await tvShowRepo.getTvShowById(tvShowTranscodingJobRead.tvShowId);
+    let tvShow = await tvShowRepo.getTvShowById(tvShowTranscodingJobRead.tvShowId);
 
-  //   const season = tvShowTranscodingJobRead.season;
-  //   const episode = tvShowTranscodingJobRead.episode;
-  //   // This is not right way to update tvShow model as there might be extra application logic for validation, etc.
-  //   // Right way would be calling corresponding lambda to the job and avoid app logic duplication. 
-  //   tvShow.addMpdFile(season, episode, `${tvShowTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`);
-  //   tvShow.addM3u8File(season, episode, `${tvShowTranscodingJobRead.outputFolderKey}/vod/master.m3u8`);
-  //   tvShowTranscodingJobRead.textTranscodeSpecs?.forEach(_ => {
-  //     const relativePath = `${tvShowTranscodingJobRead.outputFolderKey}/subtitles/${SubsLangCodes[_.lang.code]['langTag']}-${_.type.code}-${_.stream}.vtt`;
-  //     tvShow.addSubtitle(season, episode, _.name, new Subtitle(_.name, relativePath, _.lang, _.type));
-  //   })
-  //   tvShow.addThumbnailsFile(season, episode, `${tvShowTranscodingJobRead.outputFolderKey}/thumbnails/thumbnails.vtt`);
-  //   await tvShowRepo.saveTvShow(tvShow);
-  //   return;
-  // }
+    const season = tvShowTranscodingJobRead.season;
+    const episode = tvShowTranscodingJobRead.episode;
+    // This is not right way to update tvShow model as there might be extra application logic for validation, etc.
+    // Right way would be calling corresponding lambda to the job and avoid app logic duplication. 
+    
+    const subtitles = {};
+    tvShowTranscodingJobRead.textTranscodeSpecs.forEach(_ => subtitles[_.name!] =
+      Subtitle.create(_.name!, `${tvShowTranscodingJobRead.outputFolderKey}/subtitles/${_.fileName}`, _.lang, _.type));
+    const audios = {};
+    tvShowTranscodingJobRead.audioTranscodeSpecs.forEach(_ => audios[_.name!] =
+      Audio.create(_.name!, `${tvShowTranscodingJobRead.outputFolderKey}/vod/${_.fileName}`, _.lang, _.channels))
+    const resolutions: Resolution[] = [];
+    for (let r of tvShowTranscodingJobRead.videoTranscodeSpec.resolutions) {
+      const relativePath = `${tvShowTranscodingJobRead.outputFolderKey}/vod/${r.fileName}`;
+      const size = await getS3ObjectSize(mediaAssetsS3Bucket, relativePath);
+      resolutions.push({ resolution: r.resolution, relativePath: relativePath, size: size })
+    }
+    const video = Video.create(resolutions);
+
+    tvShow.addRelease(season, episode, tvShowTranscodingJobRead.releaseId, Release.create(subtitles, audios, video,
+      `${tvShowTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`,
+      `${tvShowTranscodingJobRead.outputFolderKey}/vod/master.m3u8`,
+      `${tvShowTranscodingJobRead.outputFolderKey}/thumbnails/thumbnails.vtt`,
+      tvShowTranscodingJobRead.releaseIndexerContextReleaseId, tvShowTranscodingJobRead.outputFolderKey));
+    
+    const rootFolders: string[] = [];
+    tvShowTranscodingJobRead.releasesToBeRemoved.forEach(k => {
+      const rootFolder = (tvShow.getRelease(season, episode, k) as { _rootFolder: string } | null)?._rootFolder;
+      if (!strIsBlank(rootFolder)) {
+        rootFolders.push(rootFolder!);
+      }
+    });  
+    tvShowTranscodingJobRead.releasesToBeRemoved.forEach(k => tvShow.removeRelease(season, episode, k));
+
+    await tvShowRepo.saveTvShow(tvShow);
+
+    for (let rf of rootFolders) {
+      try {
+        await emptyS3Directory(s3, mediaAssetsS3Bucket, rf);
+        await emptyS3Directory(r2, mediaAssetsR2Bucket, rf);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    
+    return;
+  }
   
   throw new FailedToGetMovieOrTvShowTranscodingJobError();
 };

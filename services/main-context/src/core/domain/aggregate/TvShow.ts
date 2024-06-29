@@ -1,16 +1,14 @@
 import { v4 as uuid } from 'uuid';
-import { L8nLangCode } from './L8nLangCodes';
-import { TvShowGenre } from './TvShowGenres';
-import { Subtitle } from './entity/Subtitle';
+import { L8nLangCode } from '../L8nLangCodes';
+import { TvShowGenre } from '../TvShowGenres';
+import { Release } from '../entity/Release';
+import { strIsBlank } from '../../../utils';
 
 interface Episode {
   originalName: string;
   nameL8ns: { [key: string]: string };
   stillImage?: string;
-  mpdFile?: string;
-  m3u8File?: string;
-  thumbnailsFile?: string;
-  subtitles: { [key: string]: Subtitle }; // key will also match with labael in MPD or HlS manifest, if subs come from the package
+  releases: { [key: string]: Release };
   tmdbEpisodeNumber?: number;
   episodeNumber: number;
 }
@@ -83,59 +81,11 @@ export class TvShow {
     this.touch();
   }
 
-  public addSubtitle(seasonNumber: number | undefined, episodeNumber: number | undefined,
-                     id: string | undefined, s: Subtitle | undefined) {
-    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
-    if (id == undefined) {
-      throw new InvalidSubtitleIdError();
-    }
-    if (s == undefined) {
-      throw new InvalidSubtitleError();
-    }
-    for (var k in episode.subtitles) {
-      if (id == k) {
-        throw new SubtitleIdAlreadyExistsError();
-      }
-      if (episode.subtitles[k].getName() === s.getName()) {
-        throw new SubtitleWithNameAlreadyExistsError();
-      }
-    }
-    episode.subtitles[id] = s;
-    this.touch();
-  }
-
   public addBackdropImage(relativePath: string | undefined) {
     if (relativePath == undefined || ! /\S/.test(relativePath)) {
       throw new InvalidBackdropImageRelativePathError();
     }
     this.backdropImage = relativePath;
-    this.touch();
-  }
-
-  public addMpdFile(seasonNumber: number | undefined, episodeNumber: number | undefined, relativePath: string | undefined) {
-    if (relativePath == undefined || ! /\S/.test(relativePath)) {
-      throw new InvalidMpdFileRelativePathError();
-    }
-    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
-    episode.mpdFile = relativePath;
-    this.touch();
-  }
-
-  public addM3u8File(seasonNumber: number | undefined, episodeNumber: number | undefined, relativePath: string | undefined) {
-    if (relativePath == undefined || ! /\S/.test(relativePath)) {
-      throw new InvalidM3u8FileRelativePathError();
-    }
-    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
-    episode.m3u8File = relativePath;
-    this.touch();
-  }
-
-  public addThumbnailsFile(seasonNumber: number | undefined, episodeNumber: number | undefined, relativePath: string | undefined) {
-    if (relativePath == undefined || ! /\S/.test(relativePath)) {
-      throw new InvalidThumbnailsFileRelativePathError();
-    }
-    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
-    episode.thumbnailsFile = relativePath;
     this.touch();
   }
 
@@ -268,7 +218,7 @@ export class TvShow {
     })
     season.episodes.push({
       originalName: originalName,
-      subtitles: {},
+      releases: {},
       nameL8ns: {},
       episodeNumber: episodeNumber
     });
@@ -319,6 +269,37 @@ export class TvShow {
     }
     return episode;
   }
+
+  public addRelease(s?: number, e?: number, key?: string, r?: Release) {
+    if (strIsBlank(key)) {
+      throw new NullReleaseKeyError();
+    }
+    if (r == null) {
+      throw new NullReleaseError();
+    }
+    const episode = this.getEpisodeOrThrow(s, e);
+    const trimmedKey = key!.trim();
+    if (trimmedKey in episode.releases) {
+      throw new ReleaseWithKeyAlreadyExistsError();
+    }
+    episode.releases[trimmedKey] = r;
+    this.touch();
+  }
+
+  public removeRelease(s?: number, e?: number, key?: string) {
+    const episode = this.getEpisodeOrThrow(s, e);
+    if (strIsBlank(key)) {
+      throw new NullReleaseKeyError();
+    }
+    delete episode[key!.trim()];
+    this.touch();
+  }
+
+  public getRelease(s?: number, e?: number, key?: string) {
+    if (strIsBlank(key)) return null;
+    const episode = this.getEpisodeOrThrow(s, e);
+    return episode[key!];
+  }
 }
 
 class InvalidTitleError extends Error {}
@@ -327,15 +308,11 @@ class InvalidReleaseYearError extends Error {}
 
 class InvalidPosterImageRelativePathError extends Error {}
 
-class InvalidMpdFileRelativePathError extends Error {}
-
 class InvalidOriginalLocaleError extends Error {}
 
 class InvalidTitleL8nError extends Error {}
 
 class InvalidBackdropImageRelativePathError extends Error {}
-
-class InvalidM3u8FileRelativePathError extends Error {}
 
 class InvalidTmdbIdError extends Error {}
 
@@ -377,12 +354,8 @@ class SeasonWithSeasonNumberAlreadyExistsError extends Error {}
 
 class EpisodeWithEpisodeNumberAlreadyExistsError extends Error {}
 
-class InvalidThumbnailsFileRelativePathError extends Error {}
+class NullReleaseKeyError extends Error {}
 
-class InvalidSubtitleIdError extends Error {}
+class NullReleaseError extends Error {}
 
-class SubtitleIdAlreadyExistsError extends Error {}
-
-class SubtitleWithNameAlreadyExistsError extends Error {}
-
-class InvalidSubtitleError extends Error {}
+class ReleaseWithKeyAlreadyExistsError extends Error {}

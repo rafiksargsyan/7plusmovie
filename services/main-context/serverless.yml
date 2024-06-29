@@ -94,40 +94,6 @@ functions:
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
-  addMpdFileToMovie:
-    environment:
-      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
-    handler: src/core/app/addMpdFileToMovie.handler
-    events:
-      - http:
-          integration: lambda
-          path: /addMpdFileToMovie
-          method: patch
-          request:
-            template:
-              application/json: '{ "movieId" : $input.json(''$.movieId''),
-                                   "relativePath" : $input.json(''$.relativePath'') }'
-              application/x-www-form-urlencoded: null                      
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
-
-  addM3u8FileToMovie:
-    environment:
-      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
-    handler: src/core/app/addM3u8FileToMovie.handler
-    events:
-      - http:
-          integration: lambda
-          path: /addM3u8FileToMovie
-          method: patch
-          request:
-            template:
-              application/json: '{ "movieId" : $input.json(''$.movieId''),
-                                   "relativePath" : $input.json(''$.relativePath'') }'
-              application/x-www-form-urlencoded: null                      
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
-
   addThumbnailsFileToMovie:
     environment:
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
@@ -236,26 +202,6 @@ functions:
           request:
             template:
               application/json: '{ "movieId" : $input.json(''$.movieId''),
-                                   "relativePath" : $input.json(''$.relativePath'') }'
-              application/x-www-form-urlencoded: null
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
-
-  addSubtitleToMovie:
-    environment:
-      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
-    handler: src/core/app/addSubtitleToMovie.handler
-    events:
-      - http:
-          integration: lambda
-          path: /addSubtitleToMovie
-          method: patch
-          request:
-            template:
-              application/json: '{ "movieId" : $input.json(''$.movieId''),
-                                   "lang" : $input.json(''$.lang''),
-                                   "type" : $input.json(''$.type''),
-                                   "name" : $input.json(''$.name''),
                                    "relativePath" : $input.json(''$.relativePath'') }'
               application/x-www-form-urlencoded: null
           authorizer:
@@ -435,44 +381,6 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
-    
-  addM3u8FileToTvShow:
-    environment:
-      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
-    handler: src/core/app/tv-show/addM3u8FileToTvShow.handler
-    events:
-      - http:
-          integration: lambda
-          path: /addM3u8FileToTvShow
-          method: patch
-          request:
-            template:
-              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
-                                   "relativePath" : $input.json(''$.relativePath''),
-                                   "season" : $input.json(''$.season''),
-                                   "episode" : $input.json(''$.episode'') }'
-              application/x-www-form-urlencoded: null                      
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
-  
-  addMpdFileToTvShow:
-    environment:
-      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
-    handler: src/core/app/tv-show/addMpdFileToTvShow.handler
-    events:
-      - http:
-          integration: lambda
-          path: /addMpdFileToTvShow
-          method: patch
-          request:
-            template:
-              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
-                                   "relativePath" : $input.json(''$.relativePath''),
-                                   "season" : $input.json(''$.season''),
-                                   "episode" : $input.json(''$.episode'') }'
-              application/x-www-form-urlencoded: null                      
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
   
   addThumbnailsFileToTvShow:
     environment:
@@ -492,28 +400,6 @@ functions:
               application/x-www-form-urlencoded: null                      
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
-
-  addSubtitleToTvShow:
-    environment:
-      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
-    handler: src/core/app/tv-show/addSubtitleToTvShow.handler
-    events:
-      - http:
-          integration: lambda
-          path: /addSubtitleToTvShow
-          method: patch
-          request:
-            template:
-              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
-                                   "lang" : $input.json(''$.lang''),
-                                   "type" : $input.json(''$.type''),
-                                   "name" : $input.json(''$.name''),
-                                   "relativePath" : $input.json(''$.relativePath''),
-                                   "season" : $input.json(''$.season''),
-                                   "episode" : $input.json(''$.episode'') }'
-              application/x-www-form-urlencoded: null
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6 
   
   addTheMovieDbIdToTvShow:
     environment:

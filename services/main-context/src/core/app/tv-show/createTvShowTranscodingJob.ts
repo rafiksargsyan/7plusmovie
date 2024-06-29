@@ -1,9 +1,11 @@
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { TvShowTranscodingJob } from "../../domain/TvShowTranscodingJob";
-import { AudioLangCode } from "../../domain/AudioLangCodes";
-import { SubsLangCode, SubsLangCodes } from "../../domain/SubsLangCodes";
-import { SubtitleType, SubtitleTypes } from '../../domain/SubtitleType';
+import { AudioTranscodeSpecParam, TextTranscodeSpecParam, VideoTranscodeSpec } from '../createMovieTranscodingJob';
+import { AudioLang } from '../../domain/AudioLang';
+import { SubtitleType } from '../../domain/SubtitleType';
+import { SubsLang } from '../../domain/SubsLang';
+import { Nullable } from '../../../utils';
 
 const dynamodbTvShowTranscodingJobTableName = process.env.DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME!;
 
@@ -16,20 +18,6 @@ const translateConfig = { marshallOptions };
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 
-interface AudioTranscodeSpecParam {
-  stream: number;
-  bitrate: string;
-  channels: number;
-  lang: string;  
-}
-
-interface TextTranscodeSpecParam {
-  stream: number;
-  name: string;
-  lang: string;
-  type: string;
-}
-
 interface CreateTvShowTranscodingJobParam {
   tvShowId: string;
   season: number;
@@ -37,22 +25,22 @@ interface CreateTvShowTranscodingJobParam {
   mkvS3ObjectKey: string;
   mkvHttpUrl: string
   outputFolderKey: string;
-  audioTranscodeSpecParams: AudioTranscodeSpecParam[] | undefined;
-  textTranscodeSpecParams: TextTranscodeSpecParam[] | undefined;
-  defaultAudioTrack: number | undefined;
-  defaultTextTrack: number | undefined;
+  audioTranscodeSpecParams: Nullable<AudioTranscodeSpecParam[]>;
+  textTranscodeSpecParams: Nullable<TextTranscodeSpecParam[]>;
+  videoTranscodeSpec: VideoTranscodeSpec;
+  releaseId: string;
+  releasesToBeRemoved: string[];
 }
 
 export const handler = async (event: CreateTvShowTranscodingJobParam): Promise<string> => {
-  let audioTranscodeSpecParams = event.audioTranscodeSpecParams?.map(_ => {
-    return { stream: _.stream, bitrate: _.bitrate, channels: _.channels, lang: new AudioLangCode(_.lang) }
+  const audioTranscodeSpecParams = event.audioTranscodeSpecParams?.map(_ => {
+    return { stream: _.stream, bitrate: _.bitrate, channels: _.channels, lang: AudioLang.fromKeyOrThrow(_.lang), name: _.name, fileName: _.fileName }
   });
-  let textTranscodeSpecParams = event.textTranscodeSpecParams?.map(_ => {
-    const name = _.name != null ? _.name : `${SubsLangCodes[_.lang].name} (${SubtitleTypes[_.type].name})`
-    return { name: name, stream: _.stream, type: new SubtitleType(_.type), lang: new SubsLangCode(_.lang)}
+  const textTranscodeSpecParams = event.textTranscodeSpecParams?.map(_ => {
+    return { name: _.name, fileName: _.fileName, stream: _.stream, type: SubtitleType.fromKeyOrThrow(_.type), lang: SubsLang.fromKeyOrThrow(_.lang) }
   });
   let tvShowTranscodingJob = new TvShowTranscodingJob(false, event.tvShowId, event.season, event.episode, event.mkvS3ObjectKey,
-    event.mkvHttpUrl, event.outputFolderKey, audioTranscodeSpecParams, textTranscodeSpecParams);
+    event.mkvHttpUrl, event.outputFolderKey, audioTranscodeSpecParams, textTranscodeSpecParams, event.videoTranscodeSpec, event.releaseId, event.releasesToBeRemoved);
   
   await docClient.put({TableName: dynamodbTvShowTranscodingJobTableName, Item: tvShowTranscodingJob});
 

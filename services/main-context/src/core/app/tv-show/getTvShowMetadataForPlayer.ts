@@ -107,8 +107,6 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
   };
 };
 
-class FailedToGetTvShowError extends Error {}
-
 class TvShowSeasonNotFoundError extends Error {}
 
 class TvShowEpisodeNotFoundError extends Error {}

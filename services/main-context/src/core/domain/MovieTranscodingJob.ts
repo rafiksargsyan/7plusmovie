@@ -198,5 +198,3 @@ export class InvalidMkvHttpUrlError extends Error {}
 export class NullVideoTranscodeSpecError extends Error {}
 
 export class EmptyReleaseIdError extends Error {}
-
-export type { MovieTranscodingJob as MovieTranscodingJobType };

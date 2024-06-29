@@ -17,7 +17,7 @@ const translateConfig = { marshallOptions };
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 
-interface AudioTranscodeSpecParam {
+export interface AudioTranscodeSpecParam {
   stream: number;
   bitrate: string;
   channels: number;
@@ -26,7 +26,7 @@ interface AudioTranscodeSpecParam {
   name?: string;
 }
 
-interface TextTranscodeSpecParam {
+export interface TextTranscodeSpecParam {
   stream: number;
   name?: string;
   lang: string;
@@ -34,7 +34,7 @@ interface TextTranscodeSpecParam {
   fileName?: string;
 }
 
-interface VideoTranscodeSpec {
+export interface VideoTranscodeSpec {
   resolutions: { fileName: string, resolution: number } []; // 360, 480, 720, 1080, etc.
   stream: number;
 }

@@ -1,4 +1,4 @@
-import { TvShow } from "../../domain/TvShow";
+import { TvShow } from "../../domain/aggregate/TvShow";
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { L8nLangCode } from "../../domain/L8nLangCodes";
