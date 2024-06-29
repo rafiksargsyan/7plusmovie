@@ -5,28 +5,38 @@ import { SubsLang } from "../SubsLang";
 import { SubtitleType } from "../SubtitleType";
 
 export class Release {
-  private subtitles: { [key: string]: Subtitle }; // key will also match with labael in MPD/HlS manifest if subs come from the package
-  private audios: { [key: string]: Audio }; // key will also match with label in MPD or HlS manifest
-  private video: Video;
-  private mpdFile: string;
-  private m3u8File: string;
-  private thumbnailsFile: string;
+  private _subtitles: { [key: string]: Subtitle }; // key will also match with labael in MPD/HlS manifest if subs come from the package
+  private _audios: { [key: string]: Audio }; // key will also match with label in MPD or HlS manifest
+  private _video: Video;
+  private _mpdFile: string;
+  private _m3u8File: string;
+  private _thumbnailsFile: string;
   // This is the id in the release indexer context, if a release is replaced with
   // a better release in the context we will replace it also in the main context.
-  private releaseIndexerContextId: Nullable<string>;
+  private _releaseIndexerContextId: Nullable<string>;
+  private _rootFolder: string;
 
   private constructor(createEmptyObject: boolean, subtitles?: { [key: string]: Subtitle }, audios?: { [key: string]: Audio },
-                      video?: Video, mpdFile?: string, m3u8File?: string, thumbnailsFile?: string, releaseIndexerContextId?: Nullable<string>) {
+                      video?: Video, mpdFile?: string, m3u8File?: string, thumbnailsFile?: string, releaseIndexerContextId?: Nullable<string>,
+                      rootFolder?: string) {
     if (!createEmptyObject) {
       if (subtitles == null) subtitles = {};
-      this.subtitles = subtitles;
-      this.audios = this.validateAudios(audios);
-      this.video = this.validateVideo(video);
-      this.mpdFile = this.validateMpdFile(mpdFile);
-      this.m3u8File = this.validateM3U8File(m3u8File);
-      this.thumbnailsFile = this.validateThumbnailsFile(thumbnailsFile);
-      this.releaseIndexerContextId = releaseIndexerContextId;
+      this._subtitles = subtitles;
+      this._audios = this.validateAudios(audios);
+      this._video = this.validateVideo(video);
+      this._mpdFile = this.validateMpdFile(mpdFile);
+      this._m3u8File = this.validateM3U8File(m3u8File);
+      this._thumbnailsFile = this.validateThumbnailsFile(thumbnailsFile);
+      this._releaseIndexerContextId = releaseIndexerContextId;
+      this._rootFolder = this.validateRootFolder(rootFolder);
     }
+  }
+
+  private validateRootFolder(rootFolder?: string) {
+    if (strIsBlank(rootFolder)) {
+      throw new BlankRootFolderError();
+    }
+    return rootFolder!;
   }
 
   private validateAudios(audios?: { [key: string]: Audio }) {
@@ -69,8 +79,13 @@ export class Release {
   }
 
   public static create(subtitles: { [key: string]: Subtitle }, audios: { [key: string]: Audio }, video: Video,
-                       mpdFile: string, m3u8File: string, thumbnailsFile: string, releaseIndexerContextId: Nullable<string>) {
-    return new Release(false, subtitles, audios, video, mpdFile, m3u8File, thumbnailsFile, releaseIndexerContextId);
+                       mpdFile: string, m3u8File: string, thumbnailsFile: string, releaseIndexerContextId: Nullable<string>,
+                       rootFolder: string) {
+    return new Release(false, subtitles, audios, video, mpdFile, m3u8File, thumbnailsFile, releaseIndexerContextId, rootFolder);
+  }
+
+  public get rootFolder() {
+    return this._rootFolder;
   }
 }
 
@@ -229,3 +244,5 @@ export class NullMpdFileError extends Error {}
 export class NullM3U8FileError extends Error {}
 
 export class NullThumbnailsFileError extends Error {}
+
+export class BlankRootFolderError extends Error {}

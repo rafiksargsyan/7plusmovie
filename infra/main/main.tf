@@ -121,9 +121,8 @@ resource "aws_secretsmanager_secret_version" "secrets_version" {
       ALGOLIA_ADMIN_KEY: var.algolia_admin_key
       COOKIE_SIGNING_PRIVATE_KEY_BASE64_ENCODED: var.cookie_signing_private_key_base64_encoded
       TMDB_API_KEY: var.tmdb_api_key
+      R2_ACCESS_KEY_ID: var.r2_access_key_id
       R2_SECRET_ACCESS_KEY: var.r2_secret_access_key
-      RADARR_API_KEY: var.radarr_api_key
-      QBITTORRENT_PASSWORD: var.qbittorrent_password
     })
   )
 }
@@ -253,6 +252,21 @@ resource "aws_secretsmanager_secret_version" "transcoding_context_secrets_versio
       GITHUB_WEBHOOK_SECRET: var.github_webhook_secret
       GITHUB_PAT: var.github_pat
       WORKFLOW_RUN_ID_PROVIDER_HOOK_SECRET: var.workflow_run_id_provider_hook_secret
+    })
+  )
+}
+
+resource "aws_secretsmanager_secret" "ric_context_secrets" {
+  name = "${local.deployment_id}-ric-ctx-secrets"
+}
+
+resource "aws_secretsmanager_secret_version" "ric_context_secrets_version" {
+  secret_id     = aws_secretsmanager_secret.ric_context_secrets.id
+  secret_string = jsonencode(
+    tomap({
+      TMDB_API_KEY: var.tmdb_api_key
+      RADARR_API_KEY: var.radarr_api_key
+      QBITTORRENT_PASSWORD: var.qbittorrent_password
     })
   )
 }

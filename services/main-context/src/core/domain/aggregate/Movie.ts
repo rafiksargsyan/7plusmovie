@@ -150,6 +150,11 @@ export class Movie {
     delete this.releases[key!.trim()];
     this.touch();
   }
+
+  public getRelease(key?: string) {
+    if (strIsBlank(key)) return null;
+    return this.releases[key!];
+  }
 }
 
 class NullReleaseKeyError extends Error {}

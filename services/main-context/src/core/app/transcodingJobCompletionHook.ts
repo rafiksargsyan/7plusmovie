@@ -11,11 +11,16 @@ import { TvShowRepository } from "../../adapters/TvShowRepository";
 import { MovieTranscodingJobRead } from "../domain/MovieTranscodingJob";
 import { Audio, Release, Resolution, Subtitle, Video } from "../domain/entity/Release";
 import { S3 } from '@aws-sdk/client-s3';
+import { strIsBlank } from "../../utils";
+import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 
+const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
+const cloudflareAccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
 const dynamodbMovieTranscodingJobTableName = process.env.DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME!;
 const dynamodbTvShowTranscodingJobTableName = process.env.DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME!;
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 const mediaAssetsS3Bucket = process.env.MEDIA_ASSETS_S3_BUCKET!;
+const mediaAssetsR2Bucket = process.env.ClOUDFLARE_MEDIA_ASSETS_R2_BUCKET!;
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -27,6 +32,7 @@ const translateConfig = { marshallOptions };
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 const tvShowRepo: TvShowRepositoryInterface = new TvShowRepository(docClient);
 
+const secretsManager = new SecretsManager({});
 const s3 = new S3({});
 
 interface HandlerParam {
@@ -34,6 +40,18 @@ interface HandlerParam {
 }
 
 export const handler = async (event: HandlerParam): Promise<void> => {
+  const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
+  const secret = JSON.parse(secretStr.SecretString!);
+
+  const r2 = new S3({
+    region: "auto",
+    endpoint: `https://${cloudflareAccountId}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: secret.R2_ACCESS_KEY_ID,
+      secretAccessKey: secret.R2_SECRET_ACCESS_KEY,
+    },
+  });
+
   let scanParams = {
     TableName: dynamodbMovieTranscodingJobTableName,
     FilterExpression: '#transcodingContextJobId = :value',
@@ -73,9 +91,28 @@ export const handler = async (event: HandlerParam): Promise<void> => {
       `${movieTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`,
       `${movieTranscodingJobRead.outputFolderKey}/vod/master.m3u8`,
       `${movieTranscodingJobRead.outputFolderKey}/thumbnails/thumbnails.vtt`,
-      movieTranscodingJobRead.releaseIndexerContextReleaseId));
+      movieTranscodingJobRead.releaseIndexerContextReleaseId, movieTranscodingJobRead.outputFolderKey));
+    
+    const rootFolders: string[] = [];
+    movieTranscodingJobRead.releasesToBeRemoved.forEach(k => {
+      const rootFolder = movie.getRelease(k)?.rootFolder;
+      if (!strIsBlank(rootFolder)) {
+        rootFolders.push(rootFolder!);
+      }
+    });  
+    movieTranscodingJobRead.releasesToBeRemoved.forEach(r => movie.removeRelease(r));
 
     await docClient.put({ TableName: dynamodbMovieTableName, Item: movie });
+
+    for (let rf of rootFolders) {
+      try {
+        await emptyS3Directory(s3, mediaAssetsS3Bucket, rf);
+        await emptyS3Directory(r2, mediaAssetsR2Bucket, rf);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     return;
   }
   
@@ -126,4 +163,31 @@ const getS3ObjectSize = async (bucketName: string, path: string): Promise<number
     return;
   }
   return objectData.ContentLength;
+}
+
+async function emptyS3Directory(s3: S3, bucket, dir) {
+  if (strIsBlank(dir)) return;
+
+  const listParams = {
+      Bucket: bucket,
+      Prefix: dir
+  };
+
+  const listedObjects = await s3.listObjectsV2(listParams);
+
+  if (listedObjects.Contents == undefined ||
+    listedObjects.Contents.length === 0) return;
+
+  const deleteParams = {
+      Bucket: bucket,
+      Delete: { Objects: [] }
+  };
+
+  listedObjects.Contents.forEach(({ Key }) => {
+      deleteParams.Delete.Objects.push({ Key } as never);
+  });
+
+  await s3.deleteObjects(deleteParams);
+
+  if (listedObjects.IsTruncated) await emptyS3Directory(s3, bucket, dir);
 }
