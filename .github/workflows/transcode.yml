@@ -72,6 +72,7 @@ jobs:
           rm -rf ${TRANSCODING_OUTPUT_DIR_NAME:?}/*
 
       - name: Transcode
+        id: transcode
         uses: ./transcoding-github-action@issue-18/language-packs
         with:
           mkvFilePath: "./${{ github.run_id }}.mkv"
@@ -85,7 +86,7 @@ jobs:
       - name: Generate thumbnails vtt
         uses: ./thumbnails-generator-github-action
         with:
-          videoFilePath: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}/vod/h264_main_540p_18.mp4"
+          videoFilePath: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}/vod/${{ steps.transcode.outputs.videoFileName }}"
           outputFolder: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}/${{ env.THUMBNAILS_DIR_NAME }}"
 
       - name: Upload transcoding results to S3
