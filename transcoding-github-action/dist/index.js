@@ -98,6 +98,7 @@ const child_process_1 = __nccwpck_require__(81);
 const lang_1 = __nccwpck_require__(133);
 const WORKING_DIR_NAME = '.transcoding-job-work-dir';
 function run() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const mkvFilePath = core.getInput('mkvFilePath');
@@ -161,6 +162,7 @@ function run() {
             }
             (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.mpd');
             (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.m3u8');
+            core.setOutput("videoFileName", (_a = (videoTranscodeSpec.resolutions.sort((a, b) => b.resolution - a.resolution)).at(0)) === null || _a === void 0 ? void 0 : _a.fileName);
         }
         catch (error) {
             if (error instanceof Error)
