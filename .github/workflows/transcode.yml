@@ -72,7 +72,7 @@ jobs:
           rm -rf ${TRANSCODING_OUTPUT_DIR_NAME:?}/*
 
       - name: Transcode
-        uses: ./transcoding-github-action
+        uses: ./transcoding-github-action@issue-18/language-packs
         with:
           mkvFilePath: "./${{ github.run_id }}.mkv"
           outputFolder: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}"
