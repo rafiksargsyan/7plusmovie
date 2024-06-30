@@ -46,7 +46,7 @@ interface CreateTranscodingJobParam {
 
 export const handler = async (event: CreateTranscodingJobParam): Promise<string> => {
   let audioTranscodeSpecParams = event.audioTranscodeSpecParams?.map(_ => {
-    return { stream: _.stream, bitrate: _.bitrate, channels: _.channels, lang: Lang.fromKeyOrThrow(_.lang), name: _.name, fileName: _.name }
+    return { stream: _.stream, bitrate: _.bitrate, channels: _.channels, lang: Lang.fromKeyOrThrow(_.lang), name: _.name, fileName: _.fileName }
   });
   let textTranscodeSpecParams = event.textTranscodeSpecParams?.map(_ => {
     return { stream: _.stream, fileName: _.fileName, lang: Lang.fromKeyOrThrow(_.lang), name: _.name }
