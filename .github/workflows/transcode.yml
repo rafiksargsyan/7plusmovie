@@ -53,6 +53,7 @@ jobs:
  
       - uses: actions/checkout@v3
         with:
+          ref: issue-18/language-packs
           sparse-checkout: |
             transcoding-github-action
             thumbnails-generator-github-action
@@ -73,7 +74,7 @@ jobs:
 
       - name: Transcode
         id: transcode
-        uses: ./transcoding-github-action@issue-18/language-packs
+        uses: ./transcoding-github-action
         with:
           mkvFilePath: "./${{ github.run_id }}.mkv"
           outputFolder: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}"
