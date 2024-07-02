@@ -4,10 +4,13 @@ import { Octokit } from '@octokit/rest';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import { Lang } from '../domain/Lang';
 import { Nullable } from '../domain/Nullable';
+import { SQS } from '@aws-sdk/client-sqs';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
+const transcodingJobQueueUrl = process.env.TRANSCODING_JOB_QUEUE_URL!;
 
 const secretsManager = new SecretsManager({});
+const sqs = new SQS();
 
 const marshaller = new Marshaller();
 
@@ -80,7 +83,13 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
           ref: process.env.GIT_REF!,
           inputs: workflowInputParams
         }
-        await octokit.actions.createWorkflowDispatch(params);
+        
+        const sqsParams = {
+          QueueUrl: transcodingJobQueueUrl,
+          MessageBody: JSON.stringify(params)
+        };
+      
+        await sqs.sendMessage(sqsParams);
       }
     }
   } catch (e) {

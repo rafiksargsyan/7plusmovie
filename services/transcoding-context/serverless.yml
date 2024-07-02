@@ -78,6 +78,17 @@ functions:
       - http:
           path: /githubWorkflowRunIdProviderHook
           method: post
+
+  transcodingJobSQSConsumer:
+    environment:
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      TRANSCODING_JOB_QUEUE_URL: todo
+      GITHUB_OWNER: ${env:GITHUB_OWNER}
+      GITHUB_REPO: ${env:GITHUB_REPO}
+    handler: src/core/app/transcodingJobSQSConsumer.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):TRANSCODING_JOB_SQS_CONSUMER_INTERVAL} minutes)
+
 plugins:
   - serverless-esbuild
 

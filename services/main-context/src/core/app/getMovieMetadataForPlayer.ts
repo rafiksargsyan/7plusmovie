@@ -9,7 +9,7 @@ const cloudflareMediaAssetsDomain = process.env.CLOUDFLARE_MEDIA_ASSETS_DOMAIN!;
 
 const terabiteInBytes = 1_000_000_000_000; // Max free outgoing traffic for Cloudfront is 1TB
 
-const docClient = DynamoDBDocument.from(new DynamoDB({}));
+const docClient = DynamoDBDocument.from(new DynamoDB({}));  
 
 interface GetMovieParam {
   movieId: string;
