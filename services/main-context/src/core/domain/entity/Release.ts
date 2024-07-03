@@ -4,6 +4,17 @@ import { MediaSource } from "../MediaSource";
 import { SubsLang } from "../SubsLang";
 import { SubtitleType } from "../SubtitleType";
 
+export interface ReleaseRead {
+  _subtitles: { [key: string]: SubtitleRead };
+  _audios: { [key: string]: AudioRead };
+  _video: VideoRead;
+  _mpdFile: string;
+  _m3u8File: string;
+  _thumbnailsFile: string;
+  _releaseIndexerContextId: Nullable<string>;
+  _rootFolder: string;
+}
+
 export class Release {
   private _subtitles: { [key: string]: Subtitle }; // key will also match with labael in MPD/HlS manifest if subs come from the package
   private _audios: { [key: string]: Audio }; // key will also match with label in MPD or HlS manifest
@@ -91,6 +102,10 @@ export class Release {
 
 export type Resolution = { resolution: number, size: Nullable<number>, relativePath: string };
 
+export interface VideoRead {
+  resolutions: Resolution[];
+}
+
 export class Video {
   private resolutions: Resolution[];
 
@@ -114,6 +129,14 @@ export class Video {
   public static create(resolutions: Resolution[]) {
     return new Video(false, resolutions);
   }
+}
+
+export interface AudioRead {
+  name: string;
+  relativePath: string;
+  lang: AudioLang;
+  channels: number;
+  source: MediaSource;
 }
 
 export class Audio {
@@ -168,6 +191,16 @@ export class Audio {
     }
     return lang;
   }
+}
+
+export interface SubtitleRead {
+  name: string;
+  relativePath: string;
+  lang: SubsLang;
+  type: Nullable<SubtitleType>;
+  recommendedDelay: number;
+  source: MediaSource;
+  audioTrackId: Nullable<string>;
 }
 
 export class Subtitle {
