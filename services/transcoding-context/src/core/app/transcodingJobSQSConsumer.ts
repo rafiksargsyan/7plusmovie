@@ -23,7 +23,7 @@ export const handler = async (): Promise<void> => {
  
   const sqsParams = {
     QueueUrl: transcodingJobQueueUrl,
-    MaxNumberOfMessages: availableRunners,
+    MaxNumberOfMessages: Math.min(availableRunners, 10),
   };
 
   const data = await sqs.receiveMessage(sqsParams);
