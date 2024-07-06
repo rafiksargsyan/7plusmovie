@@ -3,6 +3,8 @@ import { SubtitleType } from './SubtitleType';
 import { AudioLang } from './AudioLang';
 import { SubsLang } from './SubsLang';
 import { Nullable } from '../../utils';
+import { RipType } from './RipType';
+import { Resolution } from './Resolution';
 
 const ONE_DAY_IN_SECONDS = 24 * 60 * 60;
 
@@ -24,7 +26,7 @@ export interface TextTranscodeSpec {
 }
 
 export interface VideoTranscodeSpec {
-  resolutions: { fileName: string, resolution: number } []; // 360, 480, 720, 1080, etc.
+  resolutions: { fileName?: string, resolution: number } []; // 360, 480, 720, 1080, etc.
   stream: number;
 }
 
@@ -41,6 +43,8 @@ export interface MovieTranscodingJobRead {
   releaseId: string;
   releasesToBeRemoved: string[];
   releaseIndexerContextReleaseId: Nullable<string>;
+  ripType: Nullable<RipType>;
+  resolution: Nullable<Resolution>;
 }
 
 export class MovieTranscodingJob {
@@ -59,11 +63,13 @@ export class MovieTranscodingJob {
   private releaseId: string;
   private releasesToBeRemoved: string[];
   private releaseIndexerContextReleaseId: string;
+  private ripType: Nullable<RipType>;
+  private resolution: Nullable<Resolution>;
 
   public constructor(createEmptyObject: boolean, movieId?: string, mkvS3ObjectKey?: string,
     mkvHttpUrl?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
     textTranscodeSpecs?: TextTranscodeSpec[], videoTranscodeSpec?: VideoTranscodeSpec, releaseId?: string,
-    releasesToBeRemoved?: string[]) {
+    releasesToBeRemoved?: string[], ripType?: Nullable<RipType>, resolution?: Nullable<Resolution>) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setMovieId(movieId);
@@ -78,6 +84,8 @@ export class MovieTranscodingJob {
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
       this.ttl = Math.round(this.creationTime / 1000) + 15 * ONE_DAY_IN_SECONDS;
+      this.ripType = ripType;
+      this.resolution = resolution;
     }
   }
 

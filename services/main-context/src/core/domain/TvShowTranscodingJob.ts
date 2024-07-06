@@ -1,6 +1,8 @@
 import { v4 as uuid } from 'uuid';
 import { AudioTranscodeSpec, TextTranscodeSpec, VideoTranscodeSpec } from './MovieTranscodingJob';
 import { Nullable } from '../../utils';
+import { RipType } from './RipType';
+import { Resolution } from './Resolution';
 
 export interface TvShowTranscodingJobRead {
   id: string;
@@ -17,6 +19,8 @@ export interface TvShowTranscodingJobRead {
   releaseId: string;
   releasesToBeRemoved: string[];
   releaseIndexerContextReleaseId: Nullable<string>;
+  ripType: Nullable<RipType>;
+  resolution: Nullable<Resolution>;
 }
 
 export class TvShowTranscodingJob {
@@ -37,11 +41,13 @@ export class TvShowTranscodingJob {
   private releaseId: string;
   private releasesToBeRemoved: string[];
   private releaseIndexerContextReleaseId: string;
+  private ripType: RipType;
+  private resolution: Resolution;
 
   public constructor(createEmptyObject: boolean, tvShowId?: string, season?: number, episode?: number,
     mkvS3ObjectKey?: string, mkvHttpUrl?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
     textTranscodeSpecs?: TextTranscodeSpec[], videoTranscodeSpec?: VideoTranscodeSpec,  releaseId?: string,
-    releasesToBeRemoved?: string[]) {
+    releasesToBeRemoved?: string[], ripType?: Nullable<RipType>, resolution?: Nullable<Resolution>) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setTvShowId(tvShowId);

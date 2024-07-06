@@ -3,6 +3,8 @@ import { AudioLang } from "../AudioLang";
 import { MediaSource } from "../MediaSource";
 import { SubsLang } from "../SubsLang";
 import { SubtitleType } from "../SubtitleType";
+import { Resolution as ResolutionEnum } from "../Resolution";
+import { RipType } from "../RipType";
 
 export interface ReleaseRead {
   _subtitles: { [key: string]: SubtitleRead };
@@ -26,10 +28,12 @@ export class Release {
   // a better release in the context we will replace it also in the main context.
   private _releaseIndexerContextId: Nullable<string>;
   private _rootFolder: string;
+  private _ripType: RipType;
+  private _resolution: ResolutionEnum;
 
   private constructor(createEmptyObject: boolean, subtitles?: { [key: string]: Subtitle }, audios?: { [key: string]: Audio },
                       video?: Video, mpdFile?: string, m3u8File?: string, thumbnailsFile?: string, releaseIndexerContextId?: Nullable<string>,
-                      rootFolder?: string) {
+                      rootFolder?: string, ripType?: Nullable<RipType>, resolution?: Nullable<ResolutionEnum>) {
     if (!createEmptyObject) {
       if (subtitles == null) subtitles = {};
       this._subtitles = subtitles;
@@ -40,7 +44,23 @@ export class Release {
       this._thumbnailsFile = this.validateThumbnailsFile(thumbnailsFile);
       this._releaseIndexerContextId = releaseIndexerContextId;
       this._rootFolder = this.validateRootFolder(rootFolder);
+      this._resolution = this.validateResolution(resolution);
+      this._ripType = this.validateRipType(ripType);
     }
+  }
+ 
+  private validateResolution(resolution?: Nullable<ResolutionEnum>) {
+    if (resolution == null) {
+      throw new NullResolutionError();
+    }
+    return resolution;
+  }
+
+  private validateRipType(ripType?: Nullable<RipType>) {
+    if (ripType == null) {
+      throw new NullRipTypeError();
+    }
+    return ripType;
   }
 
   private validateRootFolder(rootFolder?: string) {
@@ -91,8 +111,8 @@ export class Release {
 
   public static create(subtitles: { [key: string]: Subtitle }, audios: { [key: string]: Audio }, video: Video,
                        mpdFile: string, m3u8File: string, thumbnailsFile: string, releaseIndexerContextId: Nullable<string>,
-                       rootFolder: string) {
-    return new Release(false, subtitles, audios, video, mpdFile, m3u8File, thumbnailsFile, releaseIndexerContextId, rootFolder);
+                       rootFolder: string, ripType: Nullable<RipType>, resolution: Nullable<ResolutionEnum>) {
+    return new Release(false, subtitles, audios, video, mpdFile, m3u8File, thumbnailsFile, releaseIndexerContextId, rootFolder, ripType, resolution);
   }
 
   public get rootFolder() {
@@ -279,3 +299,7 @@ export class NullM3U8FileError extends Error {}
 export class NullThumbnailsFileError extends Error {}
 
 export class BlankRootFolderError extends Error {}
+
+export class NullRipTypeError extends Error {}
+
+export class NullResolutionError extends Error {}

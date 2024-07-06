@@ -10,7 +10,6 @@ interface GetMovieParam {
   movieId: string;
 }
 
-
 export const handler = async (event: GetMovieParam) => {
   let movie = await movieRepo.getMovieById(event.movieId) as unknown as MovieRead;
   const releases = {};

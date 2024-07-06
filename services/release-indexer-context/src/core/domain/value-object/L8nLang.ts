@@ -46,6 +46,7 @@ export class L8nLang {
   static readonly SL = new L8nLang('SL', 'sl', 'sl');
   static readonly SK = new L8nLang('SK', 'sk', 'sk');
   static readonly SR = new L8nLang('SR', 'sr', 'sr');
+  static readonly AR = new L8nLang('AR', 'ar', 'ar');
 
   readonly key;
   readonly lang;

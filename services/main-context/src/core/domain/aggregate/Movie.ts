@@ -23,8 +23,9 @@ export class Movie {
   private directors: Person[] = [];
   private tmdbId: string;
   private releases: { [key: string]: Release } = {};
-  private monitorReleases: boolean;
+  private _monitorReleases: boolean;
   private releaseIndexerContextMovieId: string;
+  private _inTranscoding: boolean = false;
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -160,6 +161,35 @@ export class Movie {
     if (strIsBlank(id)) {
       throw new BlankRICMovieIdError();
     }
+    this.releaseIndexerContextMovieId = id;
+  }
+
+  public transcodingStarted() {
+    this._inTranscoding = true;
+  }
+
+  public transcodingFinished() {
+    this._inTranscoding = false;
+  }
+
+  get inTranscoding() {
+    return this._inTranscoding;
+  }
+
+  public enableMonitorReleases() {
+    this._monitorReleases = true;
+  }
+
+  public disableMonitorReleases() {
+    this._monitorReleases = false;
+  }
+
+  get monitorReleases() {
+    return this._monitorReleases;
+  }
+
+  get ricMovieId() {
+    return this.releaseIndexerContextMovieId;
   }
 }
 

@@ -58,6 +58,7 @@ Lang.NL = new Lang('NL', 'nl');
 Lang.SL = new Lang('SL', 'sl');
 Lang.SK = new Lang('SK', 'sk');
 Lang.SR = new Lang('SR', 'sr');
+Lang.AR = new Lang('AR', 'ar');
 exports.Lang = Lang;
 class InvalidLangKeyError extends Error {
 }

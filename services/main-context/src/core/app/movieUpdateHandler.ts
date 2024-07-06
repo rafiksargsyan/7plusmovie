@@ -43,17 +43,15 @@ interface MovieRead {
   id: string;
   originalTitle: string;
   posterImagesPortrait: { [key: string]: string };
-  subtitles: { [key: string]: string };
   releaseYear: number;
   titleL8ns: { [key: string]: string };
   creationTime: number;
-  mpdFile: string;
-  m3u8File: string;
   genres: MovieGenre[];
   actors: Person[];
   directors: Person[];
   tmdbId: string | undefined;
   backdropImage: string;
+  releases: { [key:string]: any };
 }
 
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
@@ -81,7 +79,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         if (updated) {
           return;
         }
-        if (movie.mpdFile == null || movie.m3u8File == null
+        if (movie.releases == null || Object.keys(movie.releases).length === 0
           || Object.keys(movie.posterImagesPortrait).length === 0) {
           return;
         }

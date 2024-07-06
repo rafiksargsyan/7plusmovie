@@ -34,6 +34,7 @@ export class Lang {
   static readonly SL = new Lang('SL', 'sl')
   static readonly SK = new Lang('SK', 'sk')
   static readonly SR = new Lang('SR', 'sr')
+  static readonly AR = new Lang('AR', 'ar')
 
   readonly key: string
   readonly lang: string

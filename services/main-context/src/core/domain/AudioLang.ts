@@ -44,6 +44,7 @@ export class AudioLang {
   static readonly SL = new AudioLang('SL', 'sl', 'sl', "Slovenian");
   static readonly SK = new AudioLang('SK', 'sk', 'sk', "Slovak");
   static readonly SR = new AudioLang('SR', 'sr', 'sr', "Serbian");
+  static readonly AR = new AudioLang('AR', 'ar', 'ar', "Arabic");
 
   private static readonly FROM_ISO_639_2 = {
     "en" : AudioLang.EN,
@@ -79,6 +80,7 @@ export class AudioLang {
     "sl" : AudioLang.SL,
     "sk" : AudioLang.SK,
     "sr" : AudioLang.SR,
+    "ar" : AudioLang.AR
   } as const;
    
   private static readonly FROM_ISO_639_1 = {
@@ -122,6 +124,7 @@ export class AudioLang {
     "slk" : AudioLang.SK,
     "slo" : AudioLang.SK,
     "srp" : AudioLang.SR,
+    "ara" : AudioLang.AR
   } as const;
 
   readonly key: string;

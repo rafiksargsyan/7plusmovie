@@ -92,7 +92,8 @@ export const handler = async (event: HandlerParam): Promise<void> => {
       `${movieTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`,
       `${movieTranscodingJobRead.outputFolderKey}/vod/master.m3u8`,
       `${movieTranscodingJobRead.outputFolderKey}/thumbnails/thumbnails.vtt`,
-      movieTranscodingJobRead.releaseIndexerContextReleaseId, movieTranscodingJobRead.outputFolderKey));
+      movieTranscodingJobRead.releaseIndexerContextReleaseId, movieTranscodingJobRead.outputFolderKey,
+      movieTranscodingJobRead.ripType, movieTranscodingJobRead.resolution));
     
     const rootFolders: string[] = [];
     movieTranscodingJobRead.releasesToBeRemoved.forEach(k => {
@@ -102,6 +103,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
       }
     });  
     movieTranscodingJobRead.releasesToBeRemoved.forEach(r => movie.removeRelease(r));
+    movie.transcodingFinished();
 
     await docClient.put({ TableName: dynamodbMovieTableName, Item: movie });
 
@@ -153,7 +155,8 @@ export const handler = async (event: HandlerParam): Promise<void> => {
       `${tvShowTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`,
       `${tvShowTranscodingJobRead.outputFolderKey}/vod/master.m3u8`,
       `${tvShowTranscodingJobRead.outputFolderKey}/thumbnails/thumbnails.vtt`,
-      tvShowTranscodingJobRead.releaseIndexerContextReleaseId, tvShowTranscodingJobRead.outputFolderKey));
+      tvShowTranscodingJobRead.releaseIndexerContextReleaseId, tvShowTranscodingJobRead.outputFolderKey,
+      tvShowTranscodingJobRead.ripType, tvShowTranscodingJobRead.resolution));
     
     const rootFolders: string[] = [];
     tvShowTranscodingJobRead.releasesToBeRemoved.forEach(k => {

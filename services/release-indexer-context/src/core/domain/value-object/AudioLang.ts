@@ -47,6 +47,7 @@ export class AudioLang {
   static readonly SL = new AudioLang('SL', 'sl', 'sl');
   static readonly SK = new AudioLang('SK', 'sk', 'sk');
   static readonly SR = new AudioLang('SR', 'sr', 'sr');
+  static readonly AR = new AudioLang('AR', 'ar', 'ar');
 
   static readonly audioAuthorPriorityList = {
     "RU" : [ AudioAuthor.JASKIER_18PLUS, AudioAuthor.VIRUSEPROJECT_18PLUS, AudioAuthor.HDREZKA_18PLUS,
@@ -91,6 +92,7 @@ export class AudioLang {
     "sl" : AudioLang.SL,
     "sk" : AudioLang.SK,
     "sr" : AudioLang.SR,
+    "ar" : AudioLang.AR
   } as const;
    
   private static readonly FROM_ISO_639_1 = {
@@ -134,6 +136,7 @@ export class AudioLang {
     "slk" : AudioLang.SK,
     "slo" : AudioLang.SK,
     "srp" : AudioLang.SR,
+    "ara" : AudioLang.AR
   } as const;
 
   readonly key: string;

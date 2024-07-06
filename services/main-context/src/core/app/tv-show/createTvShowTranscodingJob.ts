@@ -6,6 +6,8 @@ import { AudioLang } from '../../domain/AudioLang';
 import { SubtitleType } from '../../domain/SubtitleType';
 import { SubsLang } from '../../domain/SubsLang';
 import { Nullable } from '../../../utils';
+import { RipType } from '../../domain/RipType';
+import { Resolution } from '../../domain/Resolution';
 
 const dynamodbTvShowTranscodingJobTableName = process.env.DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME!;
 
@@ -30,6 +32,8 @@ interface CreateTvShowTranscodingJobParam {
   videoTranscodeSpec: VideoTranscodeSpec;
   releaseId: string;
   releasesToBeRemoved: string[];
+  ripType: string;
+  resolution: string;
 }
 
 export const handler = async (event: CreateTvShowTranscodingJobParam): Promise<string> => {
@@ -37,10 +41,11 @@ export const handler = async (event: CreateTvShowTranscodingJobParam): Promise<s
     return { stream: _.stream, bitrate: _.bitrate, channels: _.channels, lang: AudioLang.fromKeyOrThrow(_.lang), name: _.name, fileName: _.fileName }
   });
   const textTranscodeSpecParams = event.textTranscodeSpecParams?.map(_ => {
-    return { name: _.name, fileName: _.fileName, stream: _.stream, type: SubtitleType.fromKeyOrThrow(_.type), lang: SubsLang.fromKeyOrThrow(_.lang) }
+    return { name: _.name, fileName: _.fileName, stream: _.stream, type: SubtitleType.fromKey(_.type), lang: SubsLang.fromKeyOrThrow(_.lang) }
   });
   let tvShowTranscodingJob = new TvShowTranscodingJob(false, event.tvShowId, event.season, event.episode, event.mkvS3ObjectKey,
-    event.mkvHttpUrl, event.outputFolderKey, audioTranscodeSpecParams, textTranscodeSpecParams, event.videoTranscodeSpec, event.releaseId, event.releasesToBeRemoved);
+    event.mkvHttpUrl, event.outputFolderKey, audioTranscodeSpecParams, textTranscodeSpecParams, event.videoTranscodeSpec, event.releaseId, event.releasesToBeRemoved,
+    RipType.fromKey(event.ripType), Resolution.fromKey(event.resolution));
   
   await docClient.put({TableName: dynamodbTvShowTranscodingJobTableName, Item: tvShowTranscodingJob});
 
