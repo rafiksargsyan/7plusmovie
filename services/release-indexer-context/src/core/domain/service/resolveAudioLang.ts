@@ -37,6 +37,11 @@ export function resolveAudioLang(code: Nullable<string>,
   if (AudioLang.equals(audioLang, AudioLang.ES) && (title.includes("latin") || radarrLanguages.includes("spanish (latino)"))) {
     return AudioLang.ES_419;
   }
+  if (AudioLang.equals(audioLang, AudioLang.ES) && title.includes("spain")) return AudioLang.ES_ES;
+  if (AudioLang.equals(audioLang, AudioLang.FR) && title.includes("canad")) return AudioLang.FR_CA;
+  if (AudioLang.equals(audioLang, AudioLang.FR) && title.includes("france")) return AudioLang.FR_FR;
+  if (AudioLang.equals(audioLang, AudioLang.PT) && title.includes("brazil")) return AudioLang.PT_BR;
+  if (AudioLang.equals(audioLang, AudioLang.PT) && title.includes("portugal")) return AudioLang.PT_PT;
   const ruAudioAuthorList = AudioLang.audioAuthorPriorityList[AudioLang.RU.key];
   for (let a of ruAudioAuthorList) {
     if (AudioAuthor.equals(author, a)) return AudioLang.RU;

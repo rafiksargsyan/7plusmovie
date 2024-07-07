@@ -7,8 +7,12 @@ export class SubsLang {
   static readonly EN_GB = new SubsLang("EN_GB", "en", "en-GB");
   static readonly RU = new SubsLang("RU", "ru", "ru");
   static readonly FR = new SubsLang("FR", "fr", "fr");
+  static readonly FR_FR = new SubsLang("FR_FR", "fr", "fr-FR");
+  static readonly FR_CA = new SubsLang("FR_CA", "fr", "fr-CA");
   static readonly JA = new SubsLang("JA", "ja", "ja");
   static readonly PT = new SubsLang("PT", "pt", "pt");
+  static readonly PT_BR = new SubsLang("PT_BR", "pt", "pt-BR");
+  static readonly PT_PT = new SubsLang("PT_PT", "pt", "pt-PT");
   static readonly KO = new SubsLang("KO", "ko", "ko");
   static readonly DA = new SubsLang("DA", "da", "da");
   static readonly HI = new SubsLang("HI", "hi", "hi");

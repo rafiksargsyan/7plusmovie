@@ -8,6 +8,8 @@ export class AudioLang {
   static readonly EN_AU = new AudioLang("EN_AU", "en", "en-AU");
   static readonly RU = new AudioLang("RU", "ru", "ru");
   static readonly FR = new AudioLang("FR", "fr", "fr");
+  static readonly FR_FR = new AudioLang("FR_FR", "fr", "fr-FR");
+  static readonly FR_CA = new AudioLang("FR_CA", "fr", "fr-CA");
   static readonly JA = new AudioLang("JA", "ja", "ja");
   static readonly PT = new AudioLang("PT", "pt", "pt");
   static readonly PT_BR = new AudioLang("PT_BR", "pt", "pt-BR");
