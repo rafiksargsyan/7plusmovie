@@ -11,6 +11,7 @@ export function resolveAudioAuthor(title: Nullable<string>, tracker: Nullable<To
     const jaskier18PlusRegex = /jaskier.*18\+/;
     const bravoRecordsGeorgiaRegex = /bravo.*records.*georgia/;
     const readHeadSoundRegex = /read.*head.*sound/;
+    const movieDubbingRegex = /movie.*dubbing/;
     if (title.match(hdrezak18PlusRegex) != null) return AudioAuthor.HDREZKA_18PLUS;
     if (title.match(viruseProject18PlusRegex) != null) return AudioAuthor.VIRUSEPROJECT_18PLUS;
     if (title.match(jaskier18PlusRegex) != null) return AudioAuthor.JASKIER_18PLUS;
@@ -22,6 +23,7 @@ export function resolveAudioAuthor(title: Nullable<string>, tracker: Nullable<To
     if (title.includes('lostfilm')) return AudioAuthor.LOSTFILM;
     if (title.match(bravoRecordsGeorgiaRegex) != null) return AudioAuthor.BRAVO_RECORDS_GEORGIA;
     if (title.match(readHeadSoundRegex) != null) return AudioAuthor.READ_HEAD_SOUND;
+    if (title.match(movieDubbingRegex) != null) return AudioAuthor.MOVIE_DUBBING;
     if (title.includes('кириллица')) return AudioAuthor.KIRILLICA;
     if (title.includes('киномания')) return AudioAuthor.KINOMANIA;
     if (title.includes('1+1')) return AudioAuthor.ONE_PLUS_ONE;

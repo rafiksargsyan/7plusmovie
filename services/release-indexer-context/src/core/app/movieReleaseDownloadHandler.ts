@@ -203,7 +203,7 @@ async function processMediaFile(m: Movie, name: string, rcKey: string, rc: Torre
         let lang = resolveAudioLang(langStr, m.originalLocale, titleStr, author, numUndefinedAudioStreams, numAudioStreams, rc.radarrLanguages);
         if (lang == null) continue;
         const am = new AudioMetadata(s.index, s.channels, bitRate, lang,
-          resolveVoiceType(titleStr, lang, m.originalLocale), author);
+          resolveVoiceType(titleStr, lang, m.originalLocale, author), author);
         release.addAudioMetadata(am);
       }
       if (s.codec_type === "subtitle") {
