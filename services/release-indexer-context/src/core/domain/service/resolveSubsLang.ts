@@ -19,8 +19,8 @@ export function resolveSubsLang(title: Nullable<string>, code: Nullable<string>,
     return SubsLang.ES_419;
   }
   if (SubsLang.equals(subsLang, SubsLang.ES) && title.includes("spain")) return SubsLang.ES_ES;
-  if (SubsLang.equals(subsLang, SubsLang.FR) && title.includes("canad")) return SubsLang.FR_CA;
-  if (SubsLang.equals(subsLang, SubsLang.FR) && title.includes("france")) return SubsLang.FR_FR;
+  if (SubsLang.equals(subsLang, SubsLang.FR) && (title.includes("canad") || title.includes("vfq"))) return SubsLang.FR_CA;
+  if (SubsLang.equals(subsLang, SubsLang.FR) && (title.includes("france") || title.includes("vff"))) return SubsLang.FR_FR;
   if (SubsLang.equals(subsLang, SubsLang.PT) && title.includes("brazil")) return SubsLang.PT_BR;
   if (SubsLang.equals(subsLang, SubsLang.PT) && title.includes("portugal")) return SubsLang.PT_PT;
   return subsLang;

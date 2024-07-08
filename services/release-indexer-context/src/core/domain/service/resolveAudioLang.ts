@@ -38,8 +38,8 @@ export function resolveAudioLang(code: Nullable<string>,
     return AudioLang.ES_419;
   }
   if (AudioLang.equals(audioLang, AudioLang.ES) && title.includes("spain")) return AudioLang.ES_ES;
-  if (AudioLang.equals(audioLang, AudioLang.FR) && title.includes("canad")) return AudioLang.FR_CA;
-  if (AudioLang.equals(audioLang, AudioLang.FR) && title.includes("france")) return AudioLang.FR_FR;
+  if (AudioLang.equals(audioLang, AudioLang.FR) && (title.includes("canad") || title.includes("vfq"))) return AudioLang.FR_CA;
+  if (AudioLang.equals(audioLang, AudioLang.FR) && (title.includes("france") || title.includes("vff"))) return AudioLang.FR_FR;
   if (AudioLang.equals(audioLang, AudioLang.PT) && title.includes("brazil")) return AudioLang.PT_BR;
   if (AudioLang.equals(audioLang, AudioLang.PT) && title.includes("portugal")) return AudioLang.PT_PT;
   const ruAudioAuthorList = AudioLang.audioAuthorPriorityList[AudioLang.RU.key];
