@@ -85,7 +85,7 @@ export const handler = async (): Promise<void> => {
           const ripType: RipType = RipType.fromKeyOrThrow(r.release.ripType);
           const createMovieTranscodingJobParam: CreateMovieTranscodingJobParam = {
             movieId: m.id,
-            mkvHttpUrl: `${rawMediaFilesBaseUrl}/${r.release.cachedMediaFileRelativePath}`,
+            mkvHttpUrl: `${rawMediaFilesBaseUrl}${r.release.cachedMediaFileRelativePath}`,
             releaseId: k,
             videoTranscodeSpec: {
               stream: 0,
