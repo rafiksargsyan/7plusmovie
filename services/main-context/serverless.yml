@@ -647,8 +647,9 @@ functions:
   movieNewReleaseChecker:
     environment:
       RIC_GET_MOVIE_LAMBDA_NAME: ${env:RIC_GET_MOVIE_LAMBDA_NAME}
+      RAW_MEDIA_FILES_BASE_URL: ${env:RAW_MEDIA_FILES_BASE_URL}
+      DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME}
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
-      RAW_MEDIA_FILES_S3_BUCKET: ${env:RAW_MEDIA_FILES_S3_BUCKET}
     handler: src/core/app/movieNewReleaseChecker.handler
     events:
       - schedule: rate(${file(./.env.${sls:stage}.yml):MOVIE_NEW_RELEASE_CHECKER_INTERVAL_IN_MINUTES} minutes)

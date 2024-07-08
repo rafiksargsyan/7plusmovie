@@ -1,15 +1,16 @@
 import { Movie } from "../domain/aggregate/Movie";
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
-import { InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
+import { InvocationType, InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
 import { AudioTranscodeSpecParam, CreateMovieTranscodingJobParam } from "./createMovieTranscodingJob";
 import { ReleaseRead } from "../domain/entity/Release";
 import { RipType } from "../domain/RipType";
 import { Resolution as ResolutionEnum } from "../domain/Resolution";
+import { handler as createMovieTranscodingJob } from "../app/createMovieTranscodingJob";
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 const ricGetMovieLambdaName = process.env.RIC_GET_MOVIE_LAMBDA_NAME!;
-const rawMediaAssetsS3Bucket = process.env.RAW_MEDIA_FILES_S3_BUCKET!;
+const rawMediaFilesBaseUrl = process.env.RAW_MEDIA_FILES_BASE_URL!;
 
 const marshallOptions = {
   convertClassInstanceToMap: true
@@ -23,26 +24,28 @@ const lambdaClient = new LambdaClient({});
 interface RicGetMovieResponse {
   releases: {
     [releaseId:string]: {
-      replacedReleaseIds: string;
-      cachedMediaFileRelativePath: string;
-      ripType: string;
-      resolution: string;
-      audios: [
-        {
-          stream: number,
-          channels: number,
-          bitrate: number,
-          lang: string
-        }
-      ],
-      subs: [
-        {
-          stream: number,
-          lang: string,
-          type?: string
-        }
-      ]
-    }
+      replacedReleaseIds: string,
+      release: {
+        cachedMediaFileRelativePath: string;
+        ripType: string;
+        resolution: string;
+        audios: [
+          {
+            stream: number,
+            channels: number,
+            bitrate: number,
+            lang: string
+          }
+        ],
+        subs: [
+          {
+            stream: number,
+            lang: string,
+            type?: string
+          }
+        ]
+      }
+    }  
   }
 }
 
@@ -51,8 +54,8 @@ export const handler = async (): Promise<void> => {
   for (const m of movies) {
     if (m.monitorReleases && !m.inTranscoding && m.ricMovieId != null) {
       const lambdaParams = {
-      FunctionName: ricGetMovieLambdaName,
-        InvocationType: 'RequestResponse',
+        FunctionName: ricGetMovieLambdaName,
+        InvocationType: InvocationType.RequestResponse,
         Payload: JSON.stringify({ movieId: m.ricMovieId })
       };
       const invokeCommand = new InvokeCommand(lambdaParams);
@@ -78,19 +81,19 @@ export const handler = async (): Promise<void> => {
               replacedIds.push(k1);
             }
           }
-          const resolution: ResolutionEnum = ResolutionEnum.fromKeyOrThrow(r.resolution);
-          const ripType: RipType = RipType.fromKeyOrThrow(r.ripType);
+          const resolution: ResolutionEnum = ResolutionEnum.fromKeyOrThrow(r.release.resolution);
+          const ripType: RipType = RipType.fromKeyOrThrow(r.release.ripType);
           const createMovieTranscodingJobParam: CreateMovieTranscodingJobParam = {
             movieId: m.id,
-            mkvHttpUrl: `https://${rawMediaAssetsS3Bucket}/${r.cachedMediaFileRelativePath}`,
+            mkvHttpUrl: `${rawMediaFilesBaseUrl}/${r.release.cachedMediaFileRelativePath}`,
             releaseId: k,
             videoTranscodeSpec: {
               stream: 0,
-              resolutions: resolveResolutions(RipType.fromKeyOrThrow(r.ripType),
-              ResolutionEnum.fromKeyOrThrow(r.resolution)).map(r => ({ resolution: r })),
+              resolutions: resolveResolutions(RipType.fromKeyOrThrow(r.release.ripType),
+              ResolutionEnum.fromKeyOrThrow(r.release.resolution)).map(r => ({ resolution: r })),
             },
-            audioTranscodeSpecParams: createAudioTranscodeSpec(r.audios),
-            textTranscodeSpecParams: r.subs.map(s => ({
+            audioTranscodeSpecParams: createAudioTranscodeSpec(r.release.audios),
+            textTranscodeSpecParams: r.release.subs.map(s => ({
               stream: s.stream,
               lang: s.lang,
               type: s.type
@@ -98,8 +101,8 @@ export const handler = async (): Promise<void> => {
             releasesToBeRemoved: replacedIds,
             ripType: ripType.key,
             resolution: resolution.key,
-
           }
+          await createMovieTranscodingJob(createMovieTranscodingJobParam);
           break;
         }
       }  
