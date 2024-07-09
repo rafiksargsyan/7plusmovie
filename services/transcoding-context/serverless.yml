@@ -20,6 +20,7 @@ provider:
         - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
         - "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
         - "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
+        - "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
   stage: ${opt:stage}
   logRetentionInDays: 1
 
@@ -40,8 +41,7 @@ functions:
                                    "outputFolderKey" : $input.json(''$.outputFolderKey''),
                                    "audioTranscodeSpecParams" : $input.json(''$.audioTranscodeSpecParams''),
                                    "textTranscodeSpecParams" : $input.json(''$.textTranscodeSpecParams''),
-                                   "defaultAudioTrack" : $input.json(''$.defaultAudioTrack''),
-                                   "defaultTextTrack" : $input.json(''$.defaultTextTrack'') }'
+                                   "videoTranscodeSpec" : $input.json(''$.videoTranscodeSpec'') }'
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
@@ -55,6 +55,7 @@ functions:
       GITHUB_OWNER: ${env:GITHUB_OWNER}
       GITHUB_REPO: ${env:GITHUB_REPO}
       GIT_REF: ${env:GIT_REF}
+      TRANSCODING_JOB_QUEUE_URL: !Ref TranscodingQueue
     events:
       - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_TRANSCODING_JOB_STREAM_ARN}
 
@@ -79,6 +80,25 @@ functions:
       - http:
           path: /githubWorkflowRunIdProviderHook
           method: post
+
+  transcodingJobSQSConsumer:
+    environment:
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      TRANSCODING_JOB_QUEUE_URL: !Ref TranscodingQueue
+      GITHUB_OWNER: ${env:GITHUB_OWNER}
+      GITHUB_REPO: ${env:GITHUB_REPO}
+    handler: src/core/app/transcodingJobSQSConsumer.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):TRANSCODING_JOB_SQS_CONSUMER_INTERVAL} minutes)
+
+resources:
+  Resources:
+    TranscodingQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: TranscodingQueue_${sls:stage}
+        MessageRetentionPeriod: 1209600
+
 plugins:
   - serverless-esbuild
 

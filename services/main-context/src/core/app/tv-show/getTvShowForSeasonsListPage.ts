@@ -48,17 +48,12 @@ interface Season {
 
 export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataResponse> => {
   const tvShow = (await getTvShow(event.tvShowId) as unknown as TvShow);
-  let seasons = tvShow.seasons.map(_ => ({
-    ..._,
-    episodes: _.episodes.filter(e => e.mpdFile != undefined && e.m3u8File != undefined)
-  }));
-  seasons = seasons.filter(_ => _.episodes.length != 0);
   return {
     releaseYear: tvShow.releaseYear,
     originalTitle: tvShow.originalTitle,
     titleL8ns: tvShow.titleL8ns,
     posterImagesPortrait: tvShow.posterImagesPortrait,
-    seasons: seasons
+    seasons: tvShow.seasons
   };
 };
 

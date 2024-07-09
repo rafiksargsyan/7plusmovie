@@ -1,5 +1,8 @@
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
+import { ReleaseRead } from '../domain/entity/Release';
+import { AudioLang } from '../domain/AudioLang';
+import { Nullable } from '../../utils';
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
@@ -9,7 +12,7 @@ const cloudflareMediaAssetsDomain = process.env.CLOUDFLARE_MEDIA_ASSETS_DOMAIN!;
 
 const terabiteInBytes = 1_000_000_000_000; // Max free outgoing traffic for Cloudfront is 1TB
 
-const docClient = DynamoDBDocument.from(new DynamoDB({}));
+const docClient = DynamoDBDocument.from(new DynamoDB({}));  
 
 interface GetMovieParam {
   movieId: string;
@@ -19,7 +22,7 @@ interface GetMovieMetadataResponse {
   subtitles: { [key: string]: string };
   mpdFile: string;
   m3u8File: string;
-  thumbnailsFile?: string;
+  thumbnailsFile: Nullable<string>;
   backdropImage: string;
   originalTitle: string;
   titleL8ns: { [key: string]: string };
@@ -31,11 +34,12 @@ interface Movie {
   subtitles: { [key: string]: { relativePath : string } };
   mpdFile: string;
   m3u8File: string;
-  thumbnailsFile?: string;
+  thumbnailsFile: Nullable<string>;
   backdropImage: string;
   originalTitle: string;
   titleL8ns: { [key: string]: string };
-  releaseYear: number; 
+  releaseYear: number;
+  releases: { [key: string]: ReleaseRead };
 }
 
 interface CloudFrontDistro {
@@ -60,12 +64,27 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
     mediaAssetsDomain = cfDistro.domain;
   }
   mediaAssetsDomain = masqueradeMediaAssetsDomain(mediaAssetsDomain);
+  let mpdFile: string;
+  let m3u8File: string;
+  let thumbnailsFile: Nullable<string>;
+  let releases = movie.releases;
+  if (releases == null) releases = {};
+  const release = getOneRelease(Object.values(releases));
+  if (release != null) {
+    mpdFile = release._mpdFile;
+    m3u8File = release._m3u8File;
+    thumbnailsFile = release._thumbnailsFile;
+  } else {
+    mpdFile = movie.mpdFile;
+    m3u8File = movie.m3u8File;
+    thumbnailsFile = movie.thumbnailsFile;
+  }
   return {
 //    subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `https://${mediaAssetsDomain}/${movie.subtitles[key].relativePath}`; return acc;}, {}),
     subtitles: {},
-    mpdFile: `https://${mediaAssetsDomain}/${movie.mpdFile}`,
-    m3u8File: `https://${mediaAssetsDomain}/${movie.m3u8File}`,
-    thumbnailsFile: movie.thumbnailsFile !== undefined ? `https://${mediaAssetsDomain}/${movie.thumbnailsFile}` : undefined,
+    mpdFile: `https://${mediaAssetsDomain}/${mpdFile}`,
+    m3u8File: `https://${mediaAssetsDomain}/${m3u8File}`,
+    thumbnailsFile: thumbnailsFile !== null ? `https://${mediaAssetsDomain}/${thumbnailsFile}` : null,
     backdropImage: movie.backdropImage,
     originalTitle: movie.originalTitle,
     titleL8ns: movie.titleL8ns,
@@ -93,6 +112,22 @@ async function getMovie(id: string) {
   }
   let movie: Movie = data.Item as unknown as Movie;
   return movie;
+}
+
+function getOneRelease(releases?: ReleaseRead[]) {
+  if (releases == null || releases.length === 0) {
+    return null;
+  }
+  const releasesContainsRussian: ReleaseRead[] = [];
+  for (const r of releases) {
+    for (const k in r._audios) {
+      if (AudioLang.equals(AudioLang.RU, r._audios[k].lang)) {
+        releasesContainsRussian.push(r);
+      }
+    }
+  }
+  if (releasesContainsRussian.length != 0) return releasesContainsRussian[0];
+  return releases[0];
 }
 
 async function getCloudFrontDistro() {

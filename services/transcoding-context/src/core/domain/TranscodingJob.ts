@@ -1,20 +1,26 @@
 import { v4 as uuid } from 'uuid';
-import { AudioLangCode } from './AudioLangCodes';
-import { SubsLangCode } from './SubsLangCodes';
-import { SubtitleType } from './SubtitleType';
+import { Lang } from './Lang';
+import { Nullable } from './Nullable';
 
 interface AudioTranscodeSpec {
   stream: number;
   bitrate: string;
   channels: number;
-  lang: AudioLangCode;
+  lang: Lang;
+  fileName: string;
+  name: string;
 }
 
 interface TextTranscodeSpec {
   stream: number;
-  lang: SubsLangCode;
-  type: SubtitleType;
   name: string;
+  fileName: string;
+  lang: Lang;
+}
+
+interface VideoTranscodeSpec {
+  resolutions: { fileName: string, resolution: number } []; // 360, 480, 720, 1080, etc.
+  stream: number;
 }
 
 export class TranscodingJob {
@@ -28,20 +34,17 @@ export class TranscodingJob {
   private outputFolderKey: string;
   private audioTranscodeSpecs: AudioTranscodeSpec[];
   private textTranscodeSpecs: TextTranscodeSpec[];
-  private defaultAudioTrack: number | undefined;
-  private defaultTextTrack: number | undefined;
+  private videoTranscodeSpec: VideoTranscodeSpec;
 
   public constructor(createEmptyObject: boolean, mkvS3ObjectKey?: string, mkvHttpUrl?: string, outputFolderKey?: string,
-    audioTranscodeSpecs?: AudioTranscodeSpec[], textTranscodeSpecs?: TextTranscodeSpec[], defaultAudioTrack?: number,
-    defaultTextTrack?: number) {
+    audioTranscodeSpecs?: AudioTranscodeSpec[], textTranscodeSpecs?: TextTranscodeSpec[], videTranscodeSpec?: VideoTranscodeSpec) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setMkvLocation(mkvHttpUrl, mkvS3ObjectKey);
       this.setOutputFolderKey(outputFolderKey);
       this.setAudioTranscodeSpecs(audioTranscodeSpecs);
       this.setTextTranscodeSpecs(textTranscodeSpecs);
-      this.setDefaultAudioTrack(defaultAudioTrack);
-      this.setDefaultTextTrack(defaultTextTrack);
+      this.setVideoTranscodeSpec(videTranscodeSpec);
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
       this.ttl = Math.round((this.creationTime / 1000)) + 15 * 24 * 60 * 60;
@@ -86,18 +89,11 @@ export class TranscodingJob {
     this.textTranscodeSpecs = textTranscodeSpecs;
   }
 
-  private setDefaultAudioTrack(defaultAudioTrack: number | undefined) {
-    if (defaultAudioTrack != undefined && (defaultAudioTrack < 0 || defaultAudioTrack >= this.audioTranscodeSpecs.length)) {
-      throw new InvalidDefaultAudioTrackError(); 
+  private setVideoTranscodeSpec(videoTranscodeSpec: Nullable<VideoTranscodeSpec>) {
+    if (videoTranscodeSpec == null) {
+      throw new NullVideoTranscodeSpecError();
     }
-    this.defaultAudioTrack = defaultAudioTrack;
-  }  
-
-  private setDefaultTextTrack(defaultTextTrack: number | undefined) {
-    if (defaultTextTrack != undefined && (defaultTextTrack < 0 || defaultTextTrack >= this.textTranscodeSpecs.length)) {
-      throw new InvalidDefaultTextTrackError(); 
-    }
-    this.defaultTextTrack = defaultTextTrack;
+    this.videoTranscodeSpec = videoTranscodeSpec;
   }
 
   public setGithubWorkflowRunId(githubWorkflowRunId: number | undefined) {
@@ -111,10 +107,6 @@ export class TranscodingJob {
 
 class InvalidMkvS3ObjectKeyError extends Error {}
 
-class InvalidDefaultAudioTrackError extends Error {}
-
-class InvalidDefaultTextTrackError extends Error {}
-
 class InvalidOutputFolderKeyError extends Error {}
 
 class InvalidGithubWorkflowRunIdError extends Error {}
@@ -124,3 +116,5 @@ class MultipleMkvLocationsError extends Error {}
 class NoMkvLocationError extends Error {}
 
 class InvalidMkvHttpUrlError extends Error {}
+
+class NullVideoTranscodeSpecError extends Error {}

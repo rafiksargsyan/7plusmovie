@@ -54,10 +54,26 @@ output "secret_manager_transcoding_context_secret_id" {
   value = aws_secretsmanager_secret.transcoding_context_secrets.name
 }
 
+output "secret_manager_ric_conext_secret_id" {
+  value = aws_secretsmanager_secret.ric_context_secrets.name
+}
+
 output "ddb_tv_show_transcoding_job_table_name" {
   value = aws_dynamodb_table.tv_show_transcoding_job.name
 }
 
 output "ddb_tv_show_transcoding_job_table_stream_arn" {
   value = aws_dynamodb_table.tv_show_transcoding_job.stream_arn
+}
+
+output "ddb_movie_ric_table_name" {
+  value = aws_dynamodb_table.movie_release_indexer_context.name
+}
+
+output "ddb_movie_ric_table_stream_arn" {
+  value = aws_dynamodb_table.movie_release_indexer_context.stream_arn
+}
+
+output "trt_files_s3_bucket_name" {
+  value = aws_s3_bucket.trt_files.bucket
 }

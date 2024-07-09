@@ -1,18 +1,29 @@
-export const SubtitleTypes = {
-  FORCED: { name : "Forced" },
-  FULL: { name : "Full" },
-  SDH: { name : "SDH" }
-} as const;
+import { Nullable } from "../../Nullable";
 
 export class SubtitleType {
-  readonly code: string;
-    
-  public constructor(code: string | undefined) {
-    if (code == undefined || !(code in SubtitleTypes)) {
-      throw new InvalidSubtitleTypeError();
+  public static readonly FORCED = new SubtitleType("FORCED", "Forced");
+  public static readonly FULL = new SubtitleType("FULL", "Full");
+  public static readonly SDH = new SubtitleType("SDH", "SDH");
+
+  public readonly key: string;
+  public readonly name: string;
+
+  private constructor(key: string, name: string) {
+    this.key = key;
+    this.name = name;
+  }
+
+  static fromKeyOrThrow(key: string): SubtitleType {
+    if (key == null || SubtitleType[key] == null) {
+      throw new InvalidSubtitleTypeKeyError();
     }
-    this.code = code;
+    return SubtitleType[key];
+  }
+
+  static fromKey(key: Nullable<string>): Nullable<SubtitleType> {
+    if (key == null) return null;
+    return SubtitleType[key];
   }
 }
   
-class InvalidSubtitleTypeError extends Error {}
+class InvalidSubtitleTypeKeyError extends Error {}

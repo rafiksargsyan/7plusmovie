@@ -10,7 +10,10 @@ inputs:
     description: 'Output folder path'
   transcodingSpecBase64Encoded:
     required: true
-    description: 'Transcoding spec json in base 64 encoded format'    
+    description: 'Transcoding spec json in base 64 encoded format'
+outputs:
+  videoFileName:
+    description: 'A video file from generated resolutions'
 runs:
   using: 'node16'
   main: 'dist/index.js'

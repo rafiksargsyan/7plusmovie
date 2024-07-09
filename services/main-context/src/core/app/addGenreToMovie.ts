@@ -1,4 +1,4 @@
-import { Movie } from "../domain/Movie";
+import { Movie } from "../domain/aggregate/Movie";
 import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { MovieGenre, MovieGenres } from "../domain/MovieGenres";

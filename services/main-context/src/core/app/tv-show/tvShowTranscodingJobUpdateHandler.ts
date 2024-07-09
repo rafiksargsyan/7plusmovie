@@ -1,12 +1,11 @@
 import { Marshaller } from '@aws/dynamodb-auto-marshaller';
 import { DynamoDBStreamEvent } from 'aws-lambda';
-import { TvShowTranscodingJob } from '../../domain/TvShowTranscodingJob';
+import { TvShowTranscodingJob, TvShowTranscodingJobRead } from '../../domain/TvShowTranscodingJob';
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
-import { SubsLangCode } from '../../domain/SubsLangCodes';
-import { AudioLangCode } from '../../domain/AudioLangCodes';
-import { SubtitleType } from '../../domain/SubtitleType';
+import { AudioLang } from '../../domain/AudioLang';
+import { SubsLang } from '../../domain/SubsLang';
 
 const transcodingContextJobCreationLambdaName = process.env.TRANSCODING_CONTEXT_JOB_CREATION_LAMBDA_NAME!;
 const dynamodbTvShowTranscodingJobTableName = process.env.DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME!;
@@ -23,31 +22,6 @@ const translateConfig = { marshallOptions };
     
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 
-interface AudioTranscodeSpec {
-  stream: number;
-  bitrate: string;
-  channels: number;
-  lang: AudioLangCode;
-}
-
-interface TextTranscodeSpec {
-  stream: number;
-  name: string;
-  lang: SubsLangCode;
-  type: SubtitleType;
-}
-  
-interface TvShowTranscodingJobRead {
-  id?: string;
-  tvShowId?: string;
-  textTranscodeSpecs?: TextTranscodeSpec[];
-  audioTranscodeSpecs?: AudioTranscodeSpec[];
-  mkvS3ObjectKey?: string;
-  mkvHttpUrl?: string;
-  outputFolderKey?: string;
-  transcodingContextJobId?: string | undefined;
-}
-
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
   try {
     for (const record of event.Records) {
@@ -55,7 +29,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         // For now nothing to do in case of item removal
       } else {
         let item = marshaller.unmarshallItem(record.dynamodb?.NewImage!);
-        let tvShowTranscodingJobRead: TvShowTranscodingJobRead = item;
+        let tvShowTranscodingJobRead = item as unknown as TvShowTranscodingJobRead;
         if (tvShowTranscodingJobRead.transcodingContextJobId == undefined) {
           const queryParams = {
             TableName: dynamodbTvShowTranscodingJobTableName,
@@ -72,8 +46,9 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
             mkvS3ObjectKey: tvShowTranscodingJobRead.mkvS3ObjectKey,
             mkvHttpUrl: tvShowTranscodingJobRead.mkvHttpUrl,
             outputFolderKey: tvShowTranscodingJobRead.outputFolderKey,
-            audioTranscodeSpecParams: tvShowTranscodingJobRead.audioTranscodeSpecs?.map(_ => ({ ..._, lang: _.lang.code })),
-            textTranscodeSpecParams: tvShowTranscodingJobRead.textTranscodeSpecs?.map(_ => ({ ..._, lang: _.lang.code, type: _.type.code })),
+            audioTranscodeSpecParams: tvShowTranscodingJobRead.audioTranscodeSpecs?.map(_ => ({ ..._, lang: AudioLang.fromISO_639_2(_.lang.lang).key})),
+            textTranscodeSpecParams: tvShowTranscodingJobRead.textTranscodeSpecs?.map(_ => ({ ..._, lang: SubsLang.fromISO_639_2(_.lang.lang).key})),
+            videoTranscodeSpec: tvShowTranscodingJobRead.videoTranscodeSpec
           }
           const lambdaParams = {
             FunctionName: transcodingContextJobCreationLambdaName,

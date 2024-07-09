@@ -2,6 +2,9 @@ import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { TvShowRepository } from '../../../adapters/TvShowRepository';
 import { TvShowRepositoryInterface } from '../../ports/TvShowRepositoryInterface';
+import { ReleaseRead } from '../../domain/entity/Release';
+import { AudioLang } from '../../domain/AudioLang';
+import { Nullable } from '../../../utils';
 
 const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
 const cfDistroRandomSelectionProportion = Number.parseFloat(process.env.CF_DISTRO_RANDOM_SELECTION_PROPORTION!);
@@ -50,6 +53,7 @@ interface Episode {
   m3u8File: string;
   episodeNumber: number;
   thumbnailsFile?: string;
+  releases: { [key: string]: ReleaseRead };
 }
   
 interface Season {
@@ -89,14 +93,29 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
   if (episode == undefined) {
     throw new TvShowEpisodeNotFoundError();
   }
+  let mpdFile: string;
+  let m3u8File: string;
+  let thumbnailsFile: Nullable<string>;
+  let releases = episode.releases;
+  if (releases == null) releases = {};
+  const release = getOneRelease(Object.values(releases));
+  if (release != null) {
+    mpdFile = release._mpdFile;
+    m3u8File = release._m3u8File;
+    thumbnailsFile = release._thumbnailsFile;
+  } else {
+    mpdFile = episode.mpdFile;
+    m3u8File = episode.m3u8File;
+    thumbnailsFile = episode.thumbnailsFile;
+  }
   return {
     releaseYear: tvShow.releaseYear,
     // subtitles: Object.keys(episode.subtitles)
     // .reduce((acc, key) => {acc[key] = `https://${mediaAssetsDomain}/${episode.subtitles[key]}`; return acc;}, {}),
     subtitles: {},
-    mpdFile: `https://${mediaAssetsDomain}/${episode.mpdFile}`,
-    m3u8File: `https://${mediaAssetsDomain}/${episode.m3u8File}`,
-    thumbnailsFile: episode.thumbnailsFile !== undefined ? `https://${mediaAssetsDomain}/${episode.thumbnailsFile}` : undefined,
+    mpdFile: `https://${mediaAssetsDomain}/${mpdFile}`,
+    m3u8File: `https://${mediaAssetsDomain}/${m3u8File}`,
+    thumbnailsFile: thumbnailsFile !== undefined ? `https://${mediaAssetsDomain}/${thumbnailsFile}` : undefined,
     stillImage: episode.stillImage,
     originalTitle: tvShow.originalTitle,
     titleL8ns: tvShow.titleL8ns,
@@ -106,8 +125,6 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
     episodeNameL8ns: episode.nameL8ns
   };
 };
-
-class FailedToGetTvShowError extends Error {}
 
 class TvShowSeasonNotFoundError extends Error {}
 
@@ -148,4 +165,20 @@ async function getCloudFrontDistro() {
     return undefined;
   }
   return candidate;
+}
+
+function getOneRelease(releases?: ReleaseRead[]) {
+  if (releases == null || releases.length === 0) {
+    return null;
+  }
+  const releasesContainsRussian: ReleaseRead[] = [];
+  for (const r of releases) {
+    for (const k in r._audios) {
+      if (AudioLang.equals(AudioLang.RU, r._audios[k].lang)) {
+        releasesContainsRussian.push(r);
+      }
+    }
+  }
+  if (releasesContainsRussian.length != 0) return releasesContainsRussian[0];
+  return releases[0];
 }

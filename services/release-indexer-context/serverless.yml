@@ -1,0 +1,187 @@
+org: 7plusmovie
+app: 7plusmovie
+service: release-indexer-context
+frameworkVersion: '3'
+useDotenv: true
+
+package:
+  individually: true
+  patterns:
+    - '!node_modules/@aws-sdk/**'
+
+provider:
+  name: aws
+  region: eu-west-3
+  runtime: nodejs18.x
+  iam:
+    role:
+      managedPolicies:
+        - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+        - "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+        - "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        - "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
+  stage: ${opt:stage}
+  logRetentionInDays: 1
+
+functions:
+  createMovie:
+    handler: src/core/app/createMovie.handler
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    events:
+      - http:
+          integration: lambda
+          path: /movie
+          method: post
+          request:
+            template:
+              application/json: '{ "originalLocale" : $input.json(''$.originalLocale''),
+                                   "originalTitle" : $input.json(''$.originalTitle''),
+                                   "releaseYear" : $input.json(''$.releaseYear'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+
+  movieUpdateHandler:
+    handler: src/core/app/movieUpdateHandler.handler
+    environment:
+      RADARR_BASE_URL: ${env:RADARR_API_BASE_URL}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      TORRENT_FILES_S3_BUCKET: ${env:TORRENT_FILES_S3_BUCKET}
+      RAW_MEDIA_FILES_S3_BUCKET: ${env:RAW_MEDIA_FILES_S3_BUCKET}
+    events:
+      - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_MOVIE_STREAM_ARN}
+  
+  addTmdbIdToMovie:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/addTmdbIdToMovie.handler
+    events:
+      - http:
+          integration: lambda
+          path: /movie/{id}/tmdbId
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : "$input.params(''id'')",
+                                   "tmdbId" : $input.json(''$.tmdbId'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+  
+  movieReleaseCandidateUpdater:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      MOVIE_RELEASE_CANDIDATE_UPDATER_FANOUT_TOPIC: !Ref movieReleaseCandidateUpdaterFanoutTopic
+    handler: src/core/app/movieReleaseCandidateUpdater.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minutes)
+    timeout: 900
+
+  movieReleaseDownloadHandler:
+    environment:
+      QBITTORRENT_API_BASE_URL: ${env:QBITTORRENT_API_BASE_URL}
+      QBITTORRENT_BASE_URL: ${env:QBITTORRENT_BASE_URL}
+      QBITTORRENT_USERNAME: ${env:QBITTORRENT_USERNAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      MEDIA_FILES_BASE_URL: ${env:MEDIA_FILES_BASE_URL}
+      TORRENT_FILES_BASE_URL: ${env:TORRENT_FILES_BASE_URL}
+      MEDIA_FILE_CACHER_LAMBDA_NAME: ${env:MEDIA_FILE_CACHER_LAMBDA_NAME}
+    handler: src/core/app/movieReleaseDownloadHandler.handler
+    layers:
+      - ${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_FFPROBE_LAYER}
+    events:
+      - sns:
+          arn: !Ref movieReleaseDownloadHandlerFanoutTopic
+          topicName: movieReleaseDownloadHandlerFanoutTopic_${sls:stage}
+    timeout: 900
+ 
+  movieReleaseDownloadHandlerFanout:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      MOVIE_RELEASE_DOWNLOAD_HANDLER_FANOUT_TOPIC: !Ref movieReleaseDownloadHandlerFanoutTopic  
+    handler: src/core/app/movieReleaseDownloadHandlerFanout.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_INTERVAL_IN_MINUTES} minutes)
+    timeout: 900
+
+  updateMovieReleaseCandidates:
+    environment:
+      RADARR_API_BASE_URL: ${env:RADARR_API_BASE_URL}
+      RADARR_DOWNLOAD_URL_BASE_MAPPING: ${env:RADARR_DOWNLOAD_URL_BASE_MAPPING}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      TORRENT_FILES_S3_BUCKET: ${env:TORRENT_FILES_S3_BUCKET}
+    handler: src/core/app/updateMovieReleaseCandidates.handler
+    events:
+      - sns:
+          arn: !Ref movieReleaseCandidateUpdaterFanoutTopic
+          topicName: movieReleaseCandidateUpdaterFanoutTopic_${sls:stage}
+    timeout: 900
+    
+  releaseMediaFileCachingHandler:
+    environment:
+      QBITTORRENT_API_BASE_URL: ${env:QBITTORRENT_API_BASE_URL}
+      QBITTORRENT_USERNAME: ${env:QBITTORRENT_USERNAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      RAW_MEDIA_FILES_S3_BUCKET: ${env:RAW_MEDIA_FILES_S3_BUCKET}
+    handler: src/core/app/releaseMediaFileCachingHandler.handler
+    layers:
+      - ${file(./.env.${sls:stage}.yml):RELEASE_MEDIA_FILE_CACHING_RCLONE_LAYER}
+    timeout: 900
+
+  fantomAssetsCleanupHandlerFanout:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      FANTOM_ASSETS_CLEANUP_LAMBDA_NAME: ${env:FANTOM_ASSETS_CLEANUP_LAMBDA_NAME} 
+    handler: src/core/app/fantomAssetsCleanupHandlerFanout.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):FANTOM_ASSETS_CLEANUP_INTERVAL_IN_DAYS} day)
+    timeout: 900
+
+  fantomAssetsCleanupHandler:
+    environment:
+      TORRENT_FILES_S3_BUCKET: ${env:TORRENT_FILES_S3_BUCKET}
+      RAW_MEDIA_FILES_S3_BUCKET: ${env:RAW_MEDIA_FILES_S3_BUCKET}
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/fantomAssetsCleanupHandler.handler
+    timeout: 900  
+  
+  getMovieById:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/getMovieById.handler
+    events:
+      - http:
+          integration: lambda
+          path: /movie/{id}
+          method: get
+          request:
+            template:
+              application/json: '{ "movieId" : "$input.params(''id'')" }'
+              application/x-www-form-urlencoded: null
+          response:
+            headers:
+              Access-Control-Allow-Origin: "'*'"
+
+resources:
+  Resources:
+    movieReleaseCandidateUpdaterFanoutTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: movieReleaseCandidateUpdaterFanoutTopic_${sls:stage}
+    movieReleaseDownloadHandlerFanoutTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: movieReleaseDownloadHandlerFanoutTopic_${sls:stage}
+
+plugins:
+  - serverless-esbuild
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false

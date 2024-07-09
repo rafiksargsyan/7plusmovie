@@ -121,6 +121,7 @@ resource "aws_secretsmanager_secret_version" "secrets_version" {
       ALGOLIA_ADMIN_KEY: var.algolia_admin_key
       COOKIE_SIGNING_PRIVATE_KEY_BASE64_ENCODED: var.cookie_signing_private_key_base64_encoded
       TMDB_API_KEY: var.tmdb_api_key
+      R2_ACCESS_KEY_ID: var.r2_access_key_id
       R2_SECRET_ACCESS_KEY: var.r2_secret_access_key
     })
   )
@@ -190,10 +191,18 @@ resource "aws_s3_bucket_lifecycle_configuration" "raw_media_assets_lifecycle_con
   bucket = aws_s3_bucket.raw_media_assets.bucket
 
   rule {
-    id = "remove-old-files"
-    expiration {
-      days = 5
+    id = "default"
+
+    transition {
+      days          = 10
+      storage_class = "GLACIER_IR"
     }
+
+    transition {
+      days          = 100
+      storage_class = "DEEP_ARCHIVE"
+    }
+
     status = "Enabled"
   }
 }
@@ -247,6 +256,21 @@ resource "aws_secretsmanager_secret_version" "transcoding_context_secrets_versio
   )
 }
 
+resource "aws_secretsmanager_secret" "ric_context_secrets" {
+  name = "${local.deployment_id}-ric-ctx-secrets"
+}
+
+resource "aws_secretsmanager_secret_version" "ric_context_secrets_version" {
+  secret_id     = aws_secretsmanager_secret.ric_context_secrets.id
+  secret_string = jsonencode(
+    tomap({
+      TMDB_API_KEY: var.tmdb_api_key
+      RADARR_API_KEY: var.radarr_api_key
+      QBITTORRENT_PASSWORD: var.qbittorrent_password
+    })
+  )
+}
+
 resource "aws_dynamodb_table" "tv_show_transcoding_job" {
   name     = "${local.deployment_id}-tv_show_transcoding_job"
   hash_key = "id"
@@ -296,4 +320,56 @@ resource "aws_dynamodb_table" "tv_show_v2" {
   point_in_time_recovery {
     enabled = true
   }
+}
+
+resource "aws_dynamodb_table" "movie_release_indexer_context" {
+  name     = "${local.deployment_id}-movie-ric"
+  hash_key = "_id"
+  attribute {
+    name = "_id"
+    type = "S"
+  }
+  stream_enabled   = true
+  stream_view_type = "NEW_IMAGE"
+  billing_mode     = "PAY_PER_REQUEST"
+  deletion_protection_enabled = var.dynamodb_deletion_protection_enabled
+  point_in_time_recovery {
+    enabled = true
+  }
+}
+
+resource "aws_s3_bucket" "trt_files" {
+  bucket = "trt-files-${local.deployment_id}"
+}
+
+resource "aws_s3_bucket_policy" "trt_files_public_access" {
+  bucket = aws_s3_bucket.trt_files.bucket
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = "*"
+        Action = "s3:GetObject"
+        Resource = "arn:aws:s3:::${aws_s3_bucket.trt_files.bucket}/*"
+      }
+    ]
+  })
+}
+
+resource "aws_s3_bucket_policy" "raw_media_assets_public_access" {
+  bucket = aws_s3_bucket.raw_media_assets.bucket
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = "*"
+        Action = "s3:GetObject"
+        Resource = "arn:aws:s3:::${aws_s3_bucket.raw_media_assets.bucket}/*"
+      }
+    ]
+  })
 }

@@ -68,6 +68,18 @@ variable "cloudflare_media_assets_prefix" {
   type = string
 }
 
+variable r2_access_key_id {
+  type = string
+}
+
 variable "r2_secret_access_key" {
+  type = string
+}
+
+variable "radarr_api_key" {
+  type = string
+}
+
+variable "qbittorrent_password" {
   type = string
 }

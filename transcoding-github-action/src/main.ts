@@ -1,163 +1,228 @@
-import * as core from '@actions/core';
-import path from 'path';
-import fs from 'fs';
-import { execSync } from 'child_process';
-import { SubsLangCode, SubsLangCodes } from './SubsLangCodes';
-import { AudioLangCode, AudioLangCodes } from './AudioLangCodes';
-import { SubtitleType } from './SubtitleType';
+import * as core from '@actions/core'
+import path from 'path'
+import fs from 'fs'
+import {execSync} from 'child_process'
+import {Lang} from './lang'
 
-const WORKING_DIR_NAME = '.transcoding-job-work-dir';
+const WORKING_DIR_NAME = '.transcoding-job-work-dir'
 
 interface AudioTranscodeSpec {
-  stream: number;
-  bitrate: string;
-  channels: number;
-  lang: keyof typeof AudioLangCodes;
+  stream: number
+  bitrate: string
+  channels: number
+  lang: string
+  fileName: string
+  name: string
 }
 
 interface TextTranscodeSpec {
-  stream: number;
-  name: string;
-  lang: keyof typeof SubsLangCodes;
-  type: string;
+  stream: number
+  name: string
+  fileName: string
+  lang: string
+}
+
+interface VideoTranscodeSpec {
+  resolutions: {fileName: string; resolution: number}[] // 360, 480, 720, 1080, etc.
+  stream: number
 }
 
 async function run(): Promise<void> {
   try {
-    const mkvFilePath: string = core.getInput('mkvFilePath');
-    const outputFolder: string = core.getInput('outputFolder');
-    const transcodingSpecBase64Encoded: string = core.getInput('transcodingSpecBase64Encoded');
-    const transcodingSpec = JSON.parse(Buffer.from(transcodingSpecBase64Encoded, "base64").toString());
+    const mkvFilePath: string = core.getInput('mkvFilePath')
+    const outputFolder: string = core.getInput('outputFolder')
+    const transcodingSpecBase64Encoded: string = core.getInput(
+      'transcodingSpecBase64Encoded'
+    )
+    const transcodingSpec = JSON.parse(
+      Buffer.from(transcodingSpecBase64Encoded, 'base64').toString()
+    )
     // TODO: Get transcoding spec json schema from CDN and validate
-    const mkvFileAbsolutePath = path.resolve(mkvFilePath);
-    const outputFolderAbsolutePath = path.resolve(outputFolder);
-    
+    const mkvFileAbsolutePath = path.resolve(mkvFilePath)
+    const outputFolderAbsolutePath = path.resolve(outputFolder)
+
     if (!fs.existsSync(WORKING_DIR_NAME)) {
-      fs.mkdirSync(WORKING_DIR_NAME);
+      fs.mkdirSync(WORKING_DIR_NAME)
     } else {
-      const files = fs.readdirSync(WORKING_DIR_NAME);
+      const files = fs.readdirSync(WORKING_DIR_NAME)
       for (const file of files) {
-        const filePath = path.join(WORKING_DIR_NAME, file);
-        fs.unlinkSync(filePath);
+        const filePath = path.join(WORKING_DIR_NAME, file)
+        fs.unlinkSync(filePath)
       }
     }
-    const workdirAbsolutePath = path.resolve(WORKING_DIR_NAME);
-    process.chdir(WORKING_DIR_NAME);
-     
-    const vodFolderAbsolutePath = path.resolve(outputFolderAbsolutePath, 'vod');
-    fs.mkdirSync(vodFolderAbsolutePath);
-    const subtitlesFolderAbsolutePath = path.resolve(outputFolderAbsolutePath, 'subtitles');
-    fs.mkdirSync(subtitlesFolderAbsolutePath);
+    const workdirAbsolutePath = path.resolve(WORKING_DIR_NAME)
+    process.chdir(WORKING_DIR_NAME)
 
-    transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 540);
-    transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 720);
-    transcodeVideoFromMkv(mkvFileAbsolutePath, 0, 1080);
+    const vodFolderAbsolutePath = path.resolve(outputFolderAbsolutePath, 'vod')
+    fs.mkdirSync(vodFolderAbsolutePath)
+    const subtitlesFolderAbsolutePath = path.resolve(
+      outputFolderAbsolutePath,
+      'subtitles'
+    )
+    fs.mkdirSync(subtitlesFolderAbsolutePath)
 
-    let audioTranscodeSpecs: AudioTranscodeSpec[] = transcodingSpec['audio'];
-    if (audioTranscodeSpecs == undefined) audioTranscodeSpecs = [];
-    let textTranscodeSpecs: TextTranscodeSpec[] = transcodingSpec['text'];
-    if (textTranscodeSpecs == undefined) textTranscodeSpecs = [];
-    
-    audioTranscodeSpecs.forEach(_ => {
-      transcodeAudioFromMkv(mkvFileAbsolutePath, _.stream, _.channels, _.bitrate, new AudioLangCode(_.lang));
-    });
+    const videoTranscodeSpec: VideoTranscodeSpec = transcodingSpec['video']
 
-    textTranscodeSpecs.forEach(_ => {
-      transcodeSubsFromMkv(mkvFileAbsolutePath, _.stream,  new SubsLangCode(_.lang), new SubtitleType(_.type));
-    })
-    
-    if (textTranscodeSpecs.length !== 0) {
-      execSync(`cp ./*.vtt ${subtitlesFolderAbsolutePath}`);
-    } 
-    process.chdir(vodFolderAbsolutePath);
-
-    let shakaPackagerCommand = "shaka-packager ";
-    shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, "h264_main_540p_18.mp4")},stream=video,output=h264_main_540p_18.mp4 `;
-    shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, "h264_main_720p_18.mp4")},stream=video,output=h264_main_720p_18.mp4 `;
-    shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, "h264_high_1080p_19.mp4")},stream=video,output=h264_high_1080p_19.mp4 `;
-    
-    audioTranscodeSpecs.forEach(_ => {
-      const audioFileName = `aac_${_.channels}_${_.bitrate}_${AudioLangCodes[_.lang]['langTag']}.mp4`
-      let hlsName: string = AudioLangCodes[_.lang]['displayName'];
-      if (_.channels === 6) hlsName += ' (5.1)';
-      shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, audioFileName)},stream=audio,output=${audioFileName},lang=${AudioLangCodes[_.lang]['langTag']}-x-${_.channels},hls_group_id=audio,hls_name='${hlsName}' `;
-    })
-    
-    textTranscodeSpecs.forEach(_ => {
-      const textFileName = `${SubsLangCodes[_.lang]['langTag']}-${_.type}-${_.stream}.vtt`
-      shakaPackagerCommand += `in=${path.resolve(workdirAbsolutePath, textFileName)},stream=text,output=${textFileName},lang=${SubsLangCodes[_.lang]['lang']},hls_group_id=subtitle,hls_name='${_.name}',dash_label='${_.name}' `;
-    })
-
-    shakaPackagerCommand += `--mpd_output ${path.resolve(vodFolderAbsolutePath, 'manifest.mpd')} --hls_master_playlist_output ${path.resolve(vodFolderAbsolutePath, 'master.m3u8')}`;
-
-    execSync(`eval "${shakaPackagerCommand}"`);
-
-    if (textTranscodeSpecs.length !== 0) {
-      execSync('sed -i "/shaka-packager/d" ./*.vtt');
+    for (const x of videoTranscodeSpec.resolutions) {
+      transcodeVideoFromMkv(
+        mkvFileAbsolutePath,
+        videoTranscodeSpec.stream,
+        x.resolution,
+        x.fileName
+      )
     }
-    execSync('sed -i "/shaka-packager/d" ./*.mpd');
-    execSync('sed -i "/shaka-packager/d" ./*.m3u8');
+
+    let audioTranscodeSpecs: AudioTranscodeSpec[] = transcodingSpec['audio']
+    if (audioTranscodeSpecs == null) audioTranscodeSpecs = []
+    let textTranscodeSpecs: TextTranscodeSpec[] = transcodingSpec['text']
+    if (textTranscodeSpecs == null) textTranscodeSpecs = []
 
     audioTranscodeSpecs.forEach(_ => {
-      const langTag = AudioLangCodes[_.lang]['langTag'] + `-x-${_.channels}`;
-      let langDisplayName = AudioLangCodes[_.lang]['displayName'];
-      if (_.channels === 6) {
-        langDisplayName += ' (5.1)';
-      }
-      const command = `sed -i 's/.*contentType=\\"audio\\".* lang=\\"${langTag}\\".*/&\\n      \\<Label\\>${langDisplayName}\\<\\/Label\\>/' manifest.mpd`;
-      execSync(command);
-    });
+      transcodeAudioFromMkv(
+        mkvFileAbsolutePath,
+        _.stream,
+        _.channels,
+        _.bitrate,
+        _.fileName
+      )
+    })
 
+    textTranscodeSpecs.forEach(_ => {
+      transcodeSubsFromMkv(mkvFileAbsolutePath, _.stream, _.fileName)
+    })
+
+    if (textTranscodeSpecs.length !== 0) {
+      execSync(`cp ./*.vtt ${subtitlesFolderAbsolutePath}`)
+    }
+    process.chdir(vodFolderAbsolutePath)
+
+    let shakaPackagerCommand = 'shaka-packager '
+
+    for (const x of videoTranscodeSpec.resolutions) {
+      transcodeVideoFromMkv(
+        mkvFileAbsolutePath,
+        videoTranscodeSpec.stream,
+        x.resolution,
+        x.fileName
+      )
+      shakaPackagerCommand += `in=${path.resolve(
+        workdirAbsolutePath,
+        x.fileName
+      )},stream=video,output=${x.fileName} `
+    }
+
+    audioTranscodeSpecs.forEach(_ => {
+      shakaPackagerCommand += `in=${path.resolve(
+        workdirAbsolutePath,
+        _.fileName
+      )},stream=audio,output=${_.fileName},lang=${
+        Lang.fromKeyOrThrow(_.lang).lang
+      },hls_group_id=audio,hls_name='${_.name}',dash_label='${_.name}' `
+    })
+
+    textTranscodeSpecs.forEach(_ => {
+      shakaPackagerCommand += `in=${path.resolve(
+        workdirAbsolutePath,
+        _.fileName
+      )},stream=text,output=${_.fileName},lang=${
+        Lang.fromKeyOrThrow(_.lang).lang
+      },hls_group_id=subtitle,hls_name='${_.name}',dash_label='${_.name}' `
+    })
+
+    shakaPackagerCommand += `--mpd_output ${path.resolve(
+      vodFolderAbsolutePath,
+      'manifest.mpd'
+    )} --hls_master_playlist_output ${path.resolve(
+      vodFolderAbsolutePath,
+      'master.m3u8'
+    )}`
+
+    execSync(`eval "${shakaPackagerCommand}"`)
+
+    if (textTranscodeSpecs.length !== 0) {
+      execSync('sed -i "/shaka-packager/d" ./*.vtt')
+    }
+    execSync('sed -i "/shaka-packager/d" ./*.mpd')
+    execSync('sed -i "/shaka-packager/d" ./*.m3u8')
+    core.setOutput("videoFileName", (videoTranscodeSpec.resolutions.sort((a, b) => b.resolution - a.resolution)).at(0)?.fileName);
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message);
+    if (error instanceof Error) core.setFailed(error.message)
   }
 }
 
-function transcodeSubsFromMkv(mkvFilePath: string, stream: number, lang: SubsLangCode, type: SubtitleType) {
-  const fileName = `${SubsLangCodes[lang.code]['langTag']}-${type.code}-${stream}.vtt`;
-  let command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${fileName} > /dev/null 2>&1`;
-  execSync(command);
+function transcodeSubsFromMkv(
+  mkvFilePath: string,
+  stream: number,
+  fileName: string
+): void {
+  const command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${fileName} > /dev/null 2>&1`
+  execSync(command)
 }
 
-function transcodeAudioFromMkv(mkvFilePath: string, stream: number, channels: number, bitrate: string, lang: AudioLangCode) {
-  let command = `ffmpeg -i ${mkvFilePath} -map 0:${stream} -ac ${channels} -c aac -ab ${bitrate} `;
-  command += `-vn -sn aac_${channels}_${bitrate}_${AudioLangCodes[lang.code]['langTag']}.mp4 > /dev/null 2>&1`;
-  execSync(command);
+function transcodeAudioFromMkv(
+  mkvFilePath: string,
+  stream: number,
+  channels: number,
+  bitrate: string,
+  fileName: string
+): void {
+  let command = `ffmpeg -i ${mkvFilePath} -map 0:${stream} -ac ${channels} -c aac -ab ${bitrate} `
+  command += `-vn -sn ${fileName} > /dev/null 2>&1`
+  execSync(command)
 }
 
-function transcodeVideoFromMkv(mkvFilePath: string, stream: number, resolution: number) {
-  let level, profile, crf, maxRate, bufSize;
-  switch (resolution) {
-    case 540:
-      level = '3.1'; profile = 'main'; crf = 18; maxRate = '1500k'; bufSize = '3000k';
-      break;
-    case 720:
-      level = '4.0'; profile = 'main'; crf = 18; maxRate = '3000k'; bufSize = '6000k';
-      break;
-    case 1080:
-      level = '4.2'; profile = 'high'; crf = 19; maxRate = '5000k'; bufSize = '10000k';
-      break;
-    default:
-      throw new UnsupportedVideoResolutionError();
+function transcodeVideoFromMkv(
+  mkvFilePath: string,
+  stream: number,
+  resolution: number,
+  fileName: string
+): void {
+  let level, profile, crf, maxRate, bufSize
+  if (resolution <= 360) {
+    level = '3.0'
+    profile = 'baseline'
+    crf = 18
+    maxRate = '600k'
+    bufSize = '1200k'
+  } else if (resolution <= 480) {
+    level = '3.1'
+    profile = 'main'
+    crf = 18
+    maxRate = '1200k'
+    bufSize = '2400k'
+  } else if (resolution <= 720) {
+    level = '4.0'
+    profile = 'main'
+    crf = 18
+    maxRate = '3000k'
+    bufSize = '6000k'
+  } else if (resolution <= 1080) {
+    level = '4.2'
+    profile = 'high'
+    crf = 19
+    maxRate = '5000k'
+    bufSize = '10000k'
+  } else {
+    throw new UnsupportedVideoResolutionError()
   }
-  let videoSettings = `scale=-2:${resolution},format=yuv420p`;
+  let videoSettings = `scale=-2:${resolution},format=yuv420p`
   if (isHdr(mkvFilePath)) {
-    videoSettings = `zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,` + videoSettings;
+    videoSettings = `zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,${videoSettings}`
   }
-  let command = `ffmpeg -i ${mkvFilePath} -an -sn -c:v:${stream} libx264 -profile:v ${profile} -level:v ${level} `;
-  command += `-x264opts 'keyint=120:min-keyint=120:no-scenecut:open_gop=0' -map_chapters -1 -crf ${crf} -maxrate ${maxRate} `;
-  command += `-bufsize ${bufSize} -preset veryslow -tune film -vf "${videoSettings}" `;
-  command += `h264_${profile}_${resolution}p_${crf}.mp4 > /dev/null 2>&1`;  
-  execSync(command);
+  let command = `ffmpeg -i ${mkvFilePath} -an -sn -c:v:${stream} libx264 -profile:v ${profile} -level:v ${level} `
+  command += `-x264opts 'keyint=120:min-keyint=120:no-scenecut:open_gop=0' -map_chapters -1 -crf ${crf} -maxrate ${maxRate} `
+  command += `-bufsize ${bufSize} -preset veryslow -tune film -vf "${videoSettings}" `
+  command += `${fileName} > /dev/null 2>&1`
+  execSync(command)
 }
 
 function isHdr(mkvFilePath: string): boolean {
-  const command = `ffprobe -v error -select_streams v:0 -show_entries stream=color_transfer,color_space,color_primaries -of json '${mkvFilePath}'`;
-  const output = execSync(command);
-  const outputStr = output.toString('utf-8');
-  return outputStr.includes('2020');
+  const command = `ffprobe -v error -select_streams v:0 -show_entries stream=color_transfer,color_space,color_primaries -of json '${mkvFilePath}'`
+  const output = execSync(command)
+  const outputStr = output.toString('utf-8')
+  return outputStr.includes('2020')
 }
 
-run();
+run()
 
-class UnsupportedVideoResolutionError extends Error {};
+class UnsupportedVideoResolutionError extends Error {}

@@ -1,4 +1,4 @@
-import { TvShow } from "../core/domain/TvShow";
+import { TvShow } from "../core/domain/aggregate/TvShow";
 import { TvShowRepositoryInterface } from "../core/ports/TvShowRepositoryInterface";
 import { DynamoDBDocument, QueryCommandInput } from "@aws-sdk/lib-dynamodb";
 

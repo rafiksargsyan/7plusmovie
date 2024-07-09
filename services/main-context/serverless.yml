@@ -94,57 +94,6 @@ functions:
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
-  addMpdFileToMovie:
-    environment:
-      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
-    handler: src/core/app/addMpdFileToMovie.handler
-    events:
-      - http:
-          integration: lambda
-          path: /addMpdFileToMovie
-          method: patch
-          request:
-            template:
-              application/json: '{ "movieId" : $input.json(''$.movieId''),
-                                   "relativePath" : $input.json(''$.relativePath'') }'
-              application/x-www-form-urlencoded: null                      
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
-
-  addM3u8FileToMovie:
-    environment:
-      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
-    handler: src/core/app/addM3u8FileToMovie.handler
-    events:
-      - http:
-          integration: lambda
-          path: /addM3u8FileToMovie
-          method: patch
-          request:
-            template:
-              application/json: '{ "movieId" : $input.json(''$.movieId''),
-                                   "relativePath" : $input.json(''$.relativePath'') }'
-              application/x-www-form-urlencoded: null                      
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
-
-  addThumbnailsFileToMovie:
-    environment:
-      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
-    handler: src/core/app/addThumbnailsFileToMovie.handler
-    events:
-      - http:
-          integration: lambda
-          path: /addThumbnailsFileToMovie
-          method: patch
-          request:
-            template:
-              application/json: '{ "movieId" : $input.json(''$.movieId''),
-                                   "relativePath" : $input.json(''$.relativePath'') }'
-              application/x-www-form-urlencoded: null                      
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
-
   movieUpdateHandler:
     handler: src/core/app/movieUpdateHandler.handler
     environment:
@@ -236,26 +185,6 @@ functions:
           request:
             template:
               application/json: '{ "movieId" : $input.json(''$.movieId''),
-                                   "relativePath" : $input.json(''$.relativePath'') }'
-              application/x-www-form-urlencoded: null
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
-
-  addSubtitleToMovie:
-    environment:
-      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
-    handler: src/core/app/addSubtitleToMovie.handler
-    events:
-      - http:
-          integration: lambda
-          path: /addSubtitleToMovie
-          method: patch
-          request:
-            template:
-              application/json: '{ "movieId" : $input.json(''$.movieId''),
-                                   "lang" : $input.json(''$.lang''),
-                                   "type" : $input.json(''$.type''),
-                                   "name" : $input.json(''$.name''),
                                    "relativePath" : $input.json(''$.relativePath'') }'
               application/x-www-form-urlencoded: null
           authorizer:
@@ -357,6 +286,7 @@ functions:
     handler: src/core/app/createMovieTranscodingJob.handler
     environment:
       DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME}
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
     events:
       - http:
           integration: lambda
@@ -376,6 +306,10 @@ functions:
       DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME}
       DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}    
       DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME}
+      MEDIA_ASSETS_S3_BUCKET: ${env:MEDIA_ASSETS_S3_BUCKET}
+      ClOUDFLARE_MEDIA_ASSETS_R2_BUCKET: ${env:ClOUDFLARE_MEDIA_ASSETS_R2_BUCKET}
+      CLOUDFLARE_ACCOUNT_ID: ${env:CLOUDFLARE_ACCOUNT_ID}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
 
   createTvShow:
     handler: src/core/app/tv-show/createTvShow.handler
@@ -431,85 +365,6 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
-    
-  addM3u8FileToTvShow:
-    environment:
-      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
-    handler: src/core/app/tv-show/addM3u8FileToTvShow.handler
-    events:
-      - http:
-          integration: lambda
-          path: /addM3u8FileToTvShow
-          method: patch
-          request:
-            template:
-              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
-                                   "relativePath" : $input.json(''$.relativePath''),
-                                   "season" : $input.json(''$.season''),
-                                   "episode" : $input.json(''$.episode'') }'
-              application/x-www-form-urlencoded: null                      
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
-  
-  addMpdFileToTvShow:
-    environment:
-      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
-    handler: src/core/app/tv-show/addMpdFileToTvShow.handler
-    events:
-      - http:
-          integration: lambda
-          path: /addMpdFileToTvShow
-          method: patch
-          request:
-            template:
-              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
-                                   "relativePath" : $input.json(''$.relativePath''),
-                                   "season" : $input.json(''$.season''),
-                                   "episode" : $input.json(''$.episode'') }'
-              application/x-www-form-urlencoded: null                      
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
-  
-  addThumbnailsFileToTvShow:
-    environment:
-      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
-    handler: src/core/app/tv-show/addThumbnailsFileToTvShow.handler
-    events:
-      - http:
-          integration: lambda
-          path: /addThumbnailsFileToTvShow
-          method: patch
-          request:
-            template:
-              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
-                                   "relativePath" : $input.json(''$.relativePath''),
-                                   "season" : $input.json(''$.season''),
-                                   "episode" : $input.json(''$.episode'') }'
-              application/x-www-form-urlencoded: null                      
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
-
-  addSubtitleToTvShow:
-    environment:
-      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
-    handler: src/core/app/tv-show/addSubtitleToTvShow.handler
-    events:
-      - http:
-          integration: lambda
-          path: /addSubtitleToTvShow
-          method: patch
-          request:
-            template:
-              application/json: '{ "tvShowId" : $input.json(''$.tvShowId''),
-                                   "lang" : $input.json(''$.lang''),
-                                   "type" : $input.json(''$.type''),
-                                   "name" : $input.json(''$.name''),
-                                   "relativePath" : $input.json(''$.relativePath''),
-                                   "season" : $input.json(''$.season''),
-                                   "episode" : $input.json(''$.episode'') }'
-              application/x-www-form-urlencoded: null
-          authorizer:
-            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6 
   
   addTheMovieDbIdToTvShow:
     environment:
@@ -739,7 +594,66 @@ functions:
     events:
       - schedule: rate(${file(./.env.${sls:stage}.yml):CF_DISTRO_USAGE_UPDATE_INTERVAL_IN_MINUTES} minutes)
     timeout: 900
-          
+
+  addRICMovieIdToMovie:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/addRICMovieIdToMovie.handler
+    events:
+      - http:
+          integration: lambda
+          path: /movie/{id}/ricId
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : "$input.params(''id'')",
+                                   "ricId" : $input.json(''$.ricId'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+
+  movieEnableMonitorReleases:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/movieEnableMonitorReleases.handler
+    events:
+      - http:
+          integration: lambda
+          path: /movie/{id}/enableMonitorReleases
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : "$input.params(''id'')" }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+
+  movieDisableMonitorReleases:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/movieDisableMonitorReleases.handler
+    events:
+      - http:
+          integration: lambda
+          path: /movie/{id}/disableMonitorReleases
+          method: patch
+          request:
+            template:
+              application/json: '{ "movieId" : "$input.params(''id'')" }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  movieNewReleaseChecker:
+    environment:
+      RIC_GET_MOVIE_LAMBDA_NAME: ${env:RIC_GET_MOVIE_LAMBDA_NAME}
+      RAW_MEDIA_FILES_BASE_URL: ${env:RAW_MEDIA_FILES_BASE_URL}
+      DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME}
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/movieNewReleaseChecker.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):MOVIE_NEW_RELEASE_CHECKER_INTERVAL_IN_MINUTES} minutes)
+    timeout: 900
 
 resources:
   Resources:
