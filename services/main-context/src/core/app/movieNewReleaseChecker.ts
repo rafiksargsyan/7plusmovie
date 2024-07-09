@@ -101,6 +101,7 @@ export const handler = async (): Promise<void> => {
             releasesToBeRemoved: replacedIds,
             ripType: ripType.key,
             resolution: resolution.key,
+            ricReleaseId: k
           }
           await createMovieTranscodingJob(createMovieTranscodingJobParam);
           break;

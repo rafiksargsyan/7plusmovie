@@ -62,14 +62,14 @@ export class MovieTranscodingJob {
   private transcodingContextJobId: string;
   private releaseId: string;
   private releasesToBeRemoved: string[];
-  private releaseIndexerContextReleaseId: string;
+  private releaseIndexerContextReleaseId: Nullable<string>;
   private ripType: Nullable<RipType>;
   private resolution: Nullable<Resolution>;
 
   public constructor(createEmptyObject: boolean, movieId?: string, mkvS3ObjectKey?: string,
     mkvHttpUrl?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
     textTranscodeSpecs?: TextTranscodeSpec[], videoTranscodeSpec?: VideoTranscodeSpec, releaseId?: string,
-    releasesToBeRemoved?: string[], ripType?: Nullable<RipType>, resolution?: Nullable<Resolution>) {
+    releasesToBeRemoved?: string[], ripType?: Nullable<RipType>, resolution?: Nullable<Resolution>, ricContextReleaseId?: Nullable<string>) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setMovieId(movieId);
@@ -86,6 +86,7 @@ export class MovieTranscodingJob {
       this.ttl = Math.round(this.creationTime / 1000) + 15 * ONE_DAY_IN_SECONDS;
       this.ripType = ripType;
       this.resolution = resolution;
+      this.releaseIndexerContextReleaseId = ricContextReleaseId;
     }
   }
 
