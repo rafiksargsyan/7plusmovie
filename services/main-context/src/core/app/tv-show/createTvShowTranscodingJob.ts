@@ -34,6 +34,7 @@ interface CreateTvShowTranscodingJobParam {
   releasesToBeRemoved: string[];
   ripType: string;
   resolution: string;
+  thumbnailResolutions: number[];
 }
 
 export const handler = async (event: CreateTvShowTranscodingJobParam): Promise<string> => {
@@ -45,7 +46,7 @@ export const handler = async (event: CreateTvShowTranscodingJobParam): Promise<s
   });
   let tvShowTranscodingJob = new TvShowTranscodingJob(false, event.tvShowId, event.season, event.episode, event.mkvS3ObjectKey,
     event.mkvHttpUrl, event.outputFolderKey, audioTranscodeSpecParams, textTranscodeSpecParams, event.videoTranscodeSpec, event.releaseId, event.releasesToBeRemoved,
-    RipType.fromKey(event.ripType), Resolution.fromKey(event.resolution));
+    RipType.fromKey(event.ripType), Resolution.fromKey(event.resolution), event.thumbnailResolutions);
   
   await docClient.put({TableName: dynamodbTvShowTranscodingJobTableName, Item: tvShowTranscodingJob});
 

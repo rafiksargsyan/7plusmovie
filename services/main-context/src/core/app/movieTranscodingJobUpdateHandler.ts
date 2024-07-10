@@ -1,7 +1,7 @@
 import { Marshaller } from '@aws/dynamodb-auto-marshaller';
 import { DynamoDBStreamEvent } from 'aws-lambda';
 import { MovieTranscodingJob, MovieTranscodingJobRead } from '../domain/MovieTranscodingJob';
-import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
+import { InvocationType, InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { AudioLang } from '../domain/AudioLang';
@@ -47,11 +47,12 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
             outputFolderKey: movieTranscodingJobRead.outputFolderKey,
             audioTranscodeSpecParams: movieTranscodingJobRead.audioTranscodeSpecs?.map(_ => ({ ..._, lang: AudioLang.fromISO_639_2(_.lang.lang).key})),
             textTranscodeSpecParams: movieTranscodingJobRead.textTranscodeSpecs?.map(_ => ({ ..._, lang: SubsLang.fromISO_639_2(_.lang.lang).key})),
-            videoTranscodeSpec: movieTranscodingJobRead.videoTranscodeSpec
+            videoTranscodeSpec: movieTranscodingJobRead.videoTranscodeSpec,
+            thumbnailResolutions: movieTranscodingJobRead.thumbnailResolutions
           }
           const lambdaParams = {
             FunctionName: transcodingContextJobCreationLambdaName,
-            InvocationType: 'RequestResponse',
+            InvocationType: InvocationType.RequestResponse,
             Payload: JSON.stringify(transcodingJobParams)
           };
           const invokeCommand = new InvokeCommand(lambdaParams);

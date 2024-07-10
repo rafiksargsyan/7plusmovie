@@ -9,7 +9,7 @@ import { Movie } from "../domain/aggregate/Movie";
 import { TvShowRepositoryInterface } from "../ports/TvShowRepositoryInterface";
 import { TvShowRepository } from "../../adapters/TvShowRepository";
 import { MovieTranscodingJobRead } from "../domain/MovieTranscodingJob";
-import { Audio, Release, Resolution, Subtitle, Video } from "../domain/entity/Release";
+import { Audio, Release, Resolution, Subtitle, Thumbnail, Video } from "../domain/entity/Release";
 import { S3 } from '@aws-sdk/client-s3';
 import { strIsBlank } from "../../utils";
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
@@ -88,12 +88,13 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     }
     const video = Video.create(resolutions);
 
+    const thumbnails: Thumbnail[] = movieTranscodingJobRead.thumbnailResolutions
+    .map(r => ({ resolution: r, thumbnailsFile: `${movieTranscodingJobRead.outputFolderKey}/thumbnails/${r}/thumbnails.vtt`}));
     movie.addRelease(movieTranscodingJobRead.releaseId, Release.create(subtitles, audios, video,
       `${movieTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`,
       `${movieTranscodingJobRead.outputFolderKey}/vod/master.m3u8`,
-      `${movieTranscodingJobRead.outputFolderKey}/thumbnails/thumbnails.vtt`,
       movieTranscodingJobRead.releaseIndexerContextReleaseId, movieTranscodingJobRead.outputFolderKey,
-      movieTranscodingJobRead.ripType, movieTranscodingJobRead.resolution));
+      movieTranscodingJobRead.ripType, movieTranscodingJobRead.resolution, thumbnails));
     
     const rootFolders: string[] = [];
     movieTranscodingJobRead.releasesToBeRemoved.forEach(k => {
@@ -151,12 +152,13 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     }
     const video = Video.create(resolutions);
 
+    const thumbnails: Thumbnail[] = tvShowTranscodingJobRead.thumbnailResolutions
+    .map(r => ({ resolution: r, thumbnailsFile: `${tvShowTranscodingJobRead.outputFolderKey}/thumbnails/${r}/thumbnails.vtt`}))
     tvShow.addRelease(season, episode, tvShowTranscodingJobRead.releaseId, Release.create(subtitles, audios, video,
       `${tvShowTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`,
       `${tvShowTranscodingJobRead.outputFolderKey}/vod/master.m3u8`,
-      `${tvShowTranscodingJobRead.outputFolderKey}/thumbnails/thumbnails.vtt`,
       tvShowTranscodingJobRead.releaseIndexerContextReleaseId, tvShowTranscodingJobRead.outputFolderKey,
-      tvShowTranscodingJobRead.ripType, tvShowTranscodingJobRead.resolution));
+      tvShowTranscodingJobRead.ripType, tvShowTranscodingJobRead.resolution, thumbnails));
     
     const rootFolders: string[] = [];
     tvShowTranscodingJobRead.releasesToBeRemoved.forEach(k => {

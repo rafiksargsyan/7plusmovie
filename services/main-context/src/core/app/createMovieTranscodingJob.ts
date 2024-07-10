@@ -56,6 +56,7 @@ export interface CreateMovieTranscodingJobParam {
   ripType: string;
   resolution: string;
   ricReleaseId: Nullable<string>;
+  thumbnailResolutions: number[];
 }
 
 export const handler = async (event: CreateMovieTranscodingJobParam): Promise<string> => {
@@ -78,7 +79,7 @@ export const handler = async (event: CreateMovieTranscodingJobParam): Promise<st
   });
   let movieTranscodingJob = new MovieTranscodingJob(false, event.movieId, event.mkvS3ObjectKey, event.mkvHttpUrl, event.outputFolderKey,
     audioTranscodeSpecParams, textTranscodeSpecParams, event.videoTranscodeSpec, event.releaseId, event.releasesToBeRemoved, RipType.fromKey(event.ripType),
-    Resolution.fromKey(event.resolution), event.ricReleaseId);
+    Resolution.fromKey(event.resolution), event.ricReleaseId, event.thumbnailResolutions);
   movie.transcodingStarted();
 
   const transactItems = [

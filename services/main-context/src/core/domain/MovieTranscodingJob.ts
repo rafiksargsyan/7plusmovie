@@ -45,6 +45,7 @@ export interface MovieTranscodingJobRead {
   releaseIndexerContextReleaseId: Nullable<string>;
   ripType: Nullable<RipType>;
   resolution: Nullable<Resolution>;
+  thumbnailResolutions: number[];
 }
 
 export class MovieTranscodingJob {
@@ -65,11 +66,13 @@ export class MovieTranscodingJob {
   private releaseIndexerContextReleaseId: Nullable<string>;
   private ripType: Nullable<RipType>;
   private resolution: Nullable<Resolution>;
+  private thumbnailResolutions: number[];
 
   public constructor(createEmptyObject: boolean, movieId?: string, mkvS3ObjectKey?: string,
     mkvHttpUrl?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
     textTranscodeSpecs?: TextTranscodeSpec[], videoTranscodeSpec?: VideoTranscodeSpec, releaseId?: string,
-    releasesToBeRemoved?: string[], ripType?: Nullable<RipType>, resolution?: Nullable<Resolution>, ricContextReleaseId?: Nullable<string>) {
+    releasesToBeRemoved?: string[], ripType?: Nullable<RipType>, resolution?: Nullable<Resolution>,
+    ricContextReleaseId?: Nullable<string>, thumbnailResolutions?: number[]) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setMovieId(movieId);
@@ -81,6 +84,7 @@ export class MovieTranscodingJob {
       this.setTextTranscodeSpecs(textTranscodeSpecs);
       this.setVideoTranscodeSpec(videoTranscodeSpec);
       this.setReleasesToBeRemoved(releasesToBeRemoved);
+      this.setThumbnailResolutions(thumbnailResolutions);
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
       this.ttl = Math.round(this.creationTime / 1000) + 15 * ONE_DAY_IN_SECONDS;
@@ -88,6 +92,13 @@ export class MovieTranscodingJob {
       this.resolution = resolution;
       this.releaseIndexerContextReleaseId = ricContextReleaseId;
     }
+  }
+
+  private setThumbnailResolutions(thumbnailResolutions?: number[]) {
+    if (thumbnailResolutions == null || thumbnailResolutions.length === 0) {
+      throw new EmptyThumbnailResolutionsError();
+    }
+    this.thumbnailResolutions = thumbnailResolutions;
   }
 
   private setMovieId(movieId: string | undefined) {
@@ -207,3 +218,5 @@ export class InvalidMkvHttpUrlError extends Error {}
 export class NullVideoTranscodeSpecError extends Error {}
 
 export class EmptyReleaseIdError extends Error {}
+
+export class EmptyThumbnailResolutionsError extends Error {}
