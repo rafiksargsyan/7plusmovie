@@ -191,6 +191,16 @@ export class Movie {
   get ricMovieId() {
     return this.releaseIndexerContextMovieId;
   }
+
+  public releaseAlreadyExists(ricReleasId: string) {
+    for (const k in this.releases) {
+      const r = this.releases[k];
+      if (k === r._releaseIndexerContextId) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 class NullReleaseKeyError extends Error {}
