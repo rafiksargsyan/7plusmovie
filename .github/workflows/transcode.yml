@@ -92,7 +92,7 @@ jobs:
         with:
           videoFilePath: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}/vod/${{ steps.transcode.outputs.videoFileName }}"
           outputFolder: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}/${{ env.THUMBNAILS_DIR_NAME }}"
-          resolutionsBase64Encoded: ${THUMBNAIL_RESOLUTIONS_BASE64_ENCODED}
+          resolutionsBase64Encoded: ${{ env.THUMBNAIL_RESOLUTIONS_BASE64_ENCODED }}
 
       - name: Upload transcoding results to S3
         run: |
