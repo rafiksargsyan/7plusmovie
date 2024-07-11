@@ -46,19 +46,22 @@ async function run(): Promise<void> {
       }
   
       const webvttFilename = 'thumbnails.vtt';
-      fs.writeFileSync(webvttFilename, 'WEBVTT\n\n');
+//      fs.writeFileSync(webvttFilename, 'WEBVTT\n\n');
+      let vttStr = 'WEBVTT\n\n';
 
       for (let i = 0; i < thumbnailsCount; ++i) {
-        const spriteNumber = Math.floor(i / spriteS); 
+        const spriteNumber = Math.floor(i / spriteS);
         const startTime = i;
         const endTime = i + 1;
         const spritePositionX = i % spriteC * width;
         const spritePositionY = Math.floor(i % spriteS / spriteC) * height;
-  
-        fs.writeFileSync(webvttFilename, `${vttTimestamp(startTime)} --> ${vttTimestamp(endTime)}\n`, { flag: 'a+'});
-        fs.writeFileSync(webvttFilename, `sprite-${spriteNumber}.jpg#xywh=${spritePositionX},${spritePositionY},${width},${height}\n\n`, { flag: 'a+' });
+        vttStr += `${vttTimestamp(startTime)} --> ${vttTimestamp(endTime)}\n`;
+        vttStr +=  `sprite-${spriteNumber}.jpg#xywh=${spritePositionX},${spritePositionY},${width},${height}\n\n`;
+//        fs.writeFileSync(webvttFilename, `${vttTimestamp(startTime)} --> ${vttTimestamp(endTime)}\n`, { flag: 'a+'});
+//        fs.writeFileSync(webvttFilename, `sprite-${spriteNumber}.jpg#xywh=${spritePositionX},${spritePositionY},${width},${height}\n\n`, { flag: 'a+' });
       }
-
+      
+      fs.writeFileSync(webvttFilename, Buffer.from(vttStr), { flag: 'ax'});
     }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
