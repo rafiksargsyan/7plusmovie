@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 import { L8nLangCode } from '../L8nLangCodes';
 import { MovieGenre } from '../MovieGenres';
 import { Person } from '../Persons';
-import { Release } from '../entity/Release';
+import { Release, ReleaseRead } from '../entity/Release';
 import { strIsBlank } from '../../../utils';
 
 type RelativePath = string;
@@ -194,8 +194,8 @@ export class Movie {
 
   public releaseAlreadyExists(ricReleasId: string) {
     for (const k in this.releases) {
-      const r = this.releases[k];
-      if (k === r._releaseIndexerContextId) {
+      const r = this.releases[k] as unknown as ReleaseRead;
+      if (ricReleasId === r._releaseIndexerContextId) {
         return true;
       }
     }
