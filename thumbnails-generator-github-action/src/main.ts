@@ -46,9 +46,8 @@ async function run(): Promise<void> {
       }
   
       const webvttFilename = 'thumbnails.vtt';
-      const webvttFile = fs.createWriteStream(webvttFilename);
-      webvttFile.write('WEBVTT\n\n');
-  
+      fs.writeFileSync(webvttFilename, 'WEBVTT\n\n');
+
       for (let i = 0; i < thumbnailsCount; ++i) {
         const spriteNumber = Math.floor(i / spriteS); 
         const startTime = i;
@@ -56,11 +55,10 @@ async function run(): Promise<void> {
         const spritePositionX = i % spriteC * width;
         const spritePositionY = Math.floor(i % spriteS / spriteC) * height;
   
-        webvttFile.write(`${vttTimestamp(startTime)} --> ${vttTimestamp(endTime)}\n`);
-        webvttFile.write(`sprite-${spriteNumber}.jpg#xywh=${spritePositionX},${spritePositionY},${width},${height}\n\n`);
+        fs.writeFileSync(webvttFilename, `${vttTimestamp(startTime)} --> ${vttTimestamp(endTime)}\n`, { flag: 'a+'});
+        fs.writeFileSync(webvttFilename, `sprite-${spriteNumber}.jpg#xywh=${spritePositionX},${spritePositionY},${width},${height}\n\n`, { flag: 'a+' });
       }
 
-      webvttFile.close();
     }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
