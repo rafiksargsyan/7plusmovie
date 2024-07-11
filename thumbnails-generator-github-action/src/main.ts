@@ -84,10 +84,10 @@ class FailedToResolveThumbnailWidthError extends Error {};
 
 function resolveSpriteSize(resolution: number) {
   if (resolution <= 60) {
-    return [12, 20];
+    return [12, 12];
   }
   if (resolution <= 120) {
-    return [6, 10];
+    return [6, 6];
   }
-  return [3, 5];
+  return [3, 3];
 }
