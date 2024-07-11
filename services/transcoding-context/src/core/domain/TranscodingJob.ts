@@ -58,7 +58,7 @@ export class TranscodingJob {
     if (thumbnailResolutions == null || thumbnailResolutions.length === 0) {
       throw new EmptyThumbnailResolutionsError();
     }
-    return thumbnailResolutions;
+    this.thumbnailResolutions = thumbnailResolutions;
   }
 
   private setMkvLocation(mkvHttpUrl: string | undefined, mkvS3ObjectKey: string | undefined) {
