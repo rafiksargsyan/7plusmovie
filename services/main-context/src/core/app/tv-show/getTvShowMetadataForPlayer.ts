@@ -93,8 +93,8 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
   if (episode == undefined) {
     throw new TvShowEpisodeNotFoundError();
   }
-  let mpdFile: string;
-  let m3u8File: string;
+  let mpdFile: Nullable<string>;
+  let m3u8File: Nullable<string>;
   let thumbnailsFile: Nullable<string>;
   let releases = episode.releases;
   if (releases == null) releases = {};
@@ -102,11 +102,7 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
   if (release != null) {
     mpdFile = release._mpdFile;
     m3u8File = release._m3u8File;
-    thumbnailsFile = release._thumbnailsFile;
-  } else {
-    mpdFile = episode.mpdFile;
-    m3u8File = episode.m3u8File;
-    thumbnailsFile = episode.thumbnailsFile;
+    thumbnailsFile = release._thumbnailsFile != null ? release._thumbnailsFile : release._thumbnails.sort((a, b) => a.resolution - b.resolution)[0].thumbnailsFile;
   }
   return {
     releaseYear: tvShow.releaseYear,

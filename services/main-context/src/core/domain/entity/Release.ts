@@ -13,8 +13,14 @@ export interface ReleaseRead {
   _mpdFile: string;
   _m3u8File: string;
   _thumbnailsFile: string;
+  _thumbnails: { resolution: number, thumbnailsFile: string } [];
   _releaseIndexerContextId: Nullable<string>;
   _rootFolder: string;
+}
+
+export interface Thumbnail {
+  resolution: number;
+  thumbnailsFile: string;
 }
 
 export class Release {
@@ -24,6 +30,7 @@ export class Release {
   private _mpdFile: string;
   private _m3u8File: string;
   private _thumbnailsFile: string;
+  private _thumbnails: Thumbnail[];
   // This is the id in the release indexer context, if a release is replaced with
   // a better release in the context we will replace it also in the main context.
   private _releaseIndexerContextId: Nullable<string>;
@@ -32,8 +39,8 @@ export class Release {
   private _resolution: ResolutionEnum;
 
   private constructor(createEmptyObject: boolean, subtitles?: { [key: string]: Subtitle }, audios?: { [key: string]: Audio },
-                      video?: Video, mpdFile?: string, m3u8File?: string, thumbnailsFile?: string, releaseIndexerContextId?: Nullable<string>,
-                      rootFolder?: string, ripType?: Nullable<RipType>, resolution?: Nullable<ResolutionEnum>) {
+                      video?: Video, mpdFile?: string, m3u8File?: string, releaseIndexerContextId?: Nullable<string>,
+                      rootFolder?: string, ripType?: Nullable<RipType>, resolution?: Nullable<ResolutionEnum>, thumbnails?: Thumbnail[]) {
     if (!createEmptyObject) {
       if (subtitles == null) subtitles = {};
       this._subtitles = subtitles;
@@ -41,11 +48,11 @@ export class Release {
       this._video = this.validateVideo(video);
       this._mpdFile = this.validateMpdFile(mpdFile);
       this._m3u8File = this.validateM3U8File(m3u8File);
-      this._thumbnailsFile = this.validateThumbnailsFile(thumbnailsFile);
       this._releaseIndexerContextId = releaseIndexerContextId;
       this._rootFolder = this.validateRootFolder(rootFolder);
       this._resolution = this.validateResolution(resolution);
       this._ripType = this.validateRipType(ripType);
+      this._thumbnails = this.validateThumbnails(thumbnails);
     }
   }
  
@@ -98,11 +105,11 @@ export class Release {
     return m3u8File;
   }
 
-  private validateThumbnailsFile(thumbnailsFile?: string) {
-    if (thumbnailsFile == null || thumbnailsFile.trim() == "") {
-      throw new NullThumbnailsFileError();
+  private validateThumbnails(thumbnails?: Thumbnail[]) {
+    if (thumbnails == null || thumbnails.length === 0) {
+      throw new EmptyThumbnailsError();
     }
-    return thumbnailsFile;
+    return thumbnails;
   }
 
   public static createEmpty() {
@@ -110,9 +117,9 @@ export class Release {
   }
 
   public static create(subtitles: { [key: string]: Subtitle }, audios: { [key: string]: Audio }, video: Video,
-                       mpdFile: string, m3u8File: string, thumbnailsFile: string, releaseIndexerContextId: Nullable<string>,
-                       rootFolder: string, ripType: Nullable<RipType>, resolution: Nullable<ResolutionEnum>) {
-    return new Release(false, subtitles, audios, video, mpdFile, m3u8File, thumbnailsFile, releaseIndexerContextId, rootFolder, ripType, resolution);
+                       mpdFile: string, m3u8File: string, releaseIndexerContextId: Nullable<string>,
+                       rootFolder: string, ripType: Nullable<RipType>, resolution: Nullable<ResolutionEnum>, thumbnails: Thumbnail[]) {
+    return new Release(false, subtitles, audios, video, mpdFile, m3u8File, releaseIndexerContextId, rootFolder, ripType, resolution, thumbnails);
   }
 
   public get rootFolder() {
@@ -296,7 +303,7 @@ export class NullMpdFileError extends Error {}
 
 export class NullM3U8FileError extends Error {}
 
-export class NullThumbnailsFileError extends Error {}
+export class EmptyThumbnailsError extends Error {}
 
 export class BlankRootFolderError extends Error {}
 

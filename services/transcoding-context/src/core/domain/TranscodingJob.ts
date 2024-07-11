@@ -35,9 +35,11 @@ export class TranscodingJob {
   private audioTranscodeSpecs: AudioTranscodeSpec[];
   private textTranscodeSpecs: TextTranscodeSpec[];
   private videoTranscodeSpec: VideoTranscodeSpec;
+  private thumbnailResolutions: number[];
 
   public constructor(createEmptyObject: boolean, mkvS3ObjectKey?: string, mkvHttpUrl?: string, outputFolderKey?: string,
-    audioTranscodeSpecs?: AudioTranscodeSpec[], textTranscodeSpecs?: TextTranscodeSpec[], videTranscodeSpec?: VideoTranscodeSpec) {
+    audioTranscodeSpecs?: AudioTranscodeSpec[], textTranscodeSpecs?: TextTranscodeSpec[], videTranscodeSpec?: VideoTranscodeSpec,
+    thumbnailResolutions?: number[]) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setMkvLocation(mkvHttpUrl, mkvS3ObjectKey);
@@ -45,10 +47,18 @@ export class TranscodingJob {
       this.setAudioTranscodeSpecs(audioTranscodeSpecs);
       this.setTextTranscodeSpecs(textTranscodeSpecs);
       this.setVideoTranscodeSpec(videTranscodeSpec);
+      this.setThumbnailResolutions(thumbnailResolutions);
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
       this.ttl = Math.round((this.creationTime / 1000)) + 15 * 24 * 60 * 60;
     }
+  }
+
+  private setThumbnailResolutions(thumbnailResolutions?: number[]) {
+    if (thumbnailResolutions == null || thumbnailResolutions.length === 0) {
+      throw new EmptyThumbnailResolutionsError();
+    }
+    return thumbnailResolutions;
   }
 
   private setMkvLocation(mkvHttpUrl: string | undefined, mkvS3ObjectKey: string | undefined) {
@@ -118,3 +128,5 @@ class NoMkvLocationError extends Error {}
 class InvalidMkvHttpUrlError extends Error {}
 
 class NullVideoTranscodeSpecError extends Error {}
+
+class EmptyThumbnailResolutionsError extends Error {}

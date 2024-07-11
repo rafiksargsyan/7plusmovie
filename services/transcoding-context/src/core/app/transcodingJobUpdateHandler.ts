@@ -1,6 +1,5 @@
 import { Marshaller } from '@aws/dynamodb-auto-marshaller';
 import { DynamoDBStreamEvent } from 'aws-lambda';
-import { Octokit } from '@octokit/rest';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import { Lang } from '../domain/Lang';
 import { Nullable } from '../domain/Nullable';
@@ -44,15 +43,13 @@ interface TranscodingJobRead {
   textTranscodeSpecs: TextTranscodeSpec[];
   videoTranscodeSpec: VideoTranscodeSpec;
   githubWorkflowRunId: Nullable<number>;
+  thumbnailResolutions: number[];
 }
 
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
   try {  
     const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
     const secret = JSON.parse(secretStr.SecretString!);
-    const octokit = new Octokit({
-      auth: secret.GITHUB_PAT!,
-    });
     for (const record of event.Records) {
       if (record.eventName === 'REMOVE') {
         // For now nothing to do in case of item removal
@@ -73,7 +70,8 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
           mkv_http_url: (transcodingJobRead as TranscodingJobRead).mkvHttpUrl,
           output_s3_folder_key: (transcodingJobRead as TranscodingJobRead).outputFolderKey,
           transcoding_spec_base64_encoded: Buffer.from(JSON.stringify(transcodingSpec)).toString("base64"),
-          transcoding_context_job_id: (transcodingJobRead as TranscodingJobRead).id
+          transcoding_context_job_id: (transcodingJobRead as TranscodingJobRead).id,
+          thumbnail_resolutions_base64_encoded: Buffer.from(JSON.stringify((transcodingJobRead as TranscodingJobRead).thumbnailResolutions)).toString("base64")
         };
         const params = {
           owner: process.env.GITHUB_OWNER!,

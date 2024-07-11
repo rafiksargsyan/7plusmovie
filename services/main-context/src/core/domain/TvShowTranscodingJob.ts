@@ -21,6 +21,7 @@ export interface TvShowTranscodingJobRead {
   releaseIndexerContextReleaseId: Nullable<string>;
   ripType: Nullable<RipType>;
   resolution: Nullable<Resolution>;
+  thumbnailResolutions: number[];
 }
 
 export class TvShowTranscodingJob {
@@ -43,11 +44,12 @@ export class TvShowTranscodingJob {
   private releaseIndexerContextReleaseId: string;
   private ripType: RipType;
   private resolution: Resolution;
+  private thumbnailResolutions: number[];
 
   public constructor(createEmptyObject: boolean, tvShowId?: string, season?: number, episode?: number,
     mkvS3ObjectKey?: string, mkvHttpUrl?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
     textTranscodeSpecs?: TextTranscodeSpec[], videoTranscodeSpec?: VideoTranscodeSpec,  releaseId?: string,
-    releasesToBeRemoved?: string[], ripType?: Nullable<RipType>, resolution?: Nullable<Resolution>) {
+    releasesToBeRemoved?: string[], ripType?: Nullable<RipType>, resolution?: Nullable<Resolution>, thumbnailResolutions?: number[]) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setTvShowId(tvShowId);
@@ -61,10 +63,18 @@ export class TvShowTranscodingJob {
       this.setTextTranscodeSpecs(textTranscodeSpecs);
       this.setVideoTranscodeSpec(videoTranscodeSpec);
       this.setReleasesToBeRemoved(releasesToBeRemoved);
+      this.setThumbnailResolutions(thumbnailResolutions);
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
       this.ttl = Math.round(this.creationTime / 1000) + 15 * 24 * 60 * 60;
     }
+  }
+
+  private setThumbnailResolutions(thumbnailResolutions?: number[]) {
+    if (thumbnailResolutions == null || thumbnailResolutions.length === 0) {
+      throw new EmptyThumbnailResolutionsError();
+    }
+    this.thumbnailResolutions = thumbnailResolutions;
   }
 
   private setTvShowId(tvShowId: string | undefined) {
@@ -176,3 +186,5 @@ export class InvalidMkvHttpUrlError extends Error {}
 export class NullVideoTranscodeSpecError extends Error {}
 
 export class EmptyReleaseIdError extends Error {}
+
+export class EmptyThumbnailResolutionsError extends Error {}

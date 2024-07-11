@@ -64,8 +64,8 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
     mediaAssetsDomain = cfDistro.domain;
   }
   mediaAssetsDomain = masqueradeMediaAssetsDomain(mediaAssetsDomain);
-  let mpdFile: string;
-  let m3u8File: string;
+  let mpdFile: Nullable<string>;
+  let m3u8File: Nullable<string>;
   let thumbnailsFile: Nullable<string>;
   let releases = movie.releases;
   if (releases == null) releases = {};
@@ -73,11 +73,7 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   if (release != null) {
     mpdFile = release._mpdFile;
     m3u8File = release._m3u8File;
-    thumbnailsFile = release._thumbnailsFile;
-  } else {
-    mpdFile = movie.mpdFile;
-    m3u8File = movie.m3u8File;
-    thumbnailsFile = movie.thumbnailsFile;
+    thumbnailsFile = release._thumbnailsFile != null ? release._thumbnailsFile : release._thumbnails.sort((a, b) => a.resolution - b.resolution)[0].thumbnailsFile;
   }
   return {
 //    subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `https://${mediaAssetsDomain}/${movie.subtitles[key].relativePath}`; return acc;}, {}),
