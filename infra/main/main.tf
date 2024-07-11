@@ -194,12 +194,12 @@ resource "aws_s3_bucket_lifecycle_configuration" "raw_media_assets_lifecycle_con
     id = "default"
 
     transition {
-      days          = 10
+      days          = 30
       storage_class = "GLACIER_IR"
     }
 
     transition {
-      days          = 100
+      days          = 120
       storage_class = "DEEP_ARCHIVE"
     }
 
