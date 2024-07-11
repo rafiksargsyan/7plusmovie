@@ -291,14 +291,14 @@ export class TvShow {
     if (strIsBlank(key)) {
       throw new NullReleaseKeyError();
     }
-    delete episode[key!.trim()];
+    delete episode.releases[key!.trim()];
     this.touch();
   }
 
   public getRelease(s?: number, e?: number, key?: string) {
     if (strIsBlank(key)) return null;
     const episode = this.getEpisodeOrThrow(s, e);
-    return episode[key!];
+    return episode.releases[key!];
   }
 }
 

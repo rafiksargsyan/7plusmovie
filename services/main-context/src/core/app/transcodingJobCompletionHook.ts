@@ -9,11 +9,12 @@ import { Movie } from "../domain/aggregate/Movie";
 import { TvShowRepositoryInterface } from "../ports/TvShowRepositoryInterface";
 import { TvShowRepository } from "../../adapters/TvShowRepository";
 import { MovieTranscodingJobRead } from "../domain/MovieTranscodingJob";
-import { Audio, Release, Resolution, Subtitle, Thumbnail, Video } from "../domain/entity/Release";
+import { Audio, AudioRead, Release, ReleaseRead, Resolution, Subtitle, Thumbnail, Video } from "../domain/entity/Release";
 import { S3 } from '@aws-sdk/client-s3';
 import { strIsBlank } from "../../utils";
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import { TvShowTranscodingJobRead } from "../domain/TvShowTranscodingJob";
+import { AudioLang } from "../domain/AudioLang";
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const cloudflareAccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
@@ -106,12 +107,35 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     movieTranscodingJobRead.releasesToBeRemoved.forEach(r => movie.removeRelease(r));
     movie.transcodingFinished();
 
+    const migrationRelease = movie.getRelease("migration");
+    let removeMigrationRelease = false;
+    if (migrationRelease != null) {
+      removeMigrationRelease = checkReleaseAudios(migrationRelease, Object.values(audios));
+      if (removeMigrationRelease) {
+        movie.removeRelease("migration");
+      }
+    } 
+
     await docClient.put({ TableName: dynamodbMovieTableName, Item: movie });
 
     for (let rf of rootFolders) {
       try {
         await emptyS3Directory(s3, mediaAssetsS3Bucket, rf);
         await emptyS3Directory(r2, mediaAssetsR2Bucket, rf);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    if (removeMigrationRelease) {
+      const rootFolder = `${movie.id}`;
+      try {
+        await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/vod`);
+        await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/thumbnails`);
+        await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/subtitles`);
+        await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/vod`);
+        await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/thumbnails`);
+        await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/subtitles`);
       } catch (e) {
         console.error(e);
       }
@@ -169,6 +193,15 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     });  
     tvShowTranscodingJobRead.releasesToBeRemoved.forEach(k => tvShow.removeRelease(season, episode, k));
 
+    const migrationRelease = tvShow.getRelease(season, episode, "migration");
+    let removeMigrationRelease = false;
+    if (migrationRelease != null) {
+      removeMigrationRelease = checkReleaseAudios(migrationRelease, Object.values(audios));
+      if (removeMigrationRelease) {
+        tvShow.removeRelease(season, episode, "migration");
+      }
+    } 
+
     await tvShowRepo.saveTvShow(tvShow);
 
     for (let rf of rootFolders) {
@@ -180,6 +213,20 @@ export const handler = async (event: HandlerParam): Promise<void> => {
       }
     }
     
+    if (removeMigrationRelease) {
+      const rootFolder = `${tvShow.id}/${season}/${episode}`;
+      try {
+        await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/vod`);
+        await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/thumbnails`);
+        await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/subtitles`);
+        await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/vod`);
+        await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/thumbnails`);
+        await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/subtitles`);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     return;
   }
   
@@ -189,6 +236,22 @@ export const handler = async (event: HandlerParam): Promise<void> => {
 class FailedToGetMovieOrTvShowTranscodingJobError extends Error {};
 
 class FailedToGetMovieError extends Error {};
+
+function checkReleaseAudios(r: Release, audios: Audio[]) {
+  const rAudios = (r as unknown as ReleaseRead)._audios;
+  for (const k in rAudios) {
+    const ra = rAudios[k];
+    let audioExists = false;
+    for (const a of audios) {
+      if (AudioLang.looseEquals(ra.lang, (a as unknown as AudioRead).lang)) {
+        audioExists = true;
+        break;
+      }
+    }
+    if (!audioExists) return false;
+  }
+  return true;
+}
 
 const getS3ObjectSize = async (bucketName: string, path: string): Promise<number | undefined> => {
   let objectData;
