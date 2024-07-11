@@ -93,6 +93,7 @@ function run() {
                     webvttFile.write(`${vttTimestamp(startTime)} --> ${vttTimestamp(endTime)}\n`);
                     webvttFile.write(`sprite-${spriteNumber}.jpg#xywh=${spritePositionX},${spritePositionY},${width},${height}\n\n`);
                 }
+                webvttFile.close();
             }
         }
         catch (error) {

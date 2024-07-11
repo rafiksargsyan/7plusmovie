@@ -35,7 +35,7 @@ export class Release {
   // a better release in the context we will replace it also in the main context.
   private _releaseIndexerContextId: Nullable<string>;
   private _rootFolder: string;
-  private _ripType: RipType;
+  private _ripType: Nullable<RipType>;
   private _resolution: ResolutionEnum;
 
   private constructor(createEmptyObject: boolean, subtitles?: { [key: string]: Subtitle }, audios?: { [key: string]: Audio },
@@ -51,7 +51,7 @@ export class Release {
       this._releaseIndexerContextId = releaseIndexerContextId;
       this._rootFolder = this.validateRootFolder(rootFolder);
       this._resolution = this.validateResolution(resolution);
-      this._ripType = this.validateRipType(ripType);
+      this._ripType = ripType;
       this._thumbnails = this.validateThumbnails(thumbnails);
     }
   }
@@ -61,13 +61,6 @@ export class Release {
       throw new NullResolutionError();
     }
     return resolution;
-  }
-
-  private validateRipType(ripType?: Nullable<RipType>) {
-    if (ripType == null) {
-      throw new NullRipTypeError();
-    }
-    return ripType;
   }
 
   private validateRootFolder(rootFolder?: string) {
