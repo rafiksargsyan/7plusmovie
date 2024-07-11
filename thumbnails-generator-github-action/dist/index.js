@@ -74,10 +74,13 @@ function run() {
                 if (height == undefined) {
                     throw new FailedToResolveThumbnailHeightError();
                 }
-                const thumbnailsCount = fs_1.default.readdirSync(outputFolderAbsolutePath).filter(_ => _.startsWith('thumbnail')).length;
+                const thumbnailsCount = fs_1.default.readdirSync(resAbsolutePath).filter(_ => _.startsWith('thumbnail')).length;
                 const generateSpritesCommand = `magick montage -quality 20 -geometry +0+0 -tile ${spriteC}x${spriteR} thumbnail-*.png sprite.jpg`;
                 (0, child_process_1.execSync)(generateSpritesCommand);
                 (0, child_process_1.execSync)(`rm thumbnail-*`);
+                if (thumbnailsCount <= spriteS) {
+                    (0, child_process_1.execSync)(`mv sprite.jpg sprite-0.jpg`);
+                }
                 const webvttFilename = 'thumbnails.vtt';
                 const webvttFile = fs_1.default.createWriteStream(webvttFilename);
                 webvttFile.write('WEBVTT\n\n');

@@ -34,12 +34,16 @@ async function run(): Promise<void> {
       if (height == undefined) {
         throw new FailedToResolveThumbnailHeightError();
       }
-      const thumbnailsCount = fs.readdirSync(outputFolderAbsolutePath).filter(_ => _.startsWith('thumbnail')).length;
+      const thumbnailsCount = fs.readdirSync(resAbsolutePath).filter(_ => _.startsWith('thumbnail')).length;
   
       const generateSpritesCommand = `magick montage -quality 20 -geometry +0+0 -tile ${spriteC}x${spriteR} thumbnail-*.png sprite.jpg`;
       execSync(generateSpritesCommand);
   
       execSync(`rm thumbnail-*`);
+
+      if (thumbnailsCount <= spriteS) {
+        execSync(`mv sprite.jpg sprite-0.jpg`);
+      }
   
       const webvttFilename = 'thumbnails.vtt';
       const webvttFile = fs.createWriteStream(webvttFilename);
