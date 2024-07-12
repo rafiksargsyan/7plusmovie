@@ -48,6 +48,7 @@ export class SubsLang {
   static readonly SK = new SubsLang('SK', 'sk', 'sk', "Slovak");
   static readonly SR = new SubsLang('SR', 'sr', 'sr', "Serbian");
   static readonly AR = new SubsLang('AR', 'ar', 'ar', "Arabic");
+  static readonly HE = new SubsLang('HE', 'he', 'he', 'Hebrew');
 
   private static readonly FROM_ISO_639_2 = {
     "en" : SubsLang.EN,
@@ -83,7 +84,8 @@ export class SubsLang {
     "sl" : SubsLang.SL,
     "sk" : SubsLang.SK,
     "sr" : SubsLang.SR,
-    "ar" : SubsLang.AR
+    "ar" : SubsLang.AR,
+    "he" : SubsLang.HE
   } as const;
    
   private static readonly FROM_ISO_639_1 = {
@@ -127,7 +129,8 @@ export class SubsLang {
     "slk" : SubsLang.SK,
     "slo" : SubsLang.SK,
     "srp" : SubsLang.SR,
-    "ara" : SubsLang.AR
+    "ara" : SubsLang.AR,
+    "heb" : SubsLang.HE
   } as const;
 
   public readonly key: string;
