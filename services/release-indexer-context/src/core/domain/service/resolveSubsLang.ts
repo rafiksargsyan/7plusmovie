@@ -8,6 +8,7 @@ import { SubsLang } from "../value-object/SubsLang";
 // analyzing the movie details from TMDB.
 export function resolveSubsLang(title: Nullable<string>, code: Nullable<string>, locale: L8nLang) {
   if (title == null) title = "";
+  const titleOriginal = title;
   title = title.toLowerCase();
   let subsLang = SubsLang.fromISO_639_1(code);
   if (subsLang == null) subsLang = SubsLang.fromISO_639_2(code);
@@ -21,7 +22,7 @@ export function resolveSubsLang(title: Nullable<string>, code: Nullable<string>,
   if (SubsLang.equals(subsLang, SubsLang.ES) && title.includes("spain")) return SubsLang.ES_ES;
   if (SubsLang.equals(subsLang, SubsLang.FR) && (title.includes("canad") || title.includes("vfq"))) return SubsLang.FR_CA;
   if (SubsLang.equals(subsLang, SubsLang.FR) && (title.includes("france") || title.includes("vff"))) return SubsLang.FR_FR;
-  if (SubsLang.equals(subsLang, SubsLang.PT) && title.includes("brazil")) return SubsLang.PT_BR;
+  if (SubsLang.equals(subsLang, SubsLang.PT) && (title.includes("brazil") || titleOriginal.includes("BR"))) return SubsLang.PT_BR;
   if (SubsLang.equals(subsLang, SubsLang.PT) && title.includes("portugal")) return SubsLang.PT_PT;
   return subsLang;
 }

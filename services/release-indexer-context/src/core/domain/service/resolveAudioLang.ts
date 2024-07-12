@@ -27,6 +27,7 @@ export function resolveAudioLang(code: Nullable<string>,
     }
   }                             
   if (title == null) title = "";
+  const titleOriginal = title;
   title = title.toLowerCase();
   let audioLang = AudioLang.fromISO_639_1(code);
   if (audioLang == null) audioLang = AudioLang.fromISO_639_2(code);
@@ -40,7 +41,7 @@ export function resolveAudioLang(code: Nullable<string>,
   if (AudioLang.equals(audioLang, AudioLang.ES) && title.includes("spain")) return AudioLang.ES_ES;
   if (AudioLang.equals(audioLang, AudioLang.FR) && (title.includes("canad") || title.includes("vfq"))) return AudioLang.FR_CA;
   if (AudioLang.equals(audioLang, AudioLang.FR) && (title.includes("france") || title.includes("vff"))) return AudioLang.FR_FR;
-  if (AudioLang.equals(audioLang, AudioLang.PT) && title.includes("brazil")) return AudioLang.PT_BR;
+  if (AudioLang.equals(audioLang, AudioLang.PT) && (title.includes("brazil") || titleOriginal.includes("BR"))) return AudioLang.PT_BR;
   if (AudioLang.equals(audioLang, AudioLang.PT) && title.includes("portugal")) return AudioLang.PT_PT;
   const ruAudioAuthorList = AudioLang.audioAuthorPriorityList[AudioLang.RU.key];
   for (let a of ruAudioAuthorList) {
