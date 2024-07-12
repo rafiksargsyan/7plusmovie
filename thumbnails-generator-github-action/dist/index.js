@@ -75,14 +75,13 @@ function run() {
                     throw new FailedToResolveThumbnailHeightError();
                 }
                 const thumbnailsCount = fs_1.default.readdirSync(resAbsolutePath).filter(_ => _.startsWith('thumbnail')).length;
-                const generateSpritesCommand = `magick montage -quality 20 -geometry +0+0 -tile ${spriteC}x${spriteR} thumbnail-*.png sprite.jpg`;
+                const generateSpritesCommand = `magick montage -quality 15 -geometry +0+0 -tile ${spriteC}x${spriteR} thumbnail-*.png sprite.jpg`;
                 (0, child_process_1.execSync)(generateSpritesCommand);
                 (0, child_process_1.execSync)(`rm thumbnail-*`);
                 if (thumbnailsCount <= spriteS) {
                     (0, child_process_1.execSync)(`mv sprite.jpg sprite-0.jpg`);
                 }
                 const webvttFilename = 'thumbnails.vtt';
-                //      fs.writeFileSync(webvttFilename, 'WEBVTT\n\n');
                 let vttStr = 'WEBVTT\n\n';
                 for (let i = 0; i < thumbnailsCount; ++i) {
                     const spriteNumber = Math.floor(i / spriteS);
@@ -92,8 +91,6 @@ function run() {
                     const spritePositionY = Math.floor(i % spriteS / spriteC) * height;
                     vttStr += `${vttTimestamp(startTime)} --> ${vttTimestamp(endTime)}\n`;
                     vttStr += `sprite-${spriteNumber}.jpg#xywh=${spritePositionX},${spritePositionY},${width},${height}\n\n`;
-                    //        fs.writeFileSync(webvttFilename, `${vttTimestamp(startTime)} --> ${vttTimestamp(endTime)}\n`, { flag: 'a+'});
-                    //        fs.writeFileSync(webvttFilename, `sprite-${spriteNumber}.jpg#xywh=${spritePositionX},${spritePositionY},${width},${height}\n\n`, { flag: 'a+' });
                 }
                 fs_1.default.writeFileSync(webvttFilename, Buffer.from(vttStr), { flag: 'ax' });
             }
@@ -126,10 +123,10 @@ class FailedToResolveThumbnailWidthError extends Error {
 ;
 function resolveSpriteSize(resolution) {
     if (resolution <= 60) {
-        return [12, 12];
+        return [8, 8];
     }
     if (resolution <= 120) {
-        return [6, 6];
+        return [5, 5];
     }
     return [3, 3];
 }

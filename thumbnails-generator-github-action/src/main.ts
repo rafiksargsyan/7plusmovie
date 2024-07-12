@@ -36,7 +36,7 @@ async function run(): Promise<void> {
       }
       const thumbnailsCount = fs.readdirSync(resAbsolutePath).filter(_ => _.startsWith('thumbnail')).length;
   
-      const generateSpritesCommand = `magick montage -quality 20 -geometry +0+0 -tile ${spriteC}x${spriteR} thumbnail-*.png sprite.jpg`;
+      const generateSpritesCommand = `magick montage -quality 15 -geometry +0+0 -tile ${spriteC}x${spriteR} thumbnail-*.png sprite.jpg`;
       execSync(generateSpritesCommand);
   
       execSync(`rm thumbnail-*`);
@@ -88,10 +88,10 @@ class FailedToResolveThumbnailWidthError extends Error {};
 
 function resolveSpriteSize(resolution: number) {
   if (resolution <= 60) {
-    return [12, 12];
+    return [8, 8];
   }
   if (resolution <= 120) {
-    return [6, 6];
+    return [5, 5];
   }
   return [3, 3];
 }
