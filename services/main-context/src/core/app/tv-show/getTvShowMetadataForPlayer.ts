@@ -102,7 +102,7 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
   if (release != null) {
     mpdFile = release._mpdFile;
     m3u8File = release._m3u8File;
-    thumbnailsFile = release._thumbnailsFile != null ? release._thumbnailsFile : release._thumbnails.sort((a, b) => a.resolution - b.resolution)[0].thumbnailsFile;
+    thumbnailsFile = release._thumbnails.sort((a, b) => a.resolution - b.resolution)[0].thumbnailsFile;
   }
   return {
     releaseYear: tvShow.releaseYear,

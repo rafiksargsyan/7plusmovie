@@ -73,7 +73,7 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   if (release != null) {
     mpdFile = release._mpdFile;
     m3u8File = release._m3u8File;
-    thumbnailsFile = release._thumbnailsFile != null ? release._thumbnailsFile : release._thumbnails.sort((a, b) => a.resolution - b.resolution)[0].thumbnailsFile;
+    thumbnailsFile = release._thumbnails.sort((a, b) => a.resolution - b.resolution)[0].thumbnailsFile;
   }
   return {
 //    subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `https://${mediaAssetsDomain}/${movie.subtitles[key].relativePath}`; return acc;}, {}),

@@ -12,7 +12,6 @@ export interface ReleaseRead {
   _video: VideoRead;
   _mpdFile: string;
   _m3u8File: string;
-  _thumbnailsFile: string;
   _thumbnails: { resolution: number, thumbnailsFile: string } [];
   _releaseIndexerContextId: Nullable<string>;
   _rootFolder: string;
