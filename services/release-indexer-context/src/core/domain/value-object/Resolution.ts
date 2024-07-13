@@ -45,7 +45,7 @@ export class Resolution {
     if (r1 == null && r2 != null) return -1;
     if (r1 != null && r2 == null) return 1;
     if (r1?.key == r2?.key) return 0;
-    return (r1 as Resolution).priority < (r2 as Resolution).priority ? -1 : 1;
+    return (r1 as Resolution).priority - (r2 as Resolution).priority;
   }
 }
 
