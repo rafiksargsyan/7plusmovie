@@ -152,6 +152,7 @@ export class Release {
       if (a1.author != null && a2.author == null) return 1;
       let audioAuthorPriorityList = AudioLang.audioAuthorPriorityList[a1.lang.key];
       if (audioAuthorPriorityList == null) audioAuthorPriorityList = [];
+      if (AudioAuthor.equals(a1.author, a2.author)) return 0;
       const a1AuthorIndex = audioAuthorPriorityList.findIndex((v) => AudioAuthor.equals(a1.author, v));
       const a2AuthorIndex = audioAuthorPriorityList.findIndex((v) => AudioAuthor.equals(a2.author, v));
       if (a1AuthorIndex === -1 && a2AuthorIndex === -1) return null;

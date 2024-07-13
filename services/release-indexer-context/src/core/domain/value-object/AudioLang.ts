@@ -57,7 +57,7 @@ export class AudioLang {
       AudioAuthor.JASKIER, AudioAuthor.VIRUSEPROJECT, AudioAuthor.HDREZKA, AudioAuthor.TVSHOWS, AudioAuthor.KINOMANIA, 
       AudioAuthor.IVI, AudioAuthor.KIRILLICA, AudioAuthor.LOSTFILM, AudioAuthor.READ_HEAD_SOUND, AudioAuthor.MOVIE_DUBBING,
       AudioAuthor.BRAVO_RECORDS_GEORGIA, AudioAuthor.MOVIE_DALEN ],
-    "UK" : [AudioAuthor.ONE_PLUS_ONE],
+    "UK" : [AudioAuthor.ONE_PLUS_ONE, AudioAuthor.POSTMODERN],
     "BE" : [AudioAuthor.KINAKONG]
   }
 
