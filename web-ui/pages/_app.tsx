@@ -4,7 +4,7 @@ import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router';
 import Script from 'next/script';
 import { useEffect, useState } from 'react';
-import '../components/plyr-overrides.css';
+import '../components/vidstack-overrides.css';
 import { Analytics } from '@vercel/analytics/react';
 import { hotjar } from 'react-hotjar';
 

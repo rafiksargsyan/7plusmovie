@@ -1,0 +1,8 @@
+:where(.vds-poster) {
+  height: auto !important
+}
+
+[data-media-player] {
+  position: absolute;
+  height: 100vh;
+}
