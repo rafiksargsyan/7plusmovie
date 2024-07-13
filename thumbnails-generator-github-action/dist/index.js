@@ -75,7 +75,7 @@ function run() {
                     throw new FailedToResolveThumbnailHeightError();
                 }
                 const thumbnailsCount = fs_1.default.readdirSync(resAbsolutePath).filter(_ => _.startsWith('thumbnail')).length;
-                const generateSpritesCommand = `magick montage -quality 15 -geometry +0+0 -tile ${spriteC}x${spriteR} thumbnail-*.png sprite.jpg`;
+                const generateSpritesCommand = `magick montage -quality 18 -geometry +0+0 -tile ${spriteC}x${spriteR} thumbnail-*.png sprite.jpg`;
                 (0, child_process_1.execSync)(generateSpritesCommand);
                 (0, child_process_1.execSync)(`rm thumbnail-*`);
                 if (thumbnailsCount <= spriteS) {

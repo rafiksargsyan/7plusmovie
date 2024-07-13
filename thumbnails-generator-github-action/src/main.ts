@@ -36,7 +36,7 @@ async function run(): Promise<void> {
       }
       const thumbnailsCount = fs.readdirSync(resAbsolutePath).filter(_ => _.startsWith('thumbnail')).length;
   
-      const generateSpritesCommand = `magick montage -quality 15 -geometry +0+0 -tile ${spriteC}x${spriteR} thumbnail-*.png sprite.jpg`;
+      const generateSpritesCommand = `magick montage -quality 18 -geometry +0+0 -tile ${spriteC}x${spriteR} thumbnail-*.png sprite.jpg`;
       execSync(generateSpritesCommand);
   
       execSync(`rm thumbnail-*`);
