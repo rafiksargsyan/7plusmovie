@@ -87,7 +87,7 @@ export const handler = async (): Promise<void> => {
           resolutions: resolveResolutions(RipType.fromKeyOrThrow(r.release.ripType),
           ResolutionEnum.fromKeyOrThrow(r.release.resolution)).map(r => ({ resolution: r })),
         },
-        audioTranscodeSpecParams: createAudioTranscodeSpec(r.release.audios),
+        audioTranscodeSpecParams: createAudioTranscodeSpec(ripType, r.release.audios),
         textTranscodeSpecParams: r.release.subs.map(s => ({
           stream: s.stream,
           lang: s.lang,
@@ -145,7 +145,7 @@ function releaseContainsEnglishAudio(release: RicRelease) {
   return false;
 }
 
-function createAudioTranscodeSpec(audios: [{ stream: number, channels: number, bitrate: number, lang: string }]) {
+function createAudioTranscodeSpec(ripType: RipType, audios: [{ stream: number, channels: number, bitrate: number, lang: string }]) {
   const audioTranscodeSpec: AudioTranscodeSpecParam[] = [];
   for (const a of audios) {
     if (a.channels === 1) {
@@ -164,7 +164,7 @@ function createAudioTranscodeSpec(audios: [{ stream: number, channels: number, b
           lang: a.lang
         })
       }
-      if (a.channels >= 6) {
+      if (a.channels >= 6 || !(RipType.fromKey(ripType.key)?.isLowQuality())) {
         audioTranscodeSpec.push({
           stream: a.stream,
           bitrate: `${Math.min(640, Math.round(a.bitrate/1000))}k`,
