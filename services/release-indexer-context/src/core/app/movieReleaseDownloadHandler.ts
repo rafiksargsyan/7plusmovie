@@ -22,6 +22,8 @@ import { resolveSubsAuthor } from '../domain/service/resolveSubsAuthor';
 import { compareReleaseCandidates } from '../domain/service/compareReleaseCandidates';
 import { ReleaseCandidate } from '../domain/entity/ReleaseCandidate';
 import { InvocationType, InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
+import { AudioVoiceType } from '../domain/value-object/AudioVoiceType';
+import { AudioLang } from '../domain/value-object/AudioLang';
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -202,6 +204,11 @@ async function processMediaFile(m: Movie, name: string, rcKey: string, rc: Torre
         const author = resolveAudioAuthor(titleStr, rc.tracker);
         let lang = resolveAudioLang(langStr, m.originalLocale, titleStr, author, numUndefinedAudioStreams, numAudioStreams, rc.radarrLanguages);
         if (lang == null) continue;
+        const voiceType = resolveVoiceType(titleStr, lang, m.originalLocale, author);
+        // Sometimes mkv creators forget to setup correct lang code for original one
+        if (AudioVoiceType.compare(voiceType, AudioVoiceType.ORIGINAL) === 0) {
+          lang = AudioLang.fromKeyOrThrow(m.originalLocale.key);
+        }
         const am = new AudioMetadata(s.index, s.channels, bitRate, lang,
           resolveVoiceType(titleStr, lang, m.originalLocale, author), author);
         release.addAudioMetadata(am);

@@ -5,9 +5,9 @@ import { TorrentTracker } from "../value-object/TorrentTracker";
 export function resolveAudioAuthor(title: Nullable<string>, tracker: Nullable<TorrentTracker>) {
   if (title == null) return null;
   title = title.toLowerCase();
-  const hdrezak18PlusRegex = /hdrezka.*18\+/;
-  const viruseProject18PlusRegex = /viruseproject.*18\+/;
-  const jaskier18PlusRegex = /jaskier.*18\+/;
+  const hdrezak18PlusRegex = /hdrezka.*18/;
+  const viruseProject18PlusRegex = /viruseproject.*18/;
+  const jaskier18PlusRegex = /jaskier.*18/;
   const bravoRecordsGeorgiaRegex = /bravo.*records.*georgia/;
   const readHeadSoundRegex = /read.*head.*sound/;
   const movieDubbingRegex = /movie.*dubbing/;
