@@ -35,7 +35,7 @@ export class TvShow {
   private _originalLocale: L8nLang;
   private _originalTitle: string;
   private _releaseYear: number;
-  private _seasons: Season[];
+  private _seasons: Season[] = [];
 
   private constructor(createEmptyObject: boolean, originalLocale: Nullable<L8nLang>,
     originalTitle: Nullable<string>, releaseYear: Nullable<number>) {
@@ -100,11 +100,35 @@ export class TvShow {
     this._tmdbId = tmdbId;
     return true;
   }
-
   
+  private getSeason(seasonNumber: number) {
+    for (const s of this._seasons) {
+      if (s.seasonNumber === seasonNumber) {
+        return s;
+      }
+    }
+    return null;
+  }
+
+  createSeason(seasonNumber: number) {
+    if (seasonNumber == null || seasonNumber < 0 || !Number.isInteger(seasonNumber)) {
+      throw new TvShow_InvalidSeasonNumberError();  
+    }
+    if (this.getSeason(seasonNumber) != null) {
+      throw new TvShow_SeasonAlreadyExistsError();
+    }
+    this._seasons.push({
+      seasonNumber: seasonNumber,
+      episodes: [],
+      names: [],
+      tmdbSeasonNumber: null   
+    })
+  }
 }
 
 export class TvShow_NullOriginalLocaleError {};
 export class TvShow_BlankOriginalTitleError {};
 export class TvShow_InvalidReleaseYearError {};
 export class TvShow_BlankTmdbIdError {};
+export class TvShow_InvalidSeasonNumberError {};
+export class TvShow_SeasonAlreadyExistsError {};
