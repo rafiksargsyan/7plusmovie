@@ -1,4 +1,4 @@
-export type Nullable<T> = T | null | undefined;
+import { Nullable } from "./Nullable";
 
 export function strIsBlank(s: Nullable<string>) {
   return s == null || s.trim() === "";  
