@@ -50,6 +50,7 @@ export class AudioLang {
   static readonly SR = new AudioLang('SR', 'sr', 'sr', "Serbian");
   static readonly AR = new AudioLang('AR', 'ar', 'ar', "Arabic");
   static readonly HE = new AudioLang('HE', 'he', 'he', 'Hebrew');
+  static readonly MYN = new AudioLang('MYN', 'myn', 'myn', 'Mayan');
 
   private static readonly FROM_ISO_639_2 = {
     "en" : AudioLang.EN,
@@ -131,7 +132,8 @@ export class AudioLang {
     "slo" : AudioLang.SK,
     "srp" : AudioLang.SR,
     "ara" : AudioLang.AR,
-    "heb" : AudioLang.HE
+    "heb" : AudioLang.HE,
+    "myn" : AudioLang.MYN
   } as const;
 
   readonly key: string;

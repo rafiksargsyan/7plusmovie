@@ -310,6 +310,7 @@ functions:
       ClOUDFLARE_MEDIA_ASSETS_R2_BUCKET: ${env:ClOUDFLARE_MEDIA_ASSETS_R2_BUCKET}
       CLOUDFLARE_ACCOUNT_ID: ${env:CLOUDFLARE_ACCOUNT_ID}
       SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+    timeout: 300
 
   createTvShow:
     handler: src/core/app/tv-show/createTvShow.handler
@@ -654,6 +655,28 @@ functions:
     events:
       - schedule: rate(${file(./.env.${sls:stage}.yml):MOVIE_NEW_RELEASE_CHECKER_INTERVAL_IN_MINUTES} minutes)
     timeout: 900
+
+  deleteReleaseFromMovie:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      MEDIA_ASSETS_S3_BUCKET: ${env:MEDIA_ASSETS_S3_BUCKET}
+      ClOUDFLARE_MEDIA_ASSETS_R2_BUCKET: ${env:ClOUDFLARE_MEDIA_ASSETS_R2_BUCKET}
+      CLOUDFLARE_ACCOUNT_ID: ${env:CLOUDFLARE_ACCOUNT_ID}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+    handler: src/core/app/deleteReleaseFromMovie.handler
+    events:
+      - http:
+          integration: lambda
+          path: /movie/{id}/release/{releaseId}
+          method: delete
+          request:
+            template:
+              application/json: '{ "movieId" : "$input.params(''id'')",
+                                   "releaseId" : "$input.params(''releaseId'')" }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+    timeout: 20
 
 resources:
   Resources:

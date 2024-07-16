@@ -51,6 +51,7 @@ export class AudioLang {
   static readonly SR = new AudioLang('SR', 'sr', 'sr');
   static readonly AR = new AudioLang('AR', 'ar', 'ar');
   static readonly HE = new AudioLang('HE', 'he', 'he');
+  static readonly MYN = new AudioLang('MYN', 'myn', 'myn');
 
   static readonly audioAuthorPriorityList = {
     "RU" : [ AudioAuthor.JASKIER_18PLUS, AudioAuthor.VIRUSEPROJECT_18PLUS, AudioAuthor.HDREZKA_18PLUS,
@@ -141,7 +142,8 @@ export class AudioLang {
     "slo" : AudioLang.SK,
     "srp" : AudioLang.SR,
     "ara" : AudioLang.AR,
-    "heb" : AudioLang.HE
+    "heb" : AudioLang.HE,
+    "myn" : AudioLang.MYN
   } as const;
 
   readonly key: string;
