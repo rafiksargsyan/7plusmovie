@@ -24,6 +24,6 @@ export function resolveVoiceType(title: Nullable<string>, lang: AudioLang, local
   if (title.includes("original")) return AudioVoiceType.ORIGINAL;
   if (AudioAuthor.equals(author, AudioAuthor.BRAVO_RECORDS_GEORGIA) || AudioAuthor.equals(author, AudioAuthor.READ_HEAD_SOUND) ||
       AudioAuthor.equals(author, AudioAuthor.MOVIE_DUBBING) || AudioAuthor.equals(author, AudioAuthor.MOVIE_DALEN) ||
-      AudioAuthor.equals(author, AudioAuthor.POSTMODERN)) return AudioVoiceType.DUB;
+      AudioAuthor.equals(author, AudioAuthor.POSTMODERN) || AudioAuthor.equals(author, AudioAuthor.PIFAGOR)) return AudioVoiceType.DUB;
   return null;
 }

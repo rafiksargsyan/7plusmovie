@@ -29,5 +29,6 @@ export function resolveAudioAuthor(title: Nullable<string>, tracker: Nullable<To
   if (title.includes('ivi')) return AudioAuthor.IVI;
   if (title.includes('jaskier')) return AudioAuthor.JASKIER;
   if (title.includes('кінаконг')) return AudioAuthor.KINAKONG;
+  if (title.includes('пифагор')) return AudioAuthor.PIFAGOR;
   return null;
 }
