@@ -124,6 +124,33 @@ export class TvShow {
       tmdbSeasonNumber: null   
     })
   }
+
+  private getSeasonByTmdbSeasonNumber(tmdbSeasonNumber: number) {
+    for (const s of this._seasons) {
+      if (s.tmdbSeasonNumber === tmdbSeasonNumber) {
+        return s;
+      }
+    }
+    return null;
+  }
+
+  setTmdbSeasonNumber(seasonNumber: number, tmdbSeasonNumber: number) {
+    const season: Nullable<Season> = this.getSeason(seasonNumber);
+    if (season == null) {
+      throw new TvShow_SeasonNotFoundError();  
+    }
+    if (tmdbSeasonNumber == null || tmdbSeasonNumber < 0 || !Number.isInteger(tmdbSeasonNumber)) {
+        throw new TvShow_InvalidTmdbSeasonNumberError();  
+      }
+    if (this.getSeasonByTmdbSeasonNumber(tmdbSeasonNumber) != null) {
+      throw new TvShow_SeasonWithTmdbSeasonNumberAlreadyExistsError();
+    }
+    if (season.tmdbSeasonNumber !== tmdbSeasonNumber) {
+      season.tmdbSeasonNumber = tmdbSeasonNumber;
+      return true;
+    }
+    return false;
+  }
 }
 
 export class TvShow_NullOriginalLocaleError {};
@@ -132,3 +159,6 @@ export class TvShow_InvalidReleaseYearError {};
 export class TvShow_BlankTmdbIdError {};
 export class TvShow_InvalidSeasonNumberError {};
 export class TvShow_SeasonAlreadyExistsError {};
+export class TvShow_SeasonNotFoundError {};
+export class TvShow_SeasonWithTmdbSeasonNumberAlreadyExistsError {};
+export class TvShow_InvalidTmdbSeasonNumberError {};
