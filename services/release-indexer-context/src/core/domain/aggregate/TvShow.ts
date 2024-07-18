@@ -13,6 +13,7 @@ interface Season {
 }
 
 interface Episode {
+  creationTime: number;
   names: string[];
   releases: { [releaseId:string]: { release: Release, replacedReleaseIds: string[] } }
   tmdbEpisodeNumber: Nullable<number>;
@@ -110,10 +111,22 @@ export class TvShow {
     return null;
   }
 
-  createSeason(seasonNumber: number) {
+  private getSeasonOrThrow(seasonNumber: number) {
+    const season = this.getSeason(seasonNumber);
+    if (season == null) {
+      throw new TvShow_SeasonNotFoundError();
+    }
+    return season;
+  }
+
+  private checkSeasonNumberOrThrow(seasonNumber: number) {
     if (seasonNumber == null || seasonNumber < 0 || !Number.isInteger(seasonNumber)) {
       throw new TvShow_InvalidSeasonNumberError();  
     }
+  }
+
+  createSeason(seasonNumber: number) {
+    this.checkSeasonNumberOrThrow(seasonNumber);
     if (this.getSeason(seasonNumber) != null) {
       throw new TvShow_SeasonAlreadyExistsError();
     }
@@ -135,10 +148,7 @@ export class TvShow {
   }
 
   setTmdbSeasonNumber(seasonNumber: number, tmdbSeasonNumber: number) {
-    const season: Nullable<Season> = this.getSeason(seasonNumber);
-    if (season == null) {
-      throw new TvShow_SeasonNotFoundError();  
-    }
+    const season: Season = this.getSeasonOrThrow(seasonNumber);
     if (tmdbSeasonNumber == null || tmdbSeasonNumber < 0 || !Number.isInteger(tmdbSeasonNumber)) {
         throw new TvShow_InvalidTmdbSeasonNumberError();  
       }
@@ -151,6 +161,61 @@ export class TvShow {
     }
     return false;
   }
+
+  addNameToSeason(seasonNumber: number, name: string) {
+    if (strIsBlank(name)) {
+      throw new TvShow_BlankSeasonNameError();
+    }
+    const season = this.getSeasonOrThrow(seasonNumber);
+    name = name.trim().toLowerCase();
+    if (season.names.includes(name)) return false;
+    season.names.push(name);
+    return true;
+  }
+
+  private checkEpisodeNumberOrThrow(episodeNumber: number) {
+    if (episodeNumber == null || episodeNumber < 0 || !Number.isInteger(episodeNumber)) {
+      throw new TvShow_InvalidEpisodeNumberError();  
+    }
+  }
+
+  getEpisode(seasonNumber: number, episodeNumber: number) {
+    this.checkSeasonNumberOrThrow(seasonNumber);
+    const season = this.getSeason(seasonNumber);
+    if (season == null) return null;
+    this.checkEpisodeNumberOrThrow(episodeNumber);
+    for (const e of season.episodes) {
+      if (e.episodeNumber === episodeNumber) {
+        return e;
+      }
+    }
+    return null;
+  } 
+
+  createEpisode(seasonNumber: number, episodeNumber: number) {
+    this.checkSeasonNumberOrThrow(seasonNumber);
+    this.checkEpisodeNumberOrThrow(episodeNumber);
+    if (this.getEpisode(seasonNumber, episodeNumber) != null) {
+      throw new TvShow_EpisodeAlreadyExistsError();
+    }
+    const season = this.getSeasonOrThrow(seasonNumber);
+    season.episodes.push({
+      creationTime: Date.now(),
+      names: [],
+      releases: {},
+      tmdbEpisodeNumber: null,
+      episodeNumber: episodeNumber,
+      airDateInMillis: null,
+      forceScan: false,
+      blackList: [],
+      whiteList: [],
+      alreadyAddedSonarrReleaseGuidList: [],
+      lastReleaseCandidateScanTimeMillis: 0,
+      readyToBeProcessed: false,
+      releaseCandidates: {},
+      runtimeSeconds: null
+    })
+  }
 }
 
 export class TvShow_NullOriginalLocaleError {};
@@ -162,3 +227,7 @@ export class TvShow_SeasonAlreadyExistsError {};
 export class TvShow_SeasonNotFoundError {};
 export class TvShow_SeasonWithTmdbSeasonNumberAlreadyExistsError {};
 export class TvShow_InvalidTmdbSeasonNumberError {};
+export class TvShow_BlankSeasonNameError {};
+export class TvShow_InvalidEpisodeNumberError {};
+export class TvShow_EpisodeAlreadyExistsError {};
+
