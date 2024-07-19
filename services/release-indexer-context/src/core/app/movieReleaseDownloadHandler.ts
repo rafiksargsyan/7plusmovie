@@ -201,7 +201,7 @@ async function processMediaFile(m: Movie, name: string, rcKey: string, rc: Torre
         };
         let langStr = s.tags?.language;
         let titleStr = s.tags?.title;
-        if (titleStr != null && titleStr.toLowerCase().includes("commentary")) continue;
+        if (titleStr != null && (titleStr.toLowerCase().includes("commentary")||  titleStr.toLowerCase().includes("comentary"))) continue;
         const author = resolveAudioAuthor(titleStr, rc.tracker);
         let lang = resolveAudioLang(langStr, m.originalLocale, titleStr, author, numUndefinedAudioStreams, numAudioStreams, rc.radarrLanguages);
         if (lang == null) continue;

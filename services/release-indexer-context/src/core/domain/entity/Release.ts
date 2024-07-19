@@ -99,7 +99,7 @@ export class Release {
         throw new AudioMetadataWithSameStreamNumberAlreadyExistsError();
       }
       const compareResult = Release.compareAudio(x, am);
-      if (compareResult != null && compareResult > 0) {
+      if (compareResult != null && compareResult >= 0) {
         return;
       }
     }
