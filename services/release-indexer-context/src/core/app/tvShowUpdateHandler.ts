@@ -31,7 +31,7 @@ const tmdbClient = axios.create({
 });
 
 const sonarrClient = axios.create({
-  baseURL: sonarrApiBaseUrl,
+  baseURL: sonarrApiBaseUrl
 });
 
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
@@ -57,7 +57,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         await emptyS3Directory(rawMediaFilesS3Bucket, tvShowId);
         await emptyS3Directory(torrentFilesS3Bucket, tvShowId);
       } else {
-        let tvShow = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as TvShowLazy;
+        let tvShow = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as Omit<TvShowLazy, 'id'>;
         if (tvShow._tmdbId == null) return;
         const tvShowLookupResponse: any[] = (await sonarrClient.get(`series/lookup/?term=tmdb${tvShow._tmdbId}`)).data;
         // We expect to get exactly one record regardless if the tv show already exists in sonarr or not
@@ -80,7 +80,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         tvShowLookupResponse[0].qualityProfileId = 1; // 1 is the id of quality profile 'Any'
         tvShowLookupResponse[0].seasonFolder = true;
         tvShowLookupResponse[0].seriesType = "standard";
-        (await sonarrClient.post('series', tvShowLookupResponse));
+        await sonarrClient.post('series', tvShowLookupResponse);
       }
     }
   } catch (e) {

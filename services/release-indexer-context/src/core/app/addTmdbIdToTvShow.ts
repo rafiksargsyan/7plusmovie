@@ -19,6 +19,6 @@ interface AddTmdbIdParam {
 export const handler = async (event: AddTmdbIdParam): Promise<void> => {
   const tvShow = await tvShowRepo.getById(event.tvShowId);
   if (tvShow.setTmdbId(event.tmdbId)) {
-    await tvShowRepo.save(tvShow);
+    await tvShowRepo.save(tvShow, true, [], {});
   }
 }

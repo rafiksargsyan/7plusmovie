@@ -22,6 +22,6 @@ interface CreateTvShowParam {
 
 export const handler = async (event: CreateTvShowParam): Promise<string> => {
   let tvShow = TvShow.create(L8nLang.fromKeyOrThrow(event.originalLocale), event.originalTitle, event.releaseYear);
-  tvShowRepo.save(tvShow);
+  tvShowRepo.save(tvShow, true, [], {});
   return tvShow.id;
 }

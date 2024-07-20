@@ -1,10 +1,14 @@
 import { Nullable } from "../../Nullable";
-import { Season, TvShow } from "../domain/aggregate/TvShow";
+import { TvShow } from "../domain/aggregate/TvShow";
 import { L8nLang } from "../domain/value-object/L8nLang";
 
 export interface ITvShowRepository {
+  /**
+   * @throws {TvShowWithIdNotFoundError}
+   * @param id 
+   */  
   getById(id: string | undefined) : Promise<TvShow>;
-  save(t: TvShow);
+  save(t: TvShow, saveRoot: boolean, seasons: number[], episodes: { [key:number] : number [] });
 }
 
 export interface TvShowLazy {
@@ -16,3 +20,4 @@ export interface TvShowLazy {
   _releaseYear: number;
 }
 
+export class TvShowWithIdNotFoundError {};
