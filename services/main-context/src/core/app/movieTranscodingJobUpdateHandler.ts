@@ -48,7 +48,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
             audioTranscodeSpecParams: movieTranscodingJobRead.audioTranscodeSpecs?.map(_ => {
               let lang = AudioLang.fromISO_639_2(_.lang.lang).key;
               if (AudioLang.equals(_.lang, AudioLang.MYN)) lang = AudioLang.EN.key;
-              return { ..._, lang: AudioLang.fromISO_639_2(_.lang.lang).key }
+              return { ..._, lang: lang }
             }),
             textTranscodeSpecParams: movieTranscodingJobRead.textTranscodeSpecs?.map(_ => ({ ..._, lang: SubsLang.fromISO_639_2(_.lang.lang).key})),
             videoTranscodeSpec: movieTranscodingJobRead.videoTranscodeSpec,
