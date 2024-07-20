@@ -1,4 +1,3 @@
-import { Movie } from "../domain/aggregate/Movie";
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { L8nLang } from "../domain/value-object/L8nLang";
@@ -23,6 +22,6 @@ interface CreateTvShowParam {
 
 export const handler = async (event: CreateTvShowParam): Promise<string> => {
   let tvShow = TvShow.create(L8nLang.fromKeyOrThrow(event.originalLocale), event.originalTitle, event.releaseYear);
-  tvShowRepo.saveTvShow(tvShow);
+  tvShowRepo.save(tvShow);
   return tvShow.id;
 }

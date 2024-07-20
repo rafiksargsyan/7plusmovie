@@ -11,11 +11,11 @@ export class TvShowRepository implements ITvShowRepository {
     this.docClient = docClient;
   }
   
-  getTvShowById(id: string | undefined): Promise<TvShow> {
+  getById(id: string | undefined): Promise<TvShow> {
     throw new Error("Method not implemented.");
   }
   
-  saveTvShow(t: TvShow) {
+  save(t: TvShow) {
     throw new Error("Method not implemented.");
   }
 }

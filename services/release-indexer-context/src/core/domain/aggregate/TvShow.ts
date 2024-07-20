@@ -91,7 +91,7 @@ export class TvShow {
   /**
    * @param tmdbId 
    * 
-   * @throws {TvShow_NullTmdbIdError}
+   * @throws {TvShow_BlankTmdbIdError}
    */
   setTmdbId(tmdbId: string) {
     if (strIsBlank(tmdbId)) {

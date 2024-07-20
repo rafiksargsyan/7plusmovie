@@ -1,7 +1,7 @@
 import { TvShow } from "../domain/aggregate/TvShow";
 
 export interface ITvShowRepository {
-  getTvShowById(id: string | undefined) : Promise<TvShow>;
-  saveTvShow(t: TvShow);
+  getById(id: string | undefined) : Promise<TvShow>;
+  save(t: TvShow);
 }
 

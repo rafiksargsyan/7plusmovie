@@ -166,6 +166,8 @@ functions:
           response:
             headers:
               Access-Control-Allow-Origin: "'*'"
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
 
   createTvShow:
     handler: src/core/app/createTvShow.handler
@@ -185,6 +187,23 @@ functions:
           authorizer:
             arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
 
+  addTmdbIdToTvShow:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    handler: src/core/app/addTmdbIdToTvShow.handler
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show/{id}/tmdbId
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : "$input.params(''id'')",
+                                   "tmdbId" : $input.json(''$.tmdbId'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+  
 resources:
   Resources:
     movieReleaseCandidateUpdaterFanoutTopic:
