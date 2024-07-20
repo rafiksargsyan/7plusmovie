@@ -83,3 +83,7 @@ variable "radarr_api_key" {
 variable "qbittorrent_password" {
   type = string
 }
+
+variable "sonarr_api_key" {
+  type = string
+}
