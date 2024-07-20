@@ -203,6 +203,16 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+
+  tvShowUpdateHandler:
+    handler: src/core/app/tvShowUpdateHandler.handler
+    environment:
+      SONARR_API_BASE_URL: ${env:SONARR_API_BASE_URL}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      TORRENT_FILES_S3_BUCKET: ${env:TORRENT_FILES_S3_BUCKET}
+      RAW_MEDIA_FILES_S3_BUCKET: ${env:RAW_MEDIA_FILES_S3_BUCKET}
+    events:
+      - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_TVSHOW_STREAM_ARN}
   
 resources:
   Resources:
