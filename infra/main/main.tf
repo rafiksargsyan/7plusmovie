@@ -373,3 +373,24 @@ resource "aws_s3_bucket_policy" "raw_media_assets_public_access" {
     ]
   })
 }
+
+resource "aws_dynamodb_table" "tvshow_release_indexer_context" {
+  name     = "${local.deployment_id}-tvshow-ric"
+  hash_key  = "PK"
+  range_key = "SK"
+  attribute {
+    name = "PK"
+    type = "S"
+  }
+  attribute {
+    name = "SK"
+    type = "S"
+  }
+  stream_enabled   = true
+  stream_view_type = "NEW_IMAGE"
+  billing_mode     = "PAY_PER_REQUEST"
+  deletion_protection_enabled = var.dynamodb_deletion_protection_enabled
+  point_in_time_recovery {
+    enabled = true
+  }
+}
