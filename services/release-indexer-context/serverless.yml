@@ -167,6 +167,24 @@ functions:
             headers:
               Access-Control-Allow-Origin: "'*'"
 
+  createTvShow:
+    handler: src/core/app/createTvShow.handler
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show
+          method: post
+          request:
+            template:
+              application/json: '{ "originalLocale" : $input.json(''$.originalLocale''),
+                                   "originalTitle" : $input.json(''$.originalTitle''),
+                                   "releaseYear" : $input.json(''$.releaseYear'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+
 resources:
   Resources:
     movieReleaseCandidateUpdaterFanoutTopic:

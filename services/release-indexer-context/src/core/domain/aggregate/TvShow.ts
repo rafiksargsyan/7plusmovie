@@ -5,14 +5,14 @@ import { ReleaseCandidate } from "../entity/ReleaseCandidate";
 import { L8nLang } from "../value-object/L8nLang";
 import { v4 as uuid } from 'uuid';
 
-interface Season {
+export interface Season {
   names: string[];
   tmdbSeasonNumber: Nullable<number>;
   episodes: Episode[];
   seasonNumber: number;
 }
 
-interface Episode {
+export interface Episode {
   creationTime: number;
   names: string[];
   releases: { [releaseId:string]: { release: Release, replacedReleaseIds: string[] } }
@@ -30,7 +30,7 @@ interface Episode {
 }
 
 export class TvShow {
-  private _id: string;
+  public readonly id: string;
   private _creationTime: number;
   private _tmdbId: Nullable<string>;
   private _originalLocale: L8nLang;
@@ -41,7 +41,7 @@ export class TvShow {
   private constructor(createEmptyObject: boolean, originalLocale: Nullable<L8nLang>,
     originalTitle: Nullable<string>, releaseYear: Nullable<number>) {
     if (!createEmptyObject) {
-      this._id = uuid();
+      this.id = uuid();
       this.checkAndSetOriginalLocale(originalLocale);
       this.checkAndSetOriginalTitle(originalTitle);
       this.checkAndSetReleaseYear(releaseYear);
@@ -230,4 +230,3 @@ export class TvShow_InvalidTmdbSeasonNumberError {};
 export class TvShow_BlankSeasonNameError {};
 export class TvShow_InvalidEpisodeNumberError {};
 export class TvShow_EpisodeAlreadyExistsError {};
-
