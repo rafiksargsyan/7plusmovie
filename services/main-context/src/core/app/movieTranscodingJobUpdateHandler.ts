@@ -46,7 +46,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
             mkvHttpUrl: movieTranscodingJobRead.mkvHttpUrl,
             outputFolderKey: movieTranscodingJobRead.outputFolderKey,
             audioTranscodeSpecParams: movieTranscodingJobRead.audioTranscodeSpecs?.map(_ => {
-              let lang = AudioLang.fromISO_639_2(_.lang.lang).key;
+              let lang = AudioLang.fromISO_639_2(_.lang.lang)?.key; // might be null, for example Mayan (myn)
               if (AudioLang.equals(_.lang, AudioLang.MYN)) lang = AudioLang.EN.key;
               return { ..._, lang: lang }
             }),
