@@ -125,9 +125,13 @@ export class TvShow {
     }
   }
 
+  seasonExists(seasonNumber: number) {
+    return this.getSeason(seasonNumber) != null;
+  }
+
   createSeason(seasonNumber: number) {
     this.checkSeasonNumberOrThrow(seasonNumber);
-    if (this.getSeason(seasonNumber) != null) {
+    if (this.seasonExists(seasonNumber)) {
       throw new TvShow_SeasonAlreadyExistsError();
     }
     this._seasons.push({
@@ -150,8 +154,8 @@ export class TvShow {
   setTmdbSeasonNumber(seasonNumber: number, tmdbSeasonNumber: number) {
     const season: Season = this.getSeasonOrThrow(seasonNumber);
     if (tmdbSeasonNumber == null || tmdbSeasonNumber < 0 || !Number.isInteger(tmdbSeasonNumber)) {
-        throw new TvShow_InvalidTmdbSeasonNumberError();  
-      }
+      throw new TvShow_InvalidTmdbSeasonNumberError();  
+    }
     if (this.getSeasonByTmdbSeasonNumber(tmdbSeasonNumber) != null) {
       throw new TvShow_SeasonWithTmdbSeasonNumberAlreadyExistsError();
     }
@@ -162,12 +166,12 @@ export class TvShow {
     return false;
   }
 
-  addNameToSeason(seasonNumber: number, name: string) {
+  addNameToSeason(seasonNumber: number, name: Nullable<string>) {
     if (strIsBlank(name)) {
-      throw new TvShow_BlankSeasonNameError();
+      return false;
     }
     const season = this.getSeasonOrThrow(seasonNumber);
-    name = name.trim().toLowerCase();
+    name = name!.trim().toLowerCase();
     if (season.names.includes(name)) return false;
     season.names.push(name);
     return true;
@@ -179,7 +183,7 @@ export class TvShow {
     }
   }
 
-  getEpisode(seasonNumber: number, episodeNumber: number) {
+  private getEpisode(seasonNumber: number, episodeNumber: number) {
     this.checkSeasonNumberOrThrow(seasonNumber);
     const season = this.getSeason(seasonNumber);
     if (season == null) return null;
@@ -192,10 +196,22 @@ export class TvShow {
     return null;
   } 
 
+  private getEpisodeOrThrow(seasonNumber: number, episodeNumber: number) {
+    const episode = this.getEpisode(seasonNumber, episodeNumber);
+    if (episode == null) {
+      throw new TvShow_EpisodeNotFoundError();
+    }
+    return episode;
+  }
+
+  episodeExists(seasonNumber: number, episodeNumber: number) {
+    return this.getEpisode(seasonNumber, episodeNumber) != null;
+  }
+
   createEpisode(seasonNumber: number, episodeNumber: number) {
     this.checkSeasonNumberOrThrow(seasonNumber);
     this.checkEpisodeNumberOrThrow(episodeNumber);
-    if (this.getEpisode(seasonNumber, episodeNumber) != null) {
+    if (this.episodeExists(seasonNumber, episodeNumber)) {
       throw new TvShow_EpisodeAlreadyExistsError();
     }
     const season = this.getSeasonOrThrow(seasonNumber);
@@ -216,6 +232,22 @@ export class TvShow {
       runtimeSeconds: null
     })
   }
+
+  setTmdbEpisodeNumber(seasonNumber: number, episodeNumber: number, tmdbEpisodeNumber: number) {
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    if (tmdbEpisodeNumber == null || tmdbEpisodeNumber < 0 || !Number.isInteger(tmdbEpisodeNumber)) {
+      throw new TvShow_InvalidTmdbEpisodeNumberError();  
+    }
+    if (episode.tmdbEpisodeNumber !== tmdbEpisodeNumber) {
+      episode.tmdbEpisodeNumber = tmdbEpisodeNumber;
+      return true;
+    }
+    return false;
+  }
+
+  get tmdbId() {
+    return this._tmdbId;
+  }
 }
 
 export class TvShow_NullOriginalLocaleError {};
@@ -227,6 +259,7 @@ export class TvShow_SeasonAlreadyExistsError {};
 export class TvShow_SeasonNotFoundError {};
 export class TvShow_SeasonWithTmdbSeasonNumberAlreadyExistsError {};
 export class TvShow_InvalidTmdbSeasonNumberError {};
-export class TvShow_BlankSeasonNameError {};
 export class TvShow_InvalidEpisodeNumberError {};
 export class TvShow_EpisodeAlreadyExistsError {};
+export class TvShow_EpisodeNotFoundError {};
+export class TvShow_InvalidTmdbEpisodeNumberError {};

@@ -1,6 +1,6 @@
-import { ITvShowRepository, TvShowWithIdNotFoundError } from "../core/ports/ITvShowRepository";
+import { ITvShowRepository, TvShowLazy, TvShowWithIdNotFoundError } from "../core/ports/ITvShowRepository";
 import { Episode, Season, TvShow } from "../core/domain/aggregate/TvShow";
-import { DynamoDBDocument, QueryCommandInput } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocument, ScanCommandInput, QueryCommandInput } from "@aws-sdk/lib-dynamodb";
 
 const dynamodbTvShowTableName = process.env.DYNAMODB_TVSHOW_TABLE_NAME!;
 
@@ -89,7 +89,7 @@ export class TvShowRepository implements ITvShowRepository {
     }
 
     for (const s of (t as any)._seasons) {
-      if (s.seasonNumber in seasons) {
+      if (seasons.includes(s.seasonNumber)) {
         let seasonDto = {...s};
         seasonDto.PK = t.id;
         seasonDto.SK = `season#${s.seasonNumber}`;
@@ -122,6 +122,30 @@ export class TvShowRepository implements ITvShowRepository {
     if (items.length !== 0) {
       await transactWrite(items);
     }
+  }
+
+  async getAllLazy() {
+    const tvShowScanInput : ScanCommandInput = {
+      TableName : dynamodbTvShowTableName,
+      FilterExpression: "#sk = :sk",
+      ExpressionAttributeNames: {
+        '#sk': 'SK'
+      },
+      ExpressionAttributeValues: {
+        ':sk': 'tvshow',
+      }
+    };
+    const tvShows: TvShowLazy[] = [] 
+    let items;
+    do {
+      items =  await this.docClient.scan(tvShowScanInput);
+      items.Items.forEach((item) => {
+        item.id = item.PK;
+        tvShows.push(item);
+      });
+      tvShowScanInput.ExclusiveStartKey = items.LastEvaluatedKey;
+    } while (typeof items.LastEvaluatedKey !== "undefined");
+    return tvShows;
   }
 }
 

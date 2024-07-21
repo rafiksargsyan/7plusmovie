@@ -9,6 +9,7 @@ export interface ITvShowRepository {
    */  
   getById(id: string | undefined) : Promise<TvShow>;
   save(t: TvShow, saveRoot: boolean, seasons: number[], episodes: { [key:number] : number [] });
+  getAllLazy() : Promise<TvShowLazy[]>;
 }
 
 export interface TvShowLazy {
