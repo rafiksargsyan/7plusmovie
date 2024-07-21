@@ -3,6 +3,7 @@ import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
 import { TvShowRepository } from '../../adapters/TvShowRepository';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import axios, { AxiosInstance } from 'axios';
+import { strIsBlank } from '../../utils';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
@@ -67,10 +68,30 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
           if (updatedEpisodes[seasonNumber] == null) updatedEpisodes[seasonNumber] = new Set();
           updatedEpisodes[seasonNumber].add(episodeNumber);   
         }
-        // todo: continue
+        if (e.runtime != null && e.runtime > 0) {
+          if (tvShow.setEpisodeRuntime(seasonNumber, episodeNumber, e.runtime * 60)) {
+            if (updatedEpisodes[seasonNumber] == null) updatedEpisodes[seasonNumber] = new Set();
+            updatedEpisodes[seasonNumber].add(episodeNumber);
+          }
+        }
+        if (tvShow.addNameToEpisode(seasonNumber, episodeNumber, e.name)) {
+          if (updatedEpisodes[seasonNumber] == null) updatedEpisodes[seasonNumber] = new Set();
+          updatedEpisodes[seasonNumber].add(episodeNumber);  
+        }
+        if (!strIsBlank(e.air_date)) {
+          const airDateMillis = new Date(e.air_date).getTime();
+          if (tvShow.setEpisodeAirDateInMillis(seasonNumber, episodeNumber, airDateMillis)) {
+            if (updatedEpisodes[seasonNumber] == null) updatedEpisodes[seasonNumber] = new Set();
+            updatedEpisodes[seasonNumber].add(episodeNumber);
+          }  
+        }
       }
     })
   }
+  await tvShowRepo.save(tvShow, false, Array.from(updatedSeasons), Object.keys(updatedEpisodes).reduce((aggr, k) => {
+   aggr[k] = Array.from(updatedEpisodes[k]);
+   return aggr;
+  }, {}))
 };
 
 async function getTvShowDetailsFromTmdb(tmdbClient: AxiosInstance, tmdbId: string) {

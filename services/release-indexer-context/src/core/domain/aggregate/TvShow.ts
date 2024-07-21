@@ -177,6 +177,15 @@ export class TvShow {
     return true;
   }
 
+  addNameToEpisode(seasonNumber: number, episodeNumber: number, name: Nullable<string>) {
+    if (strIsBlank(name)) return false;
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    name = name!.trim().toLowerCase();
+    if (episode.names.includes(name)) return false;
+    episode.names.push(name);
+    return true;
+  }
+
   private checkEpisodeNumberOrThrow(episodeNumber: number) {
     if (episodeNumber == null || episodeNumber < 0 || !Number.isInteger(episodeNumber)) {
       throw new TvShow_InvalidEpisodeNumberError();  
@@ -248,6 +257,26 @@ export class TvShow {
   get tmdbId() {
     return this._tmdbId;
   }
+
+  setEpisodeRuntime(seasonNumber: number, episodeNumber: number, runtimeSeconds: number) {
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    if (runtimeSeconds == null || runtimeSeconds <= 0) {
+      throw new TvShow_InvalidEpisodeRuntimeSecondsError();
+    }
+    if (episode.runtimeSeconds === runtimeSeconds) return false;
+    episode.runtimeSeconds = runtimeSeconds;
+    return true;
+  }
+
+  setEpisodeAirDateInMillis(seasonNumber: number, episodeNumber: number, airDateInMillis: number) {
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    if (airDateInMillis == null || airDateInMillis <= 0) {
+      throw new TvShow_InvalidEpisodeAirDateError();
+    }
+    if (episode.airDateInMillis === airDateInMillis) return false;
+    episode.airDateInMillis = airDateInMillis;
+    return true;
+  }
 }
 
 export class TvShow_NullOriginalLocaleError {};
@@ -263,3 +292,5 @@ export class TvShow_InvalidEpisodeNumberError {};
 export class TvShow_EpisodeAlreadyExistsError {};
 export class TvShow_EpisodeNotFoundError {};
 export class TvShow_InvalidTmdbEpisodeNumberError {};
+export class TvShow_InvalidEpisodeRuntimeSecondsError {};
+export class TvShow_InvalidEpisodeAirDateError {};
