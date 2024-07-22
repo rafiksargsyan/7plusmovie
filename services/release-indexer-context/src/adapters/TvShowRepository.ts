@@ -147,6 +147,42 @@ export class TvShowRepository implements ITvShowRepository {
     } while (typeof items.LastEvaluatedKey !== "undefined");
     return tvShows;
   }
+
+  async getEpisode(id: string, seasonNumber: number, episodeNumber: number): Promise<TvShow> {
+    const tvShowDto = (await this.docClient.get({
+      TableName: dynamodbTvShowTableName,
+      Key: { 'PK': id, 'SK': 'tvshow'  }
+    })).Item;
+    
+    if (tvShowDto == null) throw new TvShowWithIdNotFoundError();
+    tvShowDto.id = tvShowDto.PK;
+
+    const tvShowSeasonDto = (await this.docClient.get({
+      TableName: dynamodbTvShowTableName,
+      Key: { 'PK': id, 'SK': `season#${seasonNumber}`  }
+    })).Item;
+
+    if (tvShowSeasonDto != null) {
+      const tvShowEpisodeDto = (await this.docClient.get({
+        TableName: dynamodbTvShowTableName,
+        Key: { 'PK': id, 'SK': `season#${seasonNumber}episode#${episodeNumber}` }
+      })).Item;
+      tvShowSeasonDto.episodes = [];
+      if (tvShowEpisodeDto != null) {
+        tvShowSeasonDto.episodes.push(tvShowEpisodeDto);
+      }
+    }
+
+    tvShowDto._seasons = [];
+    if (tvShowSeasonDto != null) {
+      tvShowDto._seasons.push(tvShowSeasonDto);
+    }
+
+    const tvShow: TvShow = TvShow.createEmpty();
+    Object.assign(tvShow, tvShowDto);
+
+    return tvShow;
+  }
 }
 
 async function transactWrite(docClient: DynamoDBDocument, items: any[]) {

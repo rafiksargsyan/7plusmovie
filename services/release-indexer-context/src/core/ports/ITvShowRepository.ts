@@ -10,6 +10,14 @@ export interface ITvShowRepository {
   getById(id: string | undefined) : Promise<TvShow>;
   save(t: TvShow, saveRoot: boolean, seasons: number[], episodes: { [key:number] : number [] });
   getAllLazy() : Promise<TvShowLazy[]>;
+  /**
+   * Sometimes we just want to work in scope of one episode, no need to load the whole tvShow model.
+   * This is kind of lazy loading.
+   * @param id
+   * @param seasonNumber
+   * @param episodeNumber
+   */
+  getEpisode(id: string, seasonNumber: number, episodeNumber: number) : Promise<TvShow>;
 }
 
 export interface TvShowLazy {
