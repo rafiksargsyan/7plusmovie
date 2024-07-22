@@ -84,7 +84,7 @@ export class TvShowRepository implements ITvShowRepository {
       delete tvShowDto.id;
       tvShowDto.PK = t.id;
       tvShowDto.SK = 'tvshow';
-      delete tvShowDto.seasons;
+      delete tvShowDto._seasons;
       items.push(tvShowDto);
     }
 
@@ -97,7 +97,7 @@ export class TvShowRepository implements ITvShowRepository {
         items.push(seasonDto);
       }  
       if (items.length === 100) {
-        await transactWrite(items);
+        await transactWrite(this.docClient, items);
         items = [];
       }
     }
@@ -112,7 +112,7 @@ export class TvShowRepository implements ITvShowRepository {
             items.push(episodeDto);
           }
           if (items.length === 100) {
-            await transactWrite(items);
+            await transactWrite(this.docClient, items);
             items = [];
           }
         }
@@ -120,7 +120,7 @@ export class TvShowRepository implements ITvShowRepository {
     }
 
     if (items.length !== 0) {
-      await transactWrite(items);
+      await transactWrite(this.docClient, items);
     }
   }
 
@@ -149,8 +149,8 @@ export class TvShowRepository implements ITvShowRepository {
   }
 }
 
-async function transactWrite(items: any[]) {
-  await this.docClient.transactWrite({
-    TransactItems : items.map(_ => { return {Put: { TableName: dynamodbTvShowTableName, Item: _}} })
+async function transactWrite(docClient: DynamoDBDocument, items: any[]) {
+  await docClient.transactWrite({
+    TransactItems : items.map(_ => ({Put: { TableName: dynamodbTvShowTableName, Item: _}}) )
   });
 }

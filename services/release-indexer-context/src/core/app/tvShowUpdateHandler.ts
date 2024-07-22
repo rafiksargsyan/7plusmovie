@@ -70,9 +70,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         tvShowLookupResponse[0].addOptions = {
           "searchForMissingEpisodes": false,
           "searchForCutoffUnmetEpisodes": false,
-          "ignoreEpisodesWithFiles": false,
-          "ignoreEpisodesWithoutFiles": false,
-          "monitor": "None"
+          "monitor": "none"
         }
         const rootFolder: string = (await sonarrClient.get(`rootfolder/1`)).data.path;
         tvShowLookupResponse[0].rootFolderPath = rootFolder;
@@ -80,7 +78,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         tvShowLookupResponse[0].qualityProfileId = 1; // 1 is the id of quality profile 'Any'
         tvShowLookupResponse[0].seasonFolder = true;
         tvShowLookupResponse[0].seriesType = "standard";
-        await sonarrClient.post('series', tvShowLookupResponse);
+        await sonarrClient.post('series', tvShowLookupResponse[0]);
       }
     }
   } catch (e) {

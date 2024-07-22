@@ -213,16 +213,24 @@ functions:
       RAW_MEDIA_FILES_S3_BUCKET: ${env:RAW_MEDIA_FILES_S3_BUCKET}
     events:
       - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_TVSHOW_STREAM_ARN}
+    timeout: 120
 
-  tvShowsTmdbSyncFanout:
+  tvShowTmdbSyncFanout:
     environment:
       DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
       TVSHOW_TMDB_SYNC_LAMBDA_NAME: ${env:TVSHOW_TMDB_SYNC_LAMBDA_NAME} 
-    handler: src/core/app/tvShowsTmdbSyncFanout.handler
+    handler: src/core/app/tvShowTmdbSyncFanout.handler
     events:
       - schedule: rate(${file(./.env.${sls:stage}.yml):TVSHOW_TMDB_SYNC_INTERVAL_IN_MINUTES} minutes)
     timeout: 900
   
+  tvShowTmdbSync:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID} 
+    handler: src/core/app/tvShowTmdbSync.handler
+    timeout: 120
+
 resources:
   Resources:
     movieReleaseCandidateUpdaterFanoutTopic:

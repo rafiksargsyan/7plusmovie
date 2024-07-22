@@ -22,6 +22,5 @@ interface CreateMovieParam {
 export const handler = async (event: CreateMovieParam): Promise<string> => {
   let movie = new Movie(false, L8nLang.fromKeyOrThrow(event.originalLocale), event.originalTitle, event.releaseYear);
   await docClient.put({TableName: dynamodbMovieTableName, Item: movie});
-
   return movie.id;
 };
