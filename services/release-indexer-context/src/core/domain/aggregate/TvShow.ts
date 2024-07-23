@@ -10,6 +10,10 @@ export interface Season {
   tmdbSeasonNumber: Nullable<number>;
   episodes: Episode[];
   seasonNumber: number;
+  alreadyAddedSonarrReleaseGuidList: string[];
+  lastReleaseCandidateScanTimeMillis: number;
+  readyToBeProcessed: boolean;
+  releaseCandidates: { [key:string]: ReleaseCandidate };
 }
 
 export interface Episode {
@@ -22,10 +26,6 @@ export interface Episode {
   forceScan: boolean;
   blackList: string[];
   whiteList: string[];
-  alreadyAddedSonarrReleaseGuidList: string[];
-  lastReleaseCandidateScanTimeMillis: number;
-  readyToBeProcessed: boolean;
-  releaseCandidates: { [key:string]: ReleaseCandidate };
   runtimeSeconds: Nullable<number>;
 }
 
@@ -138,7 +138,11 @@ export class TvShow {
       seasonNumber: seasonNumber,
       episodes: [],
       names: [],
-      tmdbSeasonNumber: null   
+      tmdbSeasonNumber: null,
+      alreadyAddedSonarrReleaseGuidList: [],
+      lastReleaseCandidateScanTimeMillis: 0,
+      readyToBeProcessed: false,
+      releaseCandidates: {}
     })
   }
 
@@ -234,10 +238,6 @@ export class TvShow {
       forceScan: false,
       blackList: [],
       whiteList: [],
-      alreadyAddedSonarrReleaseGuidList: [],
-      lastReleaseCandidateScanTimeMillis: 0,
-      readyToBeProcessed: false,
-      releaseCandidates: {},
       runtimeSeconds: null
     })
   }

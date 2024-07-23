@@ -257,6 +257,19 @@ functions:
       - schedule: rate(${file(./.env.${sls:stage}.yml):RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minutes)
     timeout: 900
 
+  tvShowReleaseCandidateUpdaterFanoutSeasons:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      TVSHOW_RC_UPDATER_LAMBDA_NAME: todo 
+    handler: src/core/app/tvShowReleaseCandidateUpdaterFanoutSeasons.handler
+    timeout: 900
+
+  tvShowReleaseCandidateUpdater:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    handler: src/core/app/tvShowReleaseCandidateUpdater.handler
+    timeout: 900
+
 resources:
   Resources:
     movieReleaseCandidateUpdaterFanoutTopic:
