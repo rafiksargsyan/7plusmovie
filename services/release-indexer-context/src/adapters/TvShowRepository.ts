@@ -1,6 +1,6 @@
 import { ITvShowRepository, TvShowLazy, TvShowWithIdNotFoundError } from "../core/ports/ITvShowRepository";
 import { Episode, Season, TvShow } from "../core/domain/aggregate/TvShow";
-import { DynamoDBDocument, ScanCommandInput, QueryCommandInput } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocument, ScanCommandInput, QueryCommandInput, DeleteCommandInput } from "@aws-sdk/lib-dynamodb";
 
 const dynamodbTvShowTableName = process.env.DYNAMODB_TVSHOW_TABLE_NAME!;
 
@@ -108,7 +108,7 @@ export class TvShowRepository implements ITvShowRepository {
           if (episodes[s.seasonNumber].includes(e.episodeNumber)) {
             let episodeDto = {...e};
             episodeDto.PK = t.id;
-            episodeDto.SK = `season#${s.seasonNumber}#${e.episodeNumber}`;
+            episodeDto.SK = `season#${s.seasonNumber}episode#${e.episodeNumber}`;
             items.push(episodeDto);
           }
           if (items.length === 100) {
@@ -183,10 +183,58 @@ export class TvShowRepository implements ITvShowRepository {
 
     return tvShow;
   }
+
+  async deleteById(id: string) {
+    const queryInput : QueryCommandInput = {
+      TableName : dynamodbTvShowTableName,
+      KeyConditionExpression: '#id = :id',
+      ExpressionAttributeNames: {
+        '#id': 'PK',
+      },
+      ExpressionAttributeValues: {
+        ':id': id,
+      }
+    };
+
+    const items: any[] = [];
+
+    do {
+      const qco = await this.docClient.query(queryInput);
+      if (qco.Items) {
+        items.push(...qco.Items);
+      }
+      if (qco.LastEvaluatedKey) {
+        queryInput.ExclusiveStartKey = qco.LastEvaluatedKey;
+      } else {
+        delete queryInput.ExclusiveStartKey;
+      }
+    } while (queryInput.ExclusiveStartKey);
+
+    const BATCH_SIZE = 25;
+    for (let i = 0; i < items.length; i += BATCH_SIZE) {
+      const batch = items.slice(i, i + BATCH_SIZE);
+      await batchDelete(this.docClient, batch);
+    }
+  }
 }
 
 async function transactWrite(docClient: DynamoDBDocument, items: any[]) {
   await docClient.transactWrite({
     TransactItems : items.map(_ => ({Put: { TableName: dynamodbTvShowTableName, Item: _}}) )
   });
+}
+
+async function batchDelete(docClient: DynamoDBDocument, items: any[]) {
+  await docClient.batchWrite({
+    RequestItems: {
+      [dynamodbTvShowTableName]: items.map(i => ({
+        DeleteRequest: {
+           Key: {
+             PK: i.PK,
+             SK: i.SK
+           }
+        }
+      }))
+    }
+  }) 
 }

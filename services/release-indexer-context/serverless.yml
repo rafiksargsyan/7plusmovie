@@ -231,6 +231,23 @@ functions:
     handler: src/core/app/tvShowTmdbSync.handler
     timeout: 120
 
+  deleteTvShowById:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    handler: src/core/app/deleteTvShowById.handler
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show/{id}
+          method: delete
+          request:
+            template:
+              application/json: '{ "tvShowId" : "$input.params(''id'')" }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+    timeout: 60
+
 resources:
   Resources:
     movieReleaseCandidateUpdaterFanoutTopic:
