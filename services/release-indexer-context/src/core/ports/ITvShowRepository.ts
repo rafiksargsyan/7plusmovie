@@ -1,5 +1,5 @@
 import { Nullable } from "../../Nullable";
-import { TvShow } from "../domain/aggregate/TvShow";
+import { Season, TvShow } from "../domain/aggregate/TvShow";
 import { L8nLang } from "../domain/value-object/L8nLang";
 
 export interface ITvShowRepository {
@@ -19,6 +19,7 @@ export interface ITvShowRepository {
    */
   getEpisode(id: string, seasonNumber: number, episodeNumber: number) : Promise<TvShow>;
   deleteById(id: string);
+  getTvShowsLazy(id: string);
 }
 
 export interface TvShowLazy {
@@ -28,6 +29,10 @@ export interface TvShowLazy {
   _originalLocale: L8nLang;
   _originalTitle: string;
   _releaseYear: number;
+}
+
+export interface TvShowSeasonsLazy extends TvShowLazy {
+  seasons: Omit<Season, 'episodes'>[]
 }
 
 export class TvShowWithIdNotFoundError {};

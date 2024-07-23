@@ -277,6 +277,10 @@ export class TvShow {
     episode.airDateInMillis = airDateInMillis;
     return true;
   }
+
+  get seasons() {
+    return this._seasons;
+  }
 }
 
 export class TvShow_NullOriginalLocaleError {};

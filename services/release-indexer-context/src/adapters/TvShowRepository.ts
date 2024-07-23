@@ -1,4 +1,4 @@
-import { ITvShowRepository, TvShowLazy, TvShowWithIdNotFoundError } from "../core/ports/ITvShowRepository";
+import { ITvShowRepository, TvShowLazy, TvShowSeasonsLazy, TvShowWithIdNotFoundError } from "../core/ports/ITvShowRepository";
 import { Episode, Season, TvShow } from "../core/domain/aggregate/TvShow";
 import { DynamoDBDocument, ScanCommandInput, QueryCommandInput, DeleteCommandInput } from "@aws-sdk/lib-dynamodb";
 
@@ -12,7 +12,6 @@ export class TvShowRepository implements ITvShowRepository {
   }
   
   async getById(id: string | undefined): Promise<TvShow> {
-    // episodes also come with the query
     const seasonsQueryInput : QueryCommandInput = {
       TableName : dynamodbTvShowTableName,
       KeyConditionExpression: '#id = :id AND begins_with(#sortKey, :sortKeySeason)',
@@ -26,20 +25,13 @@ export class TvShowRepository implements ITvShowRepository {
       }
     };
   
-    const tvShowSeasons : { [key:string]: { season?: Season, episodes: Episode[] } } = {};
+    const seasons : { [key:number]: Season } = {};
     do {
       const qco = await this.docClient.query(seasonsQueryInput);
       if (qco.Items) {
        for (const i of qco.Items) {
-         if (i.SK.includes('episode')) {
-           const end = i.SK.indexOf('episode');
-           const k = i.SK.substring(0, end);
-           if (tvShowSeasons[k] == null) tvShowSeasons[k] = { episodes: [] };
-           tvShowSeasons[k].episodes.push(i as Episode);
-         } else {
-           if (tvShowSeasons[i.SK] == null) tvShowSeasons[i.SK] = { episodes: [] }; 
-           tvShowSeasons[i.SK].season = i as Season;
-         }
+        const s = i as Season;
+        seasons[s.seasonNumber] = s;
        }
       }
       if (qco.LastEvaluatedKey) {
@@ -49,11 +41,39 @@ export class TvShowRepository implements ITvShowRepository {
       }
     } while (seasonsQueryInput.ExclusiveStartKey);
   
-    for (const k in tvShowSeasons) {
-      if (tvShowSeasons[k].season != null) {
-        tvShowSeasons[k].season!.episodes = tvShowSeasons[k].episodes; 
-      } 
-    }
+    const episodesQueryInput : QueryCommandInput = {
+      TableName : dynamodbTvShowTableName,
+      KeyConditionExpression: '#id = :id AND begins_with(#sortKey, :sortKeySeason)',
+      ExpressionAttributeNames: {
+        '#id': 'PK',
+        '#sortKey': 'SK',
+      },
+      ExpressionAttributeValues: {
+        ':id': id,
+        ':sortKeySeason': 'episode',
+      }
+    };
+    
+    do {
+      const qco = await this.docClient.query(episodesQueryInput);
+      if (qco.Items) {
+        for (const i of qco.Items) {
+          const e = i as Episode;
+          const seasonNumberStart = i.SK.indexOf('#') + 1;
+          const seasonNumberEnd = i.SK.lastIndexOf('#');
+          const seasonNumber = Number.parseInt(i.SK.substring(seasonNumberStart, seasonNumberEnd));
+          if (seasons[seasonNumber].episodes == null) {
+            seasons[seasonNumber].episodes = [];
+          }
+          seasons[seasonNumber].episodes.push(e);
+        }
+      }
+      if (qco.LastEvaluatedKey) {
+        episodesQueryInput.ExclusiveStartKey = qco.LastEvaluatedKey;
+      } else {
+        delete episodesQueryInput.ExclusiveStartKey;
+      }
+    } while (episodesQueryInput.ExclusiveStartKey);
 
     const tvShowDto = (await this.docClient.get({
       TableName: dynamodbTvShowTableName,
@@ -65,11 +85,8 @@ export class TvShowRepository implements ITvShowRepository {
     }
     
     tvShowDto.id = tvShowDto.PK;
-    tvShowDto.seasons = [];
-      
-    Object.values(tvShowSeasons).forEach(x => {
-      if (x.season != null) tvShowDto.seasons.push(x.season);
-    })
+    tvShowDto._seasons = seasons;
+
     const tvShow: TvShow = TvShow.createEmpty();
     Object.assign(tvShow, tvShowDto);
   
@@ -108,7 +125,7 @@ export class TvShowRepository implements ITvShowRepository {
           if (episodes[s.seasonNumber].includes(e.episodeNumber)) {
             let episodeDto = {...e};
             episodeDto.PK = t.id;
-            episodeDto.SK = `season#${s.seasonNumber}episode#${e.episodeNumber}`;
+            episodeDto.SK = `episode#${s.seasonNumber}#${e.episodeNumber}`;
             items.push(episodeDto);
           }
           if (items.length === 100) {
@@ -215,6 +232,46 @@ export class TvShowRepository implements ITvShowRepository {
       const batch = items.slice(i, i + BATCH_SIZE);
       await batchDelete(this.docClient, batch);
     }
+  }
+
+  async getTvShowsLazy(id: string) {
+    const seasonsQueryInput : QueryCommandInput = {
+      TableName : dynamodbTvShowTableName,
+      KeyConditionExpression: '#id = :id AND begins_with(#sortKey, :sortKeySeason)',
+      ExpressionAttributeNames: {
+        '#id': 'PK',
+        '#sortKey': 'SK'
+      },
+      ExpressionAttributeValues: {
+        ':id': id,
+        ':sortKeySeason': 'season'
+      }
+    };
+    
+    const seasons : Omit<Season, 'episodes'>[] = [];
+    do {
+      const qco = await this.docClient.query(seasonsQueryInput);
+      seasons.push(...qco.Items as Omit<Season, 'episodes'>[]);
+      if (qco.LastEvaluatedKey) {
+        seasonsQueryInput.ExclusiveStartKey = qco.LastEvaluatedKey;
+      } else {
+        delete seasonsQueryInput.ExclusiveStartKey;
+      }
+    } while (seasonsQueryInput.ExclusiveStartKey);
+
+    const tvShowDto = (await this.docClient.get({
+      TableName: dynamodbTvShowTableName,
+      Key: { 'PK': id, 'SK': 'tvshow'  }
+    })).Item;
+      
+    if (tvShowDto == null) {
+      throw new TvShowWithIdNotFoundError();
+    }
+    
+    tvShowDto.id = tvShowDto.PK;
+    tvShowDto.seasons = seasons;
+
+    return tvShowDto as TvShowSeasonsLazy;
   }
 }
 
