@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import { ISonarr, ISonarrApiError, ISonarrTvShowNotFoundError, SonarrRelease } from "../core/ports/ISonarr";
 import { strIsBlank } from "../utils";
+import { RipType } from "../core/domain/value-object/RipType";
 
 export class SonarrClient implements ISonarr {
   private _restClient: AxiosInstance;
@@ -56,9 +57,16 @@ export class SonarrClient implements ISonarr {
         console.warn(`Blank guid for release=${JSON.stringify(r)}`);
         continue;
       }
-      
+      // Ideally we should use something for Sonarr, but for now using he approach is OK, as
+      // Radarr and Sonarr doing quality in the same way
+      const ripType = RipType.fromRadarrReleaseQualityName(r?.quality?.quality?.name);
+      if (ripType == null) {
+        console.warn(`Unknown quality for release=${JSON.stringify(r)}`);
+        continue;
+      }
       ret.push({
-        guid: guid
+        guid: guid,
+        ripType: ripType
         // todo rest
       })
     }
