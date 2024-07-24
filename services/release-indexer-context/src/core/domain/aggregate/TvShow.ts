@@ -13,7 +13,6 @@ export interface Season {
   alreadyAddedSonarrReleaseGuidList: string[];
   lastReleaseCandidateScanTimeMillis: number;
   readyToBeProcessed: boolean;
-  releaseCandidates: { [key:string]: ReleaseCandidate };
 }
 
 export interface Episode {
@@ -27,6 +26,7 @@ export interface Episode {
   blackList: string[];
   whiteList: string[];
   runtimeSeconds: Nullable<number>;
+  releaseCandidates: { [key:string]: ReleaseCandidate };
 }
 
 export class TvShow {
@@ -141,8 +141,7 @@ export class TvShow {
       tmdbSeasonNumber: null,
       alreadyAddedSonarrReleaseGuidList: [],
       lastReleaseCandidateScanTimeMillis: 0,
-      readyToBeProcessed: false,
-      releaseCandidates: {}
+      readyToBeProcessed: false
     })
   }
 
@@ -238,7 +237,8 @@ export class TvShow {
       forceScan: false,
       blackList: [],
       whiteList: [],
-      runtimeSeconds: null
+      runtimeSeconds: null,
+      releaseCandidates: {}
     })
   }
 
