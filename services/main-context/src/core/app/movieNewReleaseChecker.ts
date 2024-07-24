@@ -164,7 +164,7 @@ function createAudioTranscodeSpec(ripType: RipType, audios: [{ stream: number, c
           lang: a.lang
         })
       }
-      if (a.channels >= 6 || !(RipType.fromKey(ripType.key)?.isLowQuality())) {
+      if (a.channels >= 6 && !(RipType.fromKey(ripType.key)?.isLowQuality())) {
         audioTranscodeSpec.push({
           stream: a.stream,
           bitrate: `${Math.min(640, Math.round(a.bitrate/1000))}k`,
