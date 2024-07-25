@@ -111,7 +111,7 @@ export class TvShow {
     return null;
   }
 
-  private getSeasonOrThrow(seasonNumber: number) {
+  getSeasonOrThrow(seasonNumber: number) {
     const season = this.getSeason(seasonNumber);
     if (season == null) {
       throw new TvShow_SeasonNotFoundError();

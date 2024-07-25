@@ -14,6 +14,7 @@ import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import { S3 } from '@aws-sdk/client-s3';
 import { AudioLang } from "../domain/value-object/AudioLang";
 import { TvShowRepository } from "../../adapters/TvShowRepository";
+import { SonarrClient } from "../../adapters/SonarrClient";
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const sonarrApiBaseUrl = process.env.SONARR_API_BASE_URL!;
@@ -28,26 +29,9 @@ const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 const tvShowRepo = new TvShowRepository(docClient);
 const secretsManager = new SecretsManager({});
 
-const sonarrClient = axios.create({
-  baseURL: sonarrApiBaseUrl,
-});
-
-// don't redirect magnet urls
-axios.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response && [301, 302].includes(error.response.status)) {
-      return error.response;
-    }
-    return Promise.reject(error);
-  }
-);
-
 const s3 = new S3({});
 
 const torrentFilesS3Bucket = process.env.TORRENT_FILES_S3_BUCKET!;
-
-const sonarrDownloadUrlBaseMapping = JSON.parse(process.env.SONARR_DOWNLOAD_URL_BASE_MAPPING!);
 
 const MONTH_IN_MILLIS = 30 * 24 * 60 * 60 * 1000;
 
@@ -59,14 +43,12 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
   const startTime = Date.now();
   const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
   const secret = JSON.parse(secretStr.SecretString!);
-  const radarrApiKey = secret.SONARR_API_KEY!;
-  sonarrClient.defaults.headers.common['x-api-key'] = radarrApiKey;
-
-  const m: Movie = await movieRepo.getMovieById(JSON.parse(event.Records[0].Sns.Message).movieId);
-  const radarrMovieId = (await radarrClient.get(`movie/?tmdbId=${m.tmdbId}`)).data[0].id;
-  const getReleasesResult = (await radarrClient.get(`release/?movieId=${radarrMovieId}`)).data;
+  const sonarrApiKey = secret.SONARR_API_KEY!;
+  const sonarrClient = new SonarrClient(sonarrApiBaseUrl, sonarrApiKey);
+  const tvShow = await tvShowRepo.getSeason(event.tvShowId, event.seasonNumber);
+  const sonarrReleases = await sonarrClient.getAll(tvShow.tmdbId!, tvShow.getSeasonOrThrow(event.seasonNumber).tmdbSeasonNumber!);
   let allRadarrReleasesProcessed = true;
-  for (let rr of getReleasesResult) {
+  for (let sr of sonarrReleases) {
     try {
       // Exit before lambda times out
       if (Date.now() - startTime > MAX_RUNTIME) {
