@@ -182,7 +182,7 @@ export class TvShowRepository implements ITvShowRepository {
     if (tvShowSeasonDto != null) {
       const tvShowEpisodeDto = (await this.docClient.get({
         TableName: dynamodbTvShowTableName,
-        Key: { 'PK': id, 'SK': `season#${seasonNumber}episode#${episodeNumber}` }
+        Key: { 'PK': id, 'SK': `episode#${seasonNumber}#${episodeNumber}` }
       })).Item;
       tvShowSeasonDto.episodes = [];
       if (tvShowEpisodeDto != null) {
@@ -272,6 +272,61 @@ export class TvShowRepository implements ITvShowRepository {
     tvShowDto.seasons = seasons;
 
     return tvShowDto as TvShowSeasonsLazy;
+  }
+
+  async getSeason(id: string, seasonNumber: number): Promise<TvShow> {
+    const tvShowDto = (await this.docClient.get({
+      TableName: dynamodbTvShowTableName,
+      Key: { 'PK': id, 'SK': 'tvshow'  }
+    })).Item;
+    
+    if (tvShowDto == null) throw new TvShowWithIdNotFoundError();
+    tvShowDto.id = tvShowDto.PK;
+
+    const tvShowSeasonDto = (await this.docClient.get({
+      TableName: dynamodbTvShowTableName,
+      Key: { 'PK': id, 'SK': `season#${seasonNumber}`  }
+    })).Item;
+
+    if (tvShowSeasonDto != null) {
+      tvShowSeasonDto.episodes = [];
+      const episodesQueryInput : QueryCommandInput = {
+        TableName : dynamodbTvShowTableName,
+        KeyConditionExpression: '#id = :id AND begins_with(#sortKey, :sortKeySeason)',
+        ExpressionAttributeNames: {
+          '#id': 'PK',
+          '#sortKey': 'SK',
+        },
+        ExpressionAttributeValues: {
+          ':id': id,
+          ':sortKeySeason': `episode#${seasonNumber}#`,
+        }
+      };
+      
+      do {
+        const qco = await this.docClient.query(episodesQueryInput);
+        if (qco.Items) {
+          for (const i of qco.Items) {
+            tvShowSeasonDto.episodes.push(i);
+          }
+        }
+        if (qco.LastEvaluatedKey) {
+          episodesQueryInput.ExclusiveStartKey = qco.LastEvaluatedKey;
+        } else {
+          delete episodesQueryInput.ExclusiveStartKey;
+        }
+      } while (episodesQueryInput.ExclusiveStartKey);
+    }
+
+    tvShowDto._seasons = [];
+    if (tvShowSeasonDto != null) {
+      tvShowDto._seasons.push(tvShowSeasonDto);
+    }
+
+    const tvShow: TvShow = TvShow.createEmpty();
+    Object.assign(tvShow, tvShowDto);
+
+    return tvShow;
   }
 }
 

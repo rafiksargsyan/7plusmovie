@@ -20,6 +20,7 @@ export interface ITvShowRepository {
   getEpisode(id: string, seasonNumber: number, episodeNumber: number) : Promise<TvShow>;
   deleteById(id: string);
   getTvShowsLazy(id: string);
+  getSeason(id: string, seasonNumber: number) : Promise<TvShow>;
 }
 
 export interface TvShowLazy {
