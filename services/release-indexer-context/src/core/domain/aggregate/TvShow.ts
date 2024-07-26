@@ -281,6 +281,22 @@ export class TvShow {
   get seasons() {
     return this._seasons;
   }
+
+  sonarrReleaseAlreadyAdded(seasonNumber: number, guid: string) {
+    const season = this.getSeasonOrThrow(seasonNumber);
+    if (strIsBlank(guid)) {
+      throw new TvShow_BlankSonarrReleaseGuidError();
+    }
+    return season.alreadyAddedSonarrReleaseGuidList.includes(guid);
+  }
+
+  addSonarrReleaseGuid(seasonNumber: number, guid: string) {
+    if (strIsBlank(guid)) {
+      throw new TvShow_BlankSonarrReleaseGuidError();
+    }
+    const season = this.getSeasonOrThrow(seasonNumber);
+    season.alreadyAddedSonarrReleaseGuidList.push(guid);
+  }
 }
 
 export class TvShow_NullOriginalLocaleError {};
@@ -298,3 +314,4 @@ export class TvShow_EpisodeNotFoundError {};
 export class TvShow_InvalidTmdbEpisodeNumberError {};
 export class TvShow_InvalidEpisodeRuntimeSecondsError {};
 export class TvShow_InvalidEpisodeAirDateError {};
+export class TvShow_BlankSonarrReleaseGuidError {};

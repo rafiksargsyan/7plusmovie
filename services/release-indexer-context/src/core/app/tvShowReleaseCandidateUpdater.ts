@@ -47,19 +47,25 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
   const sonarrClient = new SonarrClient(sonarrApiBaseUrl, sonarrApiKey);
   const tvShow = await tvShowRepo.getSeason(event.tvShowId, event.seasonNumber);
   const sonarrReleases = await sonarrClient.getAll(tvShow.tmdbId!, tvShow.getSeasonOrThrow(event.seasonNumber).tmdbSeasonNumber!);
-  let allRadarrReleasesProcessed = true;
+  let allReleasesProcessed = true;
   for (let sr of sonarrReleases) {
     try {
       // Exit before lambda times out
       if (Date.now() - startTime > MAX_RUNTIME) {
-        allRadarrReleasesProcessed = false;
+        allReleasesProcessed = false;
         break;
       }
-      if (m.radarrReleaseAlreadyAdded(rr.guid)) continue;
-      allRadarrReleasesProcessed = false;
-      m.addRadarrReleaseGuid(rr.guid);
-      checkProtocol(rr.protocol);
-      checkCustomFormatScore(rr.customFormatScore);
+      if (tvShow.sonarrReleaseAlreadyAdded(event.seasonNumber, sr.guid)) continue;
+      allReleasesProcessed = false;
+      tvShow.addSonarrReleaseGuid(event.seasonNumber, sr.guid);
+      if (!isTorrentRelease(sr.protocol)) {
+        console.info(`Ignoring non-torrent RC=${JSON.stringify(sr)}`);
+      }
+      ///////////////////////////////////////
+      if (sr.customFormatScore == null || sr.customFormatScore < 0) {
+        console.info(`Ignoring RC with negative customFormatScore, RC=${JSON.stringify(sr)}`);
+      }
+      
       const tracker = resolveTorrentTrackerOrThrow(rr, rr.indexer);
       if (TorrentTracker.equals(tracker, TorrentTracker.DONTORRENT)) {
         await checkReleaseYearFromInfoUrl(rr.infoUrl, m.releaseYear);
@@ -162,18 +168,6 @@ function resolveTorrentTrackerOrThrow(rr: { infoUrl: string, commentUrl: string 
   return tracker;
 }
 
-function checkProtocol(protocol: Nullable<string>) {
-  if (protocol == null || protocol != "torrent") {
-    throw new Error(`Unsupported protocol=${protocol}`);
-  } 
-}
-
-function checkCustomFormatScore(customFormatScore: Nullable<number>) {
-  if (customFormatScore != null && customFormatScore < 0) {
-    throw new Error(`Invalid customFormatScore=${customFormatScore}`);
-  }
-}
-
 function checkSeeders(seeders: Nullable<number>) {
   if (seeders == null || seeders <= 0) {
     throw new Error(`Invalid seeders=${seeders}`);
@@ -233,4 +227,8 @@ function checkUrlLength(url: string) {
     throw new Error('Url is too big');
   }
   return url;
+}
+
+function isTorrentRelease(protocol: string) {
+  return protocol === "torrent";
 }
