@@ -17,6 +17,7 @@ import { TvShowRepository } from "../../adapters/TvShowRepository";
 import { SonarrClient } from "../../adapters/SonarrClient";
 import { SonarrRelease } from "../ports/ISonarr";
 import { strIsBlank } from "../../utils";
+import { SetTopicAttributesCommand } from "@aws-sdk/client-sns";
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const sonarrApiBaseUrl = process.env.SONARR_API_BASE_URL!;
@@ -94,10 +95,14 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
         console.warn(`infoHash must be available in case of magnet links, RC=${sr}`);
         continue;
       }
-      // resolve episode and duplicate hash
+      const episodeNumber = resolveEpisodeNumber(sr);
       const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, downloadUrl,
         null, resolution, ripType, tracker, sr.infoHash!, sr.infoUrl, seeders, sonarrLanguages, false);
-      // todo
+      if (episodeNumber != null) {
+        tvShow.addRCToEpisode(event.seasonNumber, episodeNumber, sr.infoHash!, rc);
+      } else {
+        tvShow.addRCToSeason(event.seasonNumber, sr.infoHash!, rc);
+      }
     } else {
       const response = await axios.get(downloadUrl, { responseType: 'arraybuffer', maxRedirects: 0 });
       let locationHeader: Nullable<string> = response.headers?.Location;
@@ -114,18 +119,27 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
           console.warn(`Could not resolve hash for RC=${sr}`);
           continue;
         }
-        // resolve episode and duplicate hash
+        const episodeNumber = resolveEpisodeNumber(sr);
         const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, locationHeader,
           null, resolution, ripType, tracker, hash!, sr.infoUrl, seeders, sonarrLanguages, false);
-        // todo
+        if (episodeNumber != null) {
+          tvShow.addRCToEpisode(event.seasonNumber, episodeNumber, hash!, rc);
+        } else {
+          tvShow.addRCToSeason(event.seasonNumber, hash!, rc);
+        }
       } else {
         const torrentFile = response.data;
         const decodedTorrent = bencode.decode(torrentFile);
         const info = decodedTorrent['info'];
         const bencodedInfo = bencode.encode(info);
         let hash = createHash('sha1').update(bencodedInfo).digest('hex');
-        // check duplicate hash and resolve episode
-        const s3ObjectKey = `${tvShow.id}/${hash}`;
+        const episodeNumber = resolveEpisodeNumber(sr);
+        let s3ObjectKey;
+        if (episodeNumber != null) {
+          s3ObjectKey = `${tvShow.id}/${event.seasonNumber}/${episodeNumber}/${hash}`;
+        } else {
+          s3ObjectKey = `${tvShow.id}/${event.seasonNumber}/${hash}`;
+        }
         const s3Params = {
           Bucket: torrentFilesS3Bucket,
           Key: s3ObjectKey,
@@ -134,7 +148,11 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
         await s3.putObject(s3Params);
         const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, s3ObjectKey,
           null, resolution, ripType, tracker, hash, sr.infoUrl, seeders, sonarrLanguages, false);
-        // todo
+        if (episodeNumber != null) {
+          tvShow.addRCToEpisode(event.seasonNumber, episodeNumber, hash!, rc);
+        } else {
+          tvShow.addRCToSeason(event.seasonNumber, hash!, rc);
+        }
       }
     }  
   }
@@ -164,4 +182,8 @@ function resolveReleaseTimeInMillis(radarrAge: Nullable<number>, radarrAgeMinute
 
 function isTorrentRelease(protocol: string) {
   return protocol === "torrent";
+}
+
+function resolveEpisodeNumber(sr: SonarrRelease) {
+  throw new Error('not implemented');
 }

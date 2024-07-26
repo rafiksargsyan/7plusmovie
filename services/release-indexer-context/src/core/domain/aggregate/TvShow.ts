@@ -322,6 +322,38 @@ export class TvShow {
     const season = this.getSeasonOrThrow(seasonNumber);
     season.readyToBeProcessed = value;
   }
+
+  addRCToSeason(seasonNumber: number, id: string, rc: ReleaseCandidate) {
+    const season = this.getSeasonOrThrow(seasonNumber);
+    if (strIsBlank(id)) {
+      throw new TvShow_BlankRCIdError();
+    }
+    if (rc == null) {
+      throw new TvShow_NullRCError();
+    }
+    const idLowerCase = id.toLowerCase();
+    const idUpperCase = id.toUpperCase();
+    season.episodes.forEach(e => {
+      if ((!(idLowerCase in e.releaseCandidates)) && (!(idUpperCase in e.releaseCandidates))) {
+        e.releaseCandidates[id] = rc;
+      }
+    })
+  }
+
+  addRCToEpisode(seasonNumber: number, episodeNumber: number, id: string, rc: ReleaseCandidate) {
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    if (strIsBlank(id)) {
+      throw new TvShow_BlankRCIdError();
+    }
+    if (rc == null) {
+      throw new TvShow_NullRCError();
+    }
+    const idLowerCase = id.toLowerCase();
+    const idUpperCase = id.toUpperCase();
+    if ((!(idLowerCase in episode.releaseCandidates)) && (!(idUpperCase in episode.releaseCandidates))) {
+      episode.releaseCandidates[id] = rc;
+    }
+  }
 }
 
 export class TvShow_NullOriginalLocaleError {};
@@ -340,3 +372,5 @@ export class TvShow_InvalidTmdbEpisodeNumberError {};
 export class TvShow_InvalidEpisodeRuntimeSecondsError {};
 export class TvShow_InvalidEpisodeAirDateError {};
 export class TvShow_BlankSonarrReleaseGuidError {};
+export class TvShow_BlankRCIdError {};
+export class TvShow_NullRCError {};
