@@ -15,6 +15,8 @@ import { S3 } from '@aws-sdk/client-s3';
 import { AudioLang } from "../domain/value-object/AudioLang";
 import { TvShowRepository } from "../../adapters/TvShowRepository";
 import { SonarrClient } from "../../adapters/SonarrClient";
+import { SonarrRelease } from "../ports/ISonarr";
+import { strIsBlank } from "../../utils";
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const sonarrApiBaseUrl = process.env.SONARR_API_BASE_URL!;
@@ -49,130 +51,106 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
   const sonarrReleases = await sonarrClient.getAll(tvShow.tmdbId!, tvShow.getSeasonOrThrow(event.seasonNumber).tmdbSeasonNumber!);
   let allReleasesProcessed = true;
   for (let sr of sonarrReleases) {
-    try {
-      // Exit before lambda times out
-      if (Date.now() - startTime > MAX_RUNTIME) {
-        allReleasesProcessed = false;
-        break;
-      }
-      if (tvShow.sonarrReleaseAlreadyAdded(event.seasonNumber, sr.guid)) continue;
+    // Exit before lambda times out
+    if (Date.now() - startTime > MAX_RUNTIME) {
       allReleasesProcessed = false;
-      tvShow.addSonarrReleaseGuid(event.seasonNumber, sr.guid);
-      if (!isTorrentRelease(sr.protocol)) {
-        console.info(`Ignoring non-torrent RC=${JSON.stringify(sr)}`);
+      break;
+    }
+    if (tvShow.sonarrReleaseAlreadyAdded(event.seasonNumber, sr.guid)) continue;
+    allReleasesProcessed = false;
+    tvShow.addSonarrReleaseGuid(event.seasonNumber, sr.guid);
+    if (!isTorrentRelease(sr.protocol)) {
+      console.info(`Ignoring non-torrent RC=${JSON.stringify(sr)}`);
+      continue;
+    }
+    if (sr.customFormatScore == null || sr.customFormatScore < 0) {
+      console.info(`Ignoring RC with negative customFormatScore, RC=${JSON.stringify(sr)}`);
+      continue;
+    }
+    const tracker = resolveTorrentTracker(sr);
+    if (tracker == null) {
+      console.warn(`Unknown torrent tracker for RC=${JSON.stringify(sr)}`);
+      continue;
+    }
+    const seeders = sr.seeders;
+    if (seeders != null && seeders <= 0) {
+      console.info(`Ignoring RC because of low number of seeders, RC=${JSON.stringify(sr)}`);
+      continue;
+    }
+    const ripType = sr.ripType;
+    const resolution = sr.resolution;
+    const releaseTimeInMillis = resolveReleaseTimeInMillis(sr.age, sr.ageInMinutes, tracker);
+    const downloadUrl = sr.downloadUrl;
+    const sonarrLanguages  = sr.languages;
+    const lastEpisodeReleaseTime = tvShow.estimatedLastEpisodeReleaseTime(event.seasonNumber);
+    if ((lastEpisodeReleaseTime != null && (Date.now() - lastEpisodeReleaseTime > 3 * MONTH_IN_MILLIS)) &&
+       !tracker.isLanguageSpecific() && (sonarrLanguages.length === 0 ||
+         (sonarrLanguages.length === 1 && (AudioLang.fromRadarrLanguage(sonarrLanguages[0]) != null &&
+           AudioLang.fromRadarrLanguage(sonarrLanguages[0])?.lang === tvShow.originalLocale.lang || sonarrLanguages[0] === "unknown")))) {
+      continue;
+    }
+    if (downloadUrl.startsWith("magnet")) {
+      if (strIsBlank(sr.infoHash)) {
+        console.warn(`infoHash must be available in case of magnet links, RC=${sr}`);
+        continue;
       }
-      ///////////////////////////////////////
-      if (sr.customFormatScore == null || sr.customFormatScore < 0) {
-        console.info(`Ignoring RC with negative customFormatScore, RC=${JSON.stringify(sr)}`);
-      }
-      
-      const tracker = resolveTorrentTrackerOrThrow(rr, rr.indexer);
-      if (TorrentTracker.equals(tracker, TorrentTracker.DONTORRENT)) {
-        await checkReleaseYearFromInfoUrl(rr.infoUrl, m.releaseYear);
-      }
-      const seeders = checkSeeders(rr.seeders);
-      const ripType = RipType.fromRadarrReleaseQualityNameOrThrow(rr?.quality?.quality?.name);
-      let resolution = Resolution.fromPixels(rr?.quality?.quality?.resolution, rr?.quality?.quality?.resolution);
-      if (resolution == null) {
-        if (ripType.isLowQuality()) {
-          resolution = Resolution.SD;
-        } else {
-          throw new Error('Failed to find resolution');
+      // resolve episode and duplicate hash
+      const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, downloadUrl,
+        null, resolution, ripType, tracker, sr.infoHash!, sr.infoUrl, seeders, sonarrLanguages, false);
+      // todo
+    } else {
+      const response = await axios.get(downloadUrl, { responseType: 'arraybuffer', maxRedirects: 0 });
+      let locationHeader: Nullable<string> = response.headers?.Location;
+      if (locationHeader == null) locationHeader = response.headers?.location;
+      if (locationHeader != null && locationHeader.startsWith("magnet")) {
+        let hash = sr.infoHash;
+        if (strIsBlank(hash)) {
+          const hashPrefix = "xt=urn:btih:";
+          let hashStartIndex = locationHeader.indexOf(hashPrefix) + hashPrefix.length;
+          let hashEndIndex = locationHeader.indexOf('&', hashStartIndex);
+          hash = locationHeader.substring(hashStartIndex, hashEndIndex);
         }
-      }
-      if ((Date.now() - m.releaseTimeInMillis > 2 * MONTH_IN_MILLIS)
-      && (ripType.isLowQuality() || Resolution.compare(resolution, Resolution.SD) === 0)) {
-        continue;
-      }
-      const releaseTimeInMillis = resolveReleaseTimeInMillis(rr.age, rr.ageMinutes, tracker);
-      const sizeInBytes = rr.size;
-      if (sizeInBytes != null && m.runtimeSeconds != null && sizeInBytes / m.runtimeSeconds < BR_MINIUM_BITRATE
-      && RipType.compare(ripType, RipType.BR) === 0) {
-        continue;
-      } 
-      const radarrDownloadUrl = checkRadarrDownloadUrl(rr.downloadUrl);
-      let radarrLanguages: string[] = [];
-      if (rr.languages != null) {
-        for (let l of rr.languages) {
-          radarrLanguages.push(l.name.toLowerCase());
+        if (strIsBlank(hash)) {
+          console.warn(`Could not resolve hash for RC=${sr}`);
+          continue;
         }
-      }
-      if ((Date.now() - m.releaseTimeInMillis > 3 * MONTH_IN_MILLIS) &&
-      !tracker.isLanguageSpecific() && (radarrLanguages.length === 0 ||
-        (radarrLanguages.length === 1 && (AudioLang.fromRadarrLanguage(radarrLanguages[0]) != null &&
-        AudioLang.fromRadarrLanguage(radarrLanguages[0])?.lang === m.originalLocale.lang || radarrLanguages[0] === "unknown")))) {
-        continue;
-      }
-      const isRadarrUnknown = rr.rejections != null && rr.rejections.map(r => r.toLowerCase()).includes("unknown movie");
-      if (radarrDownloadUrl.startsWith("magnet")) {
-        const hash = checkEmptyHash(rr.infoHash);
-        checkDuplicateHash(hash, m);
-        const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, radarrDownloadUrl,
-          sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders, radarrLanguages, isRadarrUnknown);
-        m.addReleaseCandidate(hash, rc);
+        // resolve episode and duplicate hash
+        const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, locationHeader,
+          null, resolution, ripType, tracker, hash!, sr.infoUrl, seeders, sonarrLanguages, false);
+        // todo
       } else {
-        const publicDownloadUrl = checkUrlLength(getTorrentPublicDownloadURLOrThrow(radarrDownloadUrl));
-        const response = await axios.get(publicDownloadUrl, { responseType: 'arraybuffer', maxRedirects: 0 });
-        let locationHeader: Nullable<string> = response.headers?.Location;
-        if (locationHeader == null) locationHeader = response.headers?.location;
-        if (locationHeader != null && locationHeader.startsWith("magnet")) {
-          let hash = rr.infoHash;
-          if (hash == null || hash.trim() === "") {
-            const hashPrefix = "xt=urn:btih:";
-            let hashStartIndex = locationHeader.indexOf(hashPrefix) + hashPrefix.length;
-            let hashEndIndex = locationHeader.indexOf('&', hashStartIndex);
-            hash = locationHeader.substring(hashStartIndex, hashEndIndex);
-          }
-          checkEmptyHash(hash);
-          checkDuplicateHash(hash, m);
-          const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, locationHeader,
-            sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders, radarrLanguages, isRadarrUnknown);
-          m.addReleaseCandidate(hash, rc);
-        } else {
-          const torrentFile = response.data;
-          const decodedTorrent = bencode.decode(torrentFile);
-          const info = decodedTorrent['info'];
-          const bencodedInfo = bencode.encode(info);
-          let hash = checkEmptyHash(createHash('sha1').update(bencodedInfo).digest('hex'));
-          checkDuplicateHash(hash, m);
-          const s3ObjectKey = `${m.id}/${hash}`;
-          const s3Params = {
-            Bucket: torrentFilesS3Bucket,
-            Key: s3ObjectKey,
-            Body: torrentFile
-          };
-          await s3.putObject(s3Params);
-          const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, s3ObjectKey,
-            sizeInBytes, resolution, ripType, tracker, hash, rr.infoUrl, seeders, radarrLanguages, isRadarrUnknown);
-          m.addReleaseCandidate(hash, rc);
-        }
+        const torrentFile = response.data;
+        const decodedTorrent = bencode.decode(torrentFile);
+        const info = decodedTorrent['info'];
+        const bencodedInfo = bencode.encode(info);
+        let hash = createHash('sha1').update(bencodedInfo).digest('hex');
+        // check duplicate hash and resolve episode
+        const s3ObjectKey = `${tvShow.id}/${hash}`;
+        const s3Params = {
+          Bucket: torrentFilesS3Bucket,
+          Key: s3ObjectKey,
+          Body: torrentFile
+        };
+        await s3.putObject(s3Params);
+        const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, s3ObjectKey,
+          null, resolution, ripType, tracker, hash, sr.infoUrl, seeders, sonarrLanguages, false);
+        // todo
       }
-    } catch(e) {
-      console.log(e);
-    }   
+    }  
   }
-  if (allRadarrReleasesProcessed) {
-    m.readyToBeProcessed = true;
+  if (allReleasesProcessed) {
+    tvShow.setSeasonReadyToBeProcessed(event.seasonNumber, true);
   }
-  await movieRepo.saveMovie(m);
+  await tvShowRepo.save(tvShow, false, [event.seasonNumber], { [event.seasonNumber]: tvShow.getSeasonOrThrow(event.seasonNumber).episodes.map(e => e.episodeNumber) });
 };
 
-function resolveTorrentTrackerOrThrow(rr: { infoUrl: string, commentUrl: string },
-                                      indexerName: Nullable<string>) {
-  const url = rr.infoUrl + rr.commentUrl;
+function resolveTorrentTracker(sr: SonarrRelease) {
+  const infoUrl = sr.infoUrl == null ? "" : sr.infoUrl;
+  const commentUrl = sr.commentUrl == null ? "" : sr.commentUrl;
+  const url = infoUrl + commentUrl;
   let tracker = TorrentTracker.fromRadarrInfoCommentUrl(url);
-  if (tracker == null) tracker = TorrentTracker.fromRadarrReleaseIndexerName(indexerName);
-  if (tracker == null) {
-    throw new Error(`Failed to resolve the torrent tracker for (raddarrInfoCommentUrl=${url}, radarrReleaseIndexerName=${indexerName})`);
-  }
+  if (tracker == null) tracker = TorrentTracker.fromRadarrReleaseIndexerName(sr.indexer);
   return tracker;
-}
-
-function checkSeeders(seeders: Nullable<number>) {
-  if (seeders == null || seeders <= 0) {
-    throw new Error(`Invalid seeders=${seeders}`);
-  }
-  return seeders;
 }
 
 function resolveReleaseTimeInMillis(radarrAge: Nullable<number>, radarrAgeMinutes: Nullable<number>, tracker: TorrentTracker) {
@@ -182,51 +160,6 @@ function resolveReleaseTimeInMillis(radarrAge: Nullable<number>, radarrAgeMinute
     return null;
   }
   return Math.round(Date.now() - radarrAgeMinutes * 60 * 1000);
-}
-
-function checkRadarrDownloadUrl(url: Nullable<string>) {
-  if (url == null || url.trim() === "") {
-    throw new Error("Empty radarr download URL");
-  }
-  return url;
-}
-
-function getTorrentPublicDownloadURLOrThrow(radarrDownloadUrl: string) {
-  for (let k in radarrDownloadUrlBaseMapping) {
-    if (radarrDownloadUrl.startsWith(k)) {
-      const publicBase = radarrDownloadUrlBaseMapping[k];
-      return publicBase + radarrDownloadUrl.substring(k.length);
-    }
-  }
-  throw new Error(`Failed to resolve public download url for ${radarrDownloadUrl}`);
-}
-
-function checkEmptyHash(hash: string) {
-  if (hash == null || hash.trim() == "") {
-    throw new Error('Torrent hash is empty');
-  }
-  return hash;
-}
-
-function checkDuplicateHash(hash: string, m: Movie) {
-  if (hash in m.releaseCandidates) {
-    throw new Error(`A release candidate with hash=${hash} already exists`);
-  }
-}
-
-async function checkReleaseYearFromInfoUrl(infoUrl: string, releaseYear: number) {
-  const response = await axios.get(infoUrl);
-  const regex = new RegExp(String.raw`campo:\s*'anyo',\s*valor:\s*'${releaseYear}`);
-  if (!regex.test(response.data)) {
-    throw new Error('Release year didn\'t match for DonTorrent release');
-  }
-}
-
-function checkUrlLength(url: string) {
-  if (url.length > 2000) {
-    throw new Error('Url is too big');
-  }
-  return url;
 }
 
 function isTorrentRelease(protocol: string) {

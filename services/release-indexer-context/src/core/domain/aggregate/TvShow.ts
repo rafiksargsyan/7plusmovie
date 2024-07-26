@@ -297,6 +297,31 @@ export class TvShow {
     const season = this.getSeasonOrThrow(seasonNumber);
     season.alreadyAddedSonarrReleaseGuidList.push(guid);
   }
+
+  estimatedLastEpisodeReleaseTime(seasonNumber): Nullable<number> {
+    const season = this.getSeasonOrThrow(seasonNumber);
+    let ret = 0;
+    for (const e of season.episodes) {
+      if (e.airDateInMillis != null) {
+        ret = Math.max(ret, e.airDateInMillis);
+      } else {
+        ret = Math.max(ret, e.creationTime);
+      }
+    }
+    if (ret === 0) {
+      return null;
+    }
+    return ret;
+  }
+
+  get originalLocale() {
+    return this._originalLocale;
+  }
+
+  setSeasonReadyToBeProcessed(seasonNumber: number, value: boolean) {
+    const season = this.getSeasonOrThrow(seasonNumber);
+    season.readyToBeProcessed = value;
+  }
 }
 
 export class TvShow_NullOriginalLocaleError {};

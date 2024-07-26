@@ -21,6 +21,7 @@ export interface SonarrRelease {
   downloadUrl: string
   languages: string[]
   indexer: string
+  infoHash: Nullable<string>
 }
 
 export class ISonarrApiError {};

@@ -123,8 +123,8 @@ export class SonarrClient implements ISonarr {
         title: title,
         downloadUrl: downloadUrl,
         languages: languages,
-        indexer: indexer
-        // todo rest
+        indexer: indexer,
+        infoHash: r.infoHash
       })
     }
     
