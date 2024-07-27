@@ -85,7 +85,7 @@ export class TvShowRepository implements ITvShowRepository {
     }
     
     tvShowDto.id = tvShowDto.PK;
-    tvShowDto._seasons = seasons;
+    tvShowDto._seasons = Object.values(seasons);
 
     const tvShow: TvShow = TvShow.createEmpty();
     Object.assign(tvShow, tvShowDto);

@@ -248,26 +248,26 @@ functions:
             arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
     timeout: 60
 
-  tvShowReleaseCandidateUpdaterFanout:
+  tvShowRCUpdaterFanout:
     environment:
       DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
       TVSHOW_RC_UPDATER_FANOUT_SEASONS_LAMBDA_NAME: todo 
-    handler: src/core/app/tvShowReleaseCandidateUpdaterFanout.handler
+    handler: src/core/app/tvShowRCUpdaterFanout.handler
     events:
       - schedule: rate(${file(./.env.${sls:stage}.yml):RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minutes)
     timeout: 900
 
-  tvShowReleaseCandidateUpdaterFanoutSeasons:
+  tvShowRCUpdaterFanoutSeasons:
     environment:
       DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
       TVSHOW_RC_UPDATER_LAMBDA_NAME: todo 
-    handler: src/core/app/tvShowReleaseCandidateUpdaterFanoutSeasons.handler
+    handler: src/core/app/tvShowRCUpdaterFanoutSeasons.handler
     timeout: 900
 
-  tvShowReleaseCandidateUpdater:
+  tvShowRCUpdater:
     environment:
       DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
-    handler: src/core/app/tvShowReleaseCandidateUpdater.handler
+    handler: src/core/app/tvShowRCUpdater.handler
     timeout: 900
 
 resources:

@@ -6,7 +6,6 @@ import { L8nLang } from "../value-object/L8nLang";
 import { v4 as uuid } from 'uuid';
 
 export interface Season {
-  names: string[];
   tmdbSeasonNumber: Nullable<number>;
   episodes: Episode[];
   seasonNumber: number;
@@ -17,7 +16,6 @@ export interface Season {
 
 export interface Episode {
   creationTime: number;
-  names: string[];
   releases: { [releaseId:string]: { release: Release, replacedReleaseIds: string[] } }
   tmdbEpisodeNumber: Nullable<number>;
   episodeNumber: number;
@@ -138,7 +136,6 @@ export class TvShow {
     this._seasons.push({
       seasonNumber: seasonNumber,
       episodes: [],
-      names: [],
       tmdbSeasonNumber: null,
       alreadyAddedSonarrReleaseGuidList: [],
       lastReleaseCandidateScanTimeMillis: 0,
@@ -160,34 +157,11 @@ export class TvShow {
     if (tmdbSeasonNumber == null || tmdbSeasonNumber < 0 || !Number.isInteger(tmdbSeasonNumber)) {
       throw new TvShow_InvalidTmdbSeasonNumberError();  
     }
-    if (this.getSeasonByTmdbSeasonNumber(tmdbSeasonNumber) != null) {
-      throw new TvShow_SeasonWithTmdbSeasonNumberAlreadyExistsError();
-    }
     if (season.tmdbSeasonNumber !== tmdbSeasonNumber) {
       season.tmdbSeasonNumber = tmdbSeasonNumber;
       return true;
     }
     return false;
-  }
-
-  addNameToSeason(seasonNumber: number, name: Nullable<string>) {
-    if (strIsBlank(name)) {
-      return false;
-    }
-    const season = this.getSeasonOrThrow(seasonNumber);
-    name = name!.trim().toLowerCase();
-    if (season.names.includes(name)) return false;
-    season.names.push(name);
-    return true;
-  }
-
-  addNameToEpisode(seasonNumber: number, episodeNumber: number, name: Nullable<string>) {
-    if (strIsBlank(name)) return false;
-    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
-    name = name!.trim().toLowerCase();
-    if (episode.names.includes(name)) return false;
-    episode.names.push(name);
-    return true;
   }
 
   private checkEpisodeNumberOrThrow(episodeNumber: number) {
@@ -230,7 +204,6 @@ export class TvShow {
     const season = this.getSeasonOrThrow(seasonNumber);
     season.episodes.push({
       creationTime: Date.now(),
-      names: [],
       releases: {},
       tmdbEpisodeNumber: null,
       episodeNumber: episodeNumber,
