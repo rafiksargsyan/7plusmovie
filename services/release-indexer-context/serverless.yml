@@ -266,6 +266,10 @@ functions:
 
   tvShowRCUpdater:
     environment:
+      SONARR_API_BASE_URL: ${env:SONARR_API_BASE_URL}
+      SONARR_DOWNLOAD_URL_BASE_MAPPING: ${env:SONARR_DOWNLOAD_URL_BASE_MAPPING}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      TORRENT_FILES_S3_BUCKET: ${env:TORRENT_FILES_S3_BUCKET}
       DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
     handler: src/core/app/tvShowRCUpdater.handler
     timeout: 900
