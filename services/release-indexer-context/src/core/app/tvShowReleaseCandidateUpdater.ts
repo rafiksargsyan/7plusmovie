@@ -1,12 +1,9 @@
-import { Movie } from "../domain/aggregate/Movie";
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import axios from "axios";
 import { Nullable } from "../../Nullable";
 import { ReleaseCandidate } from "../domain/entity/ReleaseCandidate";
 import { TorrentReleaseCandidate } from "../domain/entity/TorrentReleaseCandidate";
-import { Resolution } from "../domain/value-object/Resolution";
-import { RipType } from "../domain/value-object/RipType";
 import { TorrentTracker } from "../domain/value-object/TorrentTracker";
 import bencode from 'bencode';
 import { createHash } from 'crypto';
@@ -17,7 +14,6 @@ import { TvShowRepository } from "../../adapters/TvShowRepository";
 import { SonarrClient } from "../../adapters/SonarrClient";
 import { SonarrRelease } from "../ports/ISonarr";
 import { strIsBlank } from "../../utils";
-import { SetTopicAttributesCommand } from "@aws-sdk/client-sns";
 import { TvShow } from "../domain/aggregate/TvShow";
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
