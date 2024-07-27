@@ -31,7 +31,7 @@ export class SonarrClient implements ISonarr {
   private async getIdByTmdbId(tmdbId: string) {
     let response: any = null;
     try {
-      response = (await this._restClient.get(`series/lookup/?term=${tmdbId}`)).data;
+      response = (await this._restClient.get(`series/lookup/?term=tmdb${tmdbId}`)).data;
     } catch (e) {
       console.error(e);
       throw new ISonarrApiError();
@@ -49,7 +49,7 @@ export class SonarrClient implements ISonarr {
     }
     let response;
     try {
-      response = (await this._restClient.get(`release/?seriesId=${id}?seasonNumber=${tmdbSeasonNumber}`)).data;
+      response = (await this._restClient.get(`release/?seriesId=${id}&seasonNumber=${tmdbSeasonNumber}`)).data;
       if (response == null) response = [];
     } catch (e) {
       console.log(e);
@@ -100,7 +100,7 @@ export class SonarrClient implements ISonarr {
       }
       let sonarrLanguages = r.languages != null ? r.languages : [];
       const languages: string[] = [];
-      sonarrLanguages.array.forEach(sl => {
+      sonarrLanguages.forEach(sl => {
         if (!strIsBlank(sl.name)) {
           languages.push(sl.name.toLowerCase());  
         }
@@ -133,6 +133,14 @@ export class SonarrClient implements ISonarr {
 
   private normalizeDownloadUrl(url: Nullable<string>) {
     if (url == null) return null;
+    if (url.startsWith("magnet")) {
+      if (url.length > 2000) {
+        console.warn(`Too long downloadUrl=${url}`);
+        return null;
+      } else {
+        return url;
+      }
+    }
     for (let k in sonarrDownloadUrlBaseMapping) {
       if (url.startsWith(k)) {
         const publicBase = sonarrDownloadUrlBaseMapping[k];
