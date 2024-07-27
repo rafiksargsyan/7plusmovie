@@ -37,6 +37,7 @@ export class TvShow {
   private _originalTitle: string;
   private _releaseYear: number;
   private _seasons: Season[] = [];
+  private _names: string[] = [];
 
   private constructor(createEmptyObject: boolean, originalLocale: Nullable<L8nLang>,
     originalTitle: Nullable<string>, releaseYear: Nullable<number>) {
@@ -340,19 +341,35 @@ export class TvShow {
     })
   }
 
-  addRCToEpisode(seasonNumber: number, episodeNumber: number, id: string, rc: ReleaseCandidate) {
-    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+  addRCToEpisodes(seasonNumber: number, episodeNumbers: number[], id: string, rc: ReleaseCandidate) {
     if (strIsBlank(id)) {
       throw new TvShow_BlankRCIdError();
     }
     if (rc == null) {
       throw new TvShow_NullRCError();
     }
-    const idLowerCase = id.toLowerCase();
-    const idUpperCase = id.toUpperCase();
-    if ((!(idLowerCase in episode.releaseCandidates)) && (!(idUpperCase in episode.releaseCandidates))) {
-      episode.releaseCandidates[id] = rc;
+    for (const episodeNumber of episodeNumbers) {
+     const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+     const idLowerCase = id.toLowerCase();
+     const idUpperCase = id.toUpperCase();
+     if ((!(idLowerCase in episode.releaseCandidates)) && (!(idUpperCase in episode.releaseCandidates))) {
+       episode.releaseCandidates[id] = rc;
+     }
     }
+  }
+
+  addName(name: Nullable<string>) {
+    if (strIsBlank(name)) {
+      return false;
+    }
+    name = name!.trim().toLowerCase();
+    if (this._names.includes(name)) return false;
+    this._names.push(name);
+    return true;
+  }
+
+  get names() {
+    return this._names;
   }
 }
 

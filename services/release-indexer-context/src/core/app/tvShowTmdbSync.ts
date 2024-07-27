@@ -33,8 +33,16 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
   });
   const tvShow = await tvShowRepo.getById(event.tvShowId);
   if (tvShow.tmdbId == null) return;
-  const tvShowTmdb = await getTvShowDetailsFromTmdb(tmdbClient, tvShow.tmdbId);
-  const seasons: any[] = tvShowTmdb.seasons;
+  const tvShowTmdbEn = await getTvShowDetailsFromTmdb(tmdbClient, tvShow.tmdbId, 'en');
+  const tvShowTmdbRu = await getTvShowDetailsFromTmdb(tmdbClient, tvShow.tmdbId, 'ru');
+  const tvShowTmdbEs = await getTvShowDetailsFromTmdb(tmdbClient, tvShow.tmdbId, 'es');
+  const tvShowTmdbFr = await getTvShowDetailsFromTmdb(tmdbClient, tvShow.tmdbId, 'fr');
+  const tvShowTmdbIt = await getTvShowDetailsFromTmdb(tmdbClient, tvShow.tmdbId, 'it');
+  let rootUpdated = false;
+  [tvShowTmdbEn, tvShowTmdbRu, tvShowTmdbEs, tvShowTmdbFr, tvShowTmdbIt].forEach(t => {
+    rootUpdated = rootUpdated || tvShow.addName(t.name)
+  })
+  const seasons: any[] = tvShowTmdbEn.seasons;
   if (seasons == null) return;
   const updatedSeasons: Set<number> = new Set();
   const updatedEpisodes: { [key:number] : Set<number> } = {};
@@ -52,7 +60,8 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
     const seasonDetailsRu = await getSeasonDetailsFromTmdb(tmdbClient, tvShow.tmdbId, seasonNumber, 'ru');
     const seasonDetailsEs = await getSeasonDetailsFromTmdb(tmdbClient, tvShow.tmdbId, seasonNumber, 'es');
     const seasonDetailsFr = await getSeasonDetailsFromTmdb(tmdbClient, tvShow.tmdbId, seasonNumber, 'fr');
-    [seasonDetailsEn, seasonDetailsRu, seasonDetailsEs, seasonDetailsFr].forEach(d => {
+    const seasonDetailsIt = await getSeasonDetailsFromTmdb(tmdbClient, tvShow.tmdbId, seasonNumber, 'it');
+    [seasonDetailsEn, seasonDetailsRu, seasonDetailsEs, seasonDetailsFr, seasonDetailsIt].forEach(d => {
       if (tvShow.addNameToSeason(seasonNumber, d.name)) updatedSeasons.add(seasonNumber);
       const episodes: any[] = d.episodes;
       if (episodes == null) return;
@@ -88,14 +97,14 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
       }
     })
   }
-  await tvShowRepo.save(tvShow, false, Array.from(updatedSeasons), Object.keys(updatedEpisodes).reduce((aggr, k) => {
+  await tvShowRepo.save(tvShow, rootUpdated, Array.from(updatedSeasons), Object.keys(updatedEpisodes).reduce((aggr, k) => {
    aggr[k] = Array.from(updatedEpisodes[k]);
    return aggr;
   }, {}))
 };
 
-async function getTvShowDetailsFromTmdb(tmdbClient: AxiosInstance, tmdbId: string) {
-  return (await tmdbClient.get(`tv/${tmdbId}`)).data;
+async function getTvShowDetailsFromTmdb(tmdbClient: AxiosInstance, tmdbId: string, locale: string) {
+  return (await tmdbClient.get(`tv/${tmdbId}?language=${locale}`)).data;
 }
 
 async function getSeasonDetailsFromTmdb(tmdbClient: AxiosInstance, tmdbId: string, seasonNumber: number, locale: string) {

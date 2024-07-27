@@ -18,6 +18,7 @@ import { SonarrClient } from "../../adapters/SonarrClient";
 import { SonarrRelease } from "../ports/ISonarr";
 import { strIsBlank } from "../../utils";
 import { SetTopicAttributesCommand } from "@aws-sdk/client-sns";
+import { TvShow } from "../domain/aggregate/TvShow";
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const sonarrApiBaseUrl = process.env.SONARR_API_BASE_URL!;
@@ -74,7 +75,7 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
       continue;
     }
     const seeders = sr.seeders;
-    if (seeders != null && seeders <= 0) {
+    if (seeders != null && seeders <= 5) {
       console.info(`Ignoring RC because of low number of seeders, RC=${JSON.stringify(sr)}`);
       continue;
     }
@@ -184,6 +185,43 @@ function isTorrentRelease(protocol: string) {
   return protocol === "torrent";
 }
 
-function resolveEpisodeNumber(sr: SonarrRelease) {
-  throw new Error('not implemented');
+/**
+ * @returns {number[]} null means the release must be added to all episodes, empty means no episode was found
+ */
+function resolveEpisodeNumbers(sr: SonarrRelease, seasonNumber: number, tvShow: TvShow): Nullable<number[]> {
+  const titleLC = sr.title.toLowerCase();
+  let titlePrefixMatched = false;
+  tvShow.names.forEach(n => {
+    n = n.replace(/^a-zA-Z0-9/g, '');
+    const dotted = n.replace(/\s+/g, '.');
+    if (titleLC.startsWith(n) || titleLC.startsWith(dotted)) {
+      titlePrefixMatched = true;
+    }
+  })
+  if (!titlePrefixMatched) {
+    console.warn(`Release title prefixed did not match for RC=${JSON.stringify(sr)}, seasonNumber=${seasonNumber}`);
+    return [];
+  }
+  const regex1 = new RegExp(String.raw`s0*${seasonNumber}`);
+  const regex2 = new RegExp(String.raw`temporada\s*${seasonNumber}`);
+  const regex3 = new RegExp(String.raw`saison\s*0*${seasonNumber}`);
+  if (titleLC.match(regex1) == null || titleLC.match(regex2) == null || titleLC.match(regex3) == null) {
+    console.warn(`Season not found for RC=${JSON.stringify(sr)}, seasonNumber=${seasonNumber}`)
+    return []
+  }
+  // For example 'Breaking Bad / S5E1-16 of 16 [2012, BDRemux 1080p] MVO (LostFilm) + DVO + MVO (AMEDIA) + Original'
+  const episodeRegex1 = new RegExp(String.raw`s0*${seasonNumber}\s*e(0*[1-9]+)-(0*[1-9]+)`);
+  const episodeRegex1Matchs = titleLC.match(episodeRegex1);
+  if (episodeRegex1Matchs != null) {
+    const startEpisode = Number.parseInt(episodeRegex1Matchs[1]);
+    const endEpisode = Number.parseInt(episodeRegex1Matchs[2]);
+    if (startEpisode <= endEpisode) {
+      const ret: number[] = [];
+      for (let i = startEpisode; i <= endEpisode; ++i) {
+        ret.push(i);
+      }
+      return ret;
+    }
+  }
+  return null;
 }
