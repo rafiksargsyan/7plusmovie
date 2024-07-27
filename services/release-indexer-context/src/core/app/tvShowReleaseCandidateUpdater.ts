@@ -96,13 +96,15 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
         console.warn(`infoHash must be available in case of magnet links, RC=${sr}`);
         continue;
       }
-      const episodeNumber = resolveEpisodeNumber(sr);
+      const episodeNumbers = resolveEpisodeNumbers(sr, event.seasonNumber, tvShow);
       const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, downloadUrl,
         null, resolution, ripType, tracker, sr.infoHash!, sr.infoUrl, seeders, sonarrLanguages, false);
-      if (episodeNumber != null) {
-        tvShow.addRCToEpisode(event.seasonNumber, episodeNumber, sr.infoHash!, rc);
-      } else {
+      if (episodeNumbers == null) {
         tvShow.addRCToSeason(event.seasonNumber, sr.infoHash!, rc);
+      } else if (episodeNumbers.length !== 0) {
+        tvShow.addRCToEpisodes(event.seasonNumber, episodeNumbers, sr.infoHash!, rc);
+      } else {
+        continue;
       }
     } else {
       const response = await axios.get(downloadUrl, { responseType: 'arraybuffer', maxRedirects: 0 });
@@ -120,13 +122,15 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
           console.warn(`Could not resolve hash for RC=${sr}`);
           continue;
         }
-        const episodeNumber = resolveEpisodeNumber(sr);
+        const episodeNumbers = resolveEpisodeNumbers(sr, event.seasonNumber, tvShow);
         const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, locationHeader,
           null, resolution, ripType, tracker, hash!, sr.infoUrl, seeders, sonarrLanguages, false);
-        if (episodeNumber != null) {
-          tvShow.addRCToEpisode(event.seasonNumber, episodeNumber, hash!, rc);
-        } else {
+        if (episodeNumbers == null) {
           tvShow.addRCToSeason(event.seasonNumber, hash!, rc);
+        } else if (episodeNumbers.length !== 0) {
+          tvShow.addRCToEpisodes(event.seasonNumber, episodeNumbers, hash!, rc);
+        } else {
+          continue;
         }
       } else {
         const torrentFile = response.data;
@@ -134,13 +138,7 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
         const info = decodedTorrent['info'];
         const bencodedInfo = bencode.encode(info);
         let hash = createHash('sha1').update(bencodedInfo).digest('hex');
-        const episodeNumber = resolveEpisodeNumber(sr);
-        let s3ObjectKey;
-        if (episodeNumber != null) {
-          s3ObjectKey = `${tvShow.id}/${event.seasonNumber}/${episodeNumber}/${hash}`;
-        } else {
-          s3ObjectKey = `${tvShow.id}/${event.seasonNumber}/${hash}`;
-        }
+        const s3ObjectKey = `${tvShow.id}/${event.seasonNumber}/${hash}`;
         const s3Params = {
           Bucket: torrentFilesS3Bucket,
           Key: s3ObjectKey,
@@ -149,10 +147,13 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
         await s3.putObject(s3Params);
         const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, s3ObjectKey,
           null, resolution, ripType, tracker, hash, sr.infoUrl, seeders, sonarrLanguages, false);
-        if (episodeNumber != null) {
-          tvShow.addRCToEpisode(event.seasonNumber, episodeNumber, hash!, rc);
-        } else {
+        const episodeNumbers = resolveEpisodeNumbers(sr, event.seasonNumber, tvShow);
+        if (episodeNumbers == null) {
           tvShow.addRCToSeason(event.seasonNumber, hash!, rc);
+        } else if (episodeNumbers.length !== 0) {
+          tvShow.addRCToEpisodes(event.seasonNumber, episodeNumbers, hash!, rc);
+        } else {
+          continue;
         }
       }
     }  
@@ -205,12 +206,26 @@ function resolveEpisodeNumbers(sr: SonarrRelease, seasonNumber: number, tvShow: 
   const regex1 = new RegExp(String.raw`s0*${seasonNumber}`);
   const regex2 = new RegExp(String.raw`temporada\s*${seasonNumber}`);
   const regex3 = new RegExp(String.raw`saison\s*0*${seasonNumber}`);
-  if (titleLC.match(regex1) == null || titleLC.match(regex2) == null || titleLC.match(regex3) == null) {
+  // For example 'Breaking.Bad.Complete.Series (S01-S05) .720p.BluRay.Goblin.Eng.A' or
+  // 'Breaking Bad S01 S05 Complete 720p BluRay x265 BMF'
+  const regex4 = new RegExp(String.raw`s(0*[1-9]+)[-\s][-\s+](0*[1-9]+)`);
+  // For example 'Breaking.Bad.S01-S02-S03-S04-S05.1080p.BluRay.10bit.HEVC-MkvCage'
+  const regex5 = new RegExp(String.raw`s(0*[1-9]+).*s(0*[1-9]+).*s(0*[1-9]+)`);
+  const regex4Matchs = titleLC.match(regex4);
+  if (regex4Matchs != null && titleLC.match(regex5) == null) {
+    const seriesStart = Number.parseInt(regex4Matchs[1])
+    const seriesEnd = Number.parseInt(regex4Matchs[2])
+    if (seasonNumber < seriesStart || seasonNumber > seriesEnd) {
+      console.warn(`Season not found in season range for RC=${JSON.stringify(sr)}, seasonNumber=${seasonNumber}`)
+      return []
+    }
+  } else if (titleLC.match(regex1) == null || titleLC.match(regex2) == null || titleLC.match(regex3) == null) {
     console.warn(`Season not found for RC=${JSON.stringify(sr)}, seasonNumber=${seasonNumber}`)
     return []
   }
-  // For example 'Breaking Bad / S5E1-16 of 16 [2012, BDRemux 1080p] MVO (LostFilm) + DVO + MVO (AMEDIA) + Original'
-  const episodeRegex1 = new RegExp(String.raw`s0*${seasonNumber}\s*e(0*[1-9]+)-(0*[1-9]+)`);
+  // For example 'Breaking Bad / S5E1-16 of 16 [2012, BDRemux 1080p] MVO (LostFilm) + DVO + MVO (AMEDIA) + Original' or
+  // 'Breaking Bad S05e01 16 [1080p Ita Eng Spa h265 10bit SubS][MirCrewRelease] byMe7alh'
+  const episodeRegex1 = new RegExp(String.raw`s0*${seasonNumber}\s*e(0*[1-9]+)[-\s]+(0*[1-9]+)`);
   const episodeRegex1Matchs = titleLC.match(episodeRegex1);
   if (episodeRegex1Matchs != null) {
     const startEpisode = Number.parseInt(episodeRegex1Matchs[1]);
@@ -223,5 +238,13 @@ function resolveEpisodeNumbers(sr: SonarrRelease, seasonNumber: number, tvShow: 
       return ret;
     }
   }
+  // For example 'Breaking Bad S04e08 Versione 720p BDMux 720p H264 Ita Eng AC3 5.1 Sub Ita Eng TntVillage-Darksidemux'
+  const episodeRegex2 = new RegExp(String.raw`s0*${seasonNumber}\s*e(0*[1-9]+)`);
+  const episodeRegex2Matchs = titleLC.match(episodeRegex2);
+  if (episodeRegex2Matchs != null) {
+    const episode = Number.parseInt(episodeRegex2Matchs[1]);
+    return [episode];
+  }
+  // todo: 'Los Simpsons Temporada 2 [HDTV 720p][Cap 201 211][AC3 5 1 Castellano]'
   return null;
 }
