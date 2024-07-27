@@ -16,7 +16,7 @@ const tvShowRepo = new TvShowRepository(docClient);
 const lambdaClient = new LambdaClient({});
 
 export const handler = async (event: { tvShowId: string }): Promise<void> => {
-  const tvShow = await tvShowRepo.getTvShowsLazy(event.tvShowId);
+  const tvShow = await tvShowRepo.getTvShowLazy(event.tvShowId);
   for (const s of tvShow.seasons) {
     const rcUpdaterParams = {
       tvShowId: event.tvShowId,

@@ -251,7 +251,7 @@ functions:
   tvShowRCUpdaterFanout:
     environment:
       DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
-      TVSHOW_RC_UPDATER_FANOUT_SEASONS_LAMBDA_NAME: ${env.TVSHOW_RC_UPDATER_FANOUT_SEASONS_LAMBDA_NAME}
+      TVSHOW_RC_UPDATER_FANOUT_SEASONS_LAMBDA_NAME: ${env:TVSHOW_RC_UPDATER_FANOUT_SEASONS_LAMBDA_NAME}
     handler: src/core/app/tvShowRCUpdaterFanout.handler
     events:
       - schedule: rate(${file(./.env.${sls:stage}.yml):RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minutes)
@@ -260,7 +260,7 @@ functions:
   tvShowRCUpdaterFanoutSeasons:
     environment:
       DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
-      TVSHOW_RC_UPDATER_LAMBDA_NAME: ${env.TVSHOW_RC_UPDATER_LAMBDA_NAME}
+      TVSHOW_RC_UPDATER_LAMBDA_NAME: ${env:TVSHOW_RC_UPDATER_LAMBDA_NAME}
     handler: src/core/app/tvShowRCUpdaterFanoutSeasons.handler
     timeout: 900
 

@@ -234,7 +234,7 @@ export class TvShowRepository implements ITvShowRepository {
     }
   }
 
-  async getTvShowsLazy(id: string) {
+  async getTvShowLazy(id: string) {
     const seasonsQueryInput : QueryCommandInput = {
       TableName : dynamodbTvShowTableName,
       KeyConditionExpression: '#id = :id AND begins_with(#sortKey, :sortKeySeason)',
