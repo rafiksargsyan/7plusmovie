@@ -183,9 +183,14 @@ function isTorrentRelease(protocol: string) {
 }
 
 /**
+ * TODO: safeguard episode numbers
  * @returns {number[]} null means the release must be added to all episodes, empty means no episode was found
  */
 function resolveEpisodeNumbers(sr: SonarrRelease, seasonNumber: number, tvShow: TvShow): Nullable<number[]> {
+  let maxEpisodeNumber = 1;
+  for (const e of tvShow.getSeasonOrThrow(seasonNumber).episodes) {
+    maxEpisodeNumber = Math.max(maxEpisodeNumber, e.episodeNumber)
+  }
   const titleLC = sr.title.toLowerCase();
   let titlePrefixMatched = false;
   tvShow.names.forEach(n => {
@@ -215,7 +220,7 @@ function resolveEpisodeNumbers(sr: SonarrRelease, seasonNumber: number, tvShow: 
       console.warn(`Season not found in season range for RC=${JSON.stringify(sr)}, seasonNumber=${seasonNumber}`)
       return []
     }
-  } else if (titleLC.match(regex1) == null || titleLC.match(regex2) == null || titleLC.match(regex3) == null) {
+  } else if (titleLC.match(regex1) == null && titleLC.match(regex2) == null && titleLC.match(regex3) == null) {
     console.warn(`Season not found for RC=${JSON.stringify(sr)}, seasonNumber=${seasonNumber}`)
     return []
   }
@@ -225,7 +230,7 @@ function resolveEpisodeNumbers(sr: SonarrRelease, seasonNumber: number, tvShow: 
   const episodeRegex1Matchs = titleLC.match(episodeRegex1);
   if (episodeRegex1Matchs != null) {
     const startEpisode = Number.parseInt(episodeRegex1Matchs[1]);
-    const endEpisode = Number.parseInt(episodeRegex1Matchs[2]);
+    const endEpisode = Math.min(Number.parseInt(episodeRegex1Matchs[2]), maxEpisodeNumber);
     if (startEpisode <= endEpisode) {
       const ret: number[] = [];
       for (let i = startEpisode; i <= endEpisode; ++i) {

@@ -3,7 +3,6 @@ import { ISonarr, ISonarrApiError, ISonarrTvShowNotFoundError, SonarrRelease } f
 import { strIsBlank } from "../utils";
 import { RipType } from "../core/domain/value-object/RipType";
 import { Resolution } from "../core/domain/value-object/Resolution";
-import { normalize } from "path";
 import { Nullable } from "../Nullable";
 
 const sonarrDownloadUrlBaseMapping = JSON.parse(process.env.SONARR_DOWNLOAD_URL_BASE_MAPPING!);
@@ -17,7 +16,7 @@ export class SonarrClient implements ISonarr {
     });
     this._restClient.defaults.headers.common['x-api-key'] = apiKey;
     // don't redirect magnet urls
-    this._restClient.interceptors.response.use(
+    axios.interceptors.response.use(
       response => response,
       error => {
         if (error.response && [301, 302].includes(error.response.status)) {

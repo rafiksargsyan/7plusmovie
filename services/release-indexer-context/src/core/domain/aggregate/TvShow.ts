@@ -143,15 +143,6 @@ export class TvShow {
     })
   }
 
-  private getSeasonByTmdbSeasonNumber(tmdbSeasonNumber: number) {
-    for (const s of this._seasons) {
-      if (s.tmdbSeasonNumber === tmdbSeasonNumber) {
-        return s;
-      }
-    }
-    return null;
-  }
-
   setTmdbSeasonNumber(seasonNumber: number, tmdbSeasonNumber: number) {
     const season: Season = this.getSeasonOrThrow(seasonNumber);
     if (tmdbSeasonNumber == null || tmdbSeasonNumber < 0 || !Number.isInteger(tmdbSeasonNumber)) {
