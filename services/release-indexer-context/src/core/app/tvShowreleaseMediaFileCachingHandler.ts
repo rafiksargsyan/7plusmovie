@@ -35,7 +35,7 @@ export const handler = async (event: Params) => {
     const command = `rclone copyurl '${event.sourceUrl}' s3:${destinationS3Bucket}/${event.destinationPath} --config ${rcloneConfigPath}`;
     execSync(command);
   } catch (e) {
-    console.log(e);  
+    console.error(e);  
   }
   await qbitClient.removeTag(event.torrentId, event.tag);
   const torrentInfo = await qbitClient.getTorrentById(event.torrentId);
@@ -43,7 +43,7 @@ export const handler = async (event: Params) => {
     console.error(`Torrent info is null, event=${JSON.stringify(event)}`);
     return;
   }
-  if (torrentInfo.tags.length === 0) {
+  if (torrentInfo.tags.length === 0 || (torrentInfo.tags.length === 1 && torrentInfo.tags[0] === event.tag)) {
     await qbitClient.deleteTorrentById(event.torrentId);
   }
-};
+}
