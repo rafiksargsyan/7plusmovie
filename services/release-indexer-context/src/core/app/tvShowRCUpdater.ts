@@ -191,7 +191,8 @@ function resolveEpisodeNumbers(sr: SonarrRelease, seasonNumber: number, tvShow: 
   for (const e of tvShow.getSeasonOrThrow(seasonNumber).episodes) {
     maxEpisodeNumber = Math.max(maxEpisodeNumber, e.episodeNumber)
   }
-  const titleLC = sr.title.toLowerCase();
+  // Getting rid noisy numbers
+  const titleLC = sr.title.toLowerCase().replace(/(480p)|(720p)|(1080p)|(2160p)/g, '');
   let titlePrefixMatched = false;
   tvShow.names.forEach(n => {
     n = n.replace(/^a-zA-Z0-9/g, '');
