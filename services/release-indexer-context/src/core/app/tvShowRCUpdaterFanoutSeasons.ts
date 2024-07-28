@@ -15,9 +15,30 @@ const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 const tvShowRepo = new TvShowRepository(docClient);
 const lambdaClient = new LambdaClient({});
 
+const ONE_YEAR_IN_MILLIS = 12 * 30 * 24 * 60 * 60 * 1000;
+const ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
+
 export const handler = async (event: { tvShowId: string }): Promise<void> => {
-  const tvShow = await tvShowRepo.getTvShowLazy(event.tvShowId);
+  const tvShow = await tvShowRepo.getById(event.tvShowId);
   for (const s of tvShow.seasons) {
+    tvShow.checkAndEmptyReleaseCandidates(s.seasonNumber, false);
+    await tvShowRepo.save(tvShow, false, [s.seasonNumber], { [s.seasonNumber] : s.episodes.map(e => e.episodeNumber) });
+    if (s.readyToBeProcessed) continue;
+    let forceScan = false;
+    let emptyEpisodeExists = false;
+    for (const e of s.episodes) {
+      forceScan = forceScan || e.forceScan
+      emptyEpisodeExists = emptyEpisodeExists || (Object.keys(e.releases).length === 0)
+    }
+    if (!emptyEpisodeExists) {
+      const estimatedLastEpisodeReleaseTime = tvShow.estimatedLastEpisodeReleaseTime(s.seasonNumber)
+      if (estimatedLastEpisodeReleaseTime != null && (Date.now() - estimatedLastEpisodeReleaseTime > ONE_YEAR_IN_MILLIS) && !forceScan) {
+        continue;
+      }
+      if (Date.now() - s.lastReleaseCandidateScanTimeMillis < ONE_DAY_IN_MILLIS) {
+        continue;
+      }
+    }
     const rcUpdaterParams = {
       tvShowId: event.tvShowId,
       seasonNumber: s.seasonNumber

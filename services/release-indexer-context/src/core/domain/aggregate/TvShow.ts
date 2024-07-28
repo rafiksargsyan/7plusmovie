@@ -335,6 +335,26 @@ export class TvShow {
   get names() {
     return this._names;
   }
+
+  public checkAndEmptyReleaseCandidates(seasonNumber: number, forceEmpty: boolean) {
+    const season = this.getSeasonOrThrow(seasonNumber);
+    if (forceEmpty) {
+      for (const e of season.episodes) {
+        e.releaseCandidates = {};
+      }
+      return;
+    }
+    for (const e of season.episodes) {
+      for (const k in e.releaseCandidates) {
+        if (e.releaseCandidates[k].status == null) return;
+      }
+    }
+    for (const e of season.episodes) {
+      e.releaseCandidates = {};
+    }
+    season.alreadyAddedSonarrReleaseGuidList = [];
+    season.readyToBeProcessed = false;
+  }
 }
 
 export class TvShow_NullOriginalLocaleError {};
