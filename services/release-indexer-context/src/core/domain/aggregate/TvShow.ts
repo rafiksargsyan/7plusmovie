@@ -1,7 +1,7 @@
 import { Nullable } from "../../../Nullable";
 import { strIsBlank } from "../../../utils";
 import { Release } from "../entity/Release";
-import { ReleaseCandidate } from "../entity/ReleaseCandidate";
+import { ReleaseCandidate, ReleaseCandidateStatus } from "../entity/ReleaseCandidate";
 import { L8nLang } from "../value-object/L8nLang";
 import { v4 as uuid } from 'uuid';
 
@@ -355,6 +355,44 @@ export class TvShow {
     season.alreadyAddedSonarrReleaseGuidList = [];
     season.readyToBeProcessed = false;
   }
+
+  public isBlackListed(seasonNumber: number, episodeNumber: number, id: string) {
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    return episode.blackList.includes(id);
+  }
+
+  public isWhiteListed(seasonNumber: number, episodeNumber: number, id: string) {
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    return episode.whiteList.includes(id);
+  }
+
+  private getReleaseCandidateOrThrow(seasonNumber: number, episodeNumber: number, id: string) {
+    if (strIsBlank(id)) {
+      throw new TvShow_BlankRCIdError();
+    }
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    let rc = episode.releaseCandidates[id];
+    if (rc == null) throw new TvShow_RCNotFoundError();
+    return rc;
+  }
+
+  public ignoreRc(seasonNumber: number, episodeNumber: number, id: string) {
+    let rc = this.getReleaseCandidateOrThrow(seasonNumber, episodeNumber, id)
+    rc.status = ReleaseCandidateStatus.IGNORED;
+    let e = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    if (!this.isBlackListed(seasonNumber, episodeNumber, id)) {
+      e.blackList.push(id);
+    }
+  }
+
+  public promoteRc(seasonNumber: number, episodeNumber: number, id: string) {
+    let rc = this.getReleaseCandidateOrThrow(seasonNumber, episodeNumber, id)
+    rc.status = ReleaseCandidateStatus.PROMOTED;
+    let e = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    if (!this.isWhiteListed(seasonNumber, episodeNumber, id)) {
+      e.whiteList.push(id);
+    }
+  }
 }
 
 export class TvShow_NullOriginalLocaleError {};
@@ -375,3 +413,4 @@ export class TvShow_InvalidEpisodeAirDateError {};
 export class TvShow_BlankSonarrReleaseGuidError {};
 export class TvShow_BlankRCIdError {};
 export class TvShow_NullRCError {};
+export class TvShow_RCNotFoundError {};
