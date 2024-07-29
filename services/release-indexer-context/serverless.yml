@@ -274,6 +274,35 @@ functions:
     handler: src/core/app/tvShowRCUpdater.handler
     timeout: 900
 
+  tvShowRDFanout:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      TVSHOW_RD_FANOUT_SEASONS_LAMBDA_NAME: ${env:TVSHOW_RD_FANOUT_SEASONS_LAMBDA_NAME}
+    handler: src/core/app/tvShowRDFanout.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_INTERVAL_IN_MINUTE} minutes)
+    timeout: 900
+
+  tvShowRDFanoutSeasons:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      TVSHOW_RELEASE_DOWNLOADER_LAMBDA_NAME: ${env:TVSHOW_RELEASE_DOWNLOADER_LAMBDA_NAME}
+    handler: src/core/app/tvShowRDFanoutSeasons.handler
+    timeout: 900
+  
+  tvShowReleaseMediaFileCachingHandler:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      QBITTORRENT_API_BASE_URL: ${env:QBITTORRENT_API_BASE_URL}
+      QBITTORRENT_BASE_URL: ${env:QBITTORRENT_BASE_URL}
+      QBITTORRENT_USERNAME: ${env:QBITTORRENT_USERNAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      MEDIA_FILES_BASE_URL: ${env:MEDIA_FILES_BASE_URL}
+      TORRENT_FILES_BASE_URL: ${env:TORRENT_FILES_BASE_URL}
+      TVSHOW_MEDIA_FILE_CACHER_LAMBDA_NAME: ${env:TVSHOW_MEDIA_FILE_CACHER_LAMBDA_NAME}
+    handler: src/core/app/tvShowReleaseMediaFileCachingHandler.handler
+    timeout: 900
+
 resources:
   Resources:
     movieReleaseCandidateUpdaterFanoutTopic:
