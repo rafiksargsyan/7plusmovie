@@ -6,7 +6,6 @@ import { execSync } from 'child_process';
 import { TorrentReleaseCandidate } from '../domain/entity/TorrentReleaseCandidate';
 import { Nullable } from '../../Nullable';
 import { TorrentClientInterface, TorrentInfo } from '../ports/TorrentClientInterface';
-import { Movie } from '../domain/aggregate/Movie';
 import { TorrentRelease } from '../domain/entity/TorrentRelease';
 import { AudioMetadata } from '../domain/value-object/AudioMetadata';
 import { resolveVoiceType } from '../domain/service/resolveVoiceType';
@@ -18,7 +17,6 @@ import { resolveAudioLang } from '../domain/service/resolveAudioLang';
 import { resolveSubsLang } from '../domain/service/resolveSubsLang';
 import { resolveSubsAuthor } from '../domain/service/resolveSubsAuthor';
 import { compareReleaseCandidates } from '../domain/service/compareReleaseCandidates';
-import { ReleaseCandidate } from '../domain/entity/ReleaseCandidate';
 import { InvocationType, InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 import { AudioVoiceType } from '../domain/value-object/AudioVoiceType';
 import { AudioLang } from '../domain/value-object/AudioLang';
@@ -42,7 +40,7 @@ const qbittorrentUsername = process.env.QBITTORRENT_USERNAME!;
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const mediaFilesBaseUrl = process.env.MEDIA_FILES_BASE_URL!;
 const torrentFilesBaseUrl = process.env.TORRENT_FILES_BASE_URL!;
-const mediaFileChacherLambdaName = process.env.MEDIA_FILE_CACHER_LAMBDA_NAME!;
+const mediaFileChacherLambdaName = process.env.TVSHOW_MEDIA_FILE_CACHER_LAMBDA_NAME!;
 
 const MIN_AVAILABLE_SPACE_IN_BYTES = 150000000000;
 const MAX_FILE_SIZE_IN_BYTES = 45000000000;
@@ -59,7 +57,8 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
   
   for (let i = 0; i < releaseCandidates.length; ++i) {
     const rcKey = releaseCandidates[i][0];
-    const rc = episode.releaseCandidates[releaseCandidates[i][0]];
+    const rc = episode.releaseCandidates[rcKey];
+    const tag = `S${event.seasonNumber}E${event.episodeNumber}`
     try {
       if (rc.isProcessed()) continue;
       if (tvShow.isBlackListed(event.seasonNumber, event.episodeNumber, rcKey)) {
@@ -74,7 +73,8 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
         let betterRCAlreadyPromoted = false;
         let prevRcNotProcessed = false;
         for (let j = 0; j < i; ++j) {
-          const prevRc = episode.releaseCandidates[releaseCandidates[j][0]];
+          const prevRcKey = releaseCandidates[j][0]  
+          const prevRc = episode.releaseCandidates[prevRcKey];
           if (!prevRc.isProcessed()) {
             prevRcNotProcessed = true;
             break;
@@ -92,7 +92,6 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
           continue;
         }
         let torrentInfo = await qbitClient.getTorrentById(rc.infoHash);
-        const tag = `S${event.seasonNumber}E${event.episodeNumber}`
         if (torrentInfo == null) {
           if (rc.downloadUrl.startsWith("magnet")) {
             torrentInfo = await addMagnetAndWait(qbitClient, rc.downloadUrl, rc.infoHash)
@@ -103,31 +102,22 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
           }
           await qbitClient.disableAllFiles(torrentInfo!.id);
         }
-        const fileIndex: Nullable<number> = findMediaFile(torrentInfo!, tvShow, seasonNumber, episodeNumber, rc);
+        const fileIndex: Nullable<number> = findMediaFile(torrentInfo!, event.seasonNumber, event.episodeNumber);
         if (fileIndex == null) {
           tvShow.ignoreRc(event.seasonNumber, event.episodeNumber, rcKey);
-          await qbitClient.removeTag(torrentInfo!.id, tag);
-          if ((torrentInfo!.tags.length === 1 && torrentInfo!.tags[0] === tag) || torrentInfo!.tags.length === 0) {
-            await qbitClient.deleteTorrentById(torrentInfo!.id);
-          }
+          await removeTagAndDelete(qbitClient, torrentInfo!, tag);
           continue;
         }
         const file = torrentInfo!.files[fileIndex];
         if (file.progress === 1) {
-          if (! (await processMediaFile(tvShow, event.seasonNumber, event.episodeNumber, file.name, rcKey, rc, file.size))) {
-            await qbitClient.removeTag(torrentInfo!.id, tag);
-            if ((torrentInfo!.tags.length === 1 && torrentInfo!.tags[0] === tag) || torrentInfo!.tags.length === 0) {
-              await qbitClient.deleteTorrentById(torrentInfo!.id);
-            }
+          if (!(await processMediaFile(tvShow, event.seasonNumber, event.episodeNumber, file.name, rcKey, rc, file.size, episode.runtimeSeconds, tag))) {
+            await removeTagAndDelete(qbitClient, torrentInfo!, tag);
           }
           break;
         } if ((Date.now() - torrentInfo!.addedOn * 1000) > 60 * 60 * 1000 && (torrentInfo!.isStalled ||
               (torrentInfo!.eta != null && torrentInfo!.eta > 23 * 60 * 60))) {
           tvShow.ignoreRc(event.seasonNumber, event.episodeNumber, rcKey);
-          await qbitClient.removeTag(torrentInfo!.id, tag);
-          if ((torrentInfo!.tags.length === 1 && torrentInfo!.tags[0] === tag) || torrentInfo!.tags.length === 0) {
-            await qbitClient.deleteTorrentById(torrentInfo!.id);
-          }
+          await removeTagAndDelete(qbitClient, torrentInfo!, tag);
           continue;
         } else {
           const estimatedFreeSpace = await qbitClient.getEstimatedFreeSpace();
@@ -141,7 +131,10 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
       tvShow.ignoreRc(event.seasonNumber, event.episodeNumber, rcKey);
       if (rc instanceof TorrentReleaseCandidate) {
         try {
-          await qbitClient.deleteTorrentById(rc.infoHash);
+          const torrentInfo = await qbitClient.getTorrentById(rc.infoHash);
+          if (torrentInfo != null) {
+            await removeTagAndDelete(qbitClient, torrentInfo, tag);
+          }
         } catch (e) {
           console.log(e);
         }
@@ -153,120 +146,122 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
   await qbitClient.destroy();
 };
 
-function findMediaFile(torrentInfo: TorrentInfo,  tvShow: TvShow, seasonNumber: number, episodeNumber: number,
-    rc: ReleaseCandidate): Nullable<number> {
+
+function findMediaFile(torrentInfo: TorrentInfo, seasonNumber: number, episodeNumber: number): Nullable<number> {
   let candidates: { name: string; size: number; progress: number; index: number; } [] = [];
   for (let i = 0; i < torrentInfo.files.length; ++i) {
     const f = torrentInfo.files[i];
     const name = f.name.toLowerCase();
-    if ((name.endsWith('.mkv') || name.endsWith('.mp4') || name.endsWith('.avi')) && !name.includes("sample")) {
+    const regex = new RegExp(String.raw`s0*${seasonNumber}e0*${episodeNumber}`);
+    if ((name.endsWith('.mkv') || name.endsWith('.mp4') || name.endsWith('.avi')) && !name.includes("sample")
+        && name.match(regex) != null) {
       candidates.push(f);
     }
   }
-  if (candidates.length === 0) return null;
   if (candidates.length === 1) {
-    if (rc.radarrIsUnknown) return null;
     return candidates[0].index;
   }
-  const candidateScores = candidates.map(c => ({ index: c.index, score: movie.calculateMatchScore(c.name) }))
-  .sort((a, b) => b.score - a.score);
-  if (candidateScores[0].score > candidateScores[1].score && candidateScores[0].score > 0) return candidateScores[0].index;
+  console.warn(`Could not match a media file for torrentInfo=${JSON.stringify(torrentInfo)},s=${seasonNumber},e=${episodeNumber}`);
   return null;
 }
 
-async function processMediaFile(m: Movie, name: string, rcKey: string, rc: TorrentReleaseCandidate, size: number) {
-  try {
-    if (size > MAX_FILE_SIZE_IN_BYTES) {
-      throw new Error('Too big file');
-    }
-    const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
-    const durationStr = execSync(`ffprobe -i '${mediaFilesBaseUrl}${name}' -show_entries format=duration -v quiet -of csv="p=0"`).toString();
-    const duration = Number.parseFloat(durationStr);
-    if (!Number.isNaN(duration) && m.runtimeSeconds != null && Math.abs(duration - m.runtimeSeconds) > 0.2 * m.runtimeSeconds) {
-      throw new Error ('The release candidate duration is considerably different from official runtime');
-    }
-    const release = new TorrentRelease(false, rc.ripType, rc.resolution, rc.infoHash, name, rc.tracker, rc.downloadUrl, size);
-    let numAudioStreams = 0;
-    let numUndefinedAudioStreams = 0;
-    for (let s of streams.streams) {
-      if (s.codec_type === "audio") {
-        ++numAudioStreams;
-        if (s.tags?.language == null || s.tags?.language === "und") {
-          ++numUndefinedAudioStreams;
-        }
+async function processMediaFile(tvShow: TvShow, seasonNumber: number, episodeNumber: number, name: string, rcKey: string,
+    rc: TorrentReleaseCandidate, size: number, runtimeSeconds: Nullable<number>, tag: string) {
+  if (size > MAX_FILE_SIZE_IN_BYTES) {
+    console.warn(`Too big media file: RC=${JSON.stringify(rc)},s=${seasonNumber},e=${episodeNumber}`)
+    tvShow.ignoreRc(seasonNumber, episodeNumber, rcKey)
+    return false
+  }
+  const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
+  const durationStr = execSync(`ffprobe -i '${mediaFilesBaseUrl}${name}' -show_entries format=duration -v quiet -of csv="p=0"`).toString();
+  const duration = Number.parseFloat(durationStr);
+  if (!Number.isNaN(duration) && runtimeSeconds != null && Math.abs(duration - runtimeSeconds) > 0.15 * runtimeSeconds) {
+    console.warn(`The release candidate duration is considerably different from official runtime: RC=${JSON.stringify(rc)},s=${seasonNumber},e=${episodeNumber}`)
+    tvShow.ignoreRc(seasonNumber, episodeNumber, rcKey)
+    return false
+  }
+  const release = new TorrentRelease(false, rc.ripType, rc.resolution, rc.infoHash, name, rc.tracker, rc.downloadUrl, size)
+  let numAudioStreams = 0
+  let numUndefinedAudioStreams = 0
+  for (let s of streams.streams) {
+    if (s.codec_type === "audio") {
+      ++numAudioStreams
+      if (s.tags?.language == null || s.tags?.language === "und") {
+        ++numUndefinedAudioStreams
       }
     }
-    for (let s of streams.streams) {
-      if (s.index === 0 && s.codec_type !== "video") {
-        m.ignoreRc(rcKey);
-        return;
-      }
-      if (s.codec_type === "audio") {
-        let channels = s.channels;
-        if (channels == null) continue;
-        let bitRate = s.bit_rate;
-        if (bitRate == null) {
-          if (channels >= 6) bitRate = 640000;
-          if (channels >= 2) bitRate = 192000;
-          if (channels === 1) bitRate = 128000;
-        };
-        let langStr = s.tags?.language;
-        let titleStr = s.tags?.title;
-        if (titleStr != null && (titleStr.toLowerCase().includes("commentary")||  titleStr.toLowerCase().includes("comentary"))) continue;
+  }
+  for (let s of streams.streams) {
+    if (s.index === 0 && s.codec_type !== "video") {
+      console.warn(`Video must be first stream: RC=${JSON.stringify(rc)},s=${seasonNumber},e=${episodeNumber}`)
+      tvShow.ignoreRc(seasonNumber, episodeNumber, rcKey)
+      return false
+    }
+    if (s.codec_type === "audio") {
+      let channels = s.channels
+      if (channels == null) continue
+      let bitRate = s.bit_rate
+      if (bitRate == null) {
+        if (channels >= 6) bitRate = 640000;
+        if (channels >= 2) bitRate = 192000;
+        if (channels === 1) bitRate = 128000;
+      };
+      let langStr = s.tags?.language;
+      let titleStr = s.tags?.title;
+      let titleStrLC = titleStr.toLowerCase();
+      if (titleStr != null && (titleStrLC.includes("commentary") ||  titleStrLC.includes("comentary"))) continue;
         const author = resolveAudioAuthor(titleStr, rc.tracker);
-        let lang = resolveAudioLang(langStr, m.originalLocale, titleStr, author, numUndefinedAudioStreams, numAudioStreams, rc.radarrLanguages);
+        let lang = resolveAudioLang(langStr, tvShow.originalLocale, titleStr, author,
+            numUndefinedAudioStreams, numAudioStreams, rc.radarrLanguages);
         if (lang == null) continue;
-        const voiceType = resolveVoiceType(titleStr, lang, m.originalLocale, author);
+        const voiceType = resolveVoiceType(titleStr, lang, tvShow.originalLocale, author);
         // Sometimes mkv creators forget to setup correct lang code for original one
         if (AudioVoiceType.compare(voiceType, AudioVoiceType.ORIGINAL) === 0) {
-          lang = AudioLang.fromKeyOrThrow(m.originalLocale.key);
+          lang = AudioLang.fromKeyOrThrow(tvShow.originalLocale.key);
         }
         const am = new AudioMetadata(s.index, s.channels, bitRate, lang,
-          resolveVoiceType(titleStr, lang, m.originalLocale, author), author);
+          resolveVoiceType(titleStr, lang, tvShow.originalLocale, author), author);
         release.addAudioMetadata(am);
-      }
-      if (s.codec_type === "subtitle") {
-        if (s.codec_name !== "subrip" && s.codec_name !== "ass" && s.codec_name !== "webvtt") continue;
-        let langStr = s.tags?.language;
-        let titleStr = s.tags?.title;
-        let lang = resolveSubsLang(titleStr, langStr, m.originalLocale);
-        if (lang == null) continue;
-        const sm = new SubsMetadata(s.index, lang, SubsType.fromTitle(titleStr), resolveSubsAuthor(titleStr, rc.tracker));
-        release.addSubsMetadata(sm);
-      }
     }
-    if (release.audios.length === 0) {
-      m.ignoreRc(rcKey);
-    } else {
-      release.cachedMediaFileRelativePath = m.id + "/" + rc.infoHash + name.substring(name.lastIndexOf('.'));
-      if (m.addRelease(rc.infoHash, release)) {
-        m.promoteRc(rcKey);
-
-        const cacheLambdaParams = {
-          destinationPath: release.cachedMediaFileRelativePath,
-          sourceUrl: mediaFilesBaseUrl + encodeURIComponent(name),
-          torrentId: rc.infoHash,
-          size: size
-        }
-        const lambdaParams = {
-          FunctionName: mediaFileChacherLambdaName,
-          InvocationType: InvocationType.Event,
-          Payload: JSON.stringify(cacheLambdaParams)
-        };
-        const invokeCommand = new InvokeCommand(lambdaParams);
-        try {
-          await lambdaClient.send(invokeCommand);
-        } catch (e) {
-          console.log(e);
-        }
-
-        return true;
-      }
-      m.ignoreRc(rcKey);
+    if (s.codec_type === "subtitle") {
+      if (s.codec_name !== "subrip" && s.codec_name !== "ass" && s.codec_name !== "webvtt") continue;
+      let langStr = s.tags?.language;
+      let titleStr = s.tags?.title;
+      let lang = resolveSubsLang(titleStr, langStr, tvShow.originalLocale);
+      if (lang == null) continue;
+      const sm = new SubsMetadata(s.index, lang, SubsType.fromTitle(titleStr), resolveSubsAuthor(titleStr, rc.tracker));
+      release.addSubsMetadata(sm);
     }
-  } catch (e) {
-    m.ignoreRc(rcKey);
-    console.log(e);
+  }
+  if (release.audios.length === 0) {
+    console.warn(`No audio found: RC=${JSON.stringify(rc)},s=${seasonNumber},e=${episodeNumber}`)
+    tvShow.ignoreRc(seasonNumber, episodeNumber, rcKey)
+    return false
+  } else {
+    const extension = name.substring(name.lastIndexOf('.'))
+    release.cachedMediaFileRelativePath = `${tvShow.id}/${seasonNumber}/${episodeNumber}/${rc.infoHash}.${extension}`;
+    if (tvShow.addRelease(seasonNumber, episodeNumber, rc.infoHash, release)) {
+      tvShow.promoteRc(seasonNumber, episodeNumber, rcKey);
+      const cacheLambdaParams = {
+        destinationPath: release.cachedMediaFileRelativePath,
+        sourceUrl: mediaFilesBaseUrl + encodeURIComponent(name),
+        torrentId: rc.infoHash,
+        tag: tag
+      }
+      const lambdaParams = {
+        FunctionName: mediaFileChacherLambdaName,
+        InvocationType: InvocationType.Event,
+        Payload: JSON.stringify(cacheLambdaParams)
+      };
+      const invokeCommand = new InvokeCommand(lambdaParams);
+      try {
+        await lambdaClient.send(invokeCommand);
+      } catch (e) {
+        console.log(e);
+      }
+      return true;
+    }
+    tvShow.ignoreRc(seasonNumber, episodeNumber, rcKey);
   }
   return false;
 }
@@ -284,6 +279,13 @@ async function addMagnetAndWait(qbitClient: TorrentClientInterface, downloadUrl:
     throw new TimedOutWaitingTorrentFilesError();
   }
   return torrentInfo!;
+}
+
+async function removeTagAndDelete(qbitClient: TorrentClientInterface, ti: TorrentInfo, tag: string) {
+  await qbitClient.removeTag(ti.id, tag);
+  if ((ti.tags.length === 1 && ti!.tags[0] === tag) || ti!.tags.length === 0) {
+    await qbitClient.deleteTorrentById(ti.id);
+  }  
 }
 
 class TimedOutWaitingTorrentFilesError extends Error {}

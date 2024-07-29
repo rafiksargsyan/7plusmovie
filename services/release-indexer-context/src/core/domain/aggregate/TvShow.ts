@@ -393,24 +393,70 @@ export class TvShow {
       e.whiteList.push(id);
     }
   }
+
+  public addRelease(seasonNumber: number, episodeNumber: number, id: string, r: Release) {
+    if (strIsBlank(id)) {
+      throw new TvShow_BlankReleaseIdError();
+    }
+    if (r == null) { 
+      throw new TvShow_NullReleaseError();
+    }
+    if (r.audios.length == 0) {
+      throw new TvShow_NoAudioReleaseError()
+    }
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    if (id in episode.releases) {
+      throw new TvShow_ReleaseWithIdAlreadyExistsError();
+    }
+    for (let k of Object.keys(episode.releases)) {
+      const compareResult = Release.compare(episode.releases[k].release, r);
+      if (compareResult == null) {
+        continue;
+      }
+      if (compareResult === 0) {
+        if (episode.releases[k].release.hash === r.hash || Release.compare2(episode.releases[k].release, r) >= 0) return false;
+        episode.releases[k].release = r;
+        return true;
+      }
+      if (compareResult > 0) {
+        return;
+      }
+      if (compareResult < 0) {
+        if (!(id in episode.releases)) {
+          episode.releases[id] = { release: r, replacedReleaseIds: [] }
+        }
+        episode.releases[id].replacedReleaseIds.push(k);
+        episode.releases[id].replacedReleaseIds.push(...episode.releases[k].replacedReleaseIds);
+        delete episode.releases[k];
+      }
+    }
+    if (!(id in episode.releases)) {
+      episode.releases[id] = { release: r, replacedReleaseIds: [] }
+    }
+    return true;
+  }
 }
 
-export class TvShow_NullOriginalLocaleError {};
-export class TvShow_BlankOriginalTitleError {};
-export class TvShow_InvalidReleaseYearError {};
-export class TvShow_BlankTmdbIdError {};
-export class TvShow_InvalidSeasonNumberError {};
-export class TvShow_SeasonAlreadyExistsError {};
-export class TvShow_SeasonNotFoundError {};
-export class TvShow_SeasonWithTmdbSeasonNumberAlreadyExistsError {};
-export class TvShow_InvalidTmdbSeasonNumberError {};
-export class TvShow_InvalidEpisodeNumberError {};
-export class TvShow_EpisodeAlreadyExistsError {};
-export class TvShow_EpisodeNotFoundError {};
-export class TvShow_InvalidTmdbEpisodeNumberError {};
-export class TvShow_InvalidEpisodeRuntimeSecondsError {};
-export class TvShow_InvalidEpisodeAirDateError {};
-export class TvShow_BlankSonarrReleaseGuidError {};
-export class TvShow_BlankRCIdError {};
-export class TvShow_NullRCError {};
-export class TvShow_RCNotFoundError {};
+export class TvShow_NullOriginalLocaleError {}
+export class TvShow_BlankOriginalTitleError {}
+export class TvShow_InvalidReleaseYearError {}
+export class TvShow_BlankTmdbIdError {}
+export class TvShow_InvalidSeasonNumberError {}
+export class TvShow_SeasonAlreadyExistsError {}
+export class TvShow_SeasonNotFoundError {}
+export class TvShow_SeasonWithTmdbSeasonNumberAlreadyExistsError {}
+export class TvShow_InvalidTmdbSeasonNumberError {}
+export class TvShow_InvalidEpisodeNumberError {}
+export class TvShow_EpisodeAlreadyExistsError {}
+export class TvShow_EpisodeNotFoundError {}
+export class TvShow_InvalidTmdbEpisodeNumberError {}
+export class TvShow_InvalidEpisodeRuntimeSecondsError {}
+export class TvShow_InvalidEpisodeAirDateError {}
+export class TvShow_BlankSonarrReleaseGuidError {}
+export class TvShow_BlankRCIdError {}
+export class TvShow_NullRCError {}
+export class TvShow_RCNotFoundError {}
+export class TvShow_BlankReleaseIdError {}
+export class TvShow_NullReleaseError {}
+export class TvShow_NoAudioReleaseError {}
+export class TvShow_ReleaseWithIdAlreadyExistsError {}
