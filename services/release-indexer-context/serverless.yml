@@ -303,6 +303,30 @@ functions:
     handler: src/core/app/tvShowReleaseMediaFileCachingHandler.handler
     timeout: 900
 
+  tsFantomAssetsCleanupHandlerFanout:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      TVSHOW_FANTOM_ASSETS_CLEANUP_HANDLER_FANOUT_SEASONS: ${env:TVSHOW_FANTOM_ASSETS_CLEANUP_HANDLER_FANOUT_SEASONS} 
+    handler: src/core/app/fantomAssetsCleanupHandlerFanout.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):FANTOM_ASSETS_CLEANUP_INTERVAL_IN_DAYS} day)
+    timeout: 900
+
+  tsFantomAssetsCleanupHandlerFanoutSeasons:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      TVSHOW_FANTOM_ASSETS_CLEANUP_HANDLER: ${env:TVSHOW_FANTOM_ASSETS_CLEANUP_HANDLER} 
+    handler: src/core/app/fantomAssetsCleanupHandlerFanoutSeasons.handler
+    timeout: 900
+
+  tsFantomAssetsCleanupHandler:
+    environment:
+      TORRENT_FILES_S3_BUCKET: ${env:TORRENT_FILES_S3_BUCKET}
+      RAW_MEDIA_FILES_S3_BUCKET: ${env:RAW_MEDIA_FILES_S3_BUCKET}
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    handler: src/core/app/tsFantomAssetsCleanupHandler.handler
+    timeout: 900 
+
 resources:
   Resources:
     movieReleaseCandidateUpdaterFanoutTopic:

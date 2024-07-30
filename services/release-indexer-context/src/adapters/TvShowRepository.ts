@@ -1,6 +1,9 @@
 import { ITvShowRepository, TvShowLazy, TvShowSeasonsLazy, TvShowWithIdNotFoundError } from "../core/ports/ITvShowRepository";
 import { Episode, Season, TvShow } from "../core/domain/aggregate/TvShow";
 import { DynamoDBDocument, ScanCommandInput, QueryCommandInput, DeleteCommandInput } from "@aws-sdk/lib-dynamodb";
+import { ReleaseCandidate } from "../core/domain/entity/ReleaseCandidate";
+import { TorrentReleaseCandidate } from "../core/domain/entity/TorrentReleaseCandidate";
+import { TorrentRelease } from "../core/domain/entity/TorrentRelease";
 
 const dynamodbTvShowTableName = process.env.DYNAMODB_TVSHOW_TABLE_NAME!;
 
@@ -59,6 +62,28 @@ export class TvShowRepository implements ITvShowRepository {
       if (qco.Items) {
         for (const i of qco.Items) {
           const e = i as Episode;
+    
+          let releaseCandidates: { [key:string] : ReleaseCandidate } = {};
+          for (let rcItemKey in e.releaseCandidates) {
+            const rcItem = e.releaseCandidates[rcItemKey];
+            if ((rcItem as any).tracker != null) {
+              const rc = new TorrentReleaseCandidate(true);
+              Object.assign(rc, rcItem);
+              releaseCandidates[rcItemKey] = rc;
+            }
+          }
+          e.releaseCandidates = releaseCandidates;
+          let releases = {};
+          for (let rItemKey in e.releases) {
+            const rItem = e.releases[rItemKey];
+            if ((rItem.release as any).tracker != null) {
+              const release = new TorrentRelease(true);
+              Object.assign(release, rItem.release);
+              releases[rItemKey] = { ...rItem, release: release };
+            }
+          }
+          e.releases = releases;      
+
           const seasonNumberStart = i.SK.indexOf('#') + 1;
           const seasonNumberEnd = i.SK.lastIndexOf('#');
           const seasonNumber = Number.parseInt(i.SK.substring(seasonNumberStart, seasonNumberEnd));
@@ -183,7 +208,29 @@ export class TvShowRepository implements ITvShowRepository {
       const tvShowEpisodeDto = (await this.docClient.get({
         TableName: dynamodbTvShowTableName,
         Key: { 'PK': id, 'SK': `episode#${seasonNumber}#${episodeNumber}` }
-      })).Item;
+      })).Item as Episode;
+
+      let releaseCandidates: { [key:string] : ReleaseCandidate } = {};
+      for (let rcItemKey in tvShowEpisodeDto.releaseCandidates) {
+        const rcItem = tvShowEpisodeDto.releaseCandidates[rcItemKey];
+        if ((rcItem as any).tracker != null) {
+          const rc = new TorrentReleaseCandidate(true);
+          Object.assign(rc, rcItem);
+          releaseCandidates[rcItemKey] = rc;
+        }
+      }
+      tvShowEpisodeDto.releaseCandidates = releaseCandidates;
+      let releases = {};
+      for (let rItemKey in tvShowEpisodeDto.releases) {
+        const rItem = tvShowEpisodeDto.releases[rItemKey];
+        if ((rItem.release as any).tracker != null) {
+          const release = new TorrentRelease(true);
+          Object.assign(release, rItem.release);
+          releases[rItemKey] = { ...rItem, release: release };
+        }
+      }
+      tvShowEpisodeDto.releases = releases;
+
       tvShowSeasonDto.episodes = [];
       if (tvShowEpisodeDto != null) {
         tvShowSeasonDto.episodes.push(tvShowEpisodeDto);
@@ -307,7 +354,28 @@ export class TvShowRepository implements ITvShowRepository {
         const qco = await this.docClient.query(episodesQueryInput);
         if (qco.Items) {
           for (const i of qco.Items) {
-            tvShowSeasonDto.episodes.push(i);
+            const e = i as Episode;
+            let releaseCandidates: { [key:string] : ReleaseCandidate } = {};
+            for (let rcItemKey in e.releaseCandidates) {
+              const rcItem = e.releaseCandidates[rcItemKey];
+              if ((rcItem as any).tracker != null) {
+                const rc = new TorrentReleaseCandidate(true);
+                Object.assign(rc, rcItem);
+                releaseCandidates[rcItemKey] = rc;
+              }
+            }
+            e.releaseCandidates = releaseCandidates;
+            let releases = {};
+            for (let rItemKey in e.releases) {
+              const rItem = e.releases[rItemKey];
+              if ((rItem.release as any).tracker != null) {
+                const release = new TorrentRelease(true);
+                Object.assign(release, rItem.release);
+                releases[rItemKey] = { ...rItem, release: release };
+              }
+            }
+            e.releases = releases;
+            tvShowSeasonDto.episodes.push(e);
           }
         }
         if (qco.LastEvaluatedKey) {
