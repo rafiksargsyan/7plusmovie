@@ -289,6 +289,21 @@ functions:
       TVSHOW_RELEASE_DOWNLOADER_LAMBDA_NAME: ${env:TVSHOW_RELEASE_DOWNLOADER_LAMBDA_NAME}
     handler: src/core/app/tvShowRDFanoutSeasons.handler
     timeout: 900
+
+  tvShowReleaseDownloader:
+    environment:
+      QBITTORRENT_API_BASE_URL: ${env:QBITTORRENT_API_BASE_URL}
+      QBITTORRENT_BASE_URL: ${env:QBITTORRENT_BASE_URL}
+      QBITTORRENT_USERNAME: ${env:QBITTORRENT_USERNAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      MEDIA_FILES_BASE_URL: ${env:MEDIA_FILES_BASE_URL}
+      TORRENT_FILES_BASE_URL: ${env:TORRENT_FILES_BASE_URL}
+      MEDIA_FILE_CACHER_LAMBDA_NAME: ${env:MEDIA_FILE_CACHER_LAMBDA_NAME}
+    handler: src/core/app/tvShowReleaseDownloader.handler
+    layers:
+      - ${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_FFPROBE_LAYER}
+    timeout: 900  
   
   tvShowRMFCachingHandler:
     environment:

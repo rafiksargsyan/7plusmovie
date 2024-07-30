@@ -286,6 +286,10 @@ export class TvShow {
   setSeasonReadyToBeProcessed(seasonNumber: number, value: boolean) {
     const season = this.getSeasonOrThrow(seasonNumber);
     season.readyToBeProcessed = value;
+    if (value) {
+      season.lastReleaseCandidateScanTimeMillis = Date.now();
+      season.alreadyAddedSonarrReleaseGuidList = [];
+    }
   }
 
   addRCToSeason(seasonNumber: number, id: string, rc: ReleaseCandidate) {

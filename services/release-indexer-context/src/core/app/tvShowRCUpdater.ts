@@ -35,8 +35,6 @@ const torrentFilesS3Bucket = process.env.TORRENT_FILES_S3_BUCKET!;
 
 const MONTH_IN_MILLIS = 30 * 24 * 60 * 60 * 1000;
 
-const BR_MINIUM_BITRATE = 1500000; // byte/seconds
-
 const MAX_RUNTIME = 13 * 60 * 1000;
 
 export const handler = async (event: { tvShowId: string, seasonNumber: number }) => {
