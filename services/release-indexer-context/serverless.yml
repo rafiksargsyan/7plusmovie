@@ -280,7 +280,7 @@ functions:
       TVSHOW_RD_FANOUT_SEASONS_LAMBDA_NAME: ${env:TVSHOW_RD_FANOUT_SEASONS_LAMBDA_NAME}
     handler: src/core/app/tvShowRDFanout.handler
     events:
-      - schedule: rate(${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_INTERVAL_IN_MINUTE} minutes)
+      - schedule: rate(${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_INTERVAL_IN_MINUTES} minutes)
     timeout: 900
 
   tvShowRDFanoutSeasons:
@@ -290,7 +290,7 @@ functions:
     handler: src/core/app/tvShowRDFanoutSeasons.handler
     timeout: 900
   
-  tvShowReleaseMediaFileCachingHandler:
+  tvShowRMFCachingHandler:
     environment:
       DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
       QBITTORRENT_API_BASE_URL: ${env:QBITTORRENT_API_BASE_URL}
@@ -300,7 +300,7 @@ functions:
       MEDIA_FILES_BASE_URL: ${env:MEDIA_FILES_BASE_URL}
       TORRENT_FILES_BASE_URL: ${env:TORRENT_FILES_BASE_URL}
       TVSHOW_MEDIA_FILE_CACHER_LAMBDA_NAME: ${env:TVSHOW_MEDIA_FILE_CACHER_LAMBDA_NAME}
-    handler: src/core/app/tvShowReleaseMediaFileCachingHandler.handler
+    handler: src/core/app/tvShowRMFCachingHandler.handler
     timeout: 900
 
   tsFantomAssetsCleanupHandlerFanout:
@@ -312,11 +312,11 @@ functions:
       - schedule: rate(${file(./.env.${sls:stage}.yml):FANTOM_ASSETS_CLEANUP_INTERVAL_IN_DAYS} day)
     timeout: 900
 
-  tsFantomAssetsCleanupHandlerFanoutSeasons:
+  tsFACleanupHandlerFanoutSeasons:
     environment:
       DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
       TVSHOW_FANTOM_ASSETS_CLEANUP_HANDLER: ${env:TVSHOW_FANTOM_ASSETS_CLEANUP_HANDLER} 
-    handler: src/core/app/fantomAssetsCleanupHandlerFanoutSeasons.handler
+    handler: src/core/app/tsFACleanupHandlerFanoutSeasons.handler
     timeout: 900
 
   tsFantomAssetsCleanupHandler:
