@@ -140,6 +140,7 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
         }
       }
       console.log(e)
+      console.log(`Got error when processing RC=${JSON.stringify(rc)}`)
     } 
   } 
   await tvShowRepo.save(tvShow, false, [], { [event.seasonNumber]: [event.episodeNumber] } )
@@ -151,10 +152,12 @@ function findMediaFile(torrentInfo: TorrentInfo, seasonNumber: number, episodeNu
   let candidates: { name: string; size: number; progress: number; index: number; } [] = []
   for (let i = 0; i < torrentInfo.files.length; ++i) {
     const f = torrentInfo.files[i]
+    if (f.name == null) continue;
     const name = f.name.toLowerCase()
     const regex = new RegExp(String.raw`s0*${seasonNumber}e0*${episodeNumber}`)
+    const regex2 = new RegExp(String.raw`0*${seasonNumber}x0*${episodeNumber}`)
     if ((name.endsWith('.mkv') || name.endsWith('.mp4') || name.endsWith('.avi')) && !name.includes("sample")
-        && name.match(regex) != null) {
+        && (name.match(regex) != null || name.match(regex2) != null)) {
       candidates.push(f)
     }
   }
@@ -208,7 +211,7 @@ async function processMediaFile(tvShow: TvShow, seasonNumber: number, episodeNum
       }
       let langStr = s.tags?.language
       let titleStr = s.tags?.title
-      let titleStrLC = titleStr.toLowerCase()
+      let titleStrLC = titleStr?.toLowerCase()
       if (titleStr != null && (titleStrLC.includes("commentary") ||  titleStrLC.includes("comentary"))) continue
         const author = resolveAudioAuthor(titleStr, rc.tracker)
         let lang = resolveAudioLang(langStr, tvShow.originalLocale, titleStr, author,
@@ -276,14 +279,16 @@ async function addMagnetAndWait(qbitClient: TorrentClientInterface, downloadUrl:
   }
   await qbitClient.pauseTorrent(hash)
   if (torrentInfo?.files.length === 0) {
+    console.error(`Timed out waiting torrent files: hash=${hash}, downloadUrl=${downloadUrl}, torrentInfo=${JSON.stringify(torrentInfo)}`)
     throw new TimedOutWaitingTorrentFilesError()
   }
   return torrentInfo!
 }
 
 async function removeTagAndDelete(qbitClient: TorrentClientInterface, ti: TorrentInfo, tag: string) {
+  console.log(`removeTagAndDelete: torrentInfo=${JSON.stringify(ti)},tag=${tag}`)  
   await qbitClient.removeTag(ti.id, tag)
-  if ((ti.tags.length === 1 && ti!.tags[0] === tag) || ti!.tags.length === 0) {
+  if ((ti.tags.length === 1 && ti.tags[0] === tag) || ti.tags.length === 0) {
     await qbitClient.deleteTorrentById(ti.id)
   }  
 }

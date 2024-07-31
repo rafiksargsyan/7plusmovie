@@ -270,6 +270,7 @@ async function addMagnetAndWait(qbitClient: TorrentClientInterface, downloadUrl:
   }
   await qbitClient.pauseTorrent(hash);
   if (torrentInfo?.files.length === 0) {
+    console.error(`Timed out waiting torrent files: hash=${hash}, downloadUrl=${downloadUrl}, torrentInfo=${JSON.stringify(torrentInfo)}`)
     throw new TimedOutWaitingTorrentFilesError();
   }
   return torrentInfo!;

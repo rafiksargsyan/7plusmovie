@@ -20,6 +20,8 @@ export class AudioAuthor {
   public static readonly KINAKONG = new AudioAuthor("KINAKONG");
   public static readonly MOVIE_DUBBING = new AudioAuthor("MOVIE_DUBBING");
   public static readonly PIFAGOR = new AudioAuthor("PIFAGOR");
+  public static readonly NOVAMEDIA = new AudioAuthor("NOVAMEDIA");
+  public static readonly RENTV = new AudioAuthor("RENTV");
 
   public readonly key;
 
