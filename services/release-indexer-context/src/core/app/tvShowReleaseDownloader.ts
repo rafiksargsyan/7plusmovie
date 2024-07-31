@@ -142,7 +142,7 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
       console.log(e)
     } 
   } 
-  await tvShowRepo.save(tvShow, false, [event.seasonNumber], { [event.seasonNumber]: [event.episodeNumber] } )
+  await tvShowRepo.save(tvShow, false, [], { [event.seasonNumber]: [event.episodeNumber] } )
   await qbitClient.destroy()
 }
 
@@ -238,7 +238,7 @@ async function processMediaFile(tvShow: TvShow, seasonNumber: number, episodeNum
     tvShow.ignoreRc(seasonNumber, episodeNumber, rcKey)
     return false
   } else {
-    const extension = name.substring(name.lastIndexOf('.'))
+    const extension = name.substring(name.lastIndexOf('.') + 1)
     release.cachedMediaFileRelativePath = `${tvShow.id}/${seasonNumber}/${episodeNumber}/${rc.infoHash}.${extension}`
     if (tvShow.addRelease(seasonNumber, episodeNumber, rc.infoHash, release)) {
       tvShow.promoteRc(seasonNumber, episodeNumber, rcKey)

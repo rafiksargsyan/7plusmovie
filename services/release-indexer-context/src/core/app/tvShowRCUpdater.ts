@@ -153,9 +153,10 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
     }  
   }
   if (allReleasesProcessed) {
-    tvShow.setSeasonReadyToBeProcessed(event.seasonNumber, true);
+    console.info(`All RCs have been processed for tvShowId=${tvShow.id},season=${event.seasonNumber}`);
+    tvShow.setSeasonReadyToBeProcessed(event.seasonNumber, true)
   }
-  await tvShowRepo.save(tvShow, false, [event.seasonNumber], { [event.seasonNumber]: tvShow.getSeasonOrThrow(event.seasonNumber).episodes.map(e => e.episodeNumber) });
+  await tvShowRepo.save(tvShow, false, [event.seasonNumber], { [event.seasonNumber]: tvShow.getSeasonOrThrow(event.seasonNumber).episodes.map(e => e.episodeNumber) })
 };
 
 function resolveTorrentTracker(sr: SonarrRelease) {

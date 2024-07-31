@@ -66,7 +66,7 @@ export class TvShowRepository implements ITvShowRepository {
           let releaseCandidates: { [key:string] : ReleaseCandidate } = {};
           for (let rcItemKey in e.releaseCandidates) {
             const rcItem = e.releaseCandidates[rcItemKey];
-            if ((rcItem as any).tracker != null) {
+            if ((rcItem as any)._tracker != null) {
               const rc = new TorrentReleaseCandidate(true);
               Object.assign(rc, rcItem);
               releaseCandidates[rcItemKey] = rc;
@@ -76,7 +76,7 @@ export class TvShowRepository implements ITvShowRepository {
           let releases = {};
           for (let rItemKey in e.releases) {
             const rItem = e.releases[rItemKey];
-            if ((rItem.release as any).tracker != null) {
+            if ((rItem.release as any)._tracker != null) {
               const release = new TorrentRelease(true);
               Object.assign(release, rItem.release);
               releases[rItemKey] = { ...rItem, release: release };
@@ -213,7 +213,7 @@ export class TvShowRepository implements ITvShowRepository {
       let releaseCandidates: { [key:string] : ReleaseCandidate } = {};
       for (let rcItemKey in tvShowEpisodeDto.releaseCandidates) {
         const rcItem = tvShowEpisodeDto.releaseCandidates[rcItemKey];
-        if ((rcItem as any).tracker != null) {
+        if ((rcItem as any)._tracker != null) {
           const rc = new TorrentReleaseCandidate(true);
           Object.assign(rc, rcItem);
           releaseCandidates[rcItemKey] = rc;
@@ -223,7 +223,7 @@ export class TvShowRepository implements ITvShowRepository {
       let releases = {};
       for (let rItemKey in tvShowEpisodeDto.releases) {
         const rItem = tvShowEpisodeDto.releases[rItemKey];
-        if ((rItem.release as any).tracker != null) {
+        if ((rItem.release as any)._tracker != null) {
           const release = new TorrentRelease(true);
           Object.assign(release, rItem.release);
           releases[rItemKey] = { ...rItem, release: release };
@@ -358,7 +358,7 @@ export class TvShowRepository implements ITvShowRepository {
             let releaseCandidates: { [key:string] : ReleaseCandidate } = {};
             for (let rcItemKey in e.releaseCandidates) {
               const rcItem = e.releaseCandidates[rcItemKey];
-              if ((rcItem as any).tracker != null) {
+              if ((rcItem as any)._tracker != null) {
                 const rc = new TorrentReleaseCandidate(true);
                 Object.assign(rc, rcItem);
                 releaseCandidates[rcItemKey] = rc;
@@ -368,7 +368,7 @@ export class TvShowRepository implements ITvShowRepository {
             let releases = {};
             for (let rItemKey in e.releases) {
               const rItem = e.releases[rItemKey];
-              if ((rItem.release as any).tracker != null) {
+              if ((rItem.release as any)._tracker != null) {
                 const release = new TorrentRelease(true);
                 Object.assign(release, rItem.release);
                 releases[rItemKey] = { ...rItem, release: release };

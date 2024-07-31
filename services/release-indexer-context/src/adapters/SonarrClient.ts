@@ -87,15 +87,15 @@ export class SonarrClient implements ISonarr {
         }
       }
       const age = r.age
-      const ageInMinutes = r.ageInMinutes;
-      const title = r.title;
+      const ageInMinutes = r.ageMinutes
+      const title = r.title
       if (strIsBlank(title)) {
-        console.warn(`Blank title for release=${r}`);
+        console.warn(`Blank title for release=${r}`)
       }
-      const downloadUrl = this.normalizeDownloadUrl(r.downloadUrl);
+      const downloadUrl = this.normalizeDownloadUrl(r.downloadUrl)
       if (downloadUrl == null) {
-        console.warn(`Invalid download url for release=${r}`);
-        continue;
+        console.warn(`Invalid download url for release=${r}`)
+        continue
       }
       let sonarrLanguages = r.languages != null ? r.languages : [];
       const languages: string[] = [];
