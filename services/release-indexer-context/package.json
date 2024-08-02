@@ -10,6 +10,7 @@
         "@aws/dynamodb-auto-marshaller": "^0.7.1",
         "@serverless/sdk": "^0.5.26",
         "axios": "^1.4.0",
+        "axios-retry": "^4.5.0",
         "bencode": "^4.0.0"
     },
     "devDependencies": {
