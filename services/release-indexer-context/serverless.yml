@@ -320,7 +320,7 @@ functions:
     environment:
       DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
       TVSHOW_FANTOM_ASSETS_CLEANUP_HANDLER_FANOUT_SEASONS: ${env:TVSHOW_FANTOM_ASSETS_CLEANUP_HANDLER_FANOUT_SEASONS} 
-    handler: src/core/app/fantomAssetsCleanupHandlerFanout.handler
+    handler: src/core/app/tsFantomAssetsCleanupHandlerFanout.handler
     events:
       - schedule: rate(${file(./.env.${sls:stage}.yml):FANTOM_ASSETS_CLEANUP_INTERVAL_IN_DAYS} day)
     timeout: 900
