@@ -1,11 +1,10 @@
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
 import { DynamoDB } from '@aws-sdk/client-dynamodb'
 import { SecretsManager } from '@aws-sdk/client-secrets-manager'
-import { QBittorrentClient } from '../../adapters/QBittorrentClient'
 import { execSync } from 'child_process'
 import { TorrentReleaseCandidate } from '../domain/entity/TorrentReleaseCandidate'
 import { Nullable } from '../../Nullable'
-import { TorrentClientInterface, TorrentInfo } from '../ports/TorrentClientInterface'
+import { TorrentInfo } from '../ports/ITorrentClient'
 import { TorrentRelease } from '../domain/entity/TorrentRelease'
 import { AudioMetadata } from '../domain/value-object/AudioMetadata'
 import { resolveVoiceType } from '../domain/service/resolveVoiceType'
@@ -22,6 +21,8 @@ import { AudioVoiceType } from '../domain/value-object/AudioVoiceType'
 import { AudioLang } from '../domain/value-object/AudioLang'
 import { TvShowRepository } from '../../adapters/TvShowRepository'
 import { TvShow } from '../domain/aggregate/TvShow'
+import { QBittorrentClientV2 } from '../../adapters/QBittorrentClientV2'
+import { ITorrentClient, TorrentRuntimeError } from '../ports/ITorrentClient'
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -49,7 +50,7 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
   const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId})
   const secret = JSON.parse(secretStr.SecretString!)
   const qbittorrentPassword = secret.QBITTORRENT_PASSWORD!
-  const qbitClient = new QBittorrentClient(qbittorrentApiBaseUrl, qbittorrentUsername, qbittorrentPassword)
+  const qbitClient = new QBittorrentClientV2(qbittorrentApiBaseUrl, qbittorrentUsername, qbittorrentPassword)
   const tvShow = await tvShowRepo.getEpisode(event.tvShowId, event.seasonNumber,  event.episodeNumber)
   const episode = tvShow.seasons[0].episodes[0]
   const releaseCandidates = Object.entries(episode.releaseCandidates)
@@ -93,13 +94,7 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
         }
         let torrentInfo = await qbitClient.getTorrentById(rc.infoHash)
         if (torrentInfo == null) {
-          if (rc.downloadUrl.startsWith("magnet")) {
-            torrentInfo = await addMagnetAndWait(qbitClient, rc.downloadUrl, rc.infoHash)
-            await qbitClient.addTag(torrentInfo!.id, tag)
-          } else {
-            torrentInfo = await qbitClient.addTorrentByUrlOrThrow(`${torrentFilesBaseUrl}/${rc.downloadUrl}`, rc.infoHash)
-            await qbitClient.addTag(torrentInfo!.id, tag)
-          }
+          torrentInfo = await qbitClient.addTorrentByUrl(rc.downloadUrl, rc.infoHash, [tag])
           await qbitClient.disableAllFiles(torrentInfo!.id)
         }
         const fileIndex: Nullable<number> = findMediaFile(torrentInfo!, event.seasonNumber, event.episodeNumber)
@@ -128,6 +123,11 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
         }
       }
     } catch (e) {
+      if (e instanceof TorrentRuntimeError) {
+        const msg = `Got torrent runtime error, will retry on the next run: ${e.message}`
+        console.error(msg)
+        return
+      }
       tvShow.ignoreRc(event.seasonNumber, event.episodeNumber, rcKey)
       if (rc instanceof TorrentReleaseCandidate) {
         try {
@@ -150,16 +150,22 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
 
 function findMediaFile(torrentInfo: TorrentInfo, seasonNumber: number, episodeNumber: number): Nullable<number> {
   let candidates: { name: string; size: number; progress: number; index: number; } [] = []
+  const regex = new RegExp(String.raw`s0*${seasonNumber}e0*${episodeNumber}`)
+    const regex2 = new RegExp(String.raw`0*${seasonNumber}x0*${episodeNumber}`)
   for (let i = 0; i < torrentInfo.files.length; ++i) {
     const f = torrentInfo.files[i]
     if (f.name == null) continue;
     const name = f.name.toLowerCase()
-    const regex = new RegExp(String.raw`s0*${seasonNumber}e0*${episodeNumber}`)
-    const regex2 = new RegExp(String.raw`0*${seasonNumber}x0*${episodeNumber}`)
     if ((name.endsWith('.mkv') || name.endsWith('.mp4') || name.endsWith('.avi')) && !name.includes("sample")
         && (name.match(regex) != null || name.match(regex2) != null)) {
       candidates.push(f)
     }
+  }
+  if (candidates.length > 1) {
+    candidates = candidates.filter(c => {
+      const baseName = c.name.substring(c.name.lastIndexOf('/') + 1)
+      return baseName.match(regex) != null || baseName.match(regex2) != null
+    })
   }
   if (candidates.length === 1) {
     return candidates[0].index
@@ -269,28 +275,9 @@ async function processMediaFile(tvShow: TvShow, seasonNumber: number, episodeNum
   return false
 }
 
-async function addMagnetAndWait(qbitClient: TorrentClientInterface, downloadUrl: string, hash: string): Promise<TorrentInfo> {
-  let torrentInfo: Nullable<TorrentInfo> = await qbitClient.addTorrentByUrlOrThrow(downloadUrl, hash)
-  let tryCount = 10
-  await qbitClient.resumeTorrent(torrentInfo.id)
-  while (torrentInfo?.files.length === 0 && tryCount-- > 0) {
-    await new Promise(r => setTimeout(r, 1000))
-    torrentInfo = await qbitClient.getTorrentById(hash)
-  }
-  await qbitClient.pauseTorrent(hash)
-  if (torrentInfo?.files.length === 0) {
-    console.error(`Timed out waiting torrent files: hash=${hash}, downloadUrl=${downloadUrl}, torrentInfo=${JSON.stringify(torrentInfo)}`)
-    throw new TimedOutWaitingTorrentFilesError()
-  }
-  return torrentInfo!
-}
-
-async function removeTagAndDelete(qbitClient: TorrentClientInterface, ti: TorrentInfo, tag: string) {
-  console.log(`removeTagAndDelete: torrentInfo=${JSON.stringify(ti)},tag=${tag}`)  
+async function removeTagAndDelete(qbitClient: ITorrentClient, ti: TorrentInfo, tag: string) { 
   await qbitClient.removeTag(ti.id, tag)
   if ((ti.tags.length === 1 && ti.tags[0] === tag) || ti.tags.length === 0) {
     await qbitClient.deleteTorrentById(ti.id)
   }  
 }
-
-class TimedOutWaitingTorrentFilesError extends Error {}

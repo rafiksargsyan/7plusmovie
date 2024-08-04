@@ -1,7 +1,7 @@
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
-import { QBittorrentClient } from '../../adapters/QBittorrentClient';
 import { execSync } from 'child_process';
 import * as fs from 'fs';
+import { QBittorrentClientV2 } from '../../adapters/QBittorrentClientV2';
 
 interface Params {
   destinationPath: string,
@@ -21,7 +21,7 @@ export const handler = async (event: Params) => {
   const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
   const secret = JSON.parse(secretStr.SecretString!);
   const qbittorrentPassword = secret.QBITTORRENT_PASSWORD!;
-  const qbitClient = new QBittorrentClient(qbittorrentApiBaseUrl, qbittorrentUsername, qbittorrentPassword);
+  const qbitClient = new QBittorrentClientV2(qbittorrentApiBaseUrl, qbittorrentUsername, qbittorrentPassword);
   
   const rcloneConfig = `
     [s3]
