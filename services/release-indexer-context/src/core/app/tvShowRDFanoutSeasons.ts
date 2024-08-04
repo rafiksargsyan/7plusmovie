@@ -20,6 +20,7 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
   for (const s of tvShow.seasons) {
     if (!s.readyToBeProcessed) continue;
     for (const e of s.episodes) {
+      await new Promise(r => setTimeout(r, 2000))
       const payload = {
         tvShowId: event.tvShowId,
         seasonNumber: s.seasonNumber,
