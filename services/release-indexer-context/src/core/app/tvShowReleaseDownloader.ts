@@ -97,6 +97,7 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
           torrentInfo = await qbitClient.addTorrentByUrl(rc.downloadUrl, rc.infoHash, [tag])
           await qbitClient.disableAllFiles(torrentInfo!.id)
         }
+        await qbitClient.addTag(torrentInfo.id, tag)
         const fileIndex: Nullable<number> = findMediaFile(torrentInfo!, event.seasonNumber, event.episodeNumber)
         if (fileIndex == null) {
           tvShow.ignoreRc(event.seasonNumber, event.episodeNumber, rcKey)
