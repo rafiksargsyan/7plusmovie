@@ -118,6 +118,7 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
           break
         } if ((Date.now() - torrentInfo!.addedOn * 1000) > 60 * 60 * 1000 && (torrentInfo!.isStalled ||
               (torrentInfo!.eta != null && torrentInfo!.eta > 23 * 60 * 60))) {
+          console.warn(`Took too long waiting RC=${rc.infoHash}`)
           tvShow.ignoreRc(event.seasonNumber, event.episodeNumber, rcKey)
           await removeTagAndDelete(qbitClient, torrentInfo!, tag)
           continue
