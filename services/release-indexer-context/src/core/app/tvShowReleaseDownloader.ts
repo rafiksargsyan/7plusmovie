@@ -94,6 +94,12 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
         }
         let torrentInfo = await qbitClient.getTorrentById(rc.infoHash)
         if (torrentInfo == null) {
+          let downloadUrl
+          if (rc.downloadUrl.startsWith('magnet')) {
+            downloadUrl = rc.downloadUrl
+          } else {
+            downloadUrl = `${torrentFilesBaseUrl}/${rc.downloadUrl}`
+          }
           torrentInfo = await qbitClient.addTorrentByUrl(rc.downloadUrl, rc.infoHash, [tag])
           await qbitClient.disableAllFiles(torrentInfo!.id)
         }
@@ -277,8 +283,8 @@ async function processMediaFile(tvShow: TvShow, seasonNumber: number, episodeNum
 }
 
 async function removeTagAndDelete(qbitClient: ITorrentClient, ti: TorrentInfo, tag: string) { 
-  await qbitClient.removeTag(ti.id, tag)
-  if ((ti.tags.length === 1 && ti.tags[0] === tag) || ti.tags.length === 0) {
+  ti = await qbitClient.removeTag(ti.id, tag)
+  if (ti.tags.length === 0) {
     await qbitClient.deleteTorrentById(ti.id)
   }  
 }

@@ -325,7 +325,7 @@ export class QBittorrentClientV2 implements ITorrentClient {
     }
   }
 
-  async addTag(id: string, tag: string) {
+  async addTag(id: string, tag: string): Promise<TorrentInfo> {
     if (strIsBlank(id)) {
       const msg = 'Provided id is blank!'
       console.error(msg)
@@ -353,6 +353,7 @@ export class QBittorrentClientV2 implements ITorrentClient {
         const msg = `Failed add tag: id=${id}, tag=${tag}`
         throw new Error(msg)
       }
+      return t
     } catch (e) {
       const msg = `Got error while adding tag: ${(e as Error).message}`
       console.error(msg)
@@ -360,7 +361,7 @@ export class QBittorrentClientV2 implements ITorrentClient {
     }
   }
 
-  async removeTag(id: string, tag: string) {
+  async removeTag(id: string, tag: string): Promise<TorrentInfo> {
     if (strIsBlank(id)) {
       const msg = 'Provided id is blank!'
       console.error(msg)
@@ -388,6 +389,7 @@ export class QBittorrentClientV2 implements ITorrentClient {
         const msg = `Failed to remove tag: id=${id}, tag=${tag}`
         throw new Error(msg)
       }
+      return t
     } catch (e) {
       const msg = `Got error while removing tag: ${(e as Error).message}`
       console.error(msg)

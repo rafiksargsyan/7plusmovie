@@ -1,4 +1,4 @@
-import { Nullable } from "./utils"
+import { Nullable } from "../../utils"
 
 export interface ITorrentClient {
   version(): Promise<string>
@@ -10,8 +10,8 @@ export interface ITorrentClient {
   pauseTorrent(id: string): void
   disableAllFiles(id: string): void
   enableFile(id: string, fileId: number): void
-  addTag(id: string, tag: string): void
-  removeTag(id: string, tag: string): void
+  addTag(id: string, tag: string): Promise<TorrentInfo>
+  removeTag(id: string, tag: string): Promise<TorrentInfo>
 }
 
 export interface TorrentInfo {

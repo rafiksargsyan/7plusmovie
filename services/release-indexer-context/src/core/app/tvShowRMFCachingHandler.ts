@@ -37,13 +37,8 @@ export const handler = async (event: Params) => {
   } catch (e) {
     console.error(e);  
   }
-  await qbitClient.removeTag(event.torrentId, event.tag);
-  const torrentInfo = await qbitClient.getTorrentById(event.torrentId);
-  if (torrentInfo == null) {
-    console.error(`Torrent info is null, event=${JSON.stringify(event)}`);
-    return;
-  }
-  if (torrentInfo.tags.length === 0 || (torrentInfo.tags.length === 1 && torrentInfo.tags[0] === event.tag)) {
+  const torrentInfo = await qbitClient.removeTag(event.torrentId, event.tag)
+  if (torrentInfo.tags.length === 0) {
     await qbitClient.deleteTorrentById(event.torrentId);
   }
 }
