@@ -100,7 +100,7 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
           } else {
             downloadUrl = `${torrentFilesBaseUrl}/${rc.downloadUrl}`
           }
-          torrentInfo = await qbitClient.addTorrentByUrl(rc.downloadUrl, rc.infoHash, [tag])
+          torrentInfo = await qbitClient.addTorrentByUrl(downloadUrl, rc.infoHash, [tag])
           await qbitClient.disableAllFiles(torrentInfo!.id)
         }
         await qbitClient.addTag(torrentInfo.id, tag)
