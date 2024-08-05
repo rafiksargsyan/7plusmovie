@@ -179,7 +179,7 @@ export class QBittorrentClientV2 implements ITorrentClient {
         tags: tags.join(',') + `,${id}`
       })
       let torrentInfo: Nullable<TorrentInfo> = null
-      let tryCount = 3
+      let tryCount = 5
       let resumed = false
       while ((torrentInfo == null || torrentInfo.files.length === 0) && tryCount-- > 0) {
         await new Promise(r => setTimeout(r, 5000))
