@@ -93,7 +93,7 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
           continue
         }
         let torrentInfo = await qbitClient.getTorrentById(rc.infoHash)
-        if (torrentInfo == null) {
+        if (torrentInfo == null || torrentInfo.files.length === 0) {
           let downloadUrl
           if (rc.downloadUrl.startsWith('magnet')) {
             downloadUrl = rc.downloadUrl
@@ -103,7 +103,7 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
           torrentInfo = await qbitClient.addTorrentByUrl(downloadUrl, rc.infoHash, [tag])
           await qbitClient.disableAllFiles(torrentInfo!.id)
         }
-        await qbitClient.addTag(torrentInfo.id, tag)
+        torrentInfo = await qbitClient.addTag(torrentInfo.id, tag)
         const fileIndex: Nullable<number> = findMediaFile(torrentInfo!, event.seasonNumber, event.episodeNumber)
         if (fileIndex == null) {
           tvShow.ignoreRc(event.seasonNumber, event.episodeNumber, rcKey)
