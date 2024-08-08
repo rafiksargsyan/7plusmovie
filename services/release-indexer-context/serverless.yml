@@ -340,6 +340,12 @@ functions:
     handler: src/core/app/tsFantomAssetsCleanupHandler.handler
     timeout: 900 
 
+  getTvShowSeason:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    handler: src/core/app/getTvShowSeason.handler
+    timeout: 30
+
 resources:
   Resources:
     movieReleaseCandidateUpdaterFanoutTopic:

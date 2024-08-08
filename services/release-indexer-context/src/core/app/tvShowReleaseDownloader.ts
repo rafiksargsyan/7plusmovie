@@ -158,8 +158,8 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
 
 function findMediaFile(torrentInfo: TorrentInfo, seasonNumber: number, episodeNumber: number): Nullable<number> {
   let candidates: { name: string; size: number; progress: number; index: number; } [] = []
-  const regex = new RegExp(String.raw`s0*${seasonNumber}e0*${episodeNumber}`)
-    const regex2 = new RegExp(String.raw`0*${seasonNumber}x0*${episodeNumber}`)
+  const regex = new RegExp(String.raw`s0*${seasonNumber}e0*${episodeNumber}[^\d]+`)
+    const regex2 = new RegExp(String.raw`0*${seasonNumber}x0*${episodeNumber}[^\d]+`)
   for (let i = 0; i < torrentInfo.files.length; ++i) {
     const f = torrentInfo.files[i]
     if (f.name == null) continue;

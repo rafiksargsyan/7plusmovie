@@ -209,9 +209,9 @@ function resolveEpisodeNumbers(sr: SonarrRelease, seasonNumber: number, tvShow: 
     console.warn(`Release title prefixed did not match for RC=${JSON.stringify(sr)}, seasonNumber=${seasonNumber}`);
     return [];
   }
-  const regex1 = new RegExp(String.raw`s0*${seasonNumber}`);
-  const regex2 = new RegExp(String.raw`temporada\s*${seasonNumber}`);
-  const regex3 = new RegExp(String.raw`saison\s*0*${seasonNumber}`);
+  const regex1 = new RegExp(String.raw`s0*${seasonNumber}[^\d]+`);
+  const regex2 = new RegExp(String.raw`temporada\s*0*${seasonNumber}[^\d]+`);
+  const regex3 = new RegExp(String.raw`saison\s*0*${seasonNumber}[^\d]+`);
   // For example 'Breaking.Bad.Complete.Series (S01-S05) .720p.BluRay.Goblin.Eng.A' or
   // 'Breaking Bad S01 S05 Complete 720p BluRay x265 BMF'
   const regex4 = new RegExp(String.raw`s(0*[1-9]+)[-\s][-\s+](0*[1-9]+)`);
