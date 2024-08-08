@@ -48,109 +48,114 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
   let allReleasesProcessed = true;
   for (let sr of sonarrReleases) {
     // Exit before lambda times out
-    if (Date.now() - startTime > MAX_RUNTIME) {
+    try {
+      if (Date.now() - startTime > MAX_RUNTIME) {
+        allReleasesProcessed = false;
+        break;
+      }
+      if (tvShow.sonarrReleaseAlreadyAdded(event.seasonNumber, sr.guid)) continue;
       allReleasesProcessed = false;
-      break;
-    }
-    if (tvShow.sonarrReleaseAlreadyAdded(event.seasonNumber, sr.guid)) continue;
-    allReleasesProcessed = false;
-    tvShow.addSonarrReleaseGuid(event.seasonNumber, sr.guid);
-    if (!isTorrentRelease(sr.protocol)) {
-      console.info(`Ignoring non-torrent RC=${JSON.stringify(sr)}`);
-      continue;
-    }
-    if (sr.customFormatScore == null || sr.customFormatScore < 0) {
-      console.info(`Ignoring RC with negative customFormatScore, RC=${JSON.stringify(sr)}`);
-      continue;
-    }
-    const tracker = resolveTorrentTracker(sr);
-    if (tracker == null) {
-      console.warn(`Unknown torrent tracker for RC=${JSON.stringify(sr)}`);
-      continue;
-    }
-    const seeders = sr.seeders;
-    if (seeders != null && seeders <= 5) {
-      console.info(`Ignoring RC because of low number of seeders, RC=${JSON.stringify(sr)}`);
-      continue;
-    }
-    const ripType = sr.ripType;
-    const resolution = sr.resolution;
-    const releaseTimeInMillis = resolveReleaseTimeInMillis(sr.age, sr.ageInMinutes, tracker);
-    const downloadUrl = sr.downloadUrl;
-    const sonarrLanguages  = sr.languages;
-    const lastEpisodeReleaseTime = tvShow.estimatedLastEpisodeReleaseTime(event.seasonNumber);
-    if ((lastEpisodeReleaseTime != null && (Date.now() - lastEpisodeReleaseTime > 3 * MONTH_IN_MILLIS)) &&
-       !tracker.isLanguageSpecific() && (sonarrLanguages.length === 0 ||
-         (sonarrLanguages.length === 1 && (AudioLang.fromRadarrLanguage(sonarrLanguages[0]) != null &&
-           AudioLang.fromRadarrLanguage(sonarrLanguages[0])?.lang === tvShow.originalLocale.lang || sonarrLanguages[0] === "unknown")))) {
-      continue;
-    }
-    if (downloadUrl.startsWith("magnet")) {
-      if (strIsBlank(sr.infoHash)) {
-        console.warn(`infoHash must be available in case of magnet links, RC=${sr}`);
+      tvShow.addSonarrReleaseGuid(event.seasonNumber, sr.guid);
+      if (!isTorrentRelease(sr.protocol)) {
+        console.info(`Ignoring non-torrent RC=${JSON.stringify(sr)}`);
         continue;
       }
-      const episodeNumbers = resolveEpisodeNumbers(sr, event.seasonNumber, tvShow);
-      const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, downloadUrl,
-        null, resolution, ripType, tracker, sr.infoHash!, sr.infoUrl, seeders, sonarrLanguages, false);
-      if (episodeNumbers == null) {
-        tvShow.addRCToSeason(event.seasonNumber, sr.infoHash!, rc);
-      } else if (episodeNumbers.length !== 0) {
-        tvShow.addRCToEpisodes(event.seasonNumber, episodeNumbers, sr.infoHash!, rc);
-      } else {
+      if (sr.customFormatScore == null || sr.customFormatScore < 0) {
+        console.info(`Ignoring RC with negative customFormatScore, RC=${JSON.stringify(sr)}`);
         continue;
       }
-    } else {
-      const response = await axios.get(downloadUrl, { responseType: 'arraybuffer', maxRedirects: 0 });
-      let locationHeader: Nullable<string> = response.headers?.Location;
-      if (locationHeader == null) locationHeader = response.headers?.location;
-      if (locationHeader != null && locationHeader.startsWith("magnet")) {
-        let hash = sr.infoHash;
-        if (strIsBlank(hash)) {
-          const hashPrefix = "xt=urn:btih:";
-          let hashStartIndex = locationHeader.indexOf(hashPrefix) + hashPrefix.length;
-          let hashEndIndex = locationHeader.indexOf('&', hashStartIndex);
-          hash = locationHeader.substring(hashStartIndex, hashEndIndex);
-        }
-        if (strIsBlank(hash)) {
-          console.warn(`Could not resolve hash for RC=${sr}`);
+      const tracker = resolveTorrentTracker(sr);
+      if (tracker == null) {
+        console.warn(`Unknown torrent tracker for RC=${JSON.stringify(sr)}`);
+        continue;
+      }
+      const seeders = sr.seeders;
+      if (seeders != null && seeders <= 5) {
+        console.info(`Ignoring RC because of low number of seeders, RC=${JSON.stringify(sr)}`);
+        continue;
+      }
+      const ripType = sr.ripType;
+      const resolution = sr.resolution;
+      const releaseTimeInMillis = resolveReleaseTimeInMillis(sr.age, sr.ageInMinutes, tracker);
+      const downloadUrl = sr.downloadUrl;
+      const sonarrLanguages  = sr.languages;
+      const lastEpisodeReleaseTime = tvShow.estimatedLastEpisodeReleaseTime(event.seasonNumber);
+      if ((lastEpisodeReleaseTime != null && (Date.now() - lastEpisodeReleaseTime > 3 * MONTH_IN_MILLIS)) &&
+         !tracker.isLanguageSpecific() && (sonarrLanguages.length === 0 ||
+           (sonarrLanguages.length === 1 && (AudioLang.fromRadarrLanguage(sonarrLanguages[0]) != null &&
+             AudioLang.fromRadarrLanguage(sonarrLanguages[0])?.lang === tvShow.originalLocale.lang || sonarrLanguages[0] === "unknown")))) {
+        continue;
+      }
+      if (downloadUrl.startsWith("magnet")) {
+        if (strIsBlank(sr.infoHash)) {
+          console.warn(`infoHash must be available in case of magnet links, RC=${sr}`);
           continue;
         }
         const episodeNumbers = resolveEpisodeNumbers(sr, event.seasonNumber, tvShow);
-        const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, locationHeader,
-          null, resolution, ripType, tracker, hash!, sr.infoUrl, seeders, sonarrLanguages, false);
+        const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, downloadUrl,
+          null, resolution, ripType, tracker, sr.infoHash!, sr.infoUrl, seeders, sonarrLanguages, false);
         if (episodeNumbers == null) {
-          tvShow.addRCToSeason(event.seasonNumber, hash!, rc);
+          tvShow.addRCToSeason(event.seasonNumber, sr.infoHash!, rc);
         } else if (episodeNumbers.length !== 0) {
-          tvShow.addRCToEpisodes(event.seasonNumber, episodeNumbers, hash!, rc);
+          tvShow.addRCToEpisodes(event.seasonNumber, episodeNumbers, sr.infoHash!, rc);
         } else {
           continue;
         }
       } else {
-        const torrentFile = response.data;
-        const decodedTorrent = bencode.decode(torrentFile);
-        const info = decodedTorrent['info'];
-        const bencodedInfo = bencode.encode(info);
-        let hash = createHash('sha1').update(bencodedInfo).digest('hex');
-        const s3ObjectKey = `${tvShow.id}/${event.seasonNumber}/${hash}`;
-        const s3Params = {
-          Bucket: torrentFilesS3Bucket,
-          Key: s3ObjectKey,
-          Body: torrentFile
-        };
-        await s3.putObject(s3Params);
-        const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, s3ObjectKey,
-          null, resolution, ripType, tracker, hash, sr.infoUrl, seeders, sonarrLanguages, false);
-        const episodeNumbers = resolveEpisodeNumbers(sr, event.seasonNumber, tvShow);
-        if (episodeNumbers == null) {
-          tvShow.addRCToSeason(event.seasonNumber, hash!, rc);
-        } else if (episodeNumbers.length !== 0) {
-          tvShow.addRCToEpisodes(event.seasonNumber, episodeNumbers, hash!, rc);
+        const response = await axios.get(downloadUrl, { responseType: 'arraybuffer', maxRedirects: 0 });
+        let locationHeader: Nullable<string> = response.headers?.Location;
+        if (locationHeader == null) locationHeader = response.headers?.location;
+        if (locationHeader != null && locationHeader.startsWith("magnet")) {
+          let hash = sr.infoHash;
+          if (strIsBlank(hash)) {
+            const hashPrefix = "xt=urn:btih:";
+            let hashStartIndex = locationHeader.indexOf(hashPrefix) + hashPrefix.length;
+            let hashEndIndex = locationHeader.indexOf('&', hashStartIndex);
+            hash = locationHeader.substring(hashStartIndex, hashEndIndex);
+          }
+          if (strIsBlank(hash)) {
+            console.warn(`Could not resolve hash for RC=${sr}`);
+            continue;
+          }
+          const episodeNumbers = resolveEpisodeNumbers(sr, event.seasonNumber, tvShow);
+          const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, locationHeader,
+            null, resolution, ripType, tracker, hash!, sr.infoUrl, seeders, sonarrLanguages, false);
+          if (episodeNumbers == null) {
+            tvShow.addRCToSeason(event.seasonNumber, hash!, rc);
+          } else if (episodeNumbers.length !== 0) {
+            tvShow.addRCToEpisodes(event.seasonNumber, episodeNumbers, hash!, rc);
+          } else {
+            continue;
+          }
         } else {
-          continue;
+          const torrentFile = response.data;
+          const decodedTorrent = bencode.decode(torrentFile);
+          const info = decodedTorrent['info'];
+          const bencodedInfo = bencode.encode(info);
+          let hash = createHash('sha1').update(bencodedInfo).digest('hex');
+          const s3ObjectKey = `${tvShow.id}/${event.seasonNumber}/${hash}`;
+          const s3Params = {
+            Bucket: torrentFilesS3Bucket,
+            Key: s3ObjectKey,
+            Body: torrentFile
+          };
+          await s3.putObject(s3Params);
+          const rc: ReleaseCandidate = new TorrentReleaseCandidate(false, releaseTimeInMillis, s3ObjectKey,
+            null, resolution, ripType, tracker, hash, sr.infoUrl, seeders, sonarrLanguages, false);
+          const episodeNumbers = resolveEpisodeNumbers(sr, event.seasonNumber, tvShow);
+          if (episodeNumbers == null) {
+            tvShow.addRCToSeason(event.seasonNumber, hash!, rc);
+          } else if (episodeNumbers.length !== 0) {
+            tvShow.addRCToEpisodes(event.seasonNumber, episodeNumbers, hash!, rc);
+          } else {
+            continue;
+          }
         }
       }
-    }  
+    } catch (e) {
+      const msg = `Error while processing RC=${JSON.stringify(sr)}, ${(e as Error).message}`
+      console.error(msg)
+    }   
   }
   if (allReleasesProcessed) {
     console.info(`All RCs have been processed for tvShowId=${tvShow.id},season=${event.seasonNumber}`);
