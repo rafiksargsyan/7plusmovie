@@ -696,6 +696,27 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  tvShowNewReleaseChecker:
+    environment:
+      RIC_GET_TVSHOW_SEASON_LAMBDA_NAME: ${env:RIC_GET_TVSHOW_SEASON_LAMBDA_NAME}
+      RAW_MEDIA_FILES_BASE_URL: ${env:RAW_MEDIA_FILES_BASE_URL}
+      DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME}
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/tvShowNewReleaseChecker.handler
+    timeout: 120
+    
+  tvShowNewReleaseCheckerFanout:
+    environment:
+      RIC_GET_TVSHOW_SEASON_LAMBDA_NAME: ${env:RIC_GET_TVSHOW_SEASON_LAMBDA_NAME}
+      RAW_MEDIA_FILES_BASE_URL: ${env:RAW_MEDIA_FILES_BASE_URL}
+      DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME}
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+      TVSHOW_NEW_RELEASE_CHECKER_LAMBDA: ${env:TVSHOW_NEW_RELEASE_CHECKER_LAMBDA}
+    handler: src/core/app/tv-show/tvShowNewReleaseCheckerFanout.handler  
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):MOVIE_NEW_RELEASE_CHECKER_INTERVAL_IN_MINUTES} minutes)
+    timeout: 900
 
 resources:
   Resources:

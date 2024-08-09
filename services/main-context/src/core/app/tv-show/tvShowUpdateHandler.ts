@@ -36,7 +36,7 @@ const tmdbImageClient = axios.create({
 
 const mediaAssetsS3Bucket = process.env.MEDIA_ASSETS_S3_BUCKET!;
 
-interface Episode {
+export interface Episode {
   originalName: string;
   nameL8ns: { [key: string]: string };
   stillImage: string;
@@ -47,7 +47,7 @@ interface Episode {
   releases: { [key: string]: any }
 }
     
-interface Season {
+export interface Season {
   originalName: string;
   nameL8ns: { [key: string]: string };
   episodes: Episode[];
@@ -56,7 +56,7 @@ interface Season {
   seasonNumber;
 }
 
-interface TvShowRead {
+export interface TvShowRead {
   id: string;
   originalTitle: string;
   posterImagesPortrait: { [key: string]: string };

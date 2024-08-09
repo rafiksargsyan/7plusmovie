@@ -5,4 +5,6 @@ export interface TvShowRepositoryInterface {
   saveTvShow(tvShow: TvShow)
   saveSeason(tvShow: TvShow, saveRoot: boolean, seasonNumber: number)
   getSeason(id: string, seasonNumber: number) : Promise<TvShow>
+  getTvShowRoot(id: string) : Promise<TvShow>
+  getAll() : Promise<TvShow[]>
 }

@@ -1,6 +1,6 @@
 import { ITvShowRepository, TvShowLazy, TvShowSeasonsLazy, TvShowWithIdNotFoundError } from "../core/ports/ITvShowRepository";
 import { Episode, Season, TvShow } from "../core/domain/aggregate/TvShow";
-import { DynamoDBDocument, ScanCommandInput, QueryCommandInput, DeleteCommandInput } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocument, ScanCommandInput, QueryCommandInput } from "@aws-sdk/lib-dynamodb";
 import { ReleaseCandidate } from "../core/domain/entity/ReleaseCandidate";
 import { TorrentReleaseCandidate } from "../core/domain/entity/TorrentReleaseCandidate";
 import { TorrentRelease } from "../core/domain/entity/TorrentRelease";
