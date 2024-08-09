@@ -44,6 +44,7 @@ interface Episode {
   m3u8File: string;
   tmdbEpisodeNumber: number;
   episodeNumber;
+  releases: { [key: string]: any }
 }
     
 interface Season {
@@ -102,13 +103,18 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         if (Object.keys(tvShow.posterImagesPortrait).length == 0) {
           return;
         }
-        let seasons = tvShow.seasons.map(_ => ({
-          ..._,
-          episodes: _.episodes.filter(e => e.mpdFile != undefined && e.m3u8File != undefined)
-        }));
-        seasons = seasons.filter(_ => _.episodes.length != 0);
-        if (seasons.length == 0) {
-          return;
+        let releaseExists = false;
+        for (const s of tvShow.seasons) {
+          for (const e of s.episodes) {
+            if (e.releases != null && Object.keys(e.releases).length !== 0) {
+              releaseExists = true
+              break
+            }
+          }
+          if (releaseExists) break
+        }
+        if (!releaseExists) {
+          return
         }
         if (tvShow.genres == undefined) tvShow.genres = [];
         await algoliaIndex.saveObject({ objectID: tvShow.id,

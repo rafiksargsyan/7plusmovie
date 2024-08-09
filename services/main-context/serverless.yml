@@ -680,12 +680,12 @@ functions:
 
   tvShowConfigureReleasesMonitoring:
     environment:
-      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
     handler: src/core/app/tv-show/configureReleaseMonitoring.handler
     events:
       - http:
           integration: lambda
-          path: /tv-show/{id}
+          path: /tv-show/{id}/releaseMonitoring
           method: patch
           request:
             template:
