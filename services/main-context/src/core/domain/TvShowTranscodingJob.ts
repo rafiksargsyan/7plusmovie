@@ -41,7 +41,7 @@ export class TvShowTranscodingJob {
   private transcodingContextJobId: string;
   private releaseId: string;
   private releasesToBeRemoved: string[];
-  private releaseIndexerContextReleaseId: string;
+  private releaseIndexerContextReleaseId: Nullable<string>;
   private ripType: RipType;
   private resolution: Resolution;
   private thumbnailResolutions: number[];
@@ -49,7 +49,8 @@ export class TvShowTranscodingJob {
   public constructor(createEmptyObject: boolean, tvShowId?: string, season?: number, episode?: number,
     mkvS3ObjectKey?: string, mkvHttpUrl?: string, outputFolderKey?: string, audioTranscodeSpecs?: AudioTranscodeSpec[],
     textTranscodeSpecs?: TextTranscodeSpec[], videoTranscodeSpec?: VideoTranscodeSpec,  releaseId?: string,
-    releasesToBeRemoved?: string[], ripType?: Nullable<RipType>, resolution?: Nullable<Resolution>, thumbnailResolutions?: number[]) {
+    releasesToBeRemoved?: string[], ripType?: Nullable<RipType>, resolution?: Nullable<Resolution>, thumbnailResolutions?: number[],
+    ricReleaseId?: Nullable<string>) {
     if (!createEmptyObject) {
       this.id = uuid();
       this.setTvShowId(tvShowId);
@@ -64,6 +65,7 @@ export class TvShowTranscodingJob {
       this.setVideoTranscodeSpec(videoTranscodeSpec);
       this.setReleasesToBeRemoved(releasesToBeRemoved);
       this.setThumbnailResolutions(thumbnailResolutions);
+      this.releaseIndexerContextReleaseId = ricReleaseId
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
       this.ttl = Math.round(this.creationTime / 1000) + 15 * 24 * 60 * 60;

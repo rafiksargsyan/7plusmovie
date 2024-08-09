@@ -74,7 +74,49 @@ export class TvShowRepository implements TvShowRepositoryInterface {
       .concat(seasonsDao.map(_ => { return {Put: { TableName: dynamodbTvShowTableName, Item: _}} }))
     })
   }
+  
+  async saveSeason(tvShow: TvShow, saveRoot: boolean, seasonNumber: number) {
+    const itemsToSave: any[] = []
+    const tvShowDao: any = {...tvShow}
+    delete tvShowDao.id
+    tvShowDao.PK = tvShow.id
+    tvShowDao.SK = 'tvshow'
+    delete tvShowDao.seasons
+    if (saveRoot) {
+      itemsToSave.push({ Put: { TableName: dynamodbTvShowTableName, Item: tvShowDao}})
+    }
+    let season = tvShow.getSeasonOrThrow(seasonNumber)
+    let seasonDao: any = {...season}
+    seasonDao.PK = tvShow.id
+    seasonDao.SK = `season#${season.seasonNumber}`
+    await this.docClient.transactWrite({
+      TransactItems : itemsToSave
+    })
+  }
 
+  async getSeason(id: string, seasonNumber: number): Promise<TvShow> {
+    const seasonDto = (await this.docClient.get({
+      TableName: dynamodbTvShowTableName,
+      Key: { 'PK': id, 'SK': `season#${seasonNumber}`  }
+    })).Item
+
+    const tvShowDao = (await this.docClient.get({
+      TableName: dynamodbTvShowTableName,
+      Key: { 'PK': id, 'SK': 'tvshow'  }
+    })).Item;
+    
+    if (tvShowDao == null) {
+      throw new FailedToGetTvShowError();
+    }
+  
+    tvShowDao.id = tvShowDao.PK
+    tvShowDao.seasons = [seasonDto]
+    
+    const tvShow: TvShow = new TvShow(true);
+    Object.assign(tvShow, tvShowDao);
+
+    return tvShow;
+  }
 }
 
 class FailedToGetTvShowError extends Error {}

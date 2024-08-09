@@ -8,6 +8,7 @@ import { SubsLang } from '../../domain/SubsLang';
 import { Nullable } from '../../../utils';
 import { RipType } from '../../domain/RipType';
 import { Resolution } from '../../domain/Resolution';
+import { TvShowRepository } from '../../../adapters/TvShowRepository';
 
 const dynamodbTvShowTranscodingJobTableName = process.env.DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME!;
 
@@ -19,6 +20,7 @@ const marshallOptions = {
 const translateConfig = { marshallOptions };
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
+const tvShowRepo = new TvShowRepository(docClient)
 
 export interface CreateTvShowTranscodingJobParam {
   tvShowId: string
@@ -47,9 +49,13 @@ export const handler = async (event: CreateTvShowTranscodingJobParam): Promise<s
   });
   let tvShowTranscodingJob = new TvShowTranscodingJob(false, event.tvShowId, event.season, event.episode, event.mkvS3ObjectKey,
     event.mkvHttpUrl, event.outputFolderKey, audioTranscodeSpecParams, textTranscodeSpecParams, event.videoTranscodeSpec, event.releaseId, event.releasesToBeRemoved,
-    RipType.fromKey(event.ripType), Resolution.fromKey(event.resolution), event.thumbnailResolutions);
+    RipType.fromKey(event.ripType), Resolution.fromKey(event.resolution), event.thumbnailResolutions, event.ricReleaseId);
   
-  await docClient.put({TableName: dynamodbTvShowTranscodingJobTableName, Item: tvShowTranscodingJob});
+  const tvShow = await tvShowRepo.getSeason(event.tvShowId, event.season)
+  tvShow.transcodingStarted(event.season, event.episode)
+  
+  await docClient.put({TableName: dynamodbTvShowTranscodingJobTableName, Item: tvShowTranscodingJob})
+  await tvShowRepo.saveSeason(tvShow, false, event.season)
 
   return tvShowTranscodingJob.id;
 };

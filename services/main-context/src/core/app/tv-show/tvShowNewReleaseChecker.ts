@@ -39,7 +39,7 @@ interface Param {
 }
 
 export const handler = async (event: Param): Promise<void> => {
-  const tvShow = await tvShowRepo.getTvShowById(event.tvShowId)
+  const tvShow = await tvShowRepo.getSeason(event.tvShowId, event.seasonNumber)
   const season = tvShow.getSeasonOrThrow(event.seasonNumber)
   if (tvShow.ricTvShowId == null) {
     console.warn(`ricTvShowId is null for tvShowId=${event.tvShowId}`)
@@ -92,30 +92,30 @@ export const handler = async (event: Param): Promise<void> => {
         ricReleaseId: k,
         thumbnailResolutions: [ 60, 120, 240 ]
       }
-      await createTvShowTranscodingJob(transcodingJobParam);
-      break;
+      await createTvShowTranscodingJob(transcodingJobParam)
+      break
     }
   }
 };
 
 function chooseReleaseToTranscode(response: RicEpisode, tvShow: TvShow, seasonNumber: number, episodeNumber: number) {
   for (const k in response.releases) {
-    const r = response.releases[k].release;
+    const r = response.releases[k].release
     if (releaseContainsRussianAudio(r) && !tvShow.releaseAlreadyExists(seasonNumber, episodeNumber, k)) {
-      return k;
+      return k
     }
   }
   for (const k in response.releases) {
-    const r = response.releases[k].release;
+    const r = response.releases[k].release
     if (releaseContainsEnglishAudio(r) && !tvShow.releaseAlreadyExists(seasonNumber, episodeNumber, k)) {
-      return k;
+      return k
     }
   }
   for (const k in response.releases) {
-    const r = response.releases[k].release;
+    const r = response.releases[k].release
     if (!tvShow.releaseAlreadyExists(seasonNumber, episodeNumber, k)) {
-      return k;
+      return k
     }
   }
-  return null;
+  return null
 }

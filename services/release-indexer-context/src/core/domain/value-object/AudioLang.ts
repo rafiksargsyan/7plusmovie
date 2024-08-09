@@ -56,8 +56,8 @@ export class AudioLang {
   static readonly audioAuthorPriorityList = {
     "RU" : [ AudioAuthor.JASKIER_18PLUS, AudioAuthor.VIRUSEPROJECT_18PLUS, AudioAuthor.HDREZKA_18PLUS,
       AudioAuthor.JASKIER, AudioAuthor.VIRUSEPROJECT, AudioAuthor.HDREZKA, AudioAuthor.TVSHOWS, AudioAuthor.KINOMANIA, 
-      AudioAuthor.IVI, AudioAuthor.KIRILLICA, AudioAuthor.LOSTFILM, AudioAuthor.RENTV, AudioAuthor.NOVAMEDIA, AudioAuthor.READ_HEAD_SOUND,
-      AudioAuthor.MOVIE_DUBBING, AudioAuthor.BRAVO_RECORDS_GEORGIA, AudioAuthor.MOVIE_DALEN, AudioAuthor.PIFAGOR ],
+      AudioAuthor.IVI, AudioAuthor.KIRILLICA, AudioAuthor.LOSTFILM, AudioAuthor.KRAVEC_RECORDS, AudioAuthor.RENTV, AudioAuthor.NOVAMEDIA,
+      AudioAuthor.READ_HEAD_SOUND, AudioAuthor.MOVIE_DUBBING, AudioAuthor.BRAVO_RECORDS_GEORGIA, AudioAuthor.MOVIE_DALEN, AudioAuthor.PIFAGOR ],
     "UK" : [AudioAuthor.ONE_PLUS_ONE, AudioAuthor.POSTMODERN],
     "BE" : [AudioAuthor.KINAKONG]
   }
