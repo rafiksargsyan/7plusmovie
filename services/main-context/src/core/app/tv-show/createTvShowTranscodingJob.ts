@@ -20,21 +20,22 @@ const translateConfig = { marshallOptions };
 
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 
-interface CreateTvShowTranscodingJobParam {
-  tvShowId: string;
-  season: number;
-  episode: number;
-  mkvS3ObjectKey: string;
-  mkvHttpUrl: string
-  outputFolderKey: string;
-  audioTranscodeSpecParams: Nullable<AudioTranscodeSpecParam[]>;
-  textTranscodeSpecParams: Nullable<TextTranscodeSpecParam[]>;
-  videoTranscodeSpec: VideoTranscodeSpec;
-  releaseId: string;
-  releasesToBeRemoved: string[];
-  ripType: string;
-  resolution: string;
-  thumbnailResolutions: number[];
+export interface CreateTvShowTranscodingJobParam {
+  tvShowId: string
+  season: number
+  episode: number
+  mkvS3ObjectKey?: string
+  mkvHttpUrl?: string
+  outputFolderKey?: string
+  audioTranscodeSpecParams: Nullable<AudioTranscodeSpecParam[]>
+  textTranscodeSpecParams: Nullable<TextTranscodeSpecParam[]>
+  videoTranscodeSpec: VideoTranscodeSpec
+  releaseId: string
+  releasesToBeRemoved: string[]
+  ripType: string
+  resolution: string
+  thumbnailResolutions: number[]
+  ricReleaseId: Nullable<string>
 }
 
 export const handler = async (event: CreateTvShowTranscodingJobParam): Promise<string> => {

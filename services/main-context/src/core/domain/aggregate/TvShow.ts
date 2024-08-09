@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { L8nLangCode } from '../L8nLangCodes';
 import { TvShowGenre } from '../TvShowGenres';
-import { Release } from '../entity/Release';
+import { Release, ReleaseRead } from '../entity/Release';
 import { strIsBlank } from '../../../utils';
 
 interface Episode {
@@ -253,7 +253,7 @@ export class TvShow {
     episode.nameL8ns[locale.code] = name;
   }
 
-  private getSeasonOrThrow(seasonNumber?: number) {
+  getSeasonOrThrow(seasonNumber?: number) {
     const season = this.seasons.filter(_ => _.seasonNumber == seasonNumber)[0];
     if (season == undefined) {
       throw new InvalidSeasonError();
@@ -261,7 +261,7 @@ export class TvShow {
     return season;
   }
 
-  private getEpisodeOrThrow(seasonNumber?: number, episodeNumber?: number) {
+  getEpisodeOrThrow(seasonNumber?: number, episodeNumber?: number) {
     const season = this.getSeasonOrThrow(seasonNumber);
     const episode = season.episodes.filter(_ => _.episodeNumber == episodeNumber)[0];
     if (episode == undefined) {
@@ -299,6 +299,17 @@ export class TvShow {
     if (strIsBlank(key)) return null;
     const episode = this.getEpisodeOrThrow(s, e);
     return episode.releases[key!];
+  }
+
+  public releaseAlreadyExists(seasonNumber: number, episodeNumber: number, ricReleasId: string) {
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber)
+    for (const k in episode.releases) {
+      const r = episode.releases[k] as unknown as ReleaseRead;
+      if (ricReleasId === r._releaseIndexerContextId) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
