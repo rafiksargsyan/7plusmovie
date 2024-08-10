@@ -47,8 +47,14 @@ interface TvShow {
   thumbnailsFile: string;
 }
 
-async function getMovie(movieId: string): Promise<Movie> {
-  const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${movieId}`);
+async function ip2AudioLang(ip: string | null): Promise<string> {
+  if (ip == null) ip = '0.0.0.0'
+  const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/ip-2-audio-lang/${ip}`)
+  return response.data
+}
+
+async function getMovie(movieId: string, preferredAudioLang: string): Promise<Movie> {
+  const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${movieId}?preferredAudioLang=${preferredAudioLang}`);
   return {
     id: movieId,
     originalTitle: response.data.originalTitle,
@@ -62,8 +68,8 @@ async function getMovie(movieId: string): Promise<Movie> {
   }
 }
 
-async function getTvShow(id: string, season: number, episode: number): Promise<TvShow> {
-  const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getTvShowMetadataForPlayer/${id}/${season}/${episode}`);
+async function getTvShow(id: string, season: number, episode: number, preferredAudioLang: string): Promise<TvShow> {
+  const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getTvShowMetadataForPlayer/${id}/${season}/${episode}?preferredAudioLang=${preferredAudioLang}`);
   return {
     id: id,
     season: season,
@@ -121,13 +127,14 @@ function PlayerPage(props : {movie: Movie | TvShow, currentLocaleCode: string, c
 export default PlayerPage;
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  console.log(requestIp.getClientIp(context.req))
+  const clientIp = requestIp.getClientIp(context.req)
+  const preferredAudioLang = await ip2AudioLang(clientIp)
   const movieId = context.query.movieId;
   const tvShowId = context.query.tvShowId;
   const episode = context.query.episode;
   const season = context.query.season;
-  const movie = movieId != undefined ? await getMovie(movieId as string) : undefined;
-  const tvShow = tvShowId != undefined ? await getTvShow(tvShowId as string, Number(season as string), Number(episode as string)) : undefined;
+  const movie = movieId != undefined ? await getMovie(movieId as string, preferredAudioLang) : undefined;
+  const tvShow = tvShowId != undefined ? await getTvShow(tvShowId as string, Number(season as string), Number(episode as string), preferredAudioLang) : undefined;
   
   const locale = (context.locale != null ? context.locale : context.defaultLocale!) as keyof typeof langTagToLangCode;
   const langCode = langTagToLangCode[locale];

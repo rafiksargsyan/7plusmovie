@@ -3,6 +3,8 @@ import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { ReleaseRead } from '../domain/entity/Release';
 import { AudioLang } from '../domain/AudioLang';
 import { Nullable } from '../../utils';
+import { RipType } from '../domain/RipType';
+import { Resolution } from '../domain/Resolution';
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
@@ -15,7 +17,8 @@ const terabiteInBytes = 1_000_000_000_000; // Max free outgoing traffic for Clou
 const docClient = DynamoDBDocument.from(new DynamoDB({}));  
 
 interface GetMovieParam {
-  movieId: string;
+  movieId: string
+  preferredAudioLang: string
 }
 
 interface GetMovieMetadataResponse {
@@ -69,7 +72,9 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   let thumbnailsFile: Nullable<string>;
   let releases = movie.releases;
   if (releases == null) releases = {};
-  const release = getOneRelease(Object.values(releases));
+  let preferredAudioLang = AudioLang.fromKey(event.preferredAudioLang)
+  if (preferredAudioLang == null) preferredAudioLang = AudioLang.RU
+  const release = getOneRelease(Object.values(releases), preferredAudioLang);
   if (release != null) {
     mpdFile = release._mpdFile;
     m3u8File = release._m3u8File;
@@ -109,20 +114,57 @@ async function getMovie(id: string) {
   return movie;
 }
 
-function getOneRelease(releases?: ReleaseRead[]) {
+export function getOneRelease(releases: Nullable<ReleaseRead[]>, preferredAudioLang: AudioLang) {
   if (releases == null || releases.length === 0) {
     return null;
   }
-  const releasesContainsRussian: ReleaseRead[] = [];
-  for (const r of releases) {
-    for (const k in r._audios) {
-      if (AudioLang.equals(AudioLang.RU, r._audios[k].lang)) {
-        releasesContainsRussian.push(r);
-      }
+
+  // find releases with matching audio language and sort based on quality
+  let candidates = releases.filter(r => {
+    for (const a of Object.values(r._audios)) {
+      if (AudioLang.equals(a.lang, preferredAudioLang)) return true
     }
+    return false
+  })
+  if (candidates.length !== 0) {
+    candidates.sort((a, b) => {
+      const ripCompareResult = RipType.compare(b._ripType, a._ripType)
+      if (ripCompareResult === 0) {
+        return Resolution.compare(b._resolution, a._resolution)
+      }
+      return ripCompareResult
+    })
+    return candidates[0]
   }
-  if (releasesContainsRussian.length != 0) return releasesContainsRussian[0];
-  return releases[0];
+  
+  // find releases with loose matching audio language and sort based on quality
+  candidates = releases.filter(r => {
+    for (const a of Object.values(r._audios)) {
+      if (AudioLang.looseEquals(a.lang, preferredAudioLang)) return true
+    }
+    return false
+  })
+  if (candidates.length !== 0) {
+    candidates.sort((a, b) => {
+      const ripCompareResult = RipType.compare(b._ripType, a._ripType)
+      if (ripCompareResult === 0) {
+        return Resolution.compare(b._resolution, a._resolution)
+      }
+      return ripCompareResult
+    })
+    return candidates[0]
+  }
+  
+  // just sort by quality
+  releases.sort((a, b) => {
+    const ripCompareResult = RipType.compare(b._ripType, a._ripType)
+    if (ripCompareResult === 0) {
+      return Resolution.compare(b._resolution, a._resolution)
+    }
+    return ripCompareResult
+  })
+
+  return releases[0] 
 }
 
 export async function getCloudFrontDistro() {

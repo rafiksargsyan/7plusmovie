@@ -159,7 +159,8 @@ functions:
           method: get
           request:
             template:
-              application/json: '{ "movieId" : "$input.params(''id'')" }'
+              application/json: '{ "movieId" : "$input.params(''id'')",
+                                   "preferredAudioLang" : "$util.escapeJavaScript($input.params().querystring.get(''preferredAudioLang''))" }'
               application/x-www-form-urlencoded: null
           response:
             headers:
@@ -419,7 +420,8 @@ functions:
             template:
               application/json: '{ "tvShowId" : "$input.params(''id'')",
                                    "season" : $input.params(''season''),
-                                   "episode" : $input.params(''episode'') }'
+                                   "episode" : $input.params(''episode''),
+                                   "preferredAudioLang" : "$util.escapeJavaScript($input.params().querystring.get(''preferredAudioLang''))" }'
               application/x-www-form-urlencoded: null
           response:
             headers:
@@ -741,6 +743,23 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  ip2AudioLang:
+    environment:
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+    handler: src/core/app/ip2AudioLang.handler
+    events:
+      - http:
+          integration: lambda
+          path: /ip-2-audio-lang/{ip}
+          method: get
+          request:
+            template:
+              application/json: '{ "ip" : "$input.params(''ip'')" }'
+              application/x-www-form-urlencoded: null
+          response:
+            headers:
+              Access-Control-Allow-Origin: "'*'"
 
 resources:
   Resources:
