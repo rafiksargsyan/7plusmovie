@@ -4,6 +4,7 @@ import axios from 'axios';
 import { GetServerSidePropsContext } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
+import requestIp from 'request-ip'
 
 const Player = dynamic(() => import ("../components/Player"), {ssr: false});
 
@@ -120,6 +121,7 @@ function PlayerPage(props : {movie: Movie | TvShow, currentLocaleCode: string, c
 export default PlayerPage;
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
+  console.log(requestIp.getClientIp(context.req))
   const movieId = context.query.movieId;
   const tvShowId = context.query.tvShowId;
   const episode = context.query.episode;
