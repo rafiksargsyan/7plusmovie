@@ -192,7 +192,8 @@ export const handler = async (event: HandlerParam): Promise<void> => {
       }
     });  
     tvShowTranscodingJobRead.releasesToBeRemoved.forEach(k => tvShow.removeRelease(season, episode, k));
-
+    tvShow.transcodingFinished(season, episode);
+    
     const migrationRelease = tvShow.getRelease(season, episode, "migration");
     let removeMigrationRelease = false;
     if (migrationRelease != null) {
@@ -202,7 +203,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
       }
     } 
 
-    await tvShowRepo.saveSeason(tvShow, false, season);
+    await tvShowRepo.saveSeason(tvShow, true, season);
 
     for (let rf of rootFolders) {
       try {

@@ -344,10 +344,11 @@ export class TvShow {
   }
 
   setMonitorReleases(seasonNumber: Nullable<number>, episodeNumber: Nullable<number>, monitorReleases: boolean) {
-    if (episodeNumber != null && seasonNumber != null) {
+    if (episodeNumber != null && episodeNumber != 0 &&  !isNaN(episodeNumber) &&
+        seasonNumber != null && seasonNumber != 0 && !isNaN(seasonNumber)) {
       const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber)
       episode.monitorReleases = monitorReleases
-    } else if (seasonNumber != null) {
+    } else if (seasonNumber != null && seasonNumber != 0 && !isNaN(seasonNumber)) {
       const season = this.getSeasonOrThrow(seasonNumber)
       for (const e of season.episodes) {
         e.monitorReleases = monitorReleases

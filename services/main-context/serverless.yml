@@ -463,6 +463,7 @@ functions:
     handler: src/core/app/tv-show/createTvShowTranscodingJob.handler
     environment:
       DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME}
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
     events:
       - http:
           integration: lambda
@@ -717,6 +718,23 @@ functions:
     events:
       - schedule: rate(${file(./.env.${sls:stage}.yml):MOVIE_NEW_RELEASE_CHECKER_INTERVAL_IN_MINUTES} minutes)
     timeout: 900
+
+  addRICIdToTvShow:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/addRICTvShowId.handler
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show/{id}/ricId
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : "$input.params(''id'')",
+                                   "ricId" : $input.json(''$.ricId'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
 resources:
   Resources:

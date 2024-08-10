@@ -64,6 +64,12 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
         console.info(`Ignoring RC with negative customFormatScore, RC=${JSON.stringify(sr)}`);
         continue;
       }
+      const titleLC = sr.title.toLowerCase()
+      const dolbyVisionRegex = /\b(dv|dovi|dolby[ .]?v(ision)?)\b/
+      if (titleLC.match(dolbyVisionRegex) != null) {
+        console.warn(`Dolby vision profile detected for RC=${JSON.stringify(sr)}`)
+        continue
+      }
       const tracker = resolveTorrentTracker(sr);
       if (tracker == null) {
         console.warn(`Unknown torrent tracker for RC=${JSON.stringify(sr)}`);
@@ -206,7 +212,7 @@ function resolveEpisodeNumbers(sr: SonarrRelease, seasonNumber: number, tvShow: 
     }
   })
   if (!titlePrefixMatched) {
-    console.warn(`Release title prefixed did not match for RC=${JSON.stringify(sr)}, seasonNumber=${seasonNumber}`);
+    console.warn(`Release title prefix did not match for RC=${JSON.stringify(sr)}, seasonNumber=${seasonNumber}`);
     return [];
   }
   const regex1 = new RegExp(String.raw`s0*${seasonNumber}[^\d]+`);
@@ -214,9 +220,9 @@ function resolveEpisodeNumbers(sr: SonarrRelease, seasonNumber: number, tvShow: 
   const regex3 = new RegExp(String.raw`saison\s*0*${seasonNumber}[^\d]+`);
   // For example 'Breaking.Bad.Complete.Series (S01-S05) .720p.BluRay.Goblin.Eng.A' or
   // 'Breaking Bad S01 S05 Complete 720p BluRay x265 BMF'
-  const regex4 = new RegExp(String.raw`s(0*[1-9]+)[-\s][-\s+](0*[1-9]+)`);
+  const regex4 = new RegExp(String.raw`s([0-9]+)[-\s][-\s+]([0-9]+)`);
   // For example 'Breaking.Bad.S01-S02-S03-S04-S05.1080p.BluRay.10bit.HEVC-MkvCage'
-  const regex5 = new RegExp(String.raw`s(0*[1-9]+).*s(0*[1-9]+).*s(0*[1-9]+)`);
+  const regex5 = new RegExp(String.raw`s([0-9]+).*s([0-9]+).*s([0-9]+)`);
   const regex4Matchs = titleLC.match(regex4);
   if (regex4Matchs != null && titleLC.match(regex5) == null) {
     const seriesStart = Number.parseInt(regex4Matchs[1])
@@ -231,7 +237,7 @@ function resolveEpisodeNumbers(sr: SonarrRelease, seasonNumber: number, tvShow: 
   }
   // For example 'Breaking Bad / S5E1-16 of 16 [2012, BDRemux 1080p] MVO (LostFilm) + DVO + MVO (AMEDIA) + Original' or
   // 'Breaking Bad S05e01 16 [1080p Ita Eng Spa h265 10bit SubS][MirCrewRelease] byMe7alh'
-  const episodeRegex1 = new RegExp(String.raw`s0*${seasonNumber}\s*e(0*[1-9]+)[-\s]+(0*[1-9]+)`);
+  const episodeRegex1 = new RegExp(String.raw`s0*${seasonNumber}\s*e([0-9]+)[-\s]+([0-9]+)`);
   const episodeRegex1Matchs = titleLC.match(episodeRegex1);
   if (episodeRegex1Matchs != null) {
     const startEpisode = Number.parseInt(episodeRegex1Matchs[1]);
@@ -245,7 +251,7 @@ function resolveEpisodeNumbers(sr: SonarrRelease, seasonNumber: number, tvShow: 
     }
   }
   // For example 'Breaking Bad S04e08 Versione 720p BDMux 720p H264 Ita Eng AC3 5.1 Sub Ita Eng TntVillage-Darksidemux'
-  const episodeRegex2 = new RegExp(String.raw`s0*${seasonNumber}\s*e(0*[1-9]+)`);
+  const episodeRegex2 = new RegExp(String.raw`s0*${seasonNumber}\s*e([0-9]+)`);
   const episodeRegex2Matchs = titleLC.match(episodeRegex2);
   if (episodeRegex2Matchs != null) {
     const episode = Number.parseInt(episodeRegex2Matchs[1]);

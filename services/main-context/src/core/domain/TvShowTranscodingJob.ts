@@ -42,8 +42,8 @@ export class TvShowTranscodingJob {
   private releaseId: string;
   private releasesToBeRemoved: string[];
   private releaseIndexerContextReleaseId: Nullable<string>;
-  private ripType: RipType;
-  private resolution: Resolution;
+  private ripType: Nullable<RipType>;
+  private resolution: Nullable<Resolution>;
   private thumbnailResolutions: number[];
 
   public constructor(createEmptyObject: boolean, tvShowId?: string, season?: number, episode?: number,
@@ -66,6 +66,8 @@ export class TvShowTranscodingJob {
       this.setReleasesToBeRemoved(releasesToBeRemoved);
       this.setThumbnailResolutions(thumbnailResolutions);
       this.releaseIndexerContextReleaseId = ricReleaseId
+      this.ripType = ripType
+      this.resolution = resolution
       this.creationTime = Date.now();
       this.lastUpdateTime = this.creationTime;
       this.ttl = Math.round(this.creationTime / 1000) + 15 * 24 * 60 * 60;
@@ -129,11 +131,37 @@ export class TvShowTranscodingJob {
   }
 
   private setAudioTranscodeSpecs(audioTranscodeSpecs: AudioTranscodeSpec[] | undefined) {
-    this.audioTranscodeSpecs = audioTranscodeSpecs !== undefined ? audioTranscodeSpecs : [];
+    if (audioTranscodeSpecs == null) audioTranscodeSpecs = [];
+    for (let a of audioTranscodeSpecs) {
+      if (a.fileName == null) {
+        a.fileName = `${a.lang.key}-${a.channels}-${a.bitrate}-${a.stream}.mp4`
+      }
+      if (a.name == null) {
+        a.name = `${a.lang.name} (${a.channels})`
+      }
+    }
+    this.audioTranscodeSpecs = audioTranscodeSpecs;
   }
 
-  private setTextTranscodeSpecs(textTranscodeSpecs: TextTranscodeSpec[] | undefined) {
-    this.textTranscodeSpecs = textTranscodeSpecs !== undefined ? textTranscodeSpecs : [];
+  private setTextTranscodeSpecs(textTranscodeSpecs: Nullable<TextTranscodeSpec[]>) {
+    if (textTranscodeSpecs == null) textTranscodeSpecs = [];
+    for (let t of textTranscodeSpecs) {
+      if (t.fileName == null) {
+        if (t.type == null) {
+          t.fileName = `${t.lang.key}-${t.stream}.vtt`
+        } else {
+          t.fileName = `${t.lang.key}-${t.type.key}-${t.stream}.vtt`
+        }
+      }
+      if (t.name == null) {
+        if (t.type == null) {
+          t.name = `${t.lang.name}`;
+        } else {
+          t.name = `${t.lang.name} (${t.type.name})`;
+        }
+      }
+    }
+    this.textTranscodeSpecs = textTranscodeSpecs;
   }
 
   public setTranscodingContextJobId(transcodingContextJobId: string | undefined) {

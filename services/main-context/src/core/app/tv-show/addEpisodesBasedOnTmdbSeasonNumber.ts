@@ -78,7 +78,7 @@ export const handler = async (event: Param): Promise<void> => {
     }
   }
 
-  await tvShowRepo.saveSeason(tvShow, false, event.seasonNumber)
+  await tvShowRepo.saveSeason(tvShow, true, event.seasonNumber)
 }
 
 class SeasonNotFoundError extends Error {}

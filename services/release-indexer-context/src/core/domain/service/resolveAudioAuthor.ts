@@ -32,6 +32,6 @@ export function resolveAudioAuthor(title: Nullable<string>, tracker: Nullable<To
   if (title.includes('пифагор')) return AudioAuthor.PIFAGOR;
   if (title.includes('novamedia')) return AudioAuthor.NOVAMEDIA;
   if (title.includes('ren-tv')) return AudioAuthor.RENTV;
-  if (title.includes('кравец-рекордз')) return AudioAuthor.KRAVEC_RECORDS
+  if (title.includes('кравец') || title.includes('kravec')) return AudioAuthor.KRAVEC_RECORDS
   return null;
 }

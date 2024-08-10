@@ -89,6 +89,7 @@ export class TvShowRepository implements TvShowRepositoryInterface {
     let seasonDao: any = {...season}
     seasonDao.PK = tvShow.id
     seasonDao.SK = `season#${season.seasonNumber}`
+    itemsToSave.push({ Put: { TableName: dynamodbTvShowTableName, Item: seasonDao}})
     await this.docClient.transactWrite({
       TransactItems : itemsToSave
     })
