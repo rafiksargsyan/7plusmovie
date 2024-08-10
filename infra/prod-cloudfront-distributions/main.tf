@@ -4,7 +4,7 @@ module "cf_distro_chalkhalting" {
     aws.cf_account = aws.chalkhalting
   }
 
-  source_bucket_name = "media-assets-prod-e1pjapsk"
+  source_bucket_name = "raw-media-assets-prod-e1pjapsk"
   signing_validation_public_key_path = "./resources/public-key.pem"
 }
 
@@ -14,7 +14,7 @@ module "cf_distro_mutantcandlelight" {
     aws.cf_account = aws.mutantcandlelight
   }
 
-  source_bucket_name = "media-assets-prod-e1pjapsk"
+  source_bucket_name = "raw-media-assets-prod-e1pjapsk"
   signing_validation_public_key_path = "./resources/public-key.pem"
 }
 
@@ -24,6 +24,6 @@ module "cf_distro_tracenoon" {
     aws.cf_account = aws.tracenoon
   }
 
-  source_bucket_name = "media-assets-prod-e1pjapsk"
+  source_bucket_name = "raw-media-assets-prod-e1pjapsk"
   signing_validation_public_key_path = "./resources/public-key.pem"
 }

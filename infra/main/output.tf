@@ -77,3 +77,11 @@ output "ddb_movie_ric_table_stream_arn" {
 output "trt_files_s3_bucket_name" {
   value = aws_s3_bucket.trt_files.bucket
 }
+
+output "ddb_tvshow_ric_table_name" {
+  value = aws_dynamodb_table.tvshow_release_indexer_context.name
+}
+
+output "ddb_tvshow_ric_table_stream_arn" {
+  value = aws_dynamodb_table.tvshow_release_indexer_context.stream_arn
+}

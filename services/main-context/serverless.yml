@@ -463,6 +463,7 @@ functions:
     handler: src/core/app/tv-show/createTvShowTranscodingJob.handler
     environment:
       DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME}
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
     events:
       - http:
           integration: lambda
@@ -651,6 +652,9 @@ functions:
       RAW_MEDIA_FILES_BASE_URL: ${env:RAW_MEDIA_FILES_BASE_URL}
       DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME}
       DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+      DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME: ${env:DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME}
+      CF_DISTRO_USAGE_THRESHOLD: ${env:CF_DISTRO_USAGE_THRESHOLD}
+      CF_DISTRO_RANDOM_SELECTION_PROPORTION: ${env:CF_DISTRO_RANDOM_SELECTION_PROPORTION}
     handler: src/core/app/movieNewReleaseChecker.handler
     events:
       - schedule: rate(${file(./.env.${sls:stage}.yml):MOVIE_NEW_RELEASE_CHECKER_INTERVAL_IN_MINUTES} minutes)
@@ -677,6 +681,66 @@ functions:
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
     timeout: 20
+
+  tvShowConfigureReleasesMonitoring:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/configureReleaseMonitoring.handler
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show/{id}/releaseMonitoring
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : "$input.params(''id'')",
+                                   "seasonNumber" : $input.json(''$.seasonNumber''),
+                                   "episodeNumber" : $input.json(''$.episodeNumber''),
+                                   "releaseMonitoring" : $input.json(''$.releaseMonitoring'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+  
+  tvShowNewReleaseChecker:
+    environment:
+      RIC_GET_TVSHOW_SEASON_LAMBDA_NAME: ${env:RIC_GET_TVSHOW_SEASON_LAMBDA_NAME}
+      RAW_MEDIA_FILES_BASE_URL: ${env:RAW_MEDIA_FILES_BASE_URL}
+      DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME}
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+      DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME: ${env:DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME}
+      CF_DISTRO_USAGE_THRESHOLD: ${env:CF_DISTRO_USAGE_THRESHOLD}
+      CF_DISTRO_RANDOM_SELECTION_PROPORTION: ${env:CF_DISTRO_RANDOM_SELECTION_PROPORTION}
+    handler: src/core/app/tv-show/tvShowNewReleaseChecker.handler
+    timeout: 120
+    
+  tvShowNewReleaseCheckerFanout:
+    environment:
+      RIC_GET_TVSHOW_SEASON_LAMBDA_NAME: ${env:RIC_GET_TVSHOW_SEASON_LAMBDA_NAME}
+      RAW_MEDIA_FILES_BASE_URL: ${env:RAW_MEDIA_FILES_BASE_URL}
+      DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME}
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+      TVSHOW_NEW_RELEASE_CHECKER_LAMBDA: ${env:TVSHOW_NEW_RELEASE_CHECKER_LAMBDA}
+    handler: src/core/app/tv-show/tvShowNewReleaseCheckerFanout.handler  
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):MOVIE_NEW_RELEASE_CHECKER_INTERVAL_IN_MINUTES} minutes)
+    timeout: 900
+
+  addRICIdToTvShow:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/addRICTvShowId.handler
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show/{id}/ricId
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : "$input.params(''id'')",
+                                   "ricId" : $input.json(''$.ricId'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
 resources:
   Resources:

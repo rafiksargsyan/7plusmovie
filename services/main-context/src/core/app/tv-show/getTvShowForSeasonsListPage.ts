@@ -35,6 +35,7 @@ interface Episode {
   m3u8File: string;
   episodeNumber: number;
   thumbnailsFile?: string;
+  releases: { [key: string]: any }
 }
   
 interface Season {
@@ -48,12 +49,17 @@ interface Season {
 
 export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataResponse> => {
   const tvShow = (await getTvShow(event.tvShowId) as unknown as TvShow);
+  let seasons = tvShow.seasons
+  seasons.forEach(s => {
+    s.episodes = s.episodes.filter(e => e.releases != null && Object.keys(e.releases).length !== 0)
+  })
+  seasons = seasons.filter(s => s.episodes.length !== 0)
   return {
     releaseYear: tvShow.releaseYear,
     originalTitle: tvShow.originalTitle,
     titleL8ns: tvShow.titleL8ns,
     posterImagesPortrait: tvShow.posterImagesPortrait,
-    seasons: tvShow.seasons
+    seasons: seasons
   };
 };
 

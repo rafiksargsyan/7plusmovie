@@ -166,6 +166,185 @@ functions:
           response:
             headers:
               Access-Control-Allow-Origin: "'*'"
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+
+  createTvShow:
+    handler: src/core/app/createTvShow.handler
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show
+          method: post
+          request:
+            template:
+              application/json: '{ "originalLocale" : $input.json(''$.originalLocale''),
+                                   "originalTitle" : $input.json(''$.originalTitle''),
+                                   "releaseYear" : $input.json(''$.releaseYear'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+
+  addTmdbIdToTvShow:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    handler: src/core/app/addTmdbIdToTvShow.handler
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show/{id}/tmdbId
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : "$input.params(''id'')",
+                                   "tmdbId" : $input.json(''$.tmdbId'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+
+  tvShowUpdateHandler:
+    handler: src/core/app/tvShowUpdateHandler.handler
+    environment:
+      SONARR_API_BASE_URL: ${env:SONARR_API_BASE_URL}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      TORRENT_FILES_S3_BUCKET: ${env:TORRENT_FILES_S3_BUCKET}
+      RAW_MEDIA_FILES_S3_BUCKET: ${env:RAW_MEDIA_FILES_S3_BUCKET}
+    events:
+      - stream: ${file(./.env.${sls:stage}.yml):DYNAMODB_TVSHOW_STREAM_ARN}
+    timeout: 120
+
+  tvShowTmdbSyncFanout:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      TVSHOW_TMDB_SYNC_LAMBDA_NAME: ${env:TVSHOW_TMDB_SYNC_LAMBDA_NAME} 
+    handler: src/core/app/tvShowTmdbSyncFanout.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):TVSHOW_TMDB_SYNC_INTERVAL_IN_MINUTES} minutes)
+    timeout: 900
+  
+  tvShowTmdbSync:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID} 
+    handler: src/core/app/tvShowTmdbSync.handler
+    timeout: 120
+
+  deleteTvShowById:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    handler: src/core/app/deleteTvShowById.handler
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show/{id}
+          method: delete
+          request:
+            template:
+              application/json: '{ "tvShowId" : "$input.params(''id'')" }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+    timeout: 30
+
+  tvShowRCUpdaterFanout:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      TVSHOW_RC_UPDATER_FANOUT_SEASONS_LAMBDA_NAME: ${env:TVSHOW_RC_UPDATER_FANOUT_SEASONS_LAMBDA_NAME}
+    handler: src/core/app/tvShowRCUpdaterFanout.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minutes)
+    timeout: 900
+
+  tvShowRCUpdaterFanoutSeasons:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      TVSHOW_RC_UPDATER_LAMBDA_NAME: ${env:TVSHOW_RC_UPDATER_LAMBDA_NAME}
+    handler: src/core/app/tvShowRCUpdaterFanoutSeasons.handler
+    timeout: 900
+
+  tvShowRCUpdater:
+    environment:
+      SONARR_API_BASE_URL: ${env:SONARR_API_BASE_URL}
+      SONARR_DOWNLOAD_URL_BASE_MAPPING: ${env:SONARR_DOWNLOAD_URL_BASE_MAPPING}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      TORRENT_FILES_S3_BUCKET: ${env:TORRENT_FILES_S3_BUCKET}
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    handler: src/core/app/tvShowRCUpdater.handler
+    timeout: 900
+
+  tvShowRDFanout:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      TVSHOW_RD_FANOUT_SEASONS_LAMBDA_NAME: ${env:TVSHOW_RD_FANOUT_SEASONS_LAMBDA_NAME}
+    handler: src/core/app/tvShowRDFanout.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_INTERVAL_IN_MINUTES} minutes)
+    timeout: 900
+
+  tvShowRDFanoutSeasons:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      TVSHOW_RELEASE_DOWNLOADER_LAMBDA_NAME: ${env:TVSHOW_RELEASE_DOWNLOADER_LAMBDA_NAME}
+    handler: src/core/app/tvShowRDFanoutSeasons.handler
+    timeout: 900
+
+  tvShowReleaseDownloader:
+    environment:
+      QBITTORRENT_API_BASE_URL: ${env:QBITTORRENT_API_BASE_URL}
+      QBITTORRENT_BASE_URL: ${env:QBITTORRENT_BASE_URL}
+      QBITTORRENT_USERNAME: ${env:QBITTORRENT_USERNAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      MEDIA_FILES_BASE_URL: ${env:MEDIA_FILES_BASE_URL}
+      TORRENT_FILES_BASE_URL: ${env:TORRENT_FILES_BASE_URL}
+      TVSHOW_MEDIA_FILE_CACHER_LAMBDA_NAME: ${env:TVSHOW_MEDIA_FILE_CACHER_LAMBDA_NAME}
+    handler: src/core/app/tvShowReleaseDownloader.handler
+    layers:
+      - ${file(./.env.${sls:stage}.yml):TORRENT_DOWNLOAD_HANDLER_FFPROBE_LAYER}
+    timeout: 900  
+  
+  tvShowRMFCachingHandler:
+    environment:
+      QBITTORRENT_API_BASE_URL: ${env:QBITTORRENT_API_BASE_URL}
+      QBITTORRENT_USERNAME: ${env:QBITTORRENT_USERNAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
+      RAW_MEDIA_FILES_S3_BUCKET: ${env:RAW_MEDIA_FILES_S3_BUCKET}
+    handler: src/core/app/tvShowRMFCachingHandler.handler
+    layers:
+      - ${file(./.env.${sls:stage}.yml):RELEASE_MEDIA_FILE_CACHING_RCLONE_LAYER}
+    timeout: 900
+
+  tsFantomAssetsCleanupHandlerFanout:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      TVSHOW_FANTOM_ASSETS_CLEANUP_HANDLER_FANOUT_SEASONS: ${env:TVSHOW_FANTOM_ASSETS_CLEANUP_HANDLER_FANOUT_SEASONS} 
+    handler: src/core/app/tsFantomAssetsCleanupHandlerFanout.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):FANTOM_ASSETS_CLEANUP_INTERVAL_IN_DAYS} day)
+    timeout: 900
+
+  tsFACleanupHandlerFanoutSeasons:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+      TVSHOW_FANTOM_ASSETS_CLEANUP_HANDLER: ${env:TVSHOW_FANTOM_ASSETS_CLEANUP_HANDLER} 
+    handler: src/core/app/tsFACleanupHandlerFanoutSeasons.handler
+    timeout: 900
+
+  tsFantomAssetsCleanupHandler:
+    environment:
+      TORRENT_FILES_S3_BUCKET: ${env:TORRENT_FILES_S3_BUCKET}
+      RAW_MEDIA_FILES_S3_BUCKET: ${env:RAW_MEDIA_FILES_S3_BUCKET}
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    handler: src/core/app/tsFantomAssetsCleanupHandler.handler
+    timeout: 900 
+
+  getTvShowSeason:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    handler: src/core/app/getTvShowSeason.handler
+    timeout: 30
 
 resources:
   Resources:

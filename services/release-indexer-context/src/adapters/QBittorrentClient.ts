@@ -114,7 +114,8 @@ export class QBittorrentClient implements TorrentClientInterface {
           isStalled : isStalled,
           amountLeft : amountLeft,
           files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress, index: f.index })),
-          eta: t.eta
+          eta: t.eta,
+          tags: t.tags.split(',').map(_ => _.trim()).filter(_ => _ !== tag)
         });
       }
       return ret;
@@ -233,6 +234,22 @@ export class QBittorrentClient implements TorrentClientInterface {
     } catch (e) {
       throw new TorrentApiError((e as Error).message);
     }   
+  }
+
+  async addTag(id: string, tag: string) {
+    const t = await this.getTorrentById(id);
+    await this._restClient.post(`torrents/addTags`, {
+      hashes: t?.infoHash,
+      tags: tag
+    })
+  }
+
+  async removeTag(id: string, tag: string) {
+    const t = await this.getTorrentById(id);
+    await this._restClient.post(`torrents/removeTags`, {
+      hashes: t?.infoHash,
+      tags: tag
+    })
   }
 }
 

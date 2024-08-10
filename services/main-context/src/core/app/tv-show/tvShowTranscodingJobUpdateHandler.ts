@@ -46,7 +46,11 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
             mkvS3ObjectKey: tvShowTranscodingJobRead.mkvS3ObjectKey,
             mkvHttpUrl: tvShowTranscodingJobRead.mkvHttpUrl,
             outputFolderKey: tvShowTranscodingJobRead.outputFolderKey,
-            audioTranscodeSpecParams: tvShowTranscodingJobRead.audioTranscodeSpecs?.map(_ => ({ ..._, lang: AudioLang.fromISO_639_2(_.lang.lang).key})),
+            audioTranscodeSpecParams: tvShowTranscodingJobRead.audioTranscodeSpecs?.map(_ => {
+              let lang = AudioLang.fromISO_639_2(_.lang.lang)?.key; // might be null, for example Mayan (myn)
+              if (AudioLang.equals(_.lang, AudioLang.MYN)) lang = AudioLang.EN.key;
+              return { ..._, lang: lang }
+            }),
             textTranscodeSpecParams: tvShowTranscodingJobRead.textTranscodeSpecs?.map(_ => ({ ..._, lang: SubsLang.fromISO_639_2(_.lang.lang).key})),
             videoTranscodeSpec: tvShowTranscodingJobRead.videoTranscodeSpec,
             thumbnailResolutions: tvShowTranscodingJobRead.thumbnailResolutions

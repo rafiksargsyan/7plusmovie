@@ -76,8 +76,7 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
     thumbnailsFile = release._thumbnails.sort((a, b) => a.resolution - b.resolution)[0].thumbnailsFile;
   }
   return {
-//    subtitles: Object.keys(movie.subtitles).reduce((acc, key) => {acc[key] = `https://${mediaAssetsDomain}/${movie.subtitles[key].relativePath}`; return acc;}, {}),
-    subtitles: {},
+    subtitles: {}, // TODO
     mpdFile: `https://${mediaAssetsDomain}/${mpdFile}`,
     m3u8File: `https://${mediaAssetsDomain}/${m3u8File}`,
     thumbnailsFile: thumbnailsFile !== null ? `https://${mediaAssetsDomain}/${thumbnailsFile}` : null,
@@ -126,7 +125,7 @@ function getOneRelease(releases?: ReleaseRead[]) {
   return releases[0];
 }
 
-async function getCloudFrontDistro() {
+export async function getCloudFrontDistro() {
   const cfDistros: CloudFrontDistro[] = [];
   const params = {
     TableName: dynamodbCFDistroMetadataTableName,

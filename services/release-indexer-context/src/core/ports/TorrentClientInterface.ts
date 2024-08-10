@@ -10,6 +10,8 @@ export interface TorrentClientInterface {
   pauseTorrent(id: string);
   disableAllFiles(id: string);
   enableFile(id: string, fileId: number);
+  addTag(id: string, tag: string);
+  removeTag(id: string, tag: string);
 }
 
 export interface TorrentInfo {
@@ -20,6 +22,7 @@ export interface TorrentInfo {
   isStalled: boolean;
   files: { name: string, size: number, progress: number, index: number } []
   eta: Nullable<number>; // seconds
+  tags: string[];
 }
 
 export class TorrentApiError extends Error {

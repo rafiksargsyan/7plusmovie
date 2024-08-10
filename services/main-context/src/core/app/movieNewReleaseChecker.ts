@@ -8,6 +8,7 @@ import { RipType } from "../domain/RipType";
 import { Resolution as ResolutionEnum } from "../domain/Resolution";
 import { handler as createMovieTranscodingJob } from "../app/createMovieTranscodingJob";
 import { AudioLang } from "../domain/AudioLang";
+import { getCloudFrontDistro } from "./getMovieMetadataForPlayer";
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 const ricGetMovieLambdaName = process.env.RIC_GET_MOVIE_LAMBDA_NAME!;
@@ -22,7 +23,7 @@ const translateConfig = { marshallOptions };
 const docClient = DynamoDBDocument.from(new DynamoDB({}), translateConfig);
 const lambdaClient = new LambdaClient({});
 
-interface RicRelease {
+export interface RicRelease {
   cachedMediaFileRelativePath: string;
   ripType: string;
   resolution: string;
@@ -78,9 +79,10 @@ export const handler = async (): Promise<void> => {
       }
       const resolution: ResolutionEnum = ResolutionEnum.fromKeyOrThrow(r.release.resolution);
       const ripType: RipType = RipType.fromKeyOrThrow(r.release.ripType);
+      const resolvedBaseUrl = await resolveRawMediaFileBaseUurl(rawMediaFilesBaseUrl);
       const createMovieTranscodingJobParam: CreateMovieTranscodingJobParam = {
         movieId: m.id,
-        mkvHttpUrl: `${rawMediaFilesBaseUrl}${r.release.cachedMediaFileRelativePath}`,
+        mkvHttpUrl: `${resolvedBaseUrl}${r.release.cachedMediaFileRelativePath}`,
         releaseId: k,
         videoTranscodeSpec: {
           stream: 0,
@@ -127,7 +129,7 @@ function chooseReleaseToTranscode(response: RicGetMovieResponse, m: Movie) {
   return null;
 }
 
-function releaseContainsRussianAudio(release: RicRelease) {
+export function releaseContainsRussianAudio(release: RicRelease) {
   for (const a of release.audios) {
     if (AudioLang.looseEquals(AudioLang.fromKeyOrThrow(a.lang), AudioLang.RU)) {
       return true;
@@ -136,7 +138,7 @@ function releaseContainsRussianAudio(release: RicRelease) {
   return false;
 }
 
-function releaseContainsEnglishAudio(release: RicRelease) {
+export function releaseContainsEnglishAudio(release: RicRelease) {
   for (const a of release.audios) {
     if (AudioLang.looseEquals(AudioLang.fromKeyOrThrow(a.lang), AudioLang.EN)) {
       return true;
@@ -145,7 +147,7 @@ function releaseContainsEnglishAudio(release: RicRelease) {
   return false;
 }
 
-function createAudioTranscodeSpec(ripType: RipType, audios: [{ stream: number, channels: number, bitrate: number, lang: string }]) {
+export function createAudioTranscodeSpec(ripType: RipType, audios: [{ stream: number, channels: number, bitrate: number, lang: string }]) {
   const audioTranscodeSpec: AudioTranscodeSpecParam[] = [];
   for (const a of audios) {
     if (a.channels === 1) {
@@ -177,7 +179,7 @@ function createAudioTranscodeSpec(ripType: RipType, audios: [{ stream: number, c
   return audioTranscodeSpec;
 }
 
-function resolveResolutions(ripType: RipType, resolution: ResolutionEnum) {
+export function resolveResolutions(ripType: RipType, resolution: ResolutionEnum) {
   if (RipType.fromKey(ripType.key)?.isLowQuality() || ResolutionEnum.compare(resolution, ResolutionEnum.SD) === 0) {
     return [ 360, 480 ];
   }
@@ -204,4 +206,18 @@ async function getAllMovies(): Promise<Movie[]> {
     params.ExclusiveStartKey = items.LastEvaluatedKey;
   } while (typeof items.LastEvaluatedKey !== "undefined");
   return movies;
+}
+
+export async function resolveRawMediaFileBaseUurl(defaultBaseUrl: string) {
+  let cfDistro;
+  try {
+    cfDistro = await getCloudFrontDistro();
+  } catch (e) {
+    console.error('Failed to retrieve CF distro:', e);
+  }
+  if (cfDistro == null) {
+    return defaultBaseUrl
+  } else {
+    return `https://${cfDistro.domain}/`
+  }
 }

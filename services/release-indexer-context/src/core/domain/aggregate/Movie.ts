@@ -1,5 +1,5 @@
 import { Nullable } from "../../../Nullable";
-import { Release, ReleaseRead } from "../entity/Release";
+import { Release } from "../entity/Release";
 import { v4 as uuid } from 'uuid';
 import { L8nLang } from "../value-object/L8nLang";
 import { ReleaseCandidate, ReleaseCandidateStatus } from "../entity/ReleaseCandidate";

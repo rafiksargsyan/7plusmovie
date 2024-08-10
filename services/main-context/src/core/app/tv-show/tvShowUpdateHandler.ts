@@ -36,7 +36,7 @@ const tmdbImageClient = axios.create({
 
 const mediaAssetsS3Bucket = process.env.MEDIA_ASSETS_S3_BUCKET!;
 
-interface Episode {
+export interface Episode {
   originalName: string;
   nameL8ns: { [key: string]: string };
   stillImage: string;
@@ -44,9 +44,10 @@ interface Episode {
   m3u8File: string;
   tmdbEpisodeNumber: number;
   episodeNumber;
+  releases: { [key: string]: any }
 }
     
-interface Season {
+export interface Season {
   originalName: string;
   nameL8ns: { [key: string]: string };
   episodes: Episode[];
@@ -55,7 +56,7 @@ interface Season {
   seasonNumber;
 }
 
-interface TvShowRead {
+export interface TvShowRead {
   id: string;
   originalTitle: string;
   posterImagesPortrait: { [key: string]: string };
@@ -102,13 +103,18 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         if (Object.keys(tvShow.posterImagesPortrait).length == 0) {
           return;
         }
-        let seasons = tvShow.seasons.map(_ => ({
-          ..._,
-          episodes: _.episodes.filter(e => e.mpdFile != undefined && e.m3u8File != undefined)
-        }));
-        seasons = seasons.filter(_ => _.episodes.length != 0);
-        if (seasons.length == 0) {
-          return;
+        let releaseExists = false;
+        for (const s of tvShow.seasons) {
+          for (const e of s.episodes) {
+            if (e.releases != null && Object.keys(e.releases).length !== 0) {
+              releaseExists = true
+              break
+            }
+          }
+          if (releaseExists) break
+        }
+        if (!releaseExists) {
+          return
         }
         if (tvShow.genres == undefined) tvShow.genres = [];
         await algoliaIndex.saveObject({ objectID: tvShow.id,

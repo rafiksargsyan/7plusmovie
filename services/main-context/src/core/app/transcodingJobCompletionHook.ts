@@ -155,10 +155,10 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     let tvShowTranscodingJobRead = data.Items[0] as TvShowTranscodingJobRead;
     Object.assign(tvShowTranscodingJobRead, data.Items[0]);
 
-    let tvShow = await tvShowRepo.getTvShowById(tvShowTranscodingJobRead.tvShowId);
-
     const season = tvShowTranscodingJobRead.season;
     const episode = tvShowTranscodingJobRead.episode;
+    let tvShow = await tvShowRepo.getSeason(tvShowTranscodingJobRead.tvShowId, season);
+
     // This is not right way to update tvShow model as there might be extra application logic for validation, etc.
     // Right way would be calling corresponding lambda to the job and avoid app logic duplication. 
     
@@ -192,7 +192,8 @@ export const handler = async (event: HandlerParam): Promise<void> => {
       }
     });  
     tvShowTranscodingJobRead.releasesToBeRemoved.forEach(k => tvShow.removeRelease(season, episode, k));
-
+    tvShow.transcodingFinished(season, episode);
+    
     const migrationRelease = tvShow.getRelease(season, episode, "migration");
     let removeMigrationRelease = false;
     if (migrationRelease != null) {
@@ -202,7 +203,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
       }
     } 
 
-    await tvShowRepo.saveTvShow(tvShow);
+    await tvShowRepo.saveSeason(tvShow, true, season);
 
     for (let rf of rootFolders) {
       try {

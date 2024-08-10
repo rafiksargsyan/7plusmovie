@@ -20,7 +20,7 @@ interface AddSeasonParam {
 }
 
 export const handler = async (event: AddSeasonParam): Promise<void> => {
-  let tvShow = await tvShowRepo.getTvShowById(event.tvShowId);
-  tvShow.addSeason(event.originalName, event.seasonNumber);
-  await tvShowRepo.saveTvShow(tvShow);
+  let tvShow = await tvShowRepo.getTvShowById(event.tvShowId)
+  tvShow.addSeason(event.originalName, event.seasonNumber)
+  await tvShowRepo.saveTvShow(tvShow)
 };

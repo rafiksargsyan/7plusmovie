@@ -1,16 +1,18 @@
 import { v4 as uuid } from 'uuid';
 import { L8nLangCode } from '../L8nLangCodes';
 import { TvShowGenre } from '../TvShowGenres';
-import { Release } from '../entity/Release';
-import { strIsBlank } from '../../../utils';
+import { Release, ReleaseRead } from '../entity/Release';
+import { Nullable, strIsBlank } from '../../../utils';
 
 interface Episode {
-  originalName: string;
-  nameL8ns: { [key: string]: string };
-  stillImage?: string;
-  releases: { [key: string]: Release };
-  tmdbEpisodeNumber?: number;
-  episodeNumber: number;
+  originalName: string
+  nameL8ns: { [key: string]: string }
+  stillImage?: string
+  releases: { [key: string]: Release }
+  tmdbEpisodeNumber?: number
+  episodeNumber: number
+  monitorReleases: boolean
+  inTranscoding: boolean
 }
 
 interface Season {
@@ -37,6 +39,7 @@ export class TvShow {
   private genres: TvShowGenre[] = [];
   private tmdbId : string;
   private seasons: Season[] = [];
+  private _ricTvShowId: Nullable<string>
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -207,22 +210,24 @@ export class TvShow {
     if (episodeNumber == undefined || episodeNumber < 0) {
       throw new InvalidEpisodeNumberError();
     }
-    const season = this.getSeasonOrThrow(seasonNumber);
+    const season = this.getSeasonOrThrow(seasonNumber)
     season.episodes.forEach(_ => {
       if (_.originalName == originalName) {
-        throw new EpisodeWithNameAlreadyExistsError();
+        throw new EpisodeWithNameAlreadyExistsError()
       }
       if (_.episodeNumber == episodeNumber) {
-        throw new EpisodeWithEpisodeNumberAlreadyExistsError();
+        throw new EpisodeWithEpisodeNumberAlreadyExistsError()
       }
     })
     season.episodes.push({
       originalName: originalName,
       releases: {},
       nameL8ns: {},
-      episodeNumber: episodeNumber
-    });
-    this.touch();
+      episodeNumber: episodeNumber,
+      inTranscoding: false,
+      monitorReleases: false
+    })
+    this.touch()
   }
 
   public addTmdbEpisodeNumber(seasonNumber: number | undefined, episodeNumber: number | undefined,
@@ -253,7 +258,7 @@ export class TvShow {
     episode.nameL8ns[locale.code] = name;
   }
 
-  private getSeasonOrThrow(seasonNumber?: number) {
+  getSeasonOrThrow(seasonNumber?: number) {
     const season = this.seasons.filter(_ => _.seasonNumber == seasonNumber)[0];
     if (season == undefined) {
       throw new InvalidSeasonError();
@@ -261,7 +266,7 @@ export class TvShow {
     return season;
   }
 
-  private getEpisodeOrThrow(seasonNumber?: number, episodeNumber?: number) {
+  getEpisodeOrThrow(seasonNumber?: number, episodeNumber?: number) {
     const season = this.getSeasonOrThrow(seasonNumber);
     const episode = season.episodes.filter(_ => _.episodeNumber == episodeNumber)[0];
     if (episode == undefined) {
@@ -300,6 +305,63 @@ export class TvShow {
     const episode = this.getEpisodeOrThrow(s, e);
     return episode.releases[key!];
   }
+
+  public releaseAlreadyExists(seasonNumber: number, episodeNumber: number, ricReleasId: string) {
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber)
+    for (const k in episode.releases) {
+      const r = episode.releases[k] as unknown as ReleaseRead;
+      if (ricReleasId === r._releaseIndexerContextId) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  addRICTvShowId(id: string) {
+    if (strIsBlank(id)) {
+      throw new BlankRICTvShowIdError();
+    }
+    this._ricTvShowId = id;
+  }
+
+  get ricTvShowId() {
+    return this._ricTvShowId
+  }
+
+  transcodingStarted(seasonNumber: number, episodeNumber: number) {
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber)
+    episode.inTranscoding = true
+  }
+
+  transcodingFinished(seasonNumber: number, episodeNumber: number) {
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber)
+    episode.inTranscoding = false
+  }
+
+  inTranscoding(seasonNumber: number, episodeNumber: number) {
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber)
+    return episode.inTranscoding
+  }
+
+  setMonitorReleases(seasonNumber: Nullable<number>, episodeNumber: Nullable<number>, monitorReleases: boolean) {
+    if (episodeNumber != null && episodeNumber != 0 &&  !isNaN(episodeNumber) &&
+        seasonNumber != null && seasonNumber != 0 && !isNaN(seasonNumber)) {
+      const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber)
+      episode.monitorReleases = monitorReleases
+    } else if (seasonNumber != null && seasonNumber != 0 && !isNaN(seasonNumber)) {
+      const season = this.getSeasonOrThrow(seasonNumber)
+      for (const e of season.episodes) {
+        e.monitorReleases = monitorReleases
+      }
+    } else {
+      for (const s of this.seasons) {
+        for (const e of s.episodes) {
+          e.monitorReleases = monitorReleases
+        }
+      }
+    }
+  }
+
 }
 
 class InvalidTitleError extends Error {}
@@ -359,3 +421,5 @@ class NullReleaseKeyError extends Error {}
 class NullReleaseError extends Error {}
 
 class ReleaseWithKeyAlreadyExistsError extends Error {}
+
+class BlankRICTvShowIdError extends Error {}
