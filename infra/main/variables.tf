@@ -87,3 +87,11 @@ variable "qbittorrent_password" {
 variable "sonarr_api_key" {
   type = string
 }
+
+variable "ipinfo_io_token" {
+  type = string
+}
+
+variable "ipgeolocation_io_token" {
+  type = string
+}

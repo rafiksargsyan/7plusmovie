@@ -5,6 +5,7 @@ import { TvShowRepositoryInterface } from '../../ports/TvShowRepositoryInterface
 import { ReleaseRead } from '../../domain/entity/Release';
 import { AudioLang } from '../../domain/AudioLang';
 import { Nullable } from '../../../utils';
+import { getOneRelease } from '../getMovieMetadataForPlayer';
 
 const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
 const cfDistroRandomSelectionProportion = Number.parseFloat(process.env.CF_DISTRO_RANDOM_SELECTION_PROPORTION!);
@@ -17,9 +18,10 @@ const docClient = DynamoDBDocument.from(new DynamoDB({}));
 const tvShowRepo: TvShowRepositoryInterface = new TvShowRepository(docClient);
 
 interface GetTvShowParam {
-  tvShowId: string;
-  season: number;
-  episode: number;
+  tvShowId: string
+  season: number
+  episode: number
+  preferredAudioLang: string
 }
 
 interface GetTvShowMetadataResponse {
@@ -98,7 +100,9 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
   let thumbnailsFile: Nullable<string>;
   let releases = episode.releases;
   if (releases == null) releases = {};
-  const release = getOneRelease(Object.values(releases));
+  let preferredAudioLang = AudioLang.fromKey(event.preferredAudioLang)
+  if (preferredAudioLang == null) preferredAudioLang = AudioLang.RU
+  const release = getOneRelease(Object.values(releases), preferredAudioLang)
   if (release != null) {
     mpdFile = release._mpdFile;
     m3u8File = release._m3u8File;
@@ -161,20 +165,4 @@ async function getCloudFrontDistro() {
     return undefined;
   }
   return candidate;
-}
-
-function getOneRelease(releases?: ReleaseRead[]) {
-  if (releases == null || releases.length === 0) {
-    return null;
-  }
-  const releasesContainsRussian: ReleaseRead[] = [];
-  for (const r of releases) {
-    for (const k in r._audios) {
-      if (AudioLang.equals(AudioLang.RU, r._audios[k].lang)) {
-        releasesContainsRussian.push(r);
-      }
-    }
-  }
-  if (releasesContainsRussian.length != 0) return releasesContainsRussian[0];
-  return releases[0];
 }

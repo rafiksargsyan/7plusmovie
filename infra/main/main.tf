@@ -123,6 +123,8 @@ resource "aws_secretsmanager_secret_version" "secrets_version" {
       TMDB_API_KEY: var.tmdb_api_key
       R2_ACCESS_KEY_ID: var.r2_access_key_id
       R2_SECRET_ACCESS_KEY: var.r2_secret_access_key
+      IPINFO_IO_TOKEN: var.ipinfo_io_token
+      IPGEOLOCATION_IO_TOKEN: var.ipgeolocation_io_token
     })
   )
 }

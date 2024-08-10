@@ -15,6 +15,8 @@ export interface ReleaseRead {
   _thumbnails: { resolution: number, thumbnailsFile: string } [];
   _releaseIndexerContextId: Nullable<string>;
   _rootFolder: string;
+  _ripType: Nullable<RipType>
+  _resolution: ResolutionEnum
 }
 
 export interface Thumbnail {
