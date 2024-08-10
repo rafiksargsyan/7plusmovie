@@ -33,11 +33,10 @@ async function resolveGeoData(ip: string) {
   if (ret == null) {
     ret = await getGeoDataFromIpGeolocationIo(ipgeolocationIoToken, ip)
   }
-  // TODO ipinfo.io, ipgeolocation.io
   if (ret == null) {
-    console.warn(`Failed to retrieve geo data for IP=${ip}, defaulting to US`)
+    console.warn(`Failed to retrieve geo data for IP=${ip}, defaulting to RU`)
     ret = {
-      countryCode: 'US',
+      countryCode: 'RU',
       city: null
     }
   }
