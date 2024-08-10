@@ -1,7 +1,7 @@
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
 import { DynamoDB } from '@aws-sdk/client-dynamodb'
 import { InvocationType, InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda"
-import { RicRelease, createAudioTranscodeSpec, releaseContainsEnglishAudio, releaseContainsRussianAudio, resolveResolutions } from "../movieNewReleaseChecker"
+import { RicRelease, createAudioTranscodeSpec, releaseContainsEnglishAudio, releaseContainsRussianAudio, resolveRawMediaFileBaseUurl, resolveResolutions } from "../movieNewReleaseChecker"
 import { TvShowRepository } from '../../../adapters/TvShowRepository'
 import { TvShow } from '../../domain/aggregate/TvShow'
 import { ReleaseRead } from '../../domain/entity/Release'
@@ -69,11 +69,12 @@ export const handler = async (event: Param): Promise<void> => {
       }
       const resolution: ResolutionEnum = ResolutionEnum.fromKeyOrThrow(r.release.resolution);
       const ripType: RipType = RipType.fromKeyOrThrow(r.release.ripType);
+      const resolvedBaseUrl = await resolveRawMediaFileBaseUurl(rawMediaFilesBaseUrl);
       const transcodingJobParam: CreateTvShowTranscodingJobParam = {
         tvShowId: event.tvShowId,
         season: season.seasonNumber,
         episode: e.episodeNumber,
-        mkvHttpUrl: `${rawMediaFilesBaseUrl}${r.release.cachedMediaFileRelativePath}`,
+        mkvHttpUrl: `${resolvedBaseUrl}${r.release.cachedMediaFileRelativePath}`,
         releaseId: k,
         videoTranscodeSpec: {
           stream: 0,

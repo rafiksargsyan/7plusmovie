@@ -8,6 +8,7 @@ import { RipType } from "../domain/RipType";
 import { Resolution as ResolutionEnum } from "../domain/Resolution";
 import { handler as createMovieTranscodingJob } from "../app/createMovieTranscodingJob";
 import { AudioLang } from "../domain/AudioLang";
+import { getCloudFrontDistro } from "./getMovieMetadataForPlayer";
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 const ricGetMovieLambdaName = process.env.RIC_GET_MOVIE_LAMBDA_NAME!;
@@ -78,9 +79,10 @@ export const handler = async (): Promise<void> => {
       }
       const resolution: ResolutionEnum = ResolutionEnum.fromKeyOrThrow(r.release.resolution);
       const ripType: RipType = RipType.fromKeyOrThrow(r.release.ripType);
+      const resolvedBaseUrl = await resolveRawMediaFileBaseUurl(rawMediaFilesBaseUrl);
       const createMovieTranscodingJobParam: CreateMovieTranscodingJobParam = {
         movieId: m.id,
-        mkvHttpUrl: `${rawMediaFilesBaseUrl}${r.release.cachedMediaFileRelativePath}`,
+        mkvHttpUrl: `${resolvedBaseUrl}${r.release.cachedMediaFileRelativePath}`,
         releaseId: k,
         videoTranscodeSpec: {
           stream: 0,
@@ -204,4 +206,18 @@ async function getAllMovies(): Promise<Movie[]> {
     params.ExclusiveStartKey = items.LastEvaluatedKey;
   } while (typeof items.LastEvaluatedKey !== "undefined");
   return movies;
+}
+
+export async function resolveRawMediaFileBaseUurl(defaultBaseUrl: string) {
+  let cfDistro;
+  try {
+    cfDistro = await getCloudFrontDistro();
+  } catch (e) {
+    console.error('Failed to retrieve CF distro:', e);
+  }
+  if (cfDistro == null) {
+    return defaultBaseUrl
+  } else {
+    return `${cfDistro.domain}/`
+  }
 }
