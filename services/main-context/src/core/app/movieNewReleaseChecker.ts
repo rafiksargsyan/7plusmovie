@@ -218,6 +218,6 @@ export async function resolveRawMediaFileBaseUurl(defaultBaseUrl: string) {
   if (cfDistro == null) {
     return defaultBaseUrl
   } else {
-    return `${cfDistro.domain}/`
+    return `https://${cfDistro.domain}/`
   }
 }
