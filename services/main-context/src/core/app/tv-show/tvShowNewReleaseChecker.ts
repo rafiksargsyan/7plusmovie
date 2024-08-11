@@ -100,20 +100,20 @@ export const handler = async (event: Param): Promise<void> => {
 };
 
 function chooseReleaseToTranscode(response: RicEpisode, tvShow: TvShow, seasonNumber: number, episodeNumber: number) {
-  for (const k in response.releases) {
-    const r = response.releases[k].release
+  for (const k in response) {
+    const r = response[k].release
     if (releaseContainsRussianAudio(r) && !tvShow.releaseAlreadyExists(seasonNumber, episodeNumber, k)) {
       return k
     }
   }
-  for (const k in response.releases) {
-    const r = response.releases[k].release
+  for (const k in response) {
+    const r = response[k].release
     if (releaseContainsEnglishAudio(r) && !tvShow.releaseAlreadyExists(seasonNumber, episodeNumber, k)) {
       return k
     }
   }
-  for (const k in response.releases) {
-    const r = response.releases[k].release
+  for (const k in response) {
+    const r = response[k].release
     if (!tvShow.releaseAlreadyExists(seasonNumber, episodeNumber, k)) {
       return k
     }
