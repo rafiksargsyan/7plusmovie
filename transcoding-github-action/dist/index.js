@@ -1,7 +1,7 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 133:
+/***/ 482:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -113,7 +113,7 @@ const core = __importStar(__nccwpck_require__(186));
 const path_1 = __importDefault(__nccwpck_require__(17));
 const fs_1 = __importDefault(__nccwpck_require__(147));
 const child_process_1 = __nccwpck_require__(81);
-const lang_1 = __nccwpck_require__(133);
+const Lang_1 = __nccwpck_require__(482);
 const WORKING_DIR_NAME = '.transcoding-job-work-dir';
 function run() {
     var _a;
@@ -168,10 +168,10 @@ function run() {
                 shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, x.fileName)},stream=video,output=${x.fileName} `;
             }
             audioTranscodeSpecs.forEach(_ => {
-                shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, _.fileName)},stream=audio,output=${_.fileName},lang=${lang_1.Lang.fromKeyOrThrow(_.lang).lang},hls_group_id=audio,hls_name='${_.name}',dash_label='${_.name}' `;
+                shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, _.fileName)},stream=audio,output=${_.fileName},lang=${Lang_1.Lang.fromKeyOrThrow(_.lang).lang},hls_group_id=audio,hls_name='${_.name}',dash_label='${_.name}' `;
             });
             textTranscodeSpecs.forEach(_ => {
-                shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, _.fileName)},stream=text,output=${_.fileName},lang=${lang_1.Lang.fromKeyOrThrow(_.lang).lang},hls_group_id=subtitle,hls_name='${_.name}',dash_label='${_.name}' `;
+                shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, _.fileName)},stream=text,output=${_.fileName},lang=${Lang_1.Lang.fromKeyOrThrow(_.lang).lang},hls_group_id=subtitle,hls_name='${_.name}',dash_label='${_.name}' `;
             });
             shakaPackagerCommand += `--mpd_output ${path_1.default.resolve(vodFolderAbsolutePath, 'manifest.mpd')} --hls_master_playlist_output ${path_1.default.resolve(vodFolderAbsolutePath, 'master.m3u8')}`;
             (0, child_process_1.execSync)(`eval "${shakaPackagerCommand}"`);
@@ -195,6 +195,8 @@ function transcodeSubsFromMkv(mkvFilePath, stream, fileName) {
 function transcodeAudioFromMkv(mkvFilePath, stream, channels, bitrate, fileName) {
     let command = `ffmpeg -i ${mkvFilePath} -map 0:${stream} -ac ${channels} -c aac -ab ${bitrate} `;
     command += `-vn -sn ${fileName} > /dev/null 2>&1`;
+    (0, child_process_1.execSync)(command);
+    command = `echo >> ${fileName}`; // https://github.com/shaka-project/shaka-packager/issues/1018
     (0, child_process_1.execSync)(command);
 }
 function transcodeVideoFromMkv(mkvFilePath, stream, resolution, fileName) {

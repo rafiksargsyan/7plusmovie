@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import path from 'path'
 import fs from 'fs'
 import {execSync} from 'child_process'
-import {Lang} from './lang'
+import {Lang} from './Lang'
 
 const WORKING_DIR_NAME = '.transcoding-job-work-dir'
 
@@ -169,6 +169,8 @@ function transcodeAudioFromMkv(
   let command = `ffmpeg -i ${mkvFilePath} -map 0:${stream} -ac ${channels} -c aac -ab ${bitrate} `
   command += `-vn -sn ${fileName} > /dev/null 2>&1`
   execSync(command)
+  command = `echo >> ${fileName}`; // https://github.com/shaka-project/shaka-packager/issues/1018
+  execSync(command);
 }
 
 function transcodeVideoFromMkv(

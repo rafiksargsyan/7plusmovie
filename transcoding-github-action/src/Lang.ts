@@ -1,4 +1,4 @@
-import {Nullable} from './nullable'
+import {Nullable} from './Nullable'
 
 export class Lang {
   static readonly EN = new Lang('EN', 'en')
