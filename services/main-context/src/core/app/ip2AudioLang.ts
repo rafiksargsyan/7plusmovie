@@ -109,6 +109,7 @@ function resolveAudioLang(countryCode: string, city: Nullable<string>): string {
     case 'GB': return AudioLang.EN_GB.key
     case 'AM':
     case 'GE':
+    case 'KZ':
     case 'RU': return AudioLang.RU.key
     case 'CA': {
       if (city != null && city.toLowerCase().includes('quebec')) return AudioLang.FR_CA.key
