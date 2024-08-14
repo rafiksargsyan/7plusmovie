@@ -196,7 +196,14 @@ function transcodeAudioFromMkv(mkvFilePath, stream, channels, bitrate, fileName)
     let command = `ffmpeg -i ${mkvFilePath} -map 0:${stream} -ac ${channels} -c aac -ab ${bitrate} `;
     command += `-vn -sn ${fileName} > /dev/null 2>&1`;
     (0, child_process_1.execSync)(command);
-    command = `echo >> ${fileName}`; // https://github.com/shaka-project/shaka-packager/issues/1018
+    // https://github.com/shaka-project/shaka-packager/issues/1018
+    command = `echo >> ${fileName}`;
+    (0, child_process_1.execSync)(command);
+    command = `echo '99:00:00.000 --> 99:00:01.000' >> ${fileName}`;
+    (0, child_process_1.execSync)(command);
+    command = `echo 'dummy' >> ${fileName}`;
+    (0, child_process_1.execSync)(command);
+    command = `echo >> ${fileName}`;
     (0, child_process_1.execSync)(command);
 }
 function transcodeVideoFromMkv(mkvFilePath, stream, resolution, fileName) {

@@ -169,8 +169,15 @@ function transcodeAudioFromMkv(
   let command = `ffmpeg -i ${mkvFilePath} -map 0:${stream} -ac ${channels} -c aac -ab ${bitrate} `
   command += `-vn -sn ${fileName} > /dev/null 2>&1`
   execSync(command)
-  command = `echo >> ${fileName}`; // https://github.com/shaka-project/shaka-packager/issues/1018
-  execSync(command);
+  // https://github.com/shaka-project/shaka-packager/issues/1018
+  command = `echo >> ${fileName}`
+  execSync(command)
+  command = `echo '99:00:00.000 --> 99:00:01.000' >> ${fileName}`
+  execSync(command)
+  command = `echo 'dummy' >> ${fileName}`
+  execSync(command)
+  command = `echo >> ${fileName}`
+  execSync(command)
 }
 
 function transcodeVideoFromMkv(
