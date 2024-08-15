@@ -155,7 +155,16 @@ function transcodeSubsFromMkv(
   stream: number,
   fileName: string
 ): void {
-  const command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${fileName} > /dev/null 2>&1`
+  let command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${fileName} > /dev/null 2>&1`
+  execSync(command)
+  // https://github.com/shaka-project/shaka-packager/issues/1018
+  command = `echo >> ${fileName}`
+  execSync(command)
+  command = `echo '99:00:00.000 --> 99:00:01.000' >> ${fileName}`
+  execSync(command)
+  command = `echo 'dummy' >> ${fileName}`
+  execSync(command)
+  command = `echo >> ${fileName}`
   execSync(command)
 }
 
@@ -168,15 +177,6 @@ function transcodeAudioFromMkv(
 ): void {
   let command = `ffmpeg -i ${mkvFilePath} -map 0:${stream} -ac ${channels} -c aac -ab ${bitrate} `
   command += `-vn -sn ${fileName} > /dev/null 2>&1`
-  execSync(command)
-  // https://github.com/shaka-project/shaka-packager/issues/1018
-  command = `echo >> ${fileName}`
-  execSync(command)
-  command = `echo '99:00:00.000 --> 99:00:01.000' >> ${fileName}`
-  execSync(command)
-  command = `echo 'dummy' >> ${fileName}`
-  execSync(command)
-  command = `echo >> ${fileName}`
   execSync(command)
 }
 

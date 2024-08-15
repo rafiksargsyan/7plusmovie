@@ -189,12 +189,7 @@ function run() {
     });
 }
 function transcodeSubsFromMkv(mkvFilePath, stream, fileName) {
-    const command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${fileName} > /dev/null 2>&1`;
-    (0, child_process_1.execSync)(command);
-}
-function transcodeAudioFromMkv(mkvFilePath, stream, channels, bitrate, fileName) {
-    let command = `ffmpeg -i ${mkvFilePath} -map 0:${stream} -ac ${channels} -c aac -ab ${bitrate} `;
-    command += `-vn -sn ${fileName} > /dev/null 2>&1`;
+    let command = `ffmpeg -i ${mkvFilePath} -vn -an -map 0:${stream} -codec:s webvtt ${fileName} > /dev/null 2>&1`;
     (0, child_process_1.execSync)(command);
     // https://github.com/shaka-project/shaka-packager/issues/1018
     command = `echo >> ${fileName}`;
@@ -204,6 +199,11 @@ function transcodeAudioFromMkv(mkvFilePath, stream, channels, bitrate, fileName)
     command = `echo 'dummy' >> ${fileName}`;
     (0, child_process_1.execSync)(command);
     command = `echo >> ${fileName}`;
+    (0, child_process_1.execSync)(command);
+}
+function transcodeAudioFromMkv(mkvFilePath, stream, channels, bitrate, fileName) {
+    let command = `ffmpeg -i ${mkvFilePath} -map 0:${stream} -ac ${channels} -c aac -ab ${bitrate} `;
+    command += `-vn -sn ${fileName} > /dev/null 2>&1`;
     (0, child_process_1.execSync)(command);
 }
 function transcodeVideoFromMkv(mkvFilePath, stream, resolution, fileName) {
