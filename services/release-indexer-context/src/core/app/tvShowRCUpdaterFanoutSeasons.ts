@@ -2,6 +2,7 @@ import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { TvShowRepository } from '../../adapters/TvShowRepository';
 import { InvocationType, InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
+import { shuffleArray } from '../../utils';
 
 const tvShowRCUpdaterLambdaName = process.env.TVSHOW_RC_UPDATER_LAMBDA_NAME;
 
@@ -20,6 +21,7 @@ const ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
 
 export const handler = async (event: { tvShowId: string }): Promise<void> => {
   const tvShow = await tvShowRepo.getById(event.tvShowId);
+  shuffleArray(tvShow.seasons)
   for (const s of tvShow.seasons) {
     tvShow.checkAndEmptyReleaseCandidates(s.seasonNumber, false);
     await tvShowRepo.save(tvShow, false, [s.seasonNumber], { [s.seasonNumber] : s.episodes.map(e => e.episodeNumber) });
@@ -54,5 +56,7 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
     } catch (e) {
       console.log(e);
     }
+    // Do one seasons per call to not overload sonarr
+    return
   }
 }
