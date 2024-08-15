@@ -254,7 +254,7 @@ functions:
       TVSHOW_RC_UPDATER_FANOUT_SEASONS_LAMBDA_NAME: ${env:TVSHOW_RC_UPDATER_FANOUT_SEASONS_LAMBDA_NAME}
     handler: src/core/app/tvShowRCUpdaterFanout.handler
     events:
-      - schedule: rate(${file(./.env.${sls:stage}.yml):RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minutes)
+      - schedule: rate(${file(./.env.${sls:stage}.yml):TVSHOW_RELEASE_CANDIDATE_UPDATE_INTERVAL_IN_MINUTES} minutes)
     timeout: 900
 
   tvShowRCUpdaterFanoutSeasons:
