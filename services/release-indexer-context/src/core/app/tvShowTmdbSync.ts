@@ -40,7 +40,7 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
   const tvShowTmdbIt = await getTvShowDetailsFromTmdb(tmdbClient, tvShow.tmdbId, 'it');
   let rootUpdated = false;
   [tvShowTmdbEn, tvShowTmdbRu, tvShowTmdbEs, tvShowTmdbFr, tvShowTmdbIt].forEach(t => {
-    rootUpdated = rootUpdated || tvShow.addName(t.name)
+    rootUpdated = tvShow.addName(t.name) || rootUpdated
   })
   const seasons: any[] = tvShowTmdbEn.seasons;
   if (seasons == null) return;
