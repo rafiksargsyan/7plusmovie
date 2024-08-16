@@ -189,8 +189,9 @@ async function processMediaFile(tvShow: TvShow, seasonNumber: number, episodeNum
     tvShow.ignoreRc(seasonNumber, episodeNumber, rcKey)
     return false
   }
-  const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString())
-  const durationStr = execSync(`ffprobe -i '${mediaFilesBaseUrl}${name}' -show_entries format=duration -v quiet -of csv="p=0"`).toString()
+  const fileUrl = encodeURI(`${mediaFilesBaseUrl}${name}`).replace(/'/g, "%27")
+  const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${fileUrl}'`).toString())
+  const durationStr = execSync(`ffprobe -i '${fileUrl}' -show_entries format=duration -v quiet -of csv="p=0"`).toString()
   const duration = Number.parseFloat(durationStr)
   if (!Number.isNaN(duration) && runtimeSeconds != null && Math.abs(duration - runtimeSeconds) > 0.15 * runtimeSeconds) {
     console.warn(`The release candidate duration is considerably different from official runtime: RC=${JSON.stringify(rc)},s=${seasonNumber},e=${episodeNumber}`)

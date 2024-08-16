@@ -168,8 +168,9 @@ async function processMediaFile(m: Movie, name: string, rcKey: string, rc: Torre
     if (size > MAX_FILE_SIZE_IN_BYTES) {
       throw new Error('Too big file');
     }
-    const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${mediaFilesBaseUrl}${name}'`).toString());
-    const durationStr = execSync(`ffprobe -i '${mediaFilesBaseUrl}${name}' -show_entries format=duration -v quiet -of csv="p=0"`).toString();
+    const fileUrl = encodeURI(`${mediaFilesBaseUrl}${name}`).replace(/'/g, "%27")
+    const streams = JSON.parse(execSync(`/opt/bin/ffprobe -show_streams -loglevel error -print_format json '${fileUrl}'`).toString());
+    const durationStr = execSync(`ffprobe -i '${fileUrl}' -show_entries format=duration -v quiet -of csv="p=0"`).toString();
     const duration = Number.parseFloat(durationStr);
     if (!Number.isNaN(duration) && m.runtimeSeconds != null && Math.abs(duration - m.runtimeSeconds) > 0.2 * m.runtimeSeconds) {
       throw new Error ('The release candidate duration is considerably different from official runtime');
