@@ -234,7 +234,7 @@ async function processMediaFile(m: Movie, name: string, rcKey: string, rc: Torre
 
         const cacheLambdaParams = {
           destinationPath: release.cachedMediaFileRelativePath,
-          sourceUrl: mediaFilesBaseUrl + encodeURIComponent(name),
+          sourceUrl: encodeURI(`${mediaFilesBaseUrl}${name}`).replace(/'/g, "%27"),
           torrentId: rc.infoHash,
           size: size
         }

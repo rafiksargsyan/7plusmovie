@@ -262,7 +262,7 @@ async function processMediaFile(tvShow: TvShow, seasonNumber: number, episodeNum
       tvShow.promoteRc(seasonNumber, episodeNumber, rcKey)
       const cacheLambdaParams = {
         destinationPath: release.cachedMediaFileRelativePath,
-        sourceUrl: mediaFilesBaseUrl + encodeURIComponent(name),
+        sourceUrl: encodeURI(`${mediaFilesBaseUrl}${name}`).replace(/'/g, "%27"),
         torrentId: rc.infoHash,
         tag: tag
       }
