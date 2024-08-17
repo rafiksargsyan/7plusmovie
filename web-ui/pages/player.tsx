@@ -111,9 +111,9 @@ function PlayerPage(props : {movie: Movie | TvShow, currentLocaleCode: string, c
         <title>{title}</title>
         <meta property="og:title" content={title} />
         <meta property="og:image" content={props.movie == undefined ? undefined : `${imageBaseUrl}h=720/${props.movie.backdropImage}`}/>
-        <link rel="alternate" href={`https://www.q62.xyz/en-US/player?movieId=${alternateQuery}`} hrefLang='en-US'></link>
-        <link rel="alternate" href={`https://www.q62.xyz/ru/player?movieId=${alternateQuery}`} hrefLang='ru'></link>
-        <link rel="alternate" href={`https://www.q62.xyz/en-US/player?movieId=${alternateQuery}`} hrefLang='x-default'></link>
+        <link rel="alternate" href={`https://www.q62.xyz/en-US/player${alternateQuery}`} hrefLang='en-US'></link>
+        <link rel="alternate" href={`https://www.q62.xyz/ru/player${alternateQuery}`} hrefLang='ru'></link>
+        <link rel="alternate" href={`https://www.q62.xyz/en-US/player${alternateQuery}`} hrefLang='x-default'></link>
       </Head>
       <ThemeProvider theme={darkTheme}>
 	      <CssBaseline />
