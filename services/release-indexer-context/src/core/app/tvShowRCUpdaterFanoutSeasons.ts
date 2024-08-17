@@ -41,6 +41,9 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
         continue;
       }
     }
+    if (Date.now() - s.lastReleaseCandidateScanTimeMillis < ONE_DAY_IN_MILLIS / 2) {
+      continue;
+    }
     const rcUpdaterParams = {
       tvShowId: event.tvShowId,
       seasonNumber: s.seasonNumber
