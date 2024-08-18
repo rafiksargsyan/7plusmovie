@@ -114,7 +114,7 @@ export class QBittorrentClient implements TorrentClientInterface {
           isStalled : isStalled,
           amountLeft : amountLeft,
           files: files.map((f) => ({ name: f.name, size: f.size, progress: f.progress, index: f.index })),
-          eta: t.eta,
+          eta: t.eta === 8640000 ? null : t.eta,
           tags: t.tags.split(',').map(_ => _.trim()).filter(_ => _ !== tag)
         });
       }

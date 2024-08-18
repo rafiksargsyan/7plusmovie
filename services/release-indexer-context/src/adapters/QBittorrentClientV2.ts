@@ -132,7 +132,7 @@ export class QBittorrentClientV2 implements ITorrentClient {
           isStalled : isStalled,
           amountLeft : amountLeft,
           files: files.map((f: any) => ({ name: f.name, size: f.size, progress: f.progress, index: f.index })),
-          eta: t.eta,
+          eta: t.eta === 8640000 ? null : t.eta,
           tags: t.tags.split(',').map((_: any) => _.trim()).filter((_: any) => _ !== tag)
         });
       }
