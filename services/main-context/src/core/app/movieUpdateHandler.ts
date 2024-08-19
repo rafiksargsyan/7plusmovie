@@ -10,6 +10,7 @@ import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
 import { Movie } from "../domain/aggregate/Movie";
 import axios from 'axios';
 import { L8nLangCode } from '../domain/L8nLangCodes';
+import { strIsBlank } from '../../utils';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
@@ -104,11 +105,13 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
 };
 
 async function emptyS3Directory(bucket, dir) {
+  if (strIsBlank(dir)) return;
+  if (!dir.endswith('/')) dir = `${dir}/`
+
   const listParams = {
       Bucket: bucket,
       Prefix: dir
-  };
-
+  }
   const listedObjects = await s3.listObjectsV2(listParams);
 
   if (listedObjects.Contents == undefined ||

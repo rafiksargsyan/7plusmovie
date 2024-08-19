@@ -78,7 +78,8 @@ export const handler = async (event: Param): Promise<void> => {
 
 async function emptyS3Directory(s3: S3, bucket, dir) {
     if (strIsBlank(dir)) return;
-  
+    if (!dir.endswith('/')) dir = `${dir}/`
+ 
     const listParams = {
         Bucket: bucket,
         Prefix: dir

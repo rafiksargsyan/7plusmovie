@@ -270,6 +270,7 @@ const getS3ObjectSize = async (bucketName: string, path: string): Promise<number
 
 async function emptyS3Directory(s3: S3, bucket, dir) {
   if (strIsBlank(dir)) return;
+  if (!dir.endswith('/')) dir = `${dir}/`
 
   const listParams = {
       Bucket: bucket,

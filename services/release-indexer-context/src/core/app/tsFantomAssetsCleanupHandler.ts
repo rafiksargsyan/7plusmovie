@@ -3,6 +3,7 @@ import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb'
 import { S3 } from '@aws-sdk/client-s3'
 import { TorrentRelease } from '../domain/entity/TorrentRelease'
 import { TvShowRepository } from '../../adapters/TvShowRepository'
+import { strIsBlank } from '../../utils'
 
 const torrentFilesS3Bucket = process.env.TORRENT_FILES_S3_BUCKET!
 const rawMediaFilesS3Bucket = process.env.RAW_MEDIA_FILES_S3_BUCKET!
@@ -39,7 +40,8 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
 }
 
 async function emptyS3Directory(bucket, dir, exclusionList: string[]) {
-  if (dir == null || dir.trim() === "") return;
+  if (strIsBlank(dir)) return;
+  if (!dir.endswith('/')) dir = `${dir}/`
 
   const listParams = {
     Bucket: bucket,

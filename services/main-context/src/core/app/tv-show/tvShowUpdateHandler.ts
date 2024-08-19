@@ -9,6 +9,7 @@ import axios from 'axios';
 import { L8nLangCode } from '../../domain/L8nLangCodes';
 import { TvShowRepositoryInterface } from '../../ports/TvShowRepositoryInterface';
 import { TvShowRepository } from '../../../adapters/TvShowRepository';
+import { strIsBlank } from '../../../utils';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
@@ -133,6 +134,9 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
 };
 
 async function emptyS3Directory(bucket, dir) {
+  if (strIsBlank(dir)) return;
+  if (!dir.endswith('/')) dir = `${dir}/`
+
   const listParams = {
       Bucket: bucket,
       Prefix: dir

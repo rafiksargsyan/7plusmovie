@@ -7,6 +7,7 @@ import { Movie } from "../domain/aggregate/Movie";
 import axios from 'axios';
 import { MovieRepository } from '../../adapters/MovieRepository';
 import { S3 } from '@aws-sdk/client-s3';
+import { strIsBlank } from '../../utils';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const torrentFilesS3Bucket = process.env.TORRENT_FILES_S3_BUCKET!;
@@ -130,7 +131,8 @@ async function updateMovie(movie: Movie, tmdbId: string) {
 }
 
 async function emptyS3Directory(bucket, dir) {
-  if (dir == null || dir.trim() === "") return;
+  if (strIsBlank(dir)) return;
+  if (!dir.endswith('/')) dir = `${dir}/`
 
   const listParams = {
     Bucket: bucket,
