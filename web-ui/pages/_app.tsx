@@ -67,6 +67,15 @@ export default function App({ Component, pageProps }: AppProps) {
         disable-devtool-auto
         src='https://cdn.jsdelivr.net/npm/disable-devtool@0.3.6'
       />
+      <Script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js' strategy='afterInteractive'/>
+      <Script id='ko-fi-button'  strategy='afterInteractive'>
+        {`kofiWidgetOverlay.draw('q62xyz', {
+          'type': 'floating-chat',
+          'floating-chat.donateButton.text': 'Support Us',
+          'floating-chat.donateButton.background-color': '#00b9fe',
+          'floating-chat.donateButton.text-color': '#fff'
+        });`}
+      </Script>
       <Analytics />
       {loading ? (
         <ThemeProvider theme={darkTheme}>

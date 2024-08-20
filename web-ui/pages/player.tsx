@@ -4,6 +4,7 @@ import axios from 'axios';
 import { GetServerSidePropsContext } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
+import { useEffect } from 'react';
 import requestIp from 'request-ip'
 
 const Player = dynamic(() => import ("../components/Player"), {ssr: false});
@@ -105,6 +106,14 @@ function PlayerPage(props : {movie: Movie | TvShow, currentLocaleCode: string, c
     title += ` (${seasonName}) (${episodeName})`;
   }
   const alternateQuery = props.movie == undefined  ? '' : (props.isMovie ? `?movieId=${props.movie.id}` : `?tvShowId=${props.movie.id}&season=${(props.movie as TvShow).season}&episode=${(props.movie as TvShow).episode}`);
+  
+  useEffect(() => {
+    const koFiWidgetRoot = document.querySelector('[id^=kofi-widget-overlay]')
+    if (koFiWidgetRoot != null) {
+      koFiWidgetRoot.innerHTML = ''
+    }
+  })
+
   return (
     <>
       <Head>

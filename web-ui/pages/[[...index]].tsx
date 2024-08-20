@@ -2,7 +2,7 @@ import algoliasearch from 'algoliasearch';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Catalog from '../components/Catalog';
 
 const L8nLangCodes = {
@@ -25,6 +25,8 @@ const L8nTable = {
     DESC: "Хорошие фильмы похожи на хорошие книги, они вне времени. Наша миссия — сделать лучшие фильмы всех времен доступными для всех."
   }
 }
+
+declare var kofiWidgetOverlay: any
 
 interface MovieItem {
   id: string;
@@ -55,7 +57,16 @@ function CatalogPage(props: CatalogPageProps) {
     router.replace(router.asPath, undefined, { locale: L8nLangCodes[locale as keyof typeof L8nLangCodes].langTag });
     setLocale(locale as keyof typeof L8nLangCodes);
   }
-  
+
+  useEffect(() => {
+    kofiWidgetOverlay.draw('q62xyz', {
+      'type': 'floating-chat',
+      'floating-chat.donateButton.text': 'Support Us',
+      'floating-chat.donateButton.background-color': '#00b9fe',
+      'floating-chat.donateButton.text-color': '#fff'
+    });
+  })
+
   return (
     <>
       <Head>
@@ -71,6 +82,7 @@ function CatalogPage(props: CatalogPageProps) {
         <link rel="alternate" href="https://www.q62.xyz/en-US" hrefLang='en-US'></link>
         <link rel="alternate" href="https://www.q62.xyz/ru" hrefLang='ru'></link>
         <link rel="alternate" href="https://www.q62.xyz/en-US" hrefLang='x-default'></link>
+        <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
       </Head>
       <Catalog {...props} currentLocale={locale} searchString={search}
         onSearchChange={onSearchChange} onLocaleChange={onLocaleChange}/>

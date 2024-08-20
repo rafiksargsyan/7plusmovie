@@ -1,7 +1,7 @@
 services:
   web-ui:
     container_name: web-ui
-    image: q62xyz/web-ui:1.5.1
+    image: q62xyz/web-ui:1.6.3
     restart: "unless-stopped"
 
   reverse-proxy:
@@ -14,4 +14,3 @@ services:
     environment:
       - BASE64_ENCODED_CERT=${BASE64_ENCODED_CERT:?}
       - BASE64_ENCODED_KEY=${BASE64_ENCODED_KEY:?}
-

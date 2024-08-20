@@ -2,7 +2,7 @@ import algoliasearch from 'algoliasearch';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import TvShowSeriesList from '../components/TvShowSeriesList';
 import axios from 'axios';
 
@@ -42,6 +42,8 @@ interface TvShowPageProps {
   posterImagesPortrait: {[key: string]: string};
 }
 
+declare var kofiWidgetOverlay: any
+
 function TvShowPage(props: TvShowPageProps) {
   const router = useRouter();
   const [locale, setLocale] = useState(props.currentLocale);
@@ -50,6 +52,15 @@ function TvShowPage(props: TvShowPageProps) {
     router.replace(router.asPath, undefined, { locale: L8nLangCodes[locale as keyof typeof L8nLangCodes].langTag });
     setLocale(locale as keyof typeof L8nLangCodes);
   }
+
+  useEffect(() => {
+    kofiWidgetOverlay.draw('q62xyz', {
+      'type': 'floating-chat',
+      'floating-chat.donateButton.text': 'Support Us',
+      'floating-chat.donateButton.background-color': '#00b9fe',
+      'floating-chat.donateButton.text-color': '#fff'
+    });
+  })
 
   return (
     <>
