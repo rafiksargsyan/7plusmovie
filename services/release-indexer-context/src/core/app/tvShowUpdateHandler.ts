@@ -86,9 +86,9 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
   } 
 };
 
-async function emptyS3Directory(bucket, dir) {
+async function emptyS3Directory(bucket, dir: string) {
   if (strIsBlank(dir)) return;
-  if (!dir.endswith('/')) dir = `${dir}/`
+  if (!dir.endsWith('/')) dir = `${dir}/`
 
   const listParams = {
     Bucket: bucket,

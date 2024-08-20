@@ -39,9 +39,9 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
   await emptyS3Directory(rawMediaFilesS3Bucket, `${tvShow.id}/${season.seasonNumber}`, rawAssetsExclusionList)
 }
 
-async function emptyS3Directory(bucket, dir, exclusionList: string[]) {
+async function emptyS3Directory(bucket, dir: string, exclusionList: string[]) {
   if (strIsBlank(dir)) return;
-  if (!dir.endswith('/')) dir = `${dir}/`
+  if (!dir.endsWith('/')) dir = `${dir}/`
 
   const listParams = {
     Bucket: bucket,

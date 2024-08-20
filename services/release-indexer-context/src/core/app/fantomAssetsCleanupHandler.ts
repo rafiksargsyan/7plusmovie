@@ -36,9 +36,9 @@ export const handler = async (event: { movieId: string }): Promise<void> => {
   await emptyS3Directory(rawMediaFilesS3Bucket, movie.id, rawAssetsExclusionList)
 };
 
-async function emptyS3Directory(bucket, dir, exclusionList: string[]) {
+async function emptyS3Directory(bucket, dir: string, exclusionList: string[]) {
   if (strIsBlank(dir)) return;
-  if (!dir.endswith('/')) dir = `${dir}/`
+  if (!dir.endsWith('/')) dir = `${dir}/`
 
   const listParams = {
     Bucket: bucket,
