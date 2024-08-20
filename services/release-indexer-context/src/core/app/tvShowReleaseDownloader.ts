@@ -279,6 +279,7 @@ async function processMediaFile(tvShow: TvShow, seasonNumber: number, episodeNum
       }
       return true
     }
+    console.warn(`addRelease returned false, ignoring: release=${JSON.stringify(release)},RC=${JSON.stringify(rc)},s=${seasonNumber},e=${episodeNumber}`)
     tvShow.ignoreRc(seasonNumber, episodeNumber, rcKey)
   }
   return false
