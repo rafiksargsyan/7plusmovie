@@ -48,8 +48,8 @@ function TvShowPage(props: TvShowPageProps) {
   const router = useRouter();
   const [locale, setLocale] = useState(props.currentLocale);
 
-  const onLocaleChange = (locale: string) => {
-    router.replace(router.asPath, undefined, { locale: L8nLangCodes[locale as keyof typeof L8nLangCodes].langTag });
+  const onLocaleChange = (l: string) => {
+    router.replace(router.asPath, undefined, { locale: L8nLangCodes[l as keyof typeof L8nLangCodes].langTag });
     setLocale(locale as keyof typeof L8nLangCodes);
   }
 

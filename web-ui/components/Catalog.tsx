@@ -176,6 +176,8 @@ function GridView(props: CatalogProps) {
   )
 }
 
+GridView.displayName = 'GridView'
+
 interface MovieItem {
   id: string;
   originalTitle: string;
