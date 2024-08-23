@@ -51,38 +51,28 @@ function CatalogPage(props: CatalogPageProps) {
   const [locale, setLocale] = useState(props.currentLocale);
   const [search, setSearch] = useState(props.searchString);
   const [items, setItems] = useState<any>(props.movies);
-  const [page, setPage] = useState(props.page);
+  const [page, setPage] = useState(props.page + 1);
   const [isLoading, setIsLoading] = useState(false)
-
-  const loadMoreData = async () => {
-    setIsLoading(true);
-    const pageResult = await getPage(search, page + 1, 50)
-    console.log(pageResult)
-    setItems((currentItems: any) => [...currentItems, ...pageResult.pageData]);
-    setPage(currentPage => {
-      if (currentPage >= props.maxPage) {
-        return currentPage
-      }
-      return currentPage + 1
-    });
-    setIsLoading(false);
-  };
-
   const onScroll = useCallback(async () => {
-    console.log("test")
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 && !isLoading) {
-      await loadMoreData();
-//      router.replace({ pathname: router.basePath, query: { ...router.query, page: page + 1} }, undefined, { shallow: true })
+    var { scrollTop, clientHeight, scrollHeight } = document.documentElement
+    if (scrollHeight - scrollTop - clientHeight <= 1 && !isLoading) {
+      setPage(currentPage => {
+        if (currentPage >= props.maxPage) {
+          return currentPage
+        }
+        return currentPage + 1
+      });
     }
-  }, [isLoading, page]);
+  }, [isLoading]);
 
   const onSearchChange = (searchString: string | null) => {
-    router.replace({ pathname: router.basePath, query: {search: searchString}});
+    router.replace({ pathname: router.basePath, query: {search: searchString}}, undefined, { shallow: true});
     setSearch(searchString != null ? searchString : '');
+    setPage(1)
   };
   
   const onLocaleChange = (locale: string) => {
-    router.replace(router.asPath, undefined, { locale: L8nLangCodes[locale as keyof typeof L8nLangCodes].langTag });
+    router.replace(router.asPath, undefined, { locale: L8nLangCodes[locale as keyof typeof L8nLangCodes].langTag, shallow: true });
     setLocale(locale as keyof typeof L8nLangCodes);
   }
 
@@ -93,11 +83,30 @@ function CatalogPage(props: CatalogPageProps) {
       'floating-chat.donateButton.background-color': '#00b9fe',
       'floating-chat.donateButton.text-color': '#fff'
     })
-    window.addEventListener("scroll", throttle(onScroll, 100))
+  }, [])
+
+  useEffect(() => {
+    const throttledOnScroll = throttle(onScroll, 10)
+    document.addEventListener("scroll", throttledOnScroll)
     return () => {
-      window.removeEventListener("scroll", throttle(onScroll, 100));
-    };
+      document.removeEventListener("scroll", throttledOnScroll);
+    }; 
   }, [onScroll])
+
+  useEffect(() => {
+    const loadMoreData = async () => {
+      setIsLoading(true)
+      const pageResult = await getPage(search, page, 70)
+      await new Promise(r => setTimeout(r, 500));
+      if (page === 1) {
+        setItems(pageResult.pageData)
+      } else {
+        setItems((currentItems: any) => [...currentItems, ...pageResult.pageData])
+      }
+      setIsLoading(false)
+    }
+    loadMoreData()
+  }, [page, search])
 
   let path = `/${router.locale}${router.asPath}`
   path = path.substring(0, path.lastIndexOf('/') + 1)
@@ -128,6 +137,7 @@ function CatalogPage(props: CatalogPageProps) {
       </Head>
       <Catalog {...props} movies={items} currentLocale={locale} searchString={search}
         onSearchChange={onSearchChange} onLocaleChange={onLocaleChange}/>
+      {isLoading && <h1 style={{textAlign: 'center', margin: '0 auto', display: 'block'}}>loading...</h1>}
     </>
   )  
 }
@@ -151,7 +161,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     page = Number.parseInt(context.query.page as string)
   }
   if (page == null || isNaN(page)) page = 1;
-  const pageResult = await getPage(searchString == undefined ? '' : searchString, page, 50)
+  const pageResult = await getPage(searchString == undefined ? '' : searchString, page, 70)
   const locale = (context.locale != null ? context.locale : context.defaultLocale!) as keyof typeof langTagToLangCode;
   const langCode = langTagToLangCode[locale];
   return { props: {
@@ -201,4 +211,4 @@ const throttle = (fn: any, delay: any) => {
       time = Date.now(); 
     } 
   } 
-} 
+}
