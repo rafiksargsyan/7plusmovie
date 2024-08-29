@@ -82,6 +82,8 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number, e
           }
           if (prevRc instanceof TorrentReleaseCandidate && TorrentTracker.equals(rc.tracker, prevRc.tracker)
             && TorrentTracker.fromKeyOrThrow(rc.tracker.key).isLanguageSpecific()
+            && !TorrentTracker.equals(rc.tracker, TorrentTracker.RUTOR)
+            && !TorrentTracker.equals(rc.tracker, TorrentTracker.RUTRACKER)
             && compareReleaseCandidates(rc, prevRc) < 0 && prevRc.isPromoted()) {
             tvShow.ignoreRc(event.seasonNumber, event.episodeNumber, rcKey)
             betterRCAlreadyPromoted = true
