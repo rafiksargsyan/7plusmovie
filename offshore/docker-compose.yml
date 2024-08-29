@@ -1,7 +1,7 @@
 services:
   web-ui:
     container_name: web-ui
-    image: q62xyz/web-ui:1.6.3
+    image: q62xyz/web-ui:1.6.4
     restart: "unless-stopped"
 
   reverse-proxy:
