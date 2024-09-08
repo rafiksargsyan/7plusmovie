@@ -219,7 +219,7 @@ function transcodeVideoFromMkv(
     videoSettings = `zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,${videoSettings}`
   }
   let command = `ffmpeg -i ${mkvFilePath} -an -sn -c:v:${stream} libx264 -profile:v ${profile} -level:v ${level} `
-  command += `-x264opts 'keyint=120:min-keyint=120:no-scenecut:open_gop=0' -map_chapters -1 -crf ${crf} -maxrate ${maxRate} `
+  command += `-x264opts 'keyint=120:min-keyint=120:no-scenecut:open_gop=0' -force_key_frames 'expr:gte(t,n_forced*5)' -map_chapters -1 -crf ${crf} -maxrate ${maxRate} `
   command += `-bufsize ${bufSize} -preset veryslow -tune film -vf "${videoSettings}" `
   command += `${fileName} > /dev/null 2>&1`
   execSync(command)
