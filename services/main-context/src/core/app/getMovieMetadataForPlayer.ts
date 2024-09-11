@@ -128,11 +128,11 @@ export function getOneRelease(releases: Nullable<ReleaseRead[]>, preferredAudioL
   })
   if (candidates.length !== 0) {
     candidates.sort((a, b) => {
-      const ripCompareResult = RipType.compare(b._ripType, a._ripType)
-      if (ripCompareResult === 0) {
-        return Resolution.compare(b._resolution, a._resolution)
+      const resCompareResult = Resolution.compare(b._resolution, a._resolution)
+      if (resCompareResult === 0) {
+        return RipType.compare(b._ripType, a._ripType)
       }
-      return ripCompareResult
+      return resCompareResult
     })
     return candidates[0]
   }
