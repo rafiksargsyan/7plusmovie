@@ -37,3 +37,6 @@ next-env.d.ts
 
 .idea/
 web-ui.iml
+
+# Sentry Config File
+.env.sentry-build-plugin

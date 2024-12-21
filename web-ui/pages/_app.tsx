@@ -63,10 +63,11 @@ export default function App({ Component, pageProps }: AppProps) {
           gtag('config', 'G-9F6DBJPMHW');
         `}
       </Script>
-      <Script
+      {/* disable-devtool is conflicting with Sentry, disabling for now /*}
+      {/* <Script
         disable-devtool-auto
-        src='https://cdn.jsdelivr.net/npm/disable-devtool@0.3.6'
-      />
+        src='https://cdn.jsdelivr.net/npm/disable-devtool@0.3.7'
+      /> */}
       <Script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js' strategy='beforeInteractive'/>
       <Script id='ko-fi-button'  strategy='afterInteractive'>
         {`kofiWidgetOverlay.draw('q62xyz', {

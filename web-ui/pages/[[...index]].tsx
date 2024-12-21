@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Catalog from '../components/Catalog';
+import { createClient } from 'redis';
 
 const L8nLangCodes = {
   EN_US : { langTag : "en-US", countryCode: "US" },
@@ -103,12 +104,45 @@ interface AlgoliaQueryItem {
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
+  console.log(process.env.REDIS_URL)
+  let redis = null;
+  try {
+    redis = await createClient({ url: process.env.REDIS_URL,
+      socket: {
+        reconnectStrategy: (retries) => Error("Don't retry")
+      }
+    });
+
+    redis.on('error', err => console.error('Redis Client Error', err));
+    
+    await redis.connect();
+  } catch (e) {
+    redis = null;
+  }
   const algoliaClient = algoliasearch(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
     process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!);
   const algoliaIndex = algoliaClient.initIndex(process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!);
-  const searchString = context.query.search as (string | undefined);
-  const algoliaSearchResponse = await algoliaIndex.search<AlgoliaQueryItem>(searchString == null ? '' : searchString,
-    {hitsPerPage: 1000});
+  const searchString = context.query.search as (string | undefined)??'';
+  let emptySearchResponse: { hits: AlgoliaQueryItem[] } | undefined;
+  if (searchString === '' && redis != null) {
+    let cached = null;
+    try {
+      cached = await redis.get('search=');
+    } catch (e) {
+      console.error('Got error while querying redis for search=', e);
+    }
+    if (cached == null) {
+      emptySearchResponse = await algoliaIndex.search<AlgoliaQueryItem>(searchString, {hitsPerPage: 1000});
+      try {
+        await redis.setEx('search=', 3600, JSON.stringify(emptySearchResponse));
+      } catch (e) {
+        console.error('Got error while setting redis key for search=', e);
+      }
+    } else {
+      emptySearchResponse = JSON.parse(cached);
+    }
+  }
+  const algoliaSearchResponse = emptySearchResponse ?? await algoliaIndex.search<AlgoliaQueryItem>(searchString, {hitsPerPage: 1000});
   const locale = (context.locale != null ? context.locale : context.defaultLocale!) as keyof typeof langTagToLangCode;
   const langCode = langTagToLangCode[locale];
   return { props: {

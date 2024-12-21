@@ -1,8 +1,10 @@
 services:
   web-ui:
     container_name: web-ui
-    image: q62xyz/web-ui:1.6.4
+    image: q62xyz/web-ui:1.7.0
     restart: "unless-stopped"
+    environment:
+      - REDIS_URL=redis://redis:6379
 
   reverse-proxy:
     container_name: reverse-proxy
@@ -14,3 +16,8 @@ services:
     environment:
       - BASE64_ENCODED_CERT=${BASE64_ENCODED_CERT:?}
       - BASE64_ENCODED_KEY=${BASE64_ENCODED_KEY:?}
+  
+  redis:
+    image: redis:7.4.1-alpine
+    container_name: redis
+    restart: unless-stopped
