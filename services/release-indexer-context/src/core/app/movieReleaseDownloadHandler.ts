@@ -101,6 +101,7 @@ export const handler = async (event): Promise<void> => {
         }
         const fileIndex: Nullable<number> = findMediaFile(torrentInfo!, m, rc);
         if (fileIndex == null) {
+          console.warn(`Failed to find media file for infoHash=${rc.infoHash}`);
           m.ignoreRc(rcKey);
           await qbitClient.deleteTorrentById(torrentInfo!.id);
           continue;
@@ -108,6 +109,7 @@ export const handler = async (event): Promise<void> => {
         const file = torrentInfo!.files[fileIndex];
         if (file.progress === 1) {
           if (! (await processMediaFile(m, file.name, rcKey, rc, file.size))) {
+            console.warn(`processMediaFile return false for rcKey=${rcKey}`);
             await qbitClient.deleteTorrentById(torrentInfo!.id);
           }
           break;
@@ -188,6 +190,7 @@ async function processMediaFile(m: Movie, name: string, rcKey: string, rc: Torre
     }
     for (let s of streams.streams) {
       if (s.index === 0 && s.codec_type !== "video") {
+        console.warn(`Stream with index 0 is not a video for rcKey=${rcKey}`);
         m.ignoreRc(rcKey);
         return;
       }
@@ -226,6 +229,7 @@ async function processMediaFile(m: Movie, name: string, rcKey: string, rc: Torre
       }
     }
     if (release.audios.length === 0) {
+      console.warn(`No audio for rcKey=${rcKey}`);
       m.ignoreRc(rcKey);
     } else {
       release.cachedMediaFileRelativePath = m.id + "/" + rc.infoHash + name.substring(name.lastIndexOf('.'));
@@ -252,6 +256,7 @@ async function processMediaFile(m: Movie, name: string, rcKey: string, rc: Torre
 
         return true;
       }
+      console.info(`addRelease return false for rcKey=${rcKey}`);
       m.ignoreRc(rcKey);
     }
   } catch (e) {
