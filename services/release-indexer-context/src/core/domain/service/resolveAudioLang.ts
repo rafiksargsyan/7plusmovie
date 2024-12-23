@@ -25,6 +25,9 @@ export function resolveAudioLang(code: Nullable<string>,
       if (locale.lang === "en") return AudioLang.fromKey(locale.key);
       return AudioLang.EN;
     }
+    if (radarrLanguages.includes("russian")) {
+      return AudioLang.RU;
+    }
   }                             
   if (title == null) title = "";
   const titleOriginal = title;
