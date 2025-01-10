@@ -1,7 +1,3 @@
-output "test_object_path" {
-  value = aws_s3_object.test_object.key
-}
-
 output "ddb_movie_table_name" {
   value = aws_dynamodb_table.movie.name
 }

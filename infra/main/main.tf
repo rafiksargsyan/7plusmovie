@@ -73,13 +73,6 @@ data "aws_iam_policy_document" "media_assets_s3_bucket_policy_document" {
   }
 }
 
-#resource "aws_s3_object" "test_object" {
-#  bucket = aws_s3_bucket.media_assets.bucket
-#  key    = "test-file.txt"
-#  source = "./resources/test-file.txt"
-#  etag   = filemd5("./resources/test-file.txt")
-#}
-
 resource "aws_dynamodb_table" "movie" {
   name     = "${local.deployment_id}-movie"
   hash_key = "id"
