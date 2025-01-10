@@ -47,6 +47,10 @@ jobs:
       CF_ACCESS_KEY_ID: d2a16978e1e4fb1eb0dcaf352c827c98
       CF_SECRET_ACCESS_KEY: ${{ secrets.PROD_CF_SECRET_ACCESS_KEY }}
       MEDIA_FILES_R2_BUCKET: media-assets-prod-e1pjapsk
+      CF_CACHABLE_ENDPOINT: https://5b5d144b646726b0adc3304023ec2099.r2.cloudflarestorage.com
+      CF_CACHABLE_ACCESS_KEY_ID: 4d9e5eb0127be7473d326e56708c4e46
+      CF_CACHABLE_SECRET_ACCESS_KEY: ${{ secrets.PROD_CF_CACHABLE_SECRET_ACCESS_KEY }}
+      MEDIA_FILES_CACHABLE_R2_BUCKET: media-assets-cachable-prod-e1pjapsk
     steps:
       - name: Provide workflow run id to transcoding context
         run: |
@@ -104,6 +108,22 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ env.CF_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ env.CF_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: weur
+
+      - name: Upload transcoding results to R2 cachable (thumbnails)
+        run: |
+          for i in 1 2 3; do aws s3 cp "${TRANSCODING_OUTPUT_DIR_NAME}/${THUMBNAILS_DIR_NAME}" "s3://${MEDIA_FILES_CACHABLE_R2_BUCKET}/${OUTPUT_S3_FOLDER_KEY}/${THUMBNAILS_DIR_NAME}" --endpoint-url  ${CF_CACHABLE_ENDPOINT} --recursive  && break; done
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.CF_CACHABLE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.CF_CACHABLE_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: weur
+
+      - name: Upload transcoding results to R2 cachable (subtitles)
+        run: |
+          for i in 1 2 3; do aws s3 cp "${TRANSCODING_OUTPUT_DIR_NAME}/subtitles" "s3://${MEDIA_FILES_CACHABLE_R2_BUCKET}/${OUTPUT_S3_FOLDER_KEY}/subtitles" --endpoint-url  ${CF_CACHABLE_ENDPOINT} --recursive  && break; done
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.CF_CACHABLE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.CF_CACHABLE_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: weur
 
       - name: Cleanup

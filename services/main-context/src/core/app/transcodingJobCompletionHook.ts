@@ -23,6 +23,8 @@ const dynamodbTvShowTranscodingJobTableName = process.env.DYNAMODB_TV_SHOW_TRANS
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 const mediaAssetsS3Bucket = process.env.MEDIA_ASSETS_S3_BUCKET!;
 const mediaAssetsR2Bucket = process.env.ClOUDFLARE_MEDIA_ASSETS_R2_BUCKET!;
+const mediaAssetsCachableR2Bucket = process.env.ClOUDFLARE_MEDIA_ASSETS_CACHABLE_R2_BUCKET!;
+const cloudflareCachableAccountId = process.env.CLOUDFLARE_CACHABLE_ACCOUNT_ID;
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -51,6 +53,15 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     credentials: {
       accessKeyId: secret.R2_ACCESS_KEY_ID,
       secretAccessKey: secret.R2_SECRET_ACCESS_KEY,
+    },
+  });
+
+  const r2Cachable = new S3({
+    region: "auto",
+    endpoint: `https://${cloudflareCachableAccountId}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: secret.R2_CACHABLE_ACCESS_KEY_ID,
+      secretAccessKey: secret.R2_CACHABLE_SECRET_ACCESS_KEY,
     },
   });
 
@@ -122,6 +133,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
       try {
         await emptyS3Directory(s3, mediaAssetsS3Bucket, rf);
         await emptyS3Directory(r2, mediaAssetsR2Bucket, rf);
+        await emptyS3Directory(r2Cachable, mediaAssetsCachableR2Bucket, rf);
       } catch (e) {
         console.error(e);
       }
@@ -136,6 +148,8 @@ export const handler = async (event: HandlerParam): Promise<void> => {
         await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/vod`);
         await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/thumbnails`);
         await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/subtitles`);
+        await emptyS3Directory(r2Cachable, mediaAssetsCachableR2Bucket, `${rootFolder}/thumbnails`);
+        await emptyS3Directory(r2Cachable, mediaAssetsCachableR2Bucket, `${rootFolder}/subtitles`);
       } catch (e) {
         console.error(e);
       }
@@ -209,6 +223,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
       try {
         await emptyS3Directory(s3, mediaAssetsS3Bucket, rf);
         await emptyS3Directory(r2, mediaAssetsR2Bucket, rf);
+        await emptyS3Directory(r2Cachable, mediaAssetsCachableR2Bucket, rf);
       } catch (e) {
         console.error(e);
       }
@@ -223,6 +238,8 @@ export const handler = async (event: HandlerParam): Promise<void> => {
         await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/vod`);
         await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/thumbnails`);
         await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/subtitles`);
+        await emptyS3Directory(r2Cachable, mediaAssetsCachableR2Bucket, `${rootFolder}/thumbnails`);
+        await emptyS3Directory(r2Cachable, mediaAssetsCachableR2Bucket, `${rootFolder}/subtitles`);
       } catch (e) {
         console.error(e);
       }
