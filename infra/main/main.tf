@@ -125,6 +125,8 @@ resource "aws_secretsmanager_secret_version" "secrets_version" {
       R2_SECRET_ACCESS_KEY: var.r2_secret_access_key
       IPINFO_IO_TOKEN: var.ipinfo_io_token
       IPGEOLOCATION_IO_TOKEN: var.ipgeolocation_io_token
+      R2_CACHABLE_ACCESS_KEY_ID: var.r2_cachable_access_key_id
+      R2_CACHABLE_SECRET_ACCESS_KEY: var.r2_cachable_secret_access_key
     })
   )
 }

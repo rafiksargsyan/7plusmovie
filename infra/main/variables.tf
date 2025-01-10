@@ -76,6 +76,14 @@ variable "r2_secret_access_key" {
   type = string
 }
 
+variable r2_cachable_access_key_id {
+  type = string
+}
+
+variable "r2_cachable_secret_access_key" {
+  type = string
+}
+
 variable "radarr_api_key" {
   type = string
 }
