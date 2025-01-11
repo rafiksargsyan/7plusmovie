@@ -1,0 +1,19 @@
+name: R2 to R2 cachable sync
+
+on:
+  workflow_dispatch:
+
+jobs:
+  r2-to-r2-cachable-sync:
+    runs-on: [ 'self-hosted', 'Linux', X64 ]
+    timeout-minutes: 4320
+    container: rclone/rclone:1.68
+    steps:
+      - name: Setup Rclone
+        uses: AnimMouse/setup-rclone@v1
+        with:
+          rclone_config: ${{ secrets.RCLONE_CONFIG }}
+
+      - name: Sync
+        run: |
+          rclone -v sync cloudflare:media-assets-prod-e1pjapsk cloudflare-cachable:media-assets-cachable-prod-e1pjapsk --exclude "*/vod/*"
