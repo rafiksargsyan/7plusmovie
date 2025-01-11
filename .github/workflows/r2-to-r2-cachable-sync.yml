@@ -9,11 +9,12 @@ jobs:
     timeout-minutes: 4320
     container: bitnami/rclone:1.68.2
     steps:
-      - name: Setup Rclone
-        uses: AnimMouse/setup-rclone@v1
-        with:
-          rclone_config: ${{ secrets.RCLONE_CONFIG }}
+      - name: Generate rclone.conf
+        env:
+          RCLONE_CONFIG: ${{ secrets.RCLONE_CONFIG }}
+        run: |
+          echo $RCLONE_CONFIG | base64 --decode > rclone.conf
 
       - name: Sync
         run: |
-          rclone -v sync cloudflare:media-assets-prod-e1pjapsk cloudflare-cachable:media-assets-cachable-prod-e1pjapsk --exclude "*/vod/*"
+          rclone --config="rclone.conf" -v sync cloudflare:media-assets-prod-e1pjapsk cloudflare-cachable:media-assets-cachable-prod-e1pjapsk --exclude "*/vod/*"
