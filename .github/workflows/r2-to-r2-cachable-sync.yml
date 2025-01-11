@@ -13,8 +13,8 @@ jobs:
         env:
           RCLONE_CONFIG: ${{ secrets.RCLONE_CONFIG }}
         run: |
-          echo $RCLONE_CONFIG | base64 --decode > rclone.conf
+          echo $RCLONE_CONFIG | base64 --decode > /opt/bitnami/rclone.conf
 
       - name: Sync
         run: |
-          rclone --config="rclone.conf" -v sync cloudflare:media-assets-prod-e1pjapsk cloudflare-cachable:media-assets-cachable-prod-e1pjapsk --exclude "*/vod/*"
+          rclone --config="/opt/bitnami/rclone.conf" -v sync cloudflare:media-assets-prod-e1pjapsk cloudflare-cachable:media-assets-cachable-prod-e1pjapsk --exclude "*/vod/*"
