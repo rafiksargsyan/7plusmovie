@@ -7,7 +7,7 @@ jobs:
   r2-to-r2-cachable-sync:
     runs-on: [ 'self-hosted', 'Linux', X64 ]
     timeout-minutes: 4320
-    container: rclone/rclone:1.68
+    container: bitnami/rclone:1.68.2
     steps:
       - name: Setup Rclone
         uses: AnimMouse/setup-rclone@v1
