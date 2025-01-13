@@ -11,6 +11,7 @@ const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADAT
 const cfDistroRandomSelectionProportion = Number.parseFloat(process.env.CF_DISTRO_RANDOM_SELECTION_PROPORTION!);
 const cfDistroUsageThreshold = Number.parseFloat(process.env.CF_DISTRO_USAGE_THRESHOLD!);
 const cloudflareMediaAssetsDomain = process.env.CLOUDFLARE_MEDIA_ASSETS_DOMAIN!;
+const cloudflareMediaAssetsCachableDomain = process.env.CLOUDFLARE_MEDIA_ASSETS_CACHABLE_DOMAIN!;
 
 const terabiteInBytes = 1_000_000_000_000; // Max free outgoing traffic for Cloudfront is 1TB
 
@@ -115,7 +116,7 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
     subtitles: {},
     mpdFile: `https://${mediaAssetsDomain}/${mpdFile}`,
     m3u8File: `https://${mediaAssetsDomain}/${m3u8File}`,
-    thumbnailsFile: thumbnailsFile !== undefined ? `https://${mediaAssetsDomain}/${thumbnailsFile}` : undefined,
+    thumbnailsFile: thumbnailsFile !== undefined ? `https://${cloudflareMediaAssetsCachableDomain}/${thumbnailsFile}` : undefined,
     stillImage: episode.stillImage,
     originalTitle: tvShow.originalTitle,
     titleL8ns: tvShow.titleL8ns,

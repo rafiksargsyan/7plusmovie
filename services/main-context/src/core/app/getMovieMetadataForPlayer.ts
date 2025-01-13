@@ -11,6 +11,7 @@ const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADAT
 const cfDistroRandomSelectionProportion = Number.parseFloat(process.env.CF_DISTRO_RANDOM_SELECTION_PROPORTION!);
 const cfDistroUsageThreshold = Number.parseFloat(process.env.CF_DISTRO_USAGE_THRESHOLD!);
 const cloudflareMediaAssetsDomain = process.env.CLOUDFLARE_MEDIA_ASSETS_DOMAIN!;
+const cloudflareMediaAssetsCachableDomain = process.env.CLOUDFLARE_MEDIA_ASSETS_CACHABLE_DOMAIN!;
 
 const terabiteInBytes = 1_000_000_000_000; // Max free outgoing traffic for Cloudfront is 1TB
 
@@ -84,7 +85,7 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
     subtitles: {}, // TODO
     mpdFile: `https://${mediaAssetsDomain}/${mpdFile}`,
     m3u8File: `https://${mediaAssetsDomain}/${m3u8File}`,
-    thumbnailsFile: thumbnailsFile !== null ? `https://${mediaAssetsDomain}/${thumbnailsFile}` : null,
+    thumbnailsFile: thumbnailsFile !== null ? `https://${cloudflareMediaAssetsCachableDomain}/${thumbnailsFile}` : null,
     backdropImage: movie.backdropImage,
     originalTitle: movie.originalTitle,
     titleL8ns: movie.titleL8ns,
