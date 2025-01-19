@@ -1,10 +1,12 @@
 import Image from "next/image";
 import styles from "./page.module.css";
+import { AppBar } from "./components/AppBar/AppBar";
 
 export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <AppBar></AppBar>
         <Image
           className={styles.logo}
           src="/next.svg"
