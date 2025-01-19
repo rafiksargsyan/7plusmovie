@@ -1,11 +1,10 @@
 .root {
   position: relative;
+  border: 1px solid;
   border-color: hsl(0, 0%, 18.82%);
   background-color: hsl(0, 0%, 7%);
-  border: 1px solid;
   position: relative;
   align-items: center;
-  border: 1px solid;
   border-right: 0;
   box-shadow: none;
   border-radius: 40px 0 0 40px;
@@ -14,6 +13,11 @@
   display: flex;
   flex: 1;
   cursor: text; 
+}
+
+.root:focus-within {
+  border-right: 1px solid;
+  border-color: #1c62b9;
 }
 
 .input {
@@ -27,8 +31,8 @@
   outline: none;
   -webkit-appearance: none;
   -webkit-font-smoothing: antialiased;
-  font-family: "Roboto", "Arial", sans-serif;
-  font-size: 1.6rem;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 1rem;
   line-height: 2.2rem;
   font-weight: 400;
 }
