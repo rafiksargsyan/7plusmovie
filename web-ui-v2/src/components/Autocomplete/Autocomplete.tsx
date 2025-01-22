@@ -4,9 +4,11 @@ import styles from "./Autocomplete.module.css";
 import ClearIcon from '@mui/icons-material/Clear';
 import IconButton from "@mui/material/IconButton";
 import grey from "@mui/material/colors/grey";
+import { Box } from "@mui/material";
 
 interface AutocompleteProps {
   inputPlaceholder: string;
+  className: any
 }
 
 export function Autocomplete(props: AutocompleteProps) {
@@ -14,7 +16,7 @@ export function Autocomplete(props: AutocompleteProps) {
   const clearButtonRef = useRef(null);
 
   return (
-    <div className={styles.root}>
+    <div className={`${styles.root} ${props.className}`}>
       <input ref={inputRef} className={styles.input} type="text" placeholder={props.inputPlaceholder} onChange={(e) => { (clearButtonRef.current as any).style.display = (e.target.value == "" ? "none" : "flex") }}/>
       <IconButton sx={{ "&:hover": { bgcolor: grey[900] }, display: "none", alignItems: "center" }}
                   ref={clearButtonRef}

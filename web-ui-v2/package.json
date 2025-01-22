@@ -9,10 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@algolia/autocomplete-js": "^1.17.9",
+    "@algolia/autocomplete-theme-classic": "^1.17.9",
+    "@algolia/client-search": "^5.19.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.4.0",
     "@mui/material": "^6.4.0",
+    "algoliasearch": "^5.19.0",
     "next": "15.1.4",
     "next-intl": "^3.26.3",
     "react": "^19.0.0",
