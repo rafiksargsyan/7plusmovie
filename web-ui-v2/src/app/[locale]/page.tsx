@@ -4,8 +4,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconLanguage } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-
+import { Link } from '@/i18n/routing';
 
 export default function Page() {
   const [opened, { toggle }] = useDisclosure();
@@ -33,7 +32,8 @@ export default function Page() {
               leftSection={icon}
               defaultValue={'English'}
               radius="xl"
-              maw={xsOrSmaller ? 150 : undefined}
+              maw={xsOrSmaller ? 150 : 150}
+              allowDeselect={false}
             />
             <Button>{t('login')}</Button>
           </Group>
@@ -46,9 +46,9 @@ export default function Page() {
         <Space h="xl" />
         <Link href="/"><UnstyledButton>{t('home')}</UnstyledButton></Link>
         <Space h="xl" />
-        <Link href="/movies"><UnstyledButton>{t('movies')}</UnstyledButton></Link>
+        <Link href='/movies'><UnstyledButton>{t('movies')}</UnstyledButton></Link>
         <Space h="xl" />
-        <Link href="/tv-shows"><UnstyledButton>{t('tvshows')}</UnstyledButton></Link>
+        <Link href='/tv-shows'><UnstyledButton>{t('tvshows')}</UnstyledButton></Link>
         <Space h="xl" />
         <Divider my="md" label={t('contact')} labelPosition="center"/>
         <Text fw={700}>tracenoon@gmail.com</Text>
