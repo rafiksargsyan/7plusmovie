@@ -4,7 +4,7 @@ import { Autocomplete } from "../Autocomplete/Autocomplete";
 import MenuIcon from '@mui/icons-material/Menu';
 import styles from './AppBar.module.css';
 import grey from "@mui/material/colors/grey";
-import { AlgoliaAutocomplete } from "../Autocomplete/AlgoliaAutocomplete";
+import { AlgoliaAutocomplete } from "../Autocomplete/Autocomplete";
 import { getAlgoliaResults } from "@algolia/autocomplete-js";
 import { liteClient as algoliasearch } from 'algoliasearch/lite';
 

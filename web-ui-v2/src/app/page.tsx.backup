@@ -1,0 +1,59 @@
+'use client'
+import { MovieCard } from "@/components/MovieCard/MovieCard";
+import { AppBar } from "../components/AppBar/AppBar";
+import { Hero } from "../components/Hero/Hero";
+import { AppShell, Box, Burger, Container, Drawer, Flex, Group, MantineProvider, Skeleton, Title, createTheme } from "@mantine/core";
+import '@mantine/core/styles.css';
+import '@mantine/carousel/styles.css';
+import { Carousel, CarouselSlide } from "@mantine/carousel";
+import { useState } from "react";
+
+const theme = createTheme({
+  black: "#000000"
+})
+
+export default function Home() {
+  const [navVisible, setNavVisible] = useState(false);
+
+  return (
+      <AppShell 
+      navbar={{
+        collapsed: { desktop: !navVisible, mobile: !navVisible },
+        width: 200,
+        breakpoint: 'sm'
+      }}>
+      {/* <Drawer trapFocus={false} lockScroll={false} size={"xs"} opened={navVisible} component="nav" onClose={() => setNavVisible(x => !x)} style={{display: (navVisible ? undefined : "none"), backgroundColor: "transparent"}}>
+      </Drawer> */}
+       <AppShell.Navbar p="md">
+        {/* <Burger opened={true} onClick={() => {setNavVisible(x => !x)}}  size="md" /> */}
+      </AppShell.Navbar>
+      {/* <Box ml={navVisible ? "320px" : 0}> */}
+      <AppShell.Main>
+      <Hero navVisible={navVisible} onNavClick={() => setNavVisible(x => !x)}></Hero>
+      {/* <Container > */}
+        <Box component="article" style={{ padding: "20px", backgroundColor: "#000000" }}>
+          <Title order={2} mb={"md"}>Latest Movies</Title>
+          <Carousel slideSize="30%" align="start" slideGap="md" slidesToScroll={1} controlSize={40} containScroll="trimSnaps">
+            <CarouselSlide><MovieCard></MovieCard></CarouselSlide>
+            <CarouselSlide><MovieCard></MovieCard></CarouselSlide>
+            <CarouselSlide><MovieCard></MovieCard></CarouselSlide>
+            <CarouselSlide><MovieCard></MovieCard></CarouselSlide>
+          </Carousel>
+        </Box>
+        <Box component="article" style={{ padding: "20px", backgroundColor: "#000000" }}>
+          <Title order={2} mb={"md"}>Latest TV Show updates</Title>
+          <Carousel slideSize="30%" align="start" slideGap="md" slidesToScroll={1} controlSize={40} containScroll="trimSnaps">
+            <CarouselSlide><MovieCard></MovieCard></CarouselSlide>
+            <CarouselSlide><MovieCard></MovieCard></CarouselSlide>
+            <CarouselSlide><MovieCard></MovieCard></CarouselSlide>
+            <CarouselSlide><MovieCard></MovieCard></CarouselSlide>
+          </Carousel>
+        </Box>
+        <Box component="footer">
+          Footer
+        </Box>
+        </AppShell.Main>
+      {/* </Box> */}
+      </AppShell>
+  );
+}

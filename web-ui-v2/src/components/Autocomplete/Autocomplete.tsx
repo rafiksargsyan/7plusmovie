@@ -1,27 +1,41 @@
 'use client'
-import { useRef, useState } from "react";
-import styles from "./Autocomplete.module.css";
-import ClearIcon from '@mui/icons-material/Clear';
-import IconButton from "@mui/material/IconButton";
-import grey from "@mui/material/colors/grey";
-import { Box } from "@mui/material";
+import { autocomplete, AutocompleteOptions } from '@algolia/autocomplete-js';
+import React, { createElement, Fragment, useEffect, useRef } from 'react';
+import { createRoot, Root } from 'react-dom/client';
+import '@algolia/autocomplete-theme-classic';
 
-interface AutocompleteProps {
-  inputPlaceholder: string;
-  className: any
-}
+interface AutocompleteProps extends Partial<AutocompleteOptions<any>> {}
 
 export function Autocomplete(props: AutocompleteProps) {
-  const inputRef = useRef(null);
-  const clearButtonRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const panelRootRef = useRef<Root | null>(null);
+  const rootRef = useRef<Element | null>(null);
 
-  return (
-    <div className={`${styles.root} ${props.className}`}>
-      <input ref={inputRef} className={styles.input} type="text" placeholder={props.inputPlaceholder} onChange={(e) => { (clearButtonRef.current as any).style.display = (e.target.value == "" ? "none" : "flex") }}/>
-      <IconButton sx={{ "&:hover": { bgcolor: grey[900] }, display: "none", alignItems: "center" }}
-                  ref={clearButtonRef}
-                  size="small"
-                  onClick={() => { (inputRef.current as any).value = ""; (clearButtonRef.current as any).style.display = "none"; (inputRef.current as any).focus() }}><ClearIcon sx={{ color: grey[400] }} /></IconButton>
-    </div>
-  )
+  useEffect(() => {
+    if (!containerRef.current) {
+      return undefined;
+    }
+
+    const search = autocomplete({
+      container: containerRef.current,
+      renderer: { createElement, Fragment, render: () => {} },
+      render({ children }, root) {
+        if (!panelRootRef.current || rootRef.current !== root) {
+          rootRef.current = root;
+
+          panelRootRef.current?.unmount();
+          panelRootRef.current = createRoot(root);
+        }
+
+        panelRootRef.current.render(children);
+      },
+      ...props,
+    });
+
+    return () => {
+      search.destroy();
+    };
+  }, [props]);
+
+  return <div ref={containerRef} />;
 }
