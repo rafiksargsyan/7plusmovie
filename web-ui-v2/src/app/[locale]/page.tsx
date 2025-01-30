@@ -3,8 +3,8 @@ import { AppShell, Burger, Button, Divider, Group, NavLink, Select, Space, Text,
 import { useDisclosure } from '@mantine/hooks';
 import { IconLanguage } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
+import { useLocale, useTranslations } from 'next-intl';
+import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 
 export default function Page() {
   const [opened, { toggle }] = useDisclosure();
@@ -12,6 +12,9 @@ export default function Page() {
   const theme = useMantineTheme();
   const xsOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
   const t = useTranslations();
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <AppShell
@@ -27,13 +30,14 @@ export default function Page() {
           </Group>
           <Group>
             <Select
-              data={['English', 'Русский']}
+              data={Object.keys(Locale.FROM_NATIVE_DISPLAY_NAME)}
               leftSectionPointerEvents="none"
               leftSection={icon}
-              defaultValue={'English'}
+              defaultValue={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
               radius="xl"
               maw={xsOrSmaller ? 150 : 150}
               allowDeselect={false}
+              onChange={(value) => { value && router.replace(pathname, {locale: Locale.FROM_NATIVE_DISPLAY_NAME[value].langTag}); router.refresh() }}
             />
             <Button>{t('login')}</Button>
           </Group>
