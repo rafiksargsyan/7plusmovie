@@ -1,66 +1,33 @@
-.root {
-  overflow: hidden;
-  position: relative;
-  min-height: 500px;
+.img {
+  height: 70vh;
 }
 
-.app-bar {
-  z-index: 1;
-  display: flex;
-  position: absolute;
-  background-color: black;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  align-items: center;
-  width: 100%;
-}
-
-.hero {
-  position: relative;
-  min-height: 500px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-image: linear-gradient(rgba(0,0,0,0.9), rgba(0, 0, 0, 0.6), rgba(0,0,0,1));
-}
-
-.hero > div {
-  width: 800px;
-}
-
-.root > img {
-  position: absolute;
-  display: block;
-  left: -9999px;
-  right: -9999px;
-  margin: auto;
-}
-
-@media (min-width: 800px) {
-  .root, .hero {
-    min-height: 600px;
+@media (min-width: 36em) {
+  .img {
+    height: 90vh;
   }
 }
 
-@media (min-width: 1000px) {
-  .root, .hero {
-    min-height: 800px;
+@media (min-width: 48em) {
+  .img {
+    height: 100vh;
   }
 }
 
-@media (max-width: 800px) {
-  .root > img {
-    height: 600px;
-  }
-  .hero > div {
-    width: 400px;
+@media (min-width: 62em) {
+  .img {
+    height: auto;
   }
 }
 
-@media (max-width: 600px) {
-    .hero > div {
-      width: 200px;
-    }
+@media (min-width: 75em) {
+  .img {
+    height: auto;
   }
+}
+
+@media (min-width: 88em) {
+  .img {
+    height: auto;
+  }
+}

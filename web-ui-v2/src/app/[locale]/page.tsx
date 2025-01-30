@@ -5,6 +5,7 @@ import { IconLanguage } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
+import { Hero } from '@/components/Hero/Hero';
 
 export default function Page() {
   const [opened, { toggle }] = useDisclosure();
@@ -35,7 +36,7 @@ export default function Page() {
               leftSection={icon}
               defaultValue={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
               radius="xl"
-              maw={xsOrSmaller ? 150 : 150}
+              maw={xsOrSmaller ? 130 : 150}
               allowDeselect={false}
               onChange={(value) => { value && router.replace(pathname, {locale: Locale.FROM_NATIVE_DISPLAY_NAME[value].langTag}); router.refresh() }}
             />
@@ -58,7 +59,7 @@ export default function Page() {
         <Text fw={700}>tracenoon@gmail.com</Text>
       </AppShell.Navbar>
       <AppShell.Main>
-        Alt layout – Navbar and Aside are rendered on top on Header and Footer
+        <Hero />
       </AppShell.Main>
     </AppShell>
   );

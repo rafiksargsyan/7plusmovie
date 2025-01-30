@@ -1,31 +1,23 @@
-import { Burger } from "@mantine/core";
-import { Autocomplete } from "../Autocomplete/Autocomplete";
-import { IconButton } from "../IconButton/IconButton";
-import { MenuIcon } from "../MenuIcon/MenuIcon";
-import styles from "./Hero.module.css";
-import { useState } from "react";
+import { Box, Button, Container, Overlay, Stack, Title, useMantineTheme } from "@mantine/core";
+import styles from "./Hero.module.css"
+import { useMediaQuery } from "@mantine/hooks";
 
-interface HeroProps {
-  onNavClick: () => void;
-  navVisible: boolean;
-}
+export function Hero() {
+  const theme = useMantineTheme();
+  const xsOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
 
-export function Hero(props: HeroProps) {
   return (
-    <div className={styles.root}>
-      <header className={styles['app-bar']}>
-      <Burger opened={props.navVisible} onClick={props.onNavClick} aria-label="Toggle navigation" style={{position: "sticky", top: "0"}}/> 
-      </header>
-      <img src="./hero-ru-large.jpg"></img>
-      <section className={styles.hero}>
-        <div style={{ zIndex: "100" }}>
-          <h1 style={{ textAlign: "center", marginBottom: "24px", fontSize: "3rem" }}> Good movies are like good books, they are timeless. Our mission is to make the best movies of all time accessible to everyone. </h1>
-          <Autocomplete></Autocomplete>
-        </div>
-      </section>
-      {/* <img style={{ objectFit: "none", marginLeft: "50%", transform: "translateX(-50%)" }} src="https://assets.nflxext.com/ffe/siteui/vlv3/e3e9c31f-aa15-4a8f-8059-04f01e6b8629/web/AM-ru-20250113-TRIFECTA-perspective_d6367bcc-a67b-4f04-a2e1-7ab08e02428a_large.jpg"
-      srcSet="https://assets.nflxext.com/ffe/siteui/vlv3/e3e9c31f-aa15-4a8f-8059-04f01e6b8629/web/AM-ru-20250113-TRIFECTA-perspective_d6367bcc-a67b-4f04-a2e1-7ab08e02428a_large.jpg 2000w, https://assets.nflxext.com/ffe/siteui/vlv3/e3e9c31f-aa15-4a8f-8059-04f01e6b8629/web/AM-ru-20250113-TRIFECTA-perspective_d6367bcc-a67b-4f04-a2e1-7ab08e02428a_medium.jpg 1279w, https://assets.nflxext.com/ffe/siteui/vlv3/e3e9c31f-aa15-4a8f-8059-04f01e6b8629/web/AM-ru-20250113-TRIFECTA-perspective_d6367bcc-a67b-4f04-a2e1-7ab08e02428a_small.jpg 959w"
-      alt="" aria-hidden="true"></img> */}
-    </div>
+    <Box component="section" style={{ overflow: "hidden", position: "relative" }} h={{ base: "50vh", xs: "60vh", sm: "70vh", md: "80vh", lg: "90vh", xl: "90vh" }}>
+      <img src="hero-ru-large.jpg" className={styles.img}/>
+      <Overlay color="transparent" style={{ backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.9))" }} />
+      <Box pos="absolute" style={{zIndex: 201, top: '0', left: '0', width: "100%", height: "100%"}}>
+        <Container size='sm' style={{ height: '100%'}}>
+          <Stack justify="center" align="center" style={{ height: '100%'}} pb="60">
+            <Title ta="center" order={xsOrSmaller ? 2 : 1} style={{color: "white"}}>Our mission is to make the greatest movies and TV shows of all time accessible to everyone.</Title>
+            <Button size="lg">Sign Up</Button>
+          </Stack>
+        </Container>
+      </Box>
+    </Box>
   )  
 }
