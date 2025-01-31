@@ -1,5 +1,5 @@
 'use client'
-import { AppShell, Burger, Button, Divider, Group, NavLink, Select, Space, Text, UnstyledButton, useMantineTheme } from '@mantine/core';
+import { AppShell, Burger, Button, Divider, Group, Select, Space, Text, UnstyledButton, useMantineTheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconLanguage } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
@@ -31,12 +31,14 @@ export default function Page() {
           </Group>
           <Group>
             <Select
+              checkIconPosition='right'
               data={Object.keys(Locale.FROM_NATIVE_DISPLAY_NAME)}
               leftSectionPointerEvents="none"
               leftSection={icon}
+              rightSection={<></>}
               defaultValue={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
               radius="xl"
-              maw={xsOrSmaller ? 130 : 150}
+              maw={xsOrSmaller ? 130 : 130}
               allowDeselect={false}
               onChange={(value) => { value && router.replace(pathname, {locale: Locale.FROM_NATIVE_DISPLAY_NAME[value].langTag}); router.refresh() }}
             />
@@ -59,7 +61,7 @@ export default function Page() {
         <Text fw={700}>tracenoon@gmail.com</Text>
       </AppShell.Navbar>
       <AppShell.Main>
-        <Hero />
+        <Hero title={t("hero.title")}/>
       </AppShell.Main>
     </AppShell>
   );

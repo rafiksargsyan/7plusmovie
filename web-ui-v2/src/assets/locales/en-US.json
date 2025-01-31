@@ -3,5 +3,9 @@
   "contact": "Contact",
   "home": "Home",
   "movies": "Movies",
-  "tvshows": "TV Shows"
+  "tvshows": "TV Shows",
+  "hero": {
+    "title" : "Our mission is to make the greatest movies and TV shows of all time accessible to everyone"
+  },
+  "signup": "Sign Up"
 }
