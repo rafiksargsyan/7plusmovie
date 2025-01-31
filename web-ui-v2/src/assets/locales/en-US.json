@@ -5,7 +5,10 @@
   "movies": "Movies",
   "tvshows": "TV Shows",
   "hero": {
-    "title" : "Our mission is to make the greatest movies and TV shows of all time accessible to everyone"
+    "title" : "Our mission is to make the greatest movies and TV shows of all time accessible to everyone",
+    "image": {
+      "alt": "hero section background image"
+    }
   },
   "signup": "Sign Up"
 }
