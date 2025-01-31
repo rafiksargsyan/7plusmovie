@@ -1,8 +1,8 @@
 import '@mantine/core/styles.css';
 import './global.css'
 import { ColorSchemeScript, MantineProvider, createTheme } from "@mantine/core";
-import {NextIntlClientProvider} from 'next-intl';
-import {getLocale, getMessages} from 'next-intl/server';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 
 const theme = createTheme({
   primaryColor: "violet",
