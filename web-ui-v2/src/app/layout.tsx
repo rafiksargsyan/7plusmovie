@@ -1,4 +1,5 @@
 import '@mantine/core/styles.css';
+import '@mantine/carousel/styles.css';
 import './global.css'
 import { ColorSchemeScript, MantineProvider, createTheme } from "@mantine/core";
 import { NextIntlClientProvider } from 'next-intl';

@@ -1,5 +1,11 @@
 .img {
+  position: absolute;
   height: 70vh;
+  top: -9999px;
+  bottom: -9999px;
+  left: -9999px;
+  right: -9999px;
+  margin: auto;
 }
 
 @media (min-width: 36em) {

@@ -1,11 +1,13 @@
 'use client'
-import { AppShell, Burger, Button, Divider, Group, Select, Space, Text, UnstyledButton, useMantineTheme } from '@mantine/core';
+import { AppShell, Burger, Button, Container, Divider, Group, Select, Space, Stack, Text, Title, UnstyledButton, useMantineTheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconLanguage } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { Hero } from '@/components/Hero/Hero';
+import { Carousel } from '@mantine/carousel';
+import { MovieCard } from '@/components/MovieCard/MovieCard';
 
 export default function Page() {
   const [opened, { toggle }] = useDisclosure();
@@ -62,6 +64,39 @@ export default function Page() {
       </AppShell.Navbar>
       <AppShell.Main>
         <Hero title={t("hero.title")}/>
+        <Container size="xl">
+          <Space h="xl"/>
+          <Space h="xl"/>
+          <Stack component="article">
+            <Title order={2}>{t("latest_movie_updates")}</Title>
+            <Carousel dragFree={true} slideSize={{ base: "80%", xs: "40%", sm: "35%", md: "30%", lg: "20%" }} slideGap="md" align="start" controlSize={xsOrSmaller ? 30 : 40} containScroll='trimSnaps'>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+            </Carousel>
+          </Stack>
+          <Space h="xl"/>
+          <Stack component="article">
+            <Title order={2}>{t("latest_tvshow_updates")}</Title>
+            <Carousel dragFree={true} slideSize={{ base: "80%", xs: "40%", sm: "35%", md: "30%", lg: "20%" }} slideGap="md" align="start" controlSize={xsOrSmaller ? 30 : 40} containScroll='trimSnaps'>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+              <Carousel.Slide><MovieCard></MovieCard></Carousel.Slide>
+            </Carousel>
+          </Stack>
+        </Container>
       </AppShell.Main>
     </AppShell>
   );
