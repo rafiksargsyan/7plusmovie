@@ -1,19 +1,19 @@
 import { Link } from '@/i18n/routing';
 import { Image, Text, Card, CardSection, Space, Group, Badge, Stack } from '@mantine/core';
 
-interface MovieCardProps {
+interface TvShowCardProps {
   alt: string;
-  quality: string;
   title: string;
   year: string;
   url: string;
+  season: string;
+  episode: string;
   imageBaseUrl: string;
   imagePath: string;
 }
 
-export const MovieCard = (props: MovieCardProps) => {
-  const imageBaseUrl = "https://media-assets-cachable-prod-e1pjapsk.q62.uk/cdn-cgi/image/";
-  const imagePath = "56c4b968-43fa-4d2a-9660-5680ca2f44fa/posterImagePortrait-RU.jpg";
+export const TvShowCard = (props: TvShowCardProps) => {
+  const episodeStr = `S${props.season}E${props.episode}`;  
   return (
     <Card padding="lg" radius="md">
       <CardSection pos="relative">
@@ -26,8 +26,8 @@ export const MovieCard = (props: MovieCardProps) => {
             alt={props.alt}
             loading='lazy'
           />
-          <Group style={{flexFlow: "row-reverse wrap-reverse"}} pos="absolute" bottom={0} right={0} p={16} gap="xs">
-            {props.quality && <Badge size='md' radius='sm' color="midnightblue">{props.quality}</Badge>}
+          <Group pos="absolute" top={0} right={0} p={16} gap="xs">
+            <Badge size='lg' radius='sm' color="black">{episodeStr}</Badge>
           </Group>
         </Link>
       </CardSection>

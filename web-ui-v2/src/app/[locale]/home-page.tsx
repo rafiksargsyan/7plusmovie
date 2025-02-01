@@ -8,6 +8,7 @@ import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { Hero } from '@/components/Hero/Hero';
 import { Carousel } from '@mantine/carousel';
 import { MovieCard } from '@/components/MovieCard/MovieCard';
+import { TvShowCard } from '@/components/TvShowCard/TvShowCard';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
@@ -93,15 +94,26 @@ export default function HomePage(props: HomePageProps) {
           <Space h="xl"/>
           <Stack component="article">
             <Title order={2}>{t("latest_movie_updates")}</Title>
-            <Carousel dragFree={true} slideSize={{ base: "80%", xs: "40%", sm: "35%", md: "30%", lg: "20%" }} slideGap="md" align="start" controlSize={xsOrSmaller ? 30 : 40} containScroll='trimSnaps'>
+            <Carousel height={'auto'} dragFree={true} slideSize={{ base: "10%"}} slideGap="md" align="start" controlSize={xsOrSmaller ? 30 : 40} containScroll='trimSnaps'>
               { 
                 props.recentMovieReleases.map(r => <Carousel.Slide>
-                  <MovieCard alt={`${r.title} (${r.year})`} quality={r.quality} title={`${r.title} (${r.year})`} url={'todo'} imageBaseUrl={imageBaseUrl} imagePath={`${r.posterImagePath}`} />
+                  <MovieCard alt={`${r.title} (${r.year})`} quality={r.quality} title={r.title} year={r.year} url={'todo'} imageBaseUrl={imageBaseUrl} imagePath={`${r.posterImagePath}`} />
                 </Carousel.Slide>)
               }
             </Carousel>
           </Stack>
           <Space h="xl"/>
+          <Stack component="article">
+            <Title order={2}>{t("latest_tvshow_updates")}</Title>
+            <Carousel height={'auto'} dragFree={true} slideSize={{ base: "10%"}} slideGap="md" align="start" controlSize={xsOrSmaller ? 30 : 40} containScroll='trimSnaps'>
+              { 
+                props.recentTvShowUpdates.map(r => <Carousel.Slide>
+                  <TvShowCard alt={`${r.title} (${r.year})`} title={r.title} year={r.year} url={'todo'} imageBaseUrl={imageBaseUrl}
+                  imagePath={`${r.posterImagePath}`} season={`${r.season}`} episode={`${r.episode}`} />
+                </Carousel.Slide>)
+              }
+            </Carousel>
+          </Stack>
         </Container>
       </AppShell.Main>
     </AppShell>

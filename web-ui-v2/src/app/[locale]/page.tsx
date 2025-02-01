@@ -22,9 +22,28 @@ export async function getRecentMovieReleases(locale: string) {
     posterImagePath: h.posterImagesPortrait[langKey] || h.posterImagesPortrait[langKey]['EN_US']
   }));
 }
+
+export async function getRecentTVShowUpdates(locale: string) {
+  const langKey = Locale.FROM_LANG_TAG[locale].key || 'EN_US';
+  const algoliaResponse = await algoliaClient.search({
+        requests: [ {
+          indexName: process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!,
+          query: '',
+          filters: 'category:TV_SHOW'
+        }]});
+  return algoliaResponse.results[0].hits.map((h: any) => ({
+    title: h.titleL8ns[langKey] || h.titleL8ns['EN_US'],
+    year: `${h.releaseYear}`,
+    releaseId: 'TODO',
+    season: 10,
+    episode: 10,
+    posterImagePath: h.posterImagesPortrait[langKey] || h.posterImagesPortrait[langKey]['EN_US']
+  }));
+}
  
 export default async function Page() {
   const locale = await getLocale();
   const recentMovieReleases = await getRecentMovieReleases(locale);
-  return <HomePage recentMovieReleases={recentMovieReleases} recentTvShowUpdates={[]}/>
+  const recentTvShowUpdates = await getRecentTVShowUpdates(locale);
+  return <HomePage recentMovieReleases={recentMovieReleases} recentTvShowUpdates={recentTvShowUpdates}/>
 }
