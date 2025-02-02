@@ -1,46 +1,31 @@
-'use client'
-import { AppShell, Box, Burger, Group, MantineProvider, Skeleton } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import '@mantine/core/styles.css';
-import { MovieCard } from "@/components/MovieCard/MovieCard";
-import { Autocomplete } from "@/components/Autocomplete/Autocomplete";
 
-export default function Page() {
-  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
-  const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
+import { searchClient } from '@algolia/client-search';
+import MoviesPage from './movies-page';
+import { getLocale } from 'next-intl/server';
+import { Locale } from '@/i18n/routing';
 
-  return (
-    <MantineProvider forceColorScheme="dark">
-      <AppShell
-        navbar={{
-          width: 300,
-          breakpoint: 'sm',
-          collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
-        }}
-        padding="md"
-      >
-        <AppShell.Navbar p="md">
-          <Group px="md">
-            <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
-            <Burger opened={desktopOpened} onClick={toggleDesktop} visibleFrom="sm" size="sm" />
-          </Group>
-        </AppShell.Navbar>
-        <AppShell.Main pt={"100px"}>
-        <Box component="header" style={{position: "fixed", zIndex: "1", backgroundColor: "black", width: "100%", top: "0"}}>
-          <Group justify="right">
-          { (mobileOpened || desktopOpened) || (<Group h="100%" px="md">
-            <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
-            <Burger opened={desktopOpened} onClick={toggleDesktop} visibleFrom="sm" size="sm" />
-          </Group>) }
-          <Autocomplete></Autocomplete>
-          </Group>
-        </Box>
-        <MovieCard></MovieCard>
-        <MovieCard></MovieCard>
-        <MovieCard></MovieCard>
-        <MovieCard></MovieCard>
-        </AppShell.Main>
-      </AppShell>
-    </MantineProvider>
-  );
+const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
+    process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
+
+export async function getRecentMovieReleases(locale: string) {
+  const langKey = Locale.FROM_LANG_TAG[locale].key || 'EN_US';
+  const algoliaResponse = await algoliaClient.search({
+        requests: [ {
+          indexName: process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!,
+          query: '',
+          filters: 'category:MOVIE'
+        }]});
+  return algoliaResponse.results[0].hits.map((h: any) => ({
+    title: h.titleL8ns[langKey] || h.titleL8ns['EN_US'],
+    year: `${h.releaseYear}`,
+    quality: 'TODO',
+    releaseId: 'TODO',
+    posterImagePath: h.posterImagesPortrait[langKey] || h.posterImagesPortrait[langKey]['EN_US']
+  }));
+}
+ 
+export default async function Page() {
+  const locale = await getLocale();
+  const recentMovieReleases = await getRecentMovieReleases(locale);
+  return <MoviesPage recentMovieReleases={recentMovieReleases} />
 }

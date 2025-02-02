@@ -1,39 +1,50 @@
-'use client'
-import { AppShell, Burger, Group, MantineProvider, Skeleton, Text } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import '@mantine/core/styles.css';
 
-export default function Page() {
-  const [opened, { toggle }] = useDisclosure();
+import { searchClient } from '@algolia/client-search';
+import TvShowsPage from './tvshows-page';
+import { getLocale } from 'next-intl/server';
+import { Locale } from '@/i18n/routing';
 
-  return (
-    <MantineProvider forceColorScheme='dark'>
-    <AppShell
-      layout="alt"
-      header={{ height: 60 }}
-      navbar={{ width: 300, collapsed: { mobile: !opened, desktop: !opened }, breakpoint: "sm" }}
-      padding="md"
-    >
-      <AppShell.Header style={{backgroundColor: "black"}}>
-        <Group h="100%" px="md">
-          {opened || <Burger opened={false} onClick={toggle} size="sm" />}
+const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
+    process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
 
-        </Group>
-      </AppShell.Header>
-      <AppShell.Navbar p="md" style={{backgroundColor: 'black'}}>
-        <Group>
-          {opened && <Burger opened={false} onClick={toggle}  size="sm" /> }
-        </Group>
-        {Array(15)
-          .fill(0)
-          .map((_, index) => (
-            <Skeleton key={index} h={28} mt="sm" animate={false} />
-          ))}
-      </AppShell.Navbar>
-      <AppShell.Main style={{backgroundColor: 'black'}}>
-        Alt layout – Navbar and Aside are rendered on top on Header and Footer
-      </AppShell.Main>
-    </AppShell>
-    </MantineProvider>
-  );
+export async function getRecentMovieReleases(locale: string) {
+  const langKey = Locale.FROM_LANG_TAG[locale].key || 'EN_US';
+  const algoliaResponse = await algoliaClient.search({
+        requests: [ {
+          indexName: process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!,
+          query: '',
+          filters: 'category:MOVIE'
+        }]});
+  return algoliaResponse.results[0].hits.map((h: any) => ({
+    title: h.titleL8ns[langKey] || h.titleL8ns['EN_US'],
+    year: `${h.releaseYear}`,
+    quality: 'TODO',
+    releaseId: 'TODO',
+    posterImagePath: h.posterImagesPortrait[langKey] || h.posterImagesPortrait[langKey]['EN_US']
+  }));
+}
+
+export async function getRecentTVShowUpdates(locale: string) {
+  const langKey = Locale.FROM_LANG_TAG[locale].key || 'EN_US';
+  const algoliaResponse = await algoliaClient.search({
+        requests: [ {
+          indexName: process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!,
+          query: '',
+          filters: 'category:TV_SHOW'
+        }]});
+  return algoliaResponse.results[0].hits.map((h: any) => ({
+    title: h.titleL8ns[langKey] || h.titleL8ns['EN_US'],
+    year: `${h.releaseYear}`,
+    releaseId: 'TODO',
+    season: 10,
+    episode: 10,
+    posterImagePath: h.posterImagesPortrait[langKey] || h.posterImagesPortrait[langKey]['EN_US']
+  }));
+}
+ 
+export default async function Page() {
+  const locale = await getLocale();
+  const recentMovieReleases = await getRecentMovieReleases(locale);
+  const recentTvShowUpdates = await getRecentTVShowUpdates(locale);
+  return <TvShowsPage recentMovieReleases={recentMovieReleases} recentTvShowUpdates={recentTvShowUpdates}/>
 }
