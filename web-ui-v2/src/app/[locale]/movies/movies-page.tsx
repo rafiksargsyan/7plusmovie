@@ -5,10 +5,7 @@ import { IconLanguage } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
-import { Hero } from '@/components/Hero/Hero';
-import { Carousel } from '@mantine/carousel';
 import { MovieCard } from '@/components/MovieCard/MovieCard';
-import { TvShowCard } from '@/components/TvShowCard/TvShowCard';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
@@ -16,15 +13,6 @@ interface MovieRelease {
   title: string;
   year: string;
   quality: string;
-  releaseId: string;
-  posterImagePath: string;
-}
-
-interface TvShowUpdate {
-  title: string;
-  year: string;
-  season: number;
-  episode: number;
   releaseId: string;
   posterImagePath: string;
 }
