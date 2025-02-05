@@ -43,6 +43,7 @@ export default function HomePage(props: HomePageProps) {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const carouselControlMargin = xsOrSmaller ? '-1.7rem' : '-2rem';
 
   return (
     <AppShell
@@ -94,7 +95,14 @@ export default function HomePage(props: HomePageProps) {
           <Space h="xl"/>
           <Stack component="article">
             <Title order={2}>{t("latest_movie_updates")}</Title>
-            <Carousel height={'auto'} dragFree={true} slideSize={{ base: "10%"}} slideGap="md" align="start" controlSize={xsOrSmaller ? 30 : 40} containScroll='trimSnaps'>
+            <Carousel height={'auto'} dragFree={true} slideSize={{ base: "10%"}} slideGap="md" align="start"
+            controlSize={xsOrSmaller ? 30 : 40} containScroll='trimSnaps'
+            styles={{
+              control: {
+                marginLeft: carouselControlMargin,
+                marginRight: carouselControlMargin
+              }
+            }}>
               { 
                 props.recentMovieReleases.map(r => <Carousel.Slide>
                   <MovieCard alt={`${r.title} (${r.year})`} quality={r.quality} title={r.title} year={r.year} url={'todo'} imageBaseUrl={imageBaseUrl} imagePath={`${r.posterImagePath}`} />
@@ -105,7 +113,14 @@ export default function HomePage(props: HomePageProps) {
           <Space h="xl"/>
           <Stack component="article">
             <Title order={2}>{t("latest_tvshow_updates")}</Title>
-            <Carousel height={'auto'} dragFree={true} slideSize={{ base: "10%"}} slideGap="md" align="start" controlSize={xsOrSmaller ? 30 : 40} containScroll='trimSnaps'>
+            <Carousel height={'auto'} dragFree={true} slideSize={{ base: "10%"}} slideGap="md" align="start"
+            controlSize={xsOrSmaller ? 30 : 40} containScroll='trimSnaps'
+             styles={{
+              control: {
+                marginLeft: carouselControlMargin,
+                marginRight: carouselControlMargin
+              }
+            }}>
               { 
                 props.recentTvShowUpdates.map(r => <Carousel.Slide>
                   <TvShowCard alt={`${r.title} (${r.year})`} title={r.title} year={r.year} url={'todo'} imageBaseUrl={imageBaseUrl}

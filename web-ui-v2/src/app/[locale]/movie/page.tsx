@@ -1,31 +1,39 @@
+import axios from 'axios'; 
+import requestIp from 'request-ip';
+import { headers } from 'next/headers';
+import MoviePage, { MovieRelease } from './movie-page';
 
-import { searchClient } from '@algolia/client-search';
-import MoviesPage from './movie-page';
-import { getLocale } from 'next-intl/server';
-import { Locale } from '@/i18n/routing';
+async function ip2AudioLang(ip: string | null): Promise<string> {
+  if (ip == null) ip = '0.0.0.0';
+  const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/ip-2-audio-lang/${ip}`);
+  return response.data;
+}
 
-const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
-    process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
-
-export async function getRecentMovieReleases(locale: string) {
-  const langKey = Locale.FROM_LANG_TAG[locale].key || 'EN_US';
-  const algoliaResponse = await algoliaClient.search({
-        requests: [ {
-          indexName: process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!,
-          query: '',
-          filters: 'category:MOVIE'
-        }]});
-  return algoliaResponse.results[0].hits.map((h: any) => ({
-    title: h.titleL8ns[langKey] || h.titleL8ns['EN_US'],
-    year: `${h.releaseYear}`,
-    quality: 'TODO',
-    releaseId: 'TODO',
-    posterImagePath: h.posterImagesPortrait[langKey] || h.posterImagesPortrait[langKey]['EN_US']
-  }));
+export async function getMovieReleases(movieId: string, preferredAudioLang: string) {
+  const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/movie/${movieId}/releases?preferredAudioLang=${preferredAudioLang}`);
+  const data = response.data;
+  return {
+    defaultReleaseId : data.defaultReleaseId,
+    releases: Object.values(data.releases).reduce((a: { [id:string]: MovieRelease }, c: any) => {
+      a[c['id']] = {
+        id: c['id'],
+        quality: (c['ripType'] === 'CAM' || c['ripType'] === 'TELESYNC' ? c['ripType'] : c.resolution),
+        audioLangs: c['audioLangs']     
+      };
+      return a;
+    }, {})
+  }
 }
  
-export default async function Page() {
-  const locale = await getLocale();
-  const recentMovieReleases = await getRecentMovieReleases(locale);
-  return <MoviesPage recentMovieReleases={recentMovieReleases} />
+export default async function Page({
+  searchParams
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const movieId = (await searchParams).id as string;
+  const headersList = await headers();
+  const clientIp = requestIp.getClientIp({ headers: headersList });
+  const preferredAudioLang = await ip2AudioLang(clientIp)
+  const movieReleases = await getMovieReleases(movieId, preferredAudioLang);
+  return <MoviePage {...movieReleases} />
 }

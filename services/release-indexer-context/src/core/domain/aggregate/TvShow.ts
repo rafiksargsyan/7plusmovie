@@ -228,6 +228,7 @@ export class TvShow {
     if (runtimeSeconds == null || runtimeSeconds <= 0) {
       throw new TvShow_InvalidEpisodeRuntimeSecondsError();
     }
+    if (episode.runtimeSeconds != null && episode.runtimeSeconds > 0) return false;
     if (episode.runtimeSeconds === runtimeSeconds) return false;
     episode.runtimeSeconds = runtimeSeconds;
     return true;

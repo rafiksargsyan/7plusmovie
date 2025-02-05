@@ -1,27 +1,28 @@
 'use client'
-import { AppShell, Burger, Button, Container, Divider, Group, Select, SimpleGrid, Space, Stack, Text, Title, UnstyledButton, useMantineTheme } from '@mantine/core';
+import { AppShell, Burger, Button, Container, Divider, Group, Select, SelectProps, SimpleGrid, Space, Stack, Text, Title, UnstyledButton, useMantineTheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconLanguage } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
-import { MovieCard } from '@/components/MovieCard/MovieCard';
+import { ReleaseQuality } from '@/constants/ReleaseQuality';
+import { Nullable } from '@/types/Nullable';
+import { ReleaseSelect } from '@/components/ReleaseSelect/ReleaseSelect';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
-interface MovieRelease {
-  title: string;
-  year: string;
+export interface MovieRelease {
+  id: string;
   quality: string;
-  releaseId: string;
-  posterImagePath: string;
+  audioLangs: string[];
 }
 
-interface MoviesPageProps {
-  recentMovieReleases: MovieRelease[];
+interface MoviePageProps {
+  releases: { [id: string]: MovieRelease };
+  defaultReleaseId: string
 }
 
-export default function MoviesPage(props: MoviesPageProps) {
+export default function MoviePage(props: MoviePageProps) {
   const [opened, { toggle }] = useDisclosure();
   const icon = <IconLanguage size={16} />;
   const theme = useMantineTheme();
@@ -76,16 +77,14 @@ export default function MoviesPage(props: MoviesPageProps) {
       </AppShell.Navbar>
       <AppShell.Main>
         <Container size="xl">
-          <Stack component="article">
-            <SimpleGrid cols={{base: 1, xs: 2, sm: 3, md: 4, lg: 5, xl: 5}}>
-              { 
-                props.recentMovieReleases.map(r => 
-                  <MovieCard key={r.title} alt={`${r.title} (${r.year})`} quality={r.quality} title={r.title}
-                  year={r.year} url={'todo'} imageBaseUrl={imageBaseUrl} imagePath={`${r.posterImagePath}`} />
-                )
-              }
-            </SimpleGrid>
-          </Stack>
+          <ReleaseSelect defaultReleaseId={props.defaultReleaseId} releases={Object.values(props.releases).reduce((a: any, c) => {
+            a[c['id']] = { 
+              id: c['id'],
+              audioLangs: c['audioLangs'],
+              quality: ReleaseQuality.fromKey(c['quality'])
+            }
+            return a
+          }, {})} />
         </Container>
       </AppShell.Main>
     </AppShell>
