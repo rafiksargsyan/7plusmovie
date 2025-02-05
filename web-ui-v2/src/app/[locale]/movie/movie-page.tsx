@@ -8,6 +8,7 @@ import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { ReleaseQuality } from '@/constants/ReleaseQuality';
 import { Nullable } from '@/types/Nullable';
 import { ReleaseSelect } from '@/components/ReleaseSelect/ReleaseSelect';
+import Player from '@/components/Player/Player';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
@@ -80,11 +81,14 @@ export default function MoviePage(props: MoviePageProps) {
           <ReleaseSelect defaultReleaseId={props.defaultReleaseId} releases={Object.values(props.releases).reduce((a: any, c) => {
             a[c['id']] = { 
               id: c['id'],
-              audioLangs: c['audioLangs'],
+              audioLangs: c['audioLangs'].map(l => t(`audioLang.${l}`)),
               quality: ReleaseQuality.fromKey(c['quality'])
             }
             return a
           }, {})} />
+          <Space h="xl"/>
+          <Player movieTitle={'Movie Title'} m3u8File={'https://default.cdn2.q62.xyz/b8398a81-e744-42a9-a08c-99c7a7add3f2/5e36cab32c958da404c5b7953e55339634f988ee/vod/master.m3u8'}
+          backdropImage={'b8398a81-e744-42a9-a08c-99c7a7add3f2/backdropImage.jpg'}  />
         </Container>
       </AppShell.Main>
     </AppShell>

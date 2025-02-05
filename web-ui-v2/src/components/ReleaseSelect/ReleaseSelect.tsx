@@ -28,16 +28,16 @@ export function ReleaseSelect(props: ReleaseSelectProps) {
     const qualityKey = props.releases[option.value].quality?.key;
     const langs = props.releases[option.value].audioLangs.join(' • ');
     return (<Group flex="1" gap="xs">
-      { checked && <IconCheck /> }
       { qualityKey && <Badge radius='xs' color={quality2Color[qualityKey]}>{qualityKey}</Badge> }   
       <Text> {langs} </Text>
+      { checked && <IconCheck /> }
     </Group>)
   };
 
   return (
-    <Select renderOption={renderSelectOption} placeholder="Select release"
+    <Select label="Select release" allowDeselect={false} renderOption={renderSelectOption} placeholder="Select release" defaultValue={props.defaultReleaseId}
       data={
-        Object.values(props.releases).map(r => ({ value: r.id, label: r.id}))
+        Object.values(props.releases).map(r => ({ value: r.id, labela: '', label: `${props.releases[r.id].quality?.key}   ${props.releases[r.id].audioLangs.join(' • ')}`}))
       }
     />
   ) 

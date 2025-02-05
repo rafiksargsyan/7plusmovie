@@ -12,5 +12,10 @@
   },
   "signup": "Sign Up",
   "latest_movie_updates": "Latest movie updates",
-  "latest_tvshow_updates": "Latest TV show updates"
+  "latest_tvshow_updates": "Latest TV show updates",
+  "audioLang": {
+    "EN_US": "English (US)",
+    "RU": "Russian",
+    "FR_CA": "French (Canada)"
+  }
 }
