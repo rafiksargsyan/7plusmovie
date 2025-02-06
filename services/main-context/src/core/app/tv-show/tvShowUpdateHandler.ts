@@ -142,7 +142,6 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
 };
 
 function getLatestEpisode(seasons: Season[]) {
-  console.log(seasons);
   let seasonNumber = -1;
   let episodeNumber = -1;
   let episode;
