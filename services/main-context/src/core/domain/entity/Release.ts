@@ -38,6 +38,7 @@ export class Release {
   private _rootFolder: string;
   private _ripType: Nullable<RipType>;
   private _resolution: ResolutionEnum;
+  public readonly creationTime: number;
 
   private constructor(createEmptyObject: boolean, subtitles?: { [key: string]: Subtitle }, audios?: { [key: string]: Audio },
                       video?: Video, mpdFile?: string, m3u8File?: string, releaseIndexerContextId?: Nullable<string>,
@@ -54,6 +55,7 @@ export class Release {
       this._resolution = this.validateResolution(resolution);
       this._ripType = ripType;
       this._thumbnails = this.validateThumbnails(thumbnails);
+      this.creationTime = Date.now();
     }
   }
  
@@ -118,6 +120,22 @@ export class Release {
 
   public get rootFolder() {
     return this._rootFolder;
+  }
+
+  public static compareQuality(r1: Release, r2: Release) {
+    const r1RipType: Nullable<RipType> = RipType.fromKey(r1._ripType?.key);
+    const r2RipType: Nullable<RipType> = RipType.fromKey(r2._ripType?.key);
+    const resComp = ResolutionEnum.compare(r1._resolution, r2._resolution);
+    const ripComp = RipType.compare(r1RipType, r2RipType);
+    if (ripComp === 0) {
+      return resComp;
+    }
+    if (r1RipType == null && r2RipType?.isLowQuality() || r2RipType == null && r1RipType?.isLowQuality()) {
+      if (resComp === 0) return (r1RipType == null ? 1 : -1);
+      return resComp;
+    }
+    if (resComp === 0) return ripComp;
+    return resComp;
   }
 }
 

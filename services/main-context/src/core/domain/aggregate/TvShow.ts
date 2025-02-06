@@ -13,6 +13,7 @@ interface Episode {
   episodeNumber: number
   monitorReleases: boolean
   inTranscoding: boolean
+  airDateInMillis: Nullable<number>;
 }
 
 interface Season {
@@ -225,7 +226,8 @@ export class TvShow {
       nameL8ns: {},
       episodeNumber: episodeNumber,
       inTranscoding: false,
-      monitorReleases: false
+      monitorReleases: false,
+      airDateInMillis: null
     })
     this.touch()
   }
@@ -362,6 +364,17 @@ export class TvShow {
     }
   }
 
+  setEpisodeAirDateInMillis(seasonNumber: number, episodeNumber: number, airDateInMillis: number) {
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    if (airDateInMillis == null || airDateInMillis <= 0) {
+      throw new InvalidEpisodeAirDateError();
+    }
+    if (episode.airDateInMillis === airDateInMillis) return false;
+    episode.airDateInMillis = airDateInMillis;
+    this.touch();
+    return true;
+  }
+
 }
 
 class InvalidTitleError extends Error {}
@@ -423,3 +436,5 @@ class NullReleaseError extends Error {}
 class ReleaseWithKeyAlreadyExistsError extends Error {}
 
 class BlankRICTvShowIdError extends Error {}
+
+class InvalidEpisodeAirDateError {}
