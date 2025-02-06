@@ -132,7 +132,8 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
                                         latestSeason: latestEpisode?.seasonNumber,
                                         latestEpisode: latestEpisode?.episode?.episodeNumber,
                                         latestAirDateMillis: latestEpisode?.episode?.airDateInMillis,
-                                        latestReleaseId: latestReleaseId});
+                                        latestReleaseId: latestReleaseId,
+                                        latestReleaseTime: latestReleaseId != null ? latestEpisode?.episode?.releases[latestReleaseId].creationTime : null });
       }
     }
   } catch (e) {
