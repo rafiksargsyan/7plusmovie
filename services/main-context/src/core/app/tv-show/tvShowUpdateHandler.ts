@@ -148,7 +148,7 @@ function getLatestEpisode(seasons: Season[]) {
   seasons.forEach((s) => {
     s.episodes.forEach((e) => {
       if ((s.seasonNumber > seasonNumber || (s.seasonNumber === seasonNumber && e.episodeNumber > episodeNumber))
-        && Object.keys(e.releases).length !== 0) {
+        && e.releases != null && Object.keys(e.releases).length !== 0) {
         seasonNumber = s.seasonNumber;
         episodeNumber = e.episodeNumber;
         episode = e;

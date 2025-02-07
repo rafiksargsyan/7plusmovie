@@ -124,7 +124,7 @@ export default function HomePage(props: HomePageProps) {
               { 
                 props.recentTvShowUpdates.map(r => <Carousel.Slide>
                   <TvShowCard alt={`${r.title} (${r.year})`} title={r.title} year={r.year} url={'todo'} imageBaseUrl={imageBaseUrl}
-                  imagePath={`${r.posterImagePath}`} season={`${r.season}`} episode={`${r.episode}`} />
+                  imagePath={`${r.posterImagePath}`} season={r.season} episode={r.episode} />
                 </Carousel.Slide>)
               }
             </Carousel>

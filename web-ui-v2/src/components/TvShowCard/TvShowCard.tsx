@@ -1,4 +1,5 @@
 import { Link } from '@/i18n/routing';
+import { Nullable } from '@/types/Nullable';
 import { Image, Text, Card, CardSection, Space, Group, Badge, Stack } from '@mantine/core';
 
 interface TvShowCardProps {
@@ -6,14 +7,14 @@ interface TvShowCardProps {
   title: string;
   year: string;
   url: string;
-  season: string;
-  episode: string;
+  season: Nullable<number>;
+  episode: Nullable<number>;
   imageBaseUrl: string;
   imagePath: string;
 }
 
 export const TvShowCard = (props: TvShowCardProps) => {
-  const episodeStr = `S${props.season}E${props.episode}`;  
+  const episodeStr = props.season != null && props.episode != null && `S${props.season}E${props.episode}` || null;
   return (
     <Card padding="lg" radius="md">
       <CardSection pos="relative">
@@ -27,7 +28,7 @@ export const TvShowCard = (props: TvShowCardProps) => {
             loading='lazy'
           />
           <Group pos="absolute" top={0} right={0} p={16} gap="xs">
-            <Badge size='lg' radius='sm' color="black">{episodeStr}</Badge>
+            { episodeStr && <Badge size='lg' radius='sm' color="black">{episodeStr}</Badge> }
           </Group>
         </Link>
       </CardSection>

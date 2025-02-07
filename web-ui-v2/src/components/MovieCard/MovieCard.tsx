@@ -27,7 +27,7 @@ export const MovieCard = (props: MovieCardProps) => {
             loading='lazy'
           />
           <Group style={{flexFlow: "row-reverse wrap-reverse"}} pos="absolute" bottom={0} right={0} p={16} gap="xs">
-            {props.quality && <Badge size='md' radius='sm' color="midnightblue">{props.quality}</Badge>}
+            {props.quality && <Badge size='lg' radius='sm' color="midnightblue">{props.quality}</Badge>}
           </Group>
         </Link>
       </CardSection>
