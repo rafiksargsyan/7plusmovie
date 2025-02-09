@@ -6,15 +6,16 @@ import { useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { TvShowCard } from '@/components/TvShowCard/TvShowCard';
+import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelectButton';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
 interface TvShowUpdate {
+  id: string
   title: string;
   year: string;
   season: number;
   episode: number;
-  releaseId: string;
   posterImagePath: string;
 }
 
@@ -44,19 +45,9 @@ export default function TvShowsPage(props: TvShowsPageProps) {
           <Group h="100%">
             {!opened && <Burger opened={false} onClick={toggle} size="sm" />}
           </Group>
-          <Group>
-            <Select
-              checkIconPosition='right'
-              data={Object.keys(Locale.FROM_NATIVE_DISPLAY_NAME)}
-              leftSectionPointerEvents="none"
-              leftSection={icon}
-              rightSection={<></>}
-              defaultValue={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-              radius="xl"
-              maw={xsOrSmaller ? 130 : 130}
-              allowDeselect={false}
-              onChange={(value) => { value && router.replace(pathname, {locale: Locale.FROM_NATIVE_DISPLAY_NAME[value].langTag}); router.refresh() }}
-            />
+          <Group align="center">
+            <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
+            onLocaleSelect={(value) => { value && router.replace(pathname, {locale: value}); router.refresh() }}/>
             <Button>{t('login')}</Button>
           </Group>
         </Group>
@@ -81,8 +72,9 @@ export default function TvShowsPage(props: TvShowsPageProps) {
             <SimpleGrid cols={{base: 1, xs: 2, sm: 3, md: 4, lg: 5, xl: 5}}>
               { 
                 props.recentTvShowUpdates.map(r => 
-                  <TvShowCard key={r.title} alt={`${r.title} (${r.year})`} season={`${r.season}`} episode={`${r.episode}`}
-                  title={r.title} year={r.year} url={'todo'} imageBaseUrl={imageBaseUrl} imagePath={`${r.posterImagePath}`} />
+                  <TvShowCard key={r.title} alt={`${r.title} (${r.year})`} season={r.season} episode={r.episode}
+                  title={r.title} year={r.year} url={`tv-show?id=${r.id}&s=${r.season}&e=${r.episode}`}
+                  imageBaseUrl={imageBaseUrl} imagePath={`${r.posterImagePath}`} />
                 )
               }
             </SimpleGrid>

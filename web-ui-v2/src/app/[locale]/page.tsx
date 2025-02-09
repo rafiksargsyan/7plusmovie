@@ -6,9 +6,9 @@ import { Locale } from '@/i18n/routing';
 const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
     process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
 
-const MONTH_IN_MILLIS = 30 * 24 * 60 * 60 * 1000;
+export const MONTH_IN_MILLIS = 30 * 24 * 60 * 60 * 1000;
 
-function yearToEpochMillis(year: number) {
+export function yearToEpochMillis(year: number) {
   return Math.floor(new Date(`${year}-01-01T00:00:00Z`).getTime());
 }
 

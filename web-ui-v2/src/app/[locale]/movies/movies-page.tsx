@@ -6,10 +6,12 @@ import { useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { MovieCard } from '@/components/MovieCard/MovieCard';
+import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelectButton';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
 interface MovieRelease {
+  id: string;  
   title: string;
   year: string;
   quality: string;
@@ -43,19 +45,9 @@ export default function MoviesPage(props: MoviesPageProps) {
           <Group h="100%">
             {!opened && <Burger opened={false} onClick={toggle} size="sm" />}
           </Group>
-          <Group>
-            <Select
-              checkIconPosition='right'
-              data={Object.keys(Locale.FROM_NATIVE_DISPLAY_NAME)}
-              leftSectionPointerEvents="none"
-              leftSection={icon}
-              rightSection={<></>}
-              defaultValue={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-              radius="xl"
-              maw={xsOrSmaller ? 130 : 130}
-              allowDeselect={false}
-              onChange={(value) => { value && router.replace(pathname, {locale: Locale.FROM_NATIVE_DISPLAY_NAME[value].langTag}); router.refresh() }}
-            />
+          <Group align="center">
+            <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
+            onLocaleSelect={(value) => { value && router.replace(pathname, {locale: value}); router.refresh() }}/>
             <Button>{t('login')}</Button>
           </Group>
         </Group>
@@ -81,7 +73,7 @@ export default function MoviesPage(props: MoviesPageProps) {
               { 
                 props.recentMovieReleases.map(r => 
                   <MovieCard key={r.title} alt={`${r.title} (${r.year})`} quality={r.quality} title={r.title}
-                  year={r.year} url={'todo'} imageBaseUrl={imageBaseUrl} imagePath={`${r.posterImagePath}`} />
+                  year={r.year} url={`movie?id=${r.id}`} imageBaseUrl={imageBaseUrl} imagePath={`${r.posterImagePath}`} />
                 )
               }
             </SimpleGrid>

@@ -20,7 +20,7 @@ export const MovieCard = (props: MovieCardProps) => {
             src={`${props.imageBaseUrl}w=160,f=auto/${props.imagePath}`}
             srcSet={`${props.imageBaseUrl}w=240,f=auto/${props.imagePath} 240w, ${props.imageBaseUrl}w=160,f=auto/${props.imagePath} 160w`}
             sizes="(max-width: 1200px) 160px, 240px"
-            style={{ aspectRatio: 2 / 3, background: 'url("no-image-holder.svg") no-repeat center center/contain', objectFit: "fill" }}
+            style={{ aspectRatio: 2 / 3, background: 'url("/no-image-holder.svg") no-repeat center center/contain', objectFit: "fill" }}
             alt={props.alt}
             loading='lazy'
           />

@@ -8,6 +8,7 @@ import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { ReleaseQuality } from '@/constants/ReleaseQuality';
 import { ReleaseSelect } from '@/components/ReleaseSelect/ReleaseSelect';
 import Player from '@/components/Player/Player';
+import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelectButton';
 
 export interface MovieRelease {
   id: string;
@@ -42,19 +43,9 @@ export default function MoviePage(props: MoviePageProps) {
           <Group h="100%">
             {!opened && <Burger opened={false} onClick={toggle} size="sm" />}
           </Group>
-          <Group>
-            <Select
-              checkIconPosition='right'
-              data={Object.keys(Locale.FROM_NATIVE_DISPLAY_NAME)}
-              leftSectionPointerEvents="none"
-              leftSection={icon}
-              rightSection={<></>}
-              defaultValue={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-              radius="xl"
-              maw={xsOrSmaller ? 130 : 130}
-              allowDeselect={false}
-              onChange={(value) => { value && router.replace(pathname, {locale: Locale.FROM_NATIVE_DISPLAY_NAME[value].langTag}); router.refresh() }}
-            />
+          <Group align="center">
+            <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
+            onLocaleSelect={(value) => { value && router.replace(pathname, {locale: value}); router.refresh() }}/>
             <Button>{t('login')}</Button>
           </Group>
         </Group>
