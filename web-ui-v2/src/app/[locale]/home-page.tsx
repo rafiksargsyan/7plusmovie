@@ -9,10 +9,12 @@ import { Hero } from '@/components/Hero/Hero';
 import { Carousel } from '@mantine/carousel';
 import { MovieCard } from '@/components/MovieCard/MovieCard';
 import { TvShowCard } from '@/components/TvShowCard/TvShowCard';
+import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelectButton';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
 interface MovieRelease {
+  id: string;
   title: string;
   year: string;
   quality: string;
@@ -21,6 +23,7 @@ interface MovieRelease {
 }
 
 interface TvShowUpdate {
+  id: string;
   title: string;
   year: string;
   season: number;
@@ -58,6 +61,10 @@ export default function HomePage(props: HomePageProps) {
             {!opened && <Burger opened={false} onClick={toggle} size="sm" />}
           </Group>
           <Group>
+            <LocaleSelectButton />
+            <Button>{t('login')}</Button>
+          </Group>
+          {/* <Group>
             <Select
               checkIconPosition='right'
               data={Object.keys(Locale.FROM_NATIVE_DISPLAY_NAME)}
@@ -71,7 +78,7 @@ export default function HomePage(props: HomePageProps) {
               onChange={(value) => { value && router.replace(pathname, {locale: Locale.FROM_NATIVE_DISPLAY_NAME[value].langTag}); router.refresh() }}
             />
             <Button>{t('login')}</Button>
-          </Group>
+          </Group> */}
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
@@ -105,7 +112,8 @@ export default function HomePage(props: HomePageProps) {
             }}>
               { 
                 props.recentMovieReleases.map(r => <Carousel.Slide>
-                  <MovieCard alt={`${r.title} (${r.year})`} quality={r.quality} title={r.title} year={r.year} url={'todo'} imageBaseUrl={imageBaseUrl} imagePath={`${r.posterImagePath}`} />
+                  <MovieCard alt={`${r.title} (${r.year})`} quality={r.quality} title={r.title} year={r.year}
+                  url={`${locale}/movie?id=${r.id}&releaseId=${r.releaseId}`} imageBaseUrl={imageBaseUrl} imagePath={`${r.posterImagePath}`} />
                 </Carousel.Slide>)
               }
             </Carousel>
@@ -119,11 +127,12 @@ export default function HomePage(props: HomePageProps) {
               control: {
                 marginLeft: carouselControlMargin,
                 marginRight: carouselControlMargin
-              }
+              } 
             }}>
-              { 
+              {
                 props.recentTvShowUpdates.map(r => <Carousel.Slide>
-                  <TvShowCard alt={`${r.title} (${r.year})`} title={r.title} year={r.year} url={'todo'} imageBaseUrl={imageBaseUrl}
+                  <TvShowCard alt={`${r.title} (${r.year})`} title={r.title} year={r.year}
+                  url={`${locale}/tv-show?id=${r.id}&s=${r.season}&e=${r.episode}&releaseId=${r.releaseId}`} imageBaseUrl={imageBaseUrl}
                   imagePath={`${r.posterImagePath}`} season={r.season} episode={r.episode} />
                 </Carousel.Slide>)
               }

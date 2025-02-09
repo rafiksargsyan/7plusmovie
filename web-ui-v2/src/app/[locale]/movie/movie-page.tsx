@@ -6,11 +6,8 @@ import { useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { ReleaseQuality } from '@/constants/ReleaseQuality';
-import { Nullable } from '@/types/Nullable';
 import { ReleaseSelect } from '@/components/ReleaseSelect/ReleaseSelect';
 import Player from '@/components/Player/Player';
-
-const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
 export interface MovieRelease {
   id: string;

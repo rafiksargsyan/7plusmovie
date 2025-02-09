@@ -12,8 +12,6 @@ interface MovieCardProps {
 }
 
 export const MovieCard = (props: MovieCardProps) => {
-  const imageBaseUrl = "https://media-assets-cachable-prod-e1pjapsk.q62.uk/cdn-cgi/image/";
-  const imagePath = "56c4b968-43fa-4d2a-9660-5680ca2f44fa/posterImagePortrait-RU.jpg";
   return (
     <Card padding="lg" radius="md">
       <CardSection pos="relative">
