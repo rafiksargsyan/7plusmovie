@@ -1,11 +1,15 @@
 import { Locale } from "@/i18n/routing";
-import { ActionIcon, Button, CheckIcon, Combobox, Group, UnstyledButton, useCombobox } from "@mantine/core";
+import { ActionIcon, CheckIcon, Combobox, Group, UnstyledButton, useCombobox } from "@mantine/core";
 import { IconLanguage } from "@tabler/icons-react";
 import { useState } from "react";
 
-export function LocaleSelectButton() {
-    const [selectedItem, setSelectedItem] = useState<string | null>(null);
-    const [value, setValue] = useState<string | null>('English');
+interface LocaleSelectButtonProps {
+  defaultLocaleDisplayName: string,
+  onLocaleSelect: (locale: string) => void
+}
+
+export function LocaleSelectButton(props: LocaleSelectButtonProps) {
+    const [value, setValue] = useState<string>(props.defaultLocaleDisplayName);
     const combobox = useCombobox({
       onDropdownClose: () => combobox.resetSelectedOption(),
       onDropdownOpen: (eventSource) => {
@@ -28,21 +32,21 @@ export function LocaleSelectButton() {
   
     return (
       <>
-        <Combobox
+        <Combobox      
           store={combobox}
           position="bottom-end"
           width="auto"
           withArrow
           withinPortal={false}
-          onOptionSubmit={(val) => {
-            setSelectedItem(val);
+          onOptionSubmit={(val) => {   
             combobox.closeDropdown();
             setValue(val);
+            props.onLocaleSelect(Locale.FROM_NATIVE_DISPLAY_NAME[val].langTag)
           }}
         >
           <Combobox.Target>
-            <ActionIcon variant="filled" color="gray" aria-label="Settings" onClick={() => combobox.toggleDropdown()}>
-              <IconLanguage style={{ width: '70%', height: '70%' }} stroke={1.5} />
+            <ActionIcon variant="default" size='lg' aria-label="todo" onClick={() => combobox.toggleDropdown()}>
+              <IconLanguage />
             </ActionIcon>
           </Combobox.Target>
   
@@ -53,4 +57,3 @@ export function LocaleSelectButton() {
       </>
     );
   }
-  

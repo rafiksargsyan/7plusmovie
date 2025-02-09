@@ -60,25 +60,11 @@ export default function HomePage(props: HomePageProps) {
           <Group h="100%">
             {!opened && <Burger opened={false} onClick={toggle} size="sm" />}
           </Group>
-          <Group>
-            <LocaleSelectButton />
+          <Group align="center">
+            <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
+            onLocaleSelect={(value) => { value && router.replace(pathname, {locale: value}); router.refresh() }}/>
             <Button>{t('login')}</Button>
           </Group>
-          {/* <Group>
-            <Select
-              checkIconPosition='right'
-              data={Object.keys(Locale.FROM_NATIVE_DISPLAY_NAME)}
-              leftSectionPointerEvents="none"
-              leftSection={icon}
-              rightSection={<></>}
-              defaultValue={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-              radius="xl"
-              maw={xsOrSmaller ? 130 : 130}
-              allowDeselect={false}
-              onChange={(value) => { value && router.replace(pathname, {locale: Locale.FROM_NATIVE_DISPLAY_NAME[value].langTag}); router.refresh() }}
-            />
-            <Button>{t('login')}</Button>
-          </Group> */}
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
