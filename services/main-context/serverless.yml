@@ -809,6 +809,39 @@ functions:
             headers:
               Access-Control-Allow-Origin: "'*'"
 
+  tvShowTmdbSyncFanout:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+      TVSHOW_TMDB_SYNC_LAMBDA_NAME: ${env:TVSHOW_TMDB_SYNC_LAMBDA_NAME} 
+    handler: src/core/app/tv-show/tvShowTmdbSyncFanout.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):TVSHOW_TMDB_SYNC_INTERVAL_IN_MINUTES} minutes)
+    timeout: 900
+
+  tvShowTmdbSync:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID} 
+    handler: src/core/app/tv-show/tvShowTmdbSync.handler
+    timeout: 120
+
+  tvShowSetTmdbSyncEnabled:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/tvShowSetTmdbSyncEnabled.handler
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show/{id}/  
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : "$input.params(''id'')",
+                                   "tmdbSyncEnabled" : $input.json(''$.tmdbSyncEnabled'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
+
 resources:
   Resources:
     createCloudFrontDistroMetadataRole:
