@@ -1,14 +1,13 @@
 'use client'
-import { AppShell, Burger, Button, Container, Divider, Group, Select, SelectProps, SimpleGrid, Space, Stack, Text, Title, UnstyledButton, useMantineTheme } from '@mantine/core';
+import { AppShell, Burger, Button, Container, Divider, Group, Space, Text, UnstyledButton, useMantineTheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconLanguage } from '@tabler/icons-react';
-import { useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { ReleaseQuality } from '@/constants/ReleaseQuality';
 import { ReleaseSelect } from '@/components/ReleaseSelect/ReleaseSelect';
 import Player from '@/components/Player/Player';
 import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelectButton';
+import { useSearchParams } from 'next/navigation';
 
 export interface MovieRelease {
   id: string;
@@ -23,13 +22,11 @@ interface MoviePageProps {
 
 export default function MoviePage(props: MoviePageProps) {
   const [opened, { toggle }] = useDisclosure();
-  const icon = <IconLanguage size={16} />;
-  const theme = useMantineTheme();
-  const xsOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const queryParams = useSearchParams();
 
   return (
     <AppShell
@@ -45,7 +42,7 @@ export default function MoviePage(props: MoviePageProps) {
           </Group>
           <Group align="center">
             <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-            onLocaleSelect={(value) => { value && router.replace(pathname, {locale: value}); router.refresh() }}/>
+            onLocaleSelect={(value) => { value && router.replace(`${pathname}/?${queryParams.toString()}`, {locale: value}); router.refresh() }}/>
             <Button>{t('login')}</Button>
           </Group>
         </Group>

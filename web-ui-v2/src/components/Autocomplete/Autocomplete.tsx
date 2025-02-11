@@ -1,15 +1,11 @@
-'use client'
-import { autocomplete, AutocompleteOptions } from '@algolia/autocomplete-js';
+import { autocomplete } from '@algolia/autocomplete-js';
 import React, { createElement, Fragment, useEffect, useRef } from 'react';
-import { createRoot, Root } from 'react-dom/client';
-import '@algolia/autocomplete-theme-classic';
+import { createRoot } from 'react-dom/client';
 
-interface AutocompleteProps extends Partial<AutocompleteOptions<any>> {}
-
-export function Autocomplete(props: AutocompleteProps) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const panelRootRef = useRef<Root | null>(null);
-  const rootRef = useRef<Element | null>(null);
+export function Autocomplete(props) {
+  const containerRef = useRef(null);
+  const panelRootRef = useRef(null);
+  const rootRef = useRef(null);
 
   useEffect(() => {
     if (!containerRef.current) {
