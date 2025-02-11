@@ -359,7 +359,7 @@ async function updateBasedOnTmdbId(tvShowId: string, tmdbId: string, tmdbApiKey:
             }
           }
           if (!strIsBlank(tmdbEpisodeEnUs.air_date)) {
-            const airDateMillis = new Date(tmdbSeasonEnUs.air_date).getTime();
+            const airDateMillis = new Date(tmdbEpisodeEnUs.air_date).getTime();
             if (tvShow.setEpisodeAirDateInMillis(_.seasonNumber, episode.episodeNumber, airDateMillis)) {
               updated = true
             }
