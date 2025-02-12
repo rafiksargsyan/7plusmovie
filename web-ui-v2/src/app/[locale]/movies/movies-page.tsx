@@ -1,7 +1,8 @@
 'use client'
-import { AppShell, Box, Burger, Button, Container, Divider, Group, SimpleGrid, Space, Stack,
-    Text, UnstyledButton } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { ActionIcon, AppShell, Box, Burger, Button, Container, Divider, Group, SimpleGrid, Space, Stack,
+    Text, UnstyledButton, 
+    useMantineTheme} from '@mantine/core';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { MovieCard } from '@/components/MovieCard/MovieCard';
@@ -10,6 +11,7 @@ import { Autocomplete } from '@/components/Autocomplete/Autocomplete';
 import { algoliaClient } from './page';
 import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions';
 import { useSearchParams } from 'next/navigation';
+import { IconSearch } from '@tabler/icons-react';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
@@ -34,12 +36,15 @@ export default function MoviesPage(props: MoviesPageProps) {
   const router = useRouter();
   const pathname = usePathname();
   const queryParams = useSearchParams();
-
+  const theme = useMantineTheme();
+  const xsOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
+  const [autoCompleteOpened, controlAutocomplete] = useDisclosure();
+ 
   const querySuggestionsPlugin = createQuerySuggestionsPlugin({
     searchClient: algoliaClient,
     indexName: process.env.NEXT_PUBLIC_ALGOLIA_QUERY_SUGGESTIONS_ALL_INDEX!,
     getSearchParams({ state }) {
-      return { hitsPerPage: state.query ? 10 : 10 };
+      return { hitsPerPage: state.query ? 10 : 0 };
     },
     categoryAttribute: [
       process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!,
@@ -53,10 +58,11 @@ export default function MoviesPage(props: MoviesPageProps) {
       return {
         ...source,
         onSelect(e: any) {
+          controlAutocomplete.close();  
           if (e.item.__autocomplete_qsCategory === "TV_SHOW") {
             const params = new URLSearchParams(queryParams.toString());
             params.set('q', e.item.query);
-            router.push(`tv-show?${params.toString()}`);
+            router.push(`tv-shows?${params.toString()}`);
           } else {
             const params = new URLSearchParams(queryParams.toString());
             params.set('q', e.state.query);
@@ -79,26 +85,42 @@ export default function MoviesPage(props: MoviesPageProps) {
           <Group h="100%">
             {!opened && <Burger opened={false} onClick={toggle} size="sm" />}
           </Group>
+          { !xsOrSmaller &&
           <Box w={{base: 50, xs: 300, md: 350, lg: 500, xl: 500}}>
             <Autocomplete
+              detachedMediaQuery=''
               initialState={{query: props.query}}
               plugins={[querySuggestionsPlugin]}
-              openOnFocus={false}
+              openOnFocus={true}
               onSubmit={(e: any) => {
                 const params = new URLSearchParams(queryParams.toString());
                 params.set('q', e.state.query);
                 router.replace(`?${params.toString()}`);
               }}
-              onStateChange={(e: any) => {
-                if (e.state.query === "") {
-                  const params = new URLSearchParams(queryParams.toString());
-                  if (params.get('q') === "") return;
-                  params.set('q', "");
-                  router.replace(`?${params.toString()}`);  
-                }
-              }}/>
-          </Box>
+              />
+          </Box> }
           <Group align="center">
+            {xsOrSmaller &&
+            <><ActionIcon variant="default" size='lg' aria-label="todo" onClick={() => controlAutocomplete.open()}>
+              <IconSearch />
+            </ActionIcon>
+            <Box style={{display: (autoCompleteOpened ? undefined : 'none')}}>
+            <Autocomplete
+            detachedMediaQuery=''
+            initialState={{query: props.query, isOpen: autoCompleteOpened}}
+            plugins={[querySuggestionsPlugin]}
+            openOnFocus={true}
+            onSubmit={(e: any) => {
+              controlAutocomplete.close();
+              const params = new URLSearchParams(queryParams.toString());
+              params.set('q', e.state.query);
+              router.replace(`?${params.toString()}`);
+            }}
+            onStateChange={(e: any) => {
+              !(e.state.isOpen) && controlAutocomplete.close();
+            }}/>
+          </Box></>
+            }
             <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
             onLocaleSelect={(value) => { value && router.replace(pathname, {locale: value}); router.refresh() }}/>
             <Button>{t('login')}</Button>
@@ -125,7 +147,7 @@ export default function MoviesPage(props: MoviesPageProps) {
             <SimpleGrid cols={{base: 1, xs: 2, sm: 3, md: 4, lg: 5, xl: 5}}>
               { 
                 props.recentMovieReleases.map(r => 
-                  <MovieCard key={r.title} alt={`${r.title} (${r.year})`} quality={r.quality} title={r.title}
+                  <MovieCard key={`${r.title} (${r.year})`} alt={`${r.title} (${r.year})`} quality={r.quality} title={r.title}
                   year={r.year} url={`movie?id=${r.id}`} imageBaseUrl={imageBaseUrl} imagePath={`${r.posterImagePath}`} />
                 )
               }
