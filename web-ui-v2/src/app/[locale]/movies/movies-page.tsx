@@ -68,7 +68,7 @@ export default function MoviesPage(props: MoviesPageProps) {
             params.set('q', e.state.query);
             router.replace(`?${params.toString()}`);
           }
-        },
+        }
       };
     },
   });
@@ -88,7 +88,6 @@ export default function MoviesPage(props: MoviesPageProps) {
           { !xsOrSmaller &&
           <Box w={{base: 50, xs: 300, md: 350, lg: 500, xl: 500}}>
             <Autocomplete
-              detachedMediaQuery=''
               initialState={{query: props.query}}
               plugins={[querySuggestionsPlugin]}
               openOnFocus={true}

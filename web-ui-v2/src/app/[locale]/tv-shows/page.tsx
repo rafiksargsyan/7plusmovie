@@ -8,12 +8,12 @@ import { yearToEpochMillis } from '../page';
 const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
     process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
 
-export async function getRecentTVShowUpdates(locale: string) { 
+export async function getRecentTVShowUpdates(locale: string, query: string) { 
   const langKey = Locale.FROM_LANG_TAG[locale].key || 'EN_US';
   const algoliaResponse = await algoliaClient.search({
         requests: [ {
           indexName: process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!,
-          query: '',
+          query: query,
           filters: 'category:TV_SHOW',
           hitsPerPage: 1000
         }]});
@@ -27,12 +27,17 @@ export async function getRecentTVShowUpdates(locale: string) {
     year: `${h.releaseYear}`,
     season: h.latestSeason,
     episode: h.latestEpisode,
-    posterImagePath: h.posterImagesPortrait[langKey] || h.posterImagesPortrait[langKey]['EN_US']
+    posterImagePath: h.posterImagesPortrait[langKey] || h.posterImagesPortrait['EN_US']
   }));
 }
  
-export default async function Page() {
+export default async function Page({
+  searchParams
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const locale = await getLocale();
-  const recentTvShowUpdates = await getRecentTVShowUpdates(locale);
-  return <TvShowsPage recentTvShowUpdates={recentTvShowUpdates}/>
+  const query = (await searchParams).q as string;
+  const recentTvShowUpdates = await getRecentTVShowUpdates(locale, query);
+  return <TvShowsPage recentTvShowUpdates={recentTvShowUpdates} query={query}/>
 }

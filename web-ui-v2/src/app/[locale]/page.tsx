@@ -37,7 +37,7 @@ export async function getRecentMovieReleases(locale: string) {
     year: `${h.releaseYear}`,
     quality: h.latestReleaseQuality,
     releaseId: h.latestReleaseId,
-    posterImagePath: h.posterImagesPortrait[langKey] || h.posterImagesPortrait[langKey]['EN_US']
+    posterImagePath: h.posterImagesPortrait[langKey] || h.posterImagesPortrait['EN_US']
   }));
 }
 
@@ -67,7 +67,7 @@ export async function getRecentTVShowUpdates(locale: string) {
     releaseId: h.latestReleaseId,
     season: h.latestSeason,
     episode: h.latestEpisode,
-    posterImagePath: h.posterImagesPortrait[langKey] || h.posterImagesPortrait[langKey]['EN_US']
+    posterImagePath: h.posterImagesPortrait[langKey] || h.posterImagesPortrait['EN_US']
   }));
 }
  

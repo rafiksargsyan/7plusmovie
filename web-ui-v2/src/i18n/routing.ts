@@ -4,15 +4,18 @@ import {createNavigation} from 'next-intl/navigation';
 export class Locale {
   static readonly EN_US = new Locale("EN_US", "en-US", "English");
   static readonly RU = new Locale("RU", "ru", "Русский");
+  static readonly HY = new Locale("HY", "hy", "Հայերեն");
 
   static readonly FROM_LANG_TAG: { [langTag: string]: Locale } = {
     "ru" : Locale.RU,
-    "en-US" : Locale.EN_US
+    "en-US" : Locale.EN_US,
+    "hy" : Locale.HY
   } as const;
 
   static readonly FROM_NATIVE_DISPLAY_NAME: { [nativeDisplayName: string]: Locale } = {
     "English" : Locale.EN_US,
-    "Русский" : Locale.RU
+    "Русский" : Locale.RU,
+    "Հայերեն" : Locale.HY,
   }
 
   readonly key: string;
@@ -27,7 +30,7 @@ export class Locale {
 }
 
 export const routing = defineRouting({
-  locales: ['en-US', 'ru'],
+  locales: ['en-US', 'ru', 'hy'],
   defaultLocale: 'en-US'
 });
 

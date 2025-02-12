@@ -42,7 +42,7 @@ export const handler = async (event: GetMovieReleasesParam): Promise<GetMovieRel
     a[c[0]] = {
       id: c[0],
       ripType: c[1]._ripType?.key,
-      resolution: c[1]._resolution.key,
+      resolution: c[1]._resolution != null ? c[1]._resolution.key : Resolution.FHD.key,
       audioLangs: [... new Set(Object.entries(c[1]._audios).map(v => v[1].lang.key))]
     };
     return a;

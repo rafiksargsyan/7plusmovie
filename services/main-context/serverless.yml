@@ -164,7 +164,8 @@ functions:
           request:
             template:
               application/json: '{ "movieId" : "$input.params(''id'')",
-                                   "preferredAudioLang" : "$util.escapeJavaScript($input.params().querystring.get(''preferredAudioLang''))" }'
+                                   "preferredAudioLang" : "$util.escapeJavaScript($input.params().querystring.get(''preferredAudioLang''))",
+                                   "releaseId" : "$util.escapeJavaScript($input.params().querystring.get(''releaseId''))" }'
               application/x-www-form-urlencoded: null
           response:
             headers:
@@ -177,29 +178,6 @@ functions:
                          "titleL8ns": $input.json(''$.titleL8ns''),
                          "releaseYear": $input.json(''$.releaseYear''),
                          "thumbnailsFile": $input.json(''$.thumbnailsFile'') }'
-
-  getMovieRelease:
-    environment:
-      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
-      DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME: ${env:DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME}
-      CF_DISTRO_USAGE_THRESHOLD: ${env:CF_DISTRO_USAGE_THRESHOLD}
-      CF_DISTRO_RANDOM_SELECTION_PROPORTION: ${env:CF_DISTRO_RANDOM_SELECTION_PROPORTION}
-      CLOUDFLARE_MEDIA_ASSETS_DOMAIN: ${env:CLOUDFLARE_MEDIA_ASSETS_DOMAIN}
-      CLOUDFLARE_MEDIA_ASSETS_CACHABLE_DOMAIN: ${env:CLOUDFLARE_MEDIA_ASSETS_CACHABLE_DOMAIN}
-    handler: src/core/app/getMovieRelease.handler
-    events:
-      - http:
-          integration: lambda
-          path: /movie/{id}/release/{releaseId}
-          method: get
-          request:
-            template:
-              application/json: '{ "movieId" : "$input.params(''id'')",
-                                   "releaseId" : "$input.params(''releaseId'')" }'
-              application/x-www-form-urlencoded: null
-          response:
-            headers:
-              Access-Control-Allow-Origin: "'*'"
   
   getMovieReleases:
     environment:

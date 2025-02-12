@@ -8,6 +8,20 @@ import { ReleaseSelect } from '@/components/ReleaseSelect/ReleaseSelect';
 import Player from '@/components/Player/Player';
 import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelectButton';
 import { useSearchParams } from 'next/navigation';
+import { Nullable } from '@/types/Nullable';
+
+export interface MovieStreamInfo {
+  id: string;
+  releaesId: Nullable<string>;
+  originalTitle: string;
+  titleL8ns: { [key: string]: string };
+  releaseYear: number;
+  backdropImage: string;
+  mpdFile: string;
+  m3u8File: string;
+  subtitles: { [key: string]: string };
+  thumbnailsFile: string;
+}
 
 export interface MovieRelease {
   id: string;
@@ -18,6 +32,7 @@ export interface MovieRelease {
 interface MoviePageProps {
   releases: { [id: string]: MovieRelease };
   defaultReleaseId: string
+  movieStreamInfo: MovieStreamInfo
 }
 
 export default function MoviePage(props: MoviePageProps) {
@@ -70,10 +85,16 @@ export default function MoviePage(props: MoviePageProps) {
               quality: ReleaseQuality.fromKey(c['quality'])
             }
             return a
-          }, {})} />
+          }, {})}
+          onReleaseSelected={(id: string) => {
+            const params = new URLSearchParams(queryParams.toString());
+            params.set('releaseId', id);
+            router.replace(`${pathname}?${params.toString()}`);
+          }}/>
           <Space h="xl"/>
-          <Player movieTitle={'Movie Title'} m3u8File={'https://default.cdn2.q62.xyz/b8398a81-e744-42a9-a08c-99c7a7add3f2/5e36cab32c958da404c5b7953e55339634f988ee/vod/master.m3u8'}
-          backdropImage={'b8398a81-e744-42a9-a08c-99c7a7add3f2/backdropImage.jpg'}  />
+          <Player movieTitle={`${props.movieStreamInfo.titleL8ns[Locale.FROM_LANG_TAG[locale].key] || props.movieStreamInfo.titleL8ns['EN_US']} (${props.movieStreamInfo.releaseYear})`}
+          m3u8File={props.movieStreamInfo.m3u8File}
+          backdropImage={props.movieStreamInfo.backdropImage}  />
         </Container>
       </AppShell.Main>
     </AppShell>

@@ -28,7 +28,7 @@ export default async function RootLayout({
       <head>
         <ColorSchemeScript defaultColorScheme="dark" />
       </head>
-      <body>
+      <body data-theme="dark">
         <MantineProvider theme={theme} defaultColorScheme="dark" forceColorScheme='dark'>
           <NextIntlClientProvider messages={messages}>
             {children}

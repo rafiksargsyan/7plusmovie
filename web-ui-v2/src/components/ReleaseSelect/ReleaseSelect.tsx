@@ -5,6 +5,8 @@ import { Badge, Group, Select, SelectProps, Text } from "@mantine/core";
 import { IconCheck } from "@tabler/icons-react";
 
 interface ReleaseSelectProps {
+  label: string;
+  placeholder: string;  
   defaultReleaseId: string;
   releases: {
     [id:string]: {
@@ -12,7 +14,8 @@ interface ReleaseSelectProps {
       quality: Nullable<ReleaseQuality>;
       audioLangs: string[];
     }
-  }
+  },
+  onReleaseSelected: (id: string) => void;
 }
 
 const quality2Color = {
@@ -35,10 +38,18 @@ export function ReleaseSelect(props: ReleaseSelectProps) {
   };
 
   return (
-    <Select label="Select release" allowDeselect={false} renderOption={renderSelectOption} placeholder="Select release" defaultValue={props.defaultReleaseId}
+    <Select label={props.label} allowDeselect={false} renderOption={renderSelectOption}
+    placeholder={props.placeholder} defaultValue={props.defaultReleaseId}
       data={
-        Object.values(props.releases).map(r => ({ value: r.id, labela: '', label: `${props.releases[r.id].quality?.key}   ${props.releases[r.id].audioLangs.join(' • ')}`}))
+        Object.values(props.releases).sort((a, b) => {
+          const bQuality = b.quality;
+          const aQuality = a.quality;
+          return ReleaseQuality.compare(bQuality, aQuality);
+        }).map(r => ({ value: r.id, label: `${props.releases[r.id].quality?.key}   ${props.releases[r.id].audioLangs.join(' • ')}`}))
       }
+    onOptionSubmit={(value: string) => {
+      props.onReleaseSelected(value);
+    }}
     />
   ) 
 }

@@ -20,6 +20,7 @@ const docClient = DynamoDBDocument.from(new DynamoDB({}));
 interface GetMovieParam {
   movieId: string
   preferredAudioLang: string
+  releaseId: Nullable<string>
 }
 
 interface GetMovieMetadataResponse {
@@ -75,7 +76,10 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   if (releases == null) releases = {};
   let preferredAudioLang = AudioLang.fromKey(event.preferredAudioLang)
   if (preferredAudioLang == null) preferredAudioLang = AudioLang.RU
-  const release = getOneRelease(Object.values(releases), preferredAudioLang);
+  let release = event.releaseId != null ? getRelease(releases, event.releaseId) : null;
+  if (release == null) {
+    release = getOneRelease(Object.values(releases), preferredAudioLang);
+  }
   if (release != null) {
     mpdFile = release._mpdFile;
     m3u8File = release._m3u8File;
@@ -192,4 +196,8 @@ export async function getCloudFrontDistro() {
     return undefined;
   }
   return candidate;
+}
+
+export function getRelease(releases: { [id:string]: ReleaseRead }, releaseId: string) {
+  return releases[releaseId];
 }

@@ -27,7 +27,7 @@ export async function getMovieReleases(locale: string, query: string) {
     title: h.titleL8ns[langKey] || h.titleL8ns['EN_US'],
     year: `${h.releaseYear}`,
     quality: h.maxQuality,
-    posterImagePath: h.posterImagesPortrait[langKey] || h.posterImagesPortrait[langKey]['EN_US']
+    posterImagePath: h.posterImagesPortrait[langKey] || h.posterImagesPortrait['EN_US']
   }));
 }
  
