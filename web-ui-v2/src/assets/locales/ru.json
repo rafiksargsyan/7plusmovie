@@ -13,6 +13,15 @@
   "signup": "Зарегистрироваться",
   "latest_movie_updates": "Последние обновления фильмов",
   "latest_tvshow_updates": "Последние обновления телешоу",
+  "releaseSelect": {
+    "label": "Выбрать выпуск"
+  },
+  "seasonSelect": {
+    "label": "Выбрать сезон"
+  },
+  "episodeSelect": {
+    "label": "Выбрать эпизод"
+  },
   "audioLang": {
     "EN": "Английский",
     "EN_US": "Английский (США)",
@@ -64,5 +73,10 @@
     "AR": "Арабский",
     "HE": "Иврит",
     "MYN": "Майяский"
-  }
+  },
+  "search": {
+    "placeholder": "Искать фильмы, жанры, людей"
+  },
+  "season": "Сезон {seasonNumber}",
+  "episode": "Эпизод {episodeNumber}"
 }

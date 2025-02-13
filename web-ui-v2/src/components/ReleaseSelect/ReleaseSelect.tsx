@@ -45,7 +45,7 @@ export function ReleaseSelect(props: ReleaseSelectProps) {
           const bQuality = b.quality;
           const aQuality = a.quality;
           return ReleaseQuality.compare(bQuality, aQuality);
-        }).map(r => ({ value: r.id, label: `${props.releases[r.id].quality?.key}   ${props.releases[r.id].audioLangs.join(' • ')}`}))
+        }).map(r => ({ value: r.id, label: props.releases[r.id].quality == null ? `${props.releases[r.id].audioLangs.join(' • ')}` : `${props.releases[r.id].quality?.key}   ${props.releases[r.id].audioLangs.join(' • ')}`}))
       }
     onOptionSubmit={(value: string) => {
       props.onReleaseSelected(value);

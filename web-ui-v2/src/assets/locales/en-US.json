@@ -13,6 +13,15 @@
   "signup": "Sign Up",
   "latest_movie_updates": "Latest movie updates",
   "latest_tvshow_updates": "Latest TV show updates",
+  "releaseSelect": {
+    "label": "Select release"
+  },
+  "seasonSelect": {
+    "label": "Select season"
+  },
+  "episodeSelect": {
+    "label": "Select episode"
+  },
   "audioLang": {
     "EN": "English",
     "EN_US": "English (US)",
@@ -64,5 +73,10 @@
     "AR": "Arabic",
     "HE": "Hebrew",
     "MYN": "Mayan"
-  }
+  },
+  "search": {
+    "placeholder": "Search titles, genres, persons"
+  },
+  "season": "Season {seasonNumber}",
+  "episode": "Episode {episodeNumber}"
 }

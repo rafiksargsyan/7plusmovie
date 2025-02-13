@@ -19,7 +19,6 @@ export interface MovieStreamInfo {
   backdropImage: string;
   mpdFile: string;
   m3u8File: string;
-  subtitles: { [key: string]: string };
   thumbnailsFile: string;
 }
 
@@ -78,7 +77,8 @@ export default function MoviePage(props: MoviePageProps) {
       </AppShell.Navbar>
       <AppShell.Main>
         <Container size="xl">
-          <ReleaseSelect defaultReleaseId={props.defaultReleaseId} releases={Object.values(props.releases).reduce((a: any, c) => {
+          <ReleaseSelect label={t("releaseSelect.label")} placeholder={t("releaseSelect.label")}
+          defaultReleaseId={props.defaultReleaseId} releases={Object.values(props.releases).reduce((a: any, c) => {
             a[c['id']] = { 
               id: c['id'],
               audioLangs: c['audioLangs'].map(l => t(`audioLang.${l}`)),
@@ -94,7 +94,8 @@ export default function MoviePage(props: MoviePageProps) {
           <Space h="xl"/>
           <Player movieTitle={`${props.movieStreamInfo.titleL8ns[Locale.FROM_LANG_TAG[locale].key] || props.movieStreamInfo.titleL8ns['EN_US']} (${props.movieStreamInfo.releaseYear})`}
           m3u8File={props.movieStreamInfo.m3u8File}
-          backdropImage={props.movieStreamInfo.backdropImage}  />
+          backdropImage={props.movieStreamInfo.backdropImage}
+          thumbnailsFile={props.movieStreamInfo.thumbnailsFile}  />
         </Container>
       </AppShell.Main>
     </AppShell>

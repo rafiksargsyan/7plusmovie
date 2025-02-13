@@ -88,6 +88,7 @@ export default function MoviesPage(props: MoviesPageProps) {
           { !xsOrSmaller &&
           <Box w={{base: 50, xs: 300, md: 350, lg: 500, xl: 500}}>
             <Autocomplete
+              placeholder={t("search.placeholder")}
               initialState={{query: props.query}}
               plugins={[querySuggestionsPlugin]}
               openOnFocus={true}
@@ -105,6 +106,7 @@ export default function MoviesPage(props: MoviesPageProps) {
             </ActionIcon>
             <Box style={{display: (autoCompleteOpened ? undefined : 'none')}}>
             <Autocomplete
+            placeholder={t("search.placeholder")}
             detachedMediaQuery=''
             initialState={{query: props.query, isOpen: autoCompleteOpened}}
             plugins={[querySuggestionsPlugin]}

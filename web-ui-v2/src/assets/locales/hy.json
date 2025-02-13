@@ -13,6 +13,15 @@
     "signup": "Գրանցվել",
     "latest_movie_updates": "Վերջին ֆիլմերի նորությունները",
     "latest_tvshow_updates": "Վերջին հեռուստաշոուների նորությունները",
+    "releaseSelect": {
+      "label": "Ընտրել թողարկումը"
+    },
+    "seasonSelect": {
+      "label": "Ընտրեք սեզոնը"
+    },
+    "episodeSelect": {
+      "label": "Ընտրեք դրվագը"
+    },
     "audioLang": {
       "EN": "Անգլերեն",
       "EN_US": "Անգլերեն (ԱՄՆ)",
@@ -64,6 +73,11 @@
       "AR": "Արաբերեն",
       "HE": "Եբրայերեն",
       "MYN": "Մայայերեն"
-    }
+    },
+    "search": {
+       "placeholder": "Որոնել վերնագրեր, ժանրեր, անձինք"
+    },
+    "season": "Սեզոն {seasonNumber}",
+    "episode": "Դրվագ {episodeNumber}"
   }
   

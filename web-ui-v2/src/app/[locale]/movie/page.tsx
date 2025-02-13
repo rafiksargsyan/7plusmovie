@@ -38,7 +38,6 @@ export async function getMovieStreamInfo(movieId: string, releaseId: Nullable<st
     backdropImage: response.data.backdropImage,
     mpdFile: response.data.mpdFile,
     m3u8File: response.data.m3u8File,
-    subtitles: response.data.subtitles,
     thumbnailsFile: response.data.thumbnailsFile
   }
 }
