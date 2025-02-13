@@ -8,6 +8,7 @@ interface ReleaseSelectProps {
   label: string;
   placeholder: string;  
   defaultReleaseId: string;
+  releaseId: Nullable<string>
   releases: {
     [id:string]: {
       id: string,
@@ -39,7 +40,7 @@ export function ReleaseSelect(props: ReleaseSelectProps) {
 
   return (
     <Select label={props.label} allowDeselect={false} renderOption={renderSelectOption}
-    placeholder={props.placeholder} defaultValue={props.defaultReleaseId}
+    placeholder={props.placeholder} value={props.releaseId} defaultValue={props.defaultReleaseId}
       data={
         Object.values(props.releases).sort((a, b) => {
           const bQuality = b.quality;

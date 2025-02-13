@@ -13,7 +13,6 @@ async function ip2AudioLang(ip: string | null): Promise<string> {
 export async function getMovieReleases(movieId: string, preferredAudioLang: string) {
   const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/movie/${movieId}/releases?preferredAudioLang=${preferredAudioLang}`);
   const data = response.data;
-  console.log(JSON.stringify(data));
   return {
     defaultReleaseId : data.defaultReleaseId,
     releases: Object.values(data.releases).reduce((a: { [id:string]: MovieRelease }, c: any) => {

@@ -31,7 +31,6 @@ export async function getTvShowReleases(id: string, preferredAudioLang: string) 
       })
     }
   }
-  console.log(seasons);
   return seasons;
 }
 

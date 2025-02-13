@@ -23,7 +23,7 @@ export function EpisodeSelect(props: EpisodeSelectProps) {
 
   return (
     <Select label={props.label} allowDeselect={false} renderOption={renderSelectOption}
-    placeholder={props.placeholder} defaultValue={`${props.defaultEpisodeNumber}`}
+    placeholder={props.placeholder} value={`${props.defaultEpisodeNumber}`}
       data={
         Object.values(props.episodes).sort((a, b) => {
           return a.episodeNumber - b.episodeNumber;

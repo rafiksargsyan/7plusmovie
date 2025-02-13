@@ -9,8 +9,10 @@ import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelect
 import { useSearchParams } from 'next/navigation';
 import { SeasonSelect } from '@/components/SeasonSelect/SeasonSelect';
 import { EpisodeSelect } from '@/components/EpisodeSelect/EpisodeSelect';
-import { Nullable } from '@/types/Nullable';
-import { errorToJSON } from 'next/dist/server/render';
+
+export function getDefaultReleaseId(seasons: Season[], season: number, episode: number) {
+  return seasons.filter((s) => s.seasonNumber === season)[0].episodes.filter((e) => e.episodeNumber === episode)[0].defaultReleaseId;
+}
 
 export interface Release {
   id: string;
@@ -104,18 +106,27 @@ export default function TvShowPage(props: TvShowPageProps) {
           seasons={props.seasons.map((s) => ({
             seasonNumber: s.seasonNumber,
             seasonName: t('season', {seasonNumber: s.seasonNumber})
-          }))} onSeasonSelected={function (seasonNumber: number): void {
-                      throw new Error('Function not implemented.');
-                  } }/>
+          }))}
+            onSeasonSelected={function (seasonNumber: number): void {
+              const params = new URLSearchParams(queryParams.toString());
+              params.set('s', `${seasonNumber}`);
+              params.set('e', '1');
+              params.set('releaseId', getDefaultReleaseId(props.seasons, seasonNumber, 1))
+              router.replace(`${pathname}?${params.toString()}`);
+          }}/>
           <EpisodeSelect label={t("episodeSelect.label")} placeholder={t("episodeSelect.label")} defaultEpisodeNumber={props.currentEpisodeNumber}
           episodes={props.seasons.filter((s) => s.seasonNumber === props.currentSeasonNumber)[0].episodes.map((e) => ({
             episodeNumber: e.episodeNumber,
             episodeName: t('episode', {episodeNumber: e.episodeNumber}) + (localeKey in e.nameL8ns && e.nameL8ns[localeKey] != t('episode', {episodeNumber: e.episodeNumber}) ? ` (${e.nameL8ns[localeKey]})` : "")
-          }))} onEpisodeSelected={function (episodeNumber: number): void {
-                      throw new Error('Function not implemented.');
-                  } }/>  
-          <ReleaseSelect label={t("releaseSelect.label")} placeholder={t("releaseSelect.label")}
-          defaultReleaseId={props.currentReleaseId} releases={Object.values(getEpisode(props.seasons, props.currentSeasonNumber, props.currentEpisodeNumber).releases).reduce((a: any, c) => {
+          }))}
+          onEpisodeSelected={function (episodeNumber: number): void {
+            const params = new URLSearchParams(queryParams.toString());
+              params.set('e', `${episodeNumber}`);
+              params.set('releaseId', getDefaultReleaseId(props.seasons, props.currentSeasonNumber, episodeNumber))
+              router.replace(`${pathname}?${params.toString()}`);        
+            } }/>  
+          <ReleaseSelect label={t("releaseSelect.label")} placeholder={t("releaseSelect.label")} releaseId={props.currentReleaseId}
+           defaultReleaseId={props.currentReleaseId} releases={Object.values(getEpisode(props.seasons, props.currentSeasonNumber, props.currentEpisodeNumber).releases).reduce((a: any, c) => {
             a[c['id']] = { 
               id: c['id'],
               audioLangs: c['audioLangs'].map(l => t(`audioLang.${l}`)),
