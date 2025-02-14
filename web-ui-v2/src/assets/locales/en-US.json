@@ -78,5 +78,6 @@
     "placeholder": "Search titles, genres, persons"
   },
   "season": "Season {seasonNumber}",
-  "episode": "Episode {episodeNumber}"
+  "episode": "Episode {episodeNumber}",
+  "emptySearchResultsMessage": "Oops, we couldn't find anything. Try to adjust your search."
 }

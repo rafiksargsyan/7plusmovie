@@ -78,5 +78,6 @@
     "placeholder": "Искать фильмы, жанры, людей"
   },
   "season": "Сезон {seasonNumber}",
-  "episode": "Эпизод {episodeNumber}"
+  "episode": "Эпизод {episodeNumber}",
+  "emptySearchResultsMessage": "Упс, мы ничего не нашли. Попробуйте скорректировать поиск."
 }

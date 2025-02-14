@@ -78,6 +78,7 @@
        "placeholder": "Որոնել վերնագրեր, ժանրեր, անձինք"
     },
     "season": "Սեզոն {seasonNumber}",
-    "episode": "Դրվագ {episodeNumber}"
+    "episode": "Դրվագ {episodeNumber}",
+    "emptySearchResultsMessage": "Ուփս, ոչինչ չգտանք։ Փորձեք փոփոխել ձեր որոնումը։"
   }
   

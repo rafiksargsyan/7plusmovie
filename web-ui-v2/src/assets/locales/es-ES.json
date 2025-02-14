@@ -78,6 +78,7 @@
       "placeholder": "Buscar títulos, géneros, personas"
     },
     "season": "Temporada {seasonNumber}",
-    "episode": "Episodio {episodeNumber}"
+    "episode": "Episodio {episodeNumber}",
+    "emptySearchResultsMessage": "¡Vaya! No encontramos nada. Intenta ajustar tu búsqueda."
   }
   

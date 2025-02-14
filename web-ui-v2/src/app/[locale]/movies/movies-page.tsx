@@ -123,7 +123,7 @@ export default function MoviesPage(props: MoviesPageProps) {
           </Box></>
             }
             <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-            onLocaleSelect={(value) => { value && router.replace(`${pathname}/?${queryParams.toString()}`, {locale: value}) }}/>
+            onLocaleSelect={(value) => { value && router.replace(`${pathname}/?${queryParams.toString()}`, {locale: value}); router.refresh()}}/>
             <Button>{t('login')}</Button>
           </Group>
         </Group>
@@ -145,6 +145,7 @@ export default function MoviesPage(props: MoviesPageProps) {
       <AppShell.Main>
         <Container size="xl">
           <Stack component="article">
+            { props.recentMovieReleases.length === 0 ? <Text style={{textAlign: 'center'}}>{t('emptySearchResultsMessage')}</Text> :
             <SimpleGrid cols={{base: 1, xs: 2, sm: 3, md: 4, lg: 5, xl: 5}}>
               { 
                 props.recentMovieReleases.map(r => 
@@ -153,6 +154,7 @@ export default function MoviesPage(props: MoviesPageProps) {
                 )
               }
             </SimpleGrid>
+            }
           </Stack>
         </Container>
       </AppShell.Main>
