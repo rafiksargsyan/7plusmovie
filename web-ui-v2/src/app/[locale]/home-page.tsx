@@ -10,6 +10,7 @@ import { Carousel } from '@mantine/carousel';
 import { MovieCard } from '@/components/MovieCard/MovieCard';
 import { TvShowCard } from '@/components/TvShowCard/TvShowCard';
 import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelectButton';
+import { useSearchParams } from 'next/navigation';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
@@ -46,6 +47,7 @@ export default function HomePage(props: HomePageProps) {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const carouselControlMargin = xsOrSmaller ? '-1.7rem' : '-2rem';
 
   return (
@@ -62,7 +64,7 @@ export default function HomePage(props: HomePageProps) {
           </Group>
           <Group align="center">
             <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-            onLocaleSelect={(value) => { value && router.replace(pathname, {locale: value}); router.refresh() }}/>
+            onLocaleSelect={(value) => { value && router.replace(`${pathname}?${searchParams.toString()}`, {locale: value}); }}/>
             <Button>{t('login')}</Button>
           </Group>
         </Group>
@@ -97,7 +99,7 @@ export default function HomePage(props: HomePageProps) {
               }
             }}>
               { 
-                props.recentMovieReleases.map(r => <Carousel.Slide>
+                props.recentMovieReleases.map(r => <Carousel.Slide key={r.id}>
                   <MovieCard alt={`${r.title} (${r.year})`} quality={r.quality} title={r.title} year={r.year}
                   url={`${locale}/movie?id=${r.id}&releaseId=${r.releaseId}`} imageBaseUrl={imageBaseUrl} imagePath={`${r.posterImagePath}`} />
                 </Carousel.Slide>)
@@ -116,7 +118,7 @@ export default function HomePage(props: HomePageProps) {
               } 
             }}>
               {
-                props.recentTvShowUpdates.map(r => <Carousel.Slide>
+                props.recentTvShowUpdates.map(r => <Carousel.Slide key={r.id}>
                   <TvShowCard alt={`${r.title} (${r.year})`} title={r.title} year={r.year}
                   url={`${locale}/tv-show?id=${r.id}&s=${r.season}&e=${r.episode}&releaseId=${r.releaseId}`} imageBaseUrl={imageBaseUrl}
                   imagePath={`${r.posterImagePath}`} season={r.season} episode={r.episode} />

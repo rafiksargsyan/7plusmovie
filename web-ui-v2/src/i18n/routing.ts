@@ -34,7 +34,8 @@ export class Locale {
 
 export const routing = defineRouting({
   locales: ['en-US', 'ru', 'hy', 'es-ES'],
-  defaultLocale: 'en-US'
+  defaultLocale: 'en-US',
+  localePrefix: 'as-needed'
 });
 
 export const {Link, redirect, usePathname, useRouter, getPathname} =

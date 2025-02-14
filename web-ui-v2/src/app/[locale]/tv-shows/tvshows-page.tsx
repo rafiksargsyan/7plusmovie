@@ -122,7 +122,7 @@ export default function TvShowsPage(props: TvShowsPageProps) {
           </Box></>
             }
             <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-            onLocaleSelect={(value) => { value && router.replace(pathname, {locale: value}); router.refresh() }}/>
+            onLocaleSelect={(value) => { value && router.replace(`${pathname}/?${queryParams.toString()}`, {locale: value}); }}/>
             <Button>{t('login')}</Button>
           </Group>
         </Group>
