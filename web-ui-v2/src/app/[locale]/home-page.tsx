@@ -62,7 +62,7 @@ export default function HomePage(props: HomePageProps) {
           </Group>
           <Group align="center">
             <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-            onLocaleSelect={(value) => { value && router.replace(`${pathname}?${searchParams.toString()}`, {locale: value}); router.refresh(); }}/>
+            onLocaleSelect={(value) => { if (value != null) {router.replace(`${pathname}?${searchParams.toString()}`, {locale: value}); router.refresh(); }}}/>
             <Button>{t('login')}</Button>
           </Group>
         </Group>
@@ -72,11 +72,11 @@ export default function HomePage(props: HomePageProps) {
           <Burger opened={true} onClick={toggle} size="sm" />
         </Group>
         <Space h="xl" />
-        <Link href="/"><UnstyledButton>{t('home')}</UnstyledButton></Link>
+        <Link prefetch={true} href="/"><UnstyledButton>{t('home')}</UnstyledButton></Link>
         <Space h="xl" />
-        <Link href='/movies'><UnstyledButton>{t('movies')}</UnstyledButton></Link>
+        <Link prefetch={true} href='/movies'><UnstyledButton>{t('movies')}</UnstyledButton></Link>
         <Space h="xl" />
-        <Link href='/tv-shows'><UnstyledButton>{t('tvshows')}</UnstyledButton></Link>
+        <Link prefetch={true} href='/tv-shows'><UnstyledButton>{t('tvshows')}</UnstyledButton></Link>
         <Space h="xl" />
         <Divider my="md" label={t('contact')} labelPosition="center"/>
         <Text fw={700}>tracenoon@gmail.com</Text>

@@ -13,7 +13,7 @@ function Player(props: {movieTitle: string, m3u8File: string, thumbnailsFile?: s
   useEffect(() => {
     const player = playerRef.current;
     if (player) {
-      player.textTracks.clear();
+      (player as any).textTracks.clear();
     }
   }, [props.m3u8File]);
 

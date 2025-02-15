@@ -8,7 +8,7 @@ interface ReleaseSelectProps {
   label: string;
   placeholder: string;  
   defaultReleaseId: string;
-  releaseId: Nullable<string>
+  releaseId?: Nullable<string>
   releases: {
     [id:string]: {
       id: string,
@@ -19,7 +19,7 @@ interface ReleaseSelectProps {
   onReleaseSelected: (id: string) => void;
 }
 
-const quality2Color = {
+const quality2Color: {[key:string]: string} = {
   'CAM': 'red',
   'TELESYNC': 'orange',
   'SD': 'yellow',

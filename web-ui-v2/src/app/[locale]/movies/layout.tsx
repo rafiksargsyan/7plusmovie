@@ -1,15 +1,13 @@
 import { Locale } from "@/i18n/routing";
-import { Metadata, ResolvingMetadata } from "next";
+import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 type Props = {
   params: Promise<{ locale: string }>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export async function generateMetadata(
-  { params, searchParams }: Props,
-  parent: ResolvingMetadata
+  { params }: Props
 ): Promise<Metadata> {
   const locale = (await params).locale;
   const t = await getTranslations({locale, namespace: 'Metadata'});

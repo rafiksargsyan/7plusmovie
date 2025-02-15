@@ -8,10 +8,13 @@ import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { MovieCard } from '@/components/MovieCard/MovieCard';
 import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelectButton';
 import { Autocomplete } from '@/components/Autocomplete/Autocomplete';
-import { algoliaClient } from './page';
 import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions';
 import { useSearchParams } from 'next/navigation';
 import { IconSearch } from '@tabler/icons-react';
+import { searchClient } from '@algolia/client-search';
+
+const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
+    process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
@@ -118,12 +121,12 @@ export default function MoviesPage(props: MoviesPageProps) {
               router.replace(`?${params.toString()}`);
             }}
             onStateChange={(e: any) => {
-              !(e.state.isOpen) && controlAutocomplete.close();
+              if(!(e.state.isOpen)) controlAutocomplete.close();
             }}/>
           </Box></>
             }
             <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-            onLocaleSelect={(value) => { value && router.replace(`${pathname}/?${queryParams.toString()}`, {locale: value}); router.refresh()}}/>
+            onLocaleSelect={(value) => { if (value != null) {router.replace(`${pathname}/?${queryParams.toString()}`, {locale: value}); router.refresh()}}}/>
             <Button>{t('login')}</Button>
           </Group>
         </Group>

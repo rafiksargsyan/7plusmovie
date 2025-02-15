@@ -1,5 +1,5 @@
 'use client'
-import { AppShell, Burger, Button, Container, Divider, Group, Space, Text, UnstyledButton, useMantineTheme } from '@mantine/core';
+import { AppShell, Burger, Button, Container, Divider, Group, Space, Text, UnstyledButton } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
@@ -56,7 +56,7 @@ export default function MoviePage(props: MoviePageProps) {
           </Group>
           <Group align="center">
             <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-            onLocaleSelect={(value) => { value && router.replace(`${pathname}/?${queryParams.toString()}`, {locale: value}); router.refresh(); }}/>
+            onLocaleSelect={(value) => { if (value != null) {router.replace(`${pathname}/?${queryParams.toString()}`, {locale: value}); router.refresh(); }}}/>
             <Button>{t('login')}</Button>
           </Group>
         </Group>

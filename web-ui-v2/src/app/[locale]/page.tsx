@@ -1,7 +1,7 @@
 import { searchClient } from '@algolia/client-search';
-import HomePage from './home-page';
 import { getLocale } from 'next-intl/server';
 import { Locale } from '@/i18n/routing';
+import HomePage from './home-page';
 
 const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
     process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
@@ -21,7 +21,7 @@ export async function getRecentMovieReleases(locale: string) {
           filters: 'category:MOVIE',
           hitsPerPage: 1000
         }]});
-  return algoliaResponse.results[0].hits.filter((m: any) => { return new Date().getFullYear() - m.releaseYear < 2 }).sort((a: any, b: any) => {
+  return (algoliaResponse.results[0] as any).hits.filter((m: any) => { return new Date().getFullYear() - m.releaseYear < 2 }).sort((a: any, b: any) => {
     const currentTime = Date.now();
     const aReleaseTimeInMillis = a.releaseTimeInMillis || yearToEpochMillis(a.releaseYear);
     const bReleaseTimeInMillis = b.releaseTimeInMillis || yearToEpochMillis(b.releaseYear);
@@ -51,7 +51,7 @@ export async function getRecentTVShowUpdates(locale: string) {
           filters: 'category:TV_SHOW',
           hitsPerPage: 1000
         }]});
-  return algoliaResponse.results[0].hits.filter((t: any) => t.objectID !== '6d4a2151-7cc7-4191-8738-b4d4be093330').sort((a: any, b: any) => {
+  return (algoliaResponse.results[0] as any).hits.filter((t: any) => t.objectID !== '6d4a2151-7cc7-4191-8738-b4d4be093330').sort((a: any, b: any) => {
     const aLatestAirDateMillis = a.latestAirDateMillis || yearToEpochMillis(a.releaseYear);
     const bLatestAirDateMillis = b.latestAirDateMillis || yearToEpochMillis(b.releaseYear);
     const aLatestReleasetime = a.latestReleaseTime || aLatestAirDateMillis;

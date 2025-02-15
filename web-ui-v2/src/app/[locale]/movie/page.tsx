@@ -1,9 +1,9 @@
 import axios from 'axios'; 
-import requestIp from 'request-ip';
+import requestIp, { RequestHeaders } from 'request-ip';
 import { headers } from 'next/headers';
 import MoviePage, { MovieRelease, MovieStreamInfo } from './movie-page';
 import { Nullable } from '@/types/Nullable';
-import { Metadata, ResolvingMetadata } from 'next';
+import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Locale } from '@/i18n/routing';
 
@@ -15,7 +15,7 @@ async function ip2AudioLang(ip: string | null): Promise<string> {
   return response.data;
 }
 
-export async function getMovieReleases(movieId: string, preferredAudioLang: string) {
+async function getMovieReleases(movieId: string, preferredAudioLang: string) {
   const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/movie/${movieId}/releases?preferredAudioLang=${preferredAudioLang}`);
   const data = response.data;
   return {
@@ -31,7 +31,7 @@ export async function getMovieReleases(movieId: string, preferredAudioLang: stri
   }
 }
 
-export async function getMovieStreamInfo(movieId: string, releaseId: Nullable<string>, preferredAudioLang: string): Promise<MovieStreamInfo> {
+async function getMovieStreamInfo(movieId: string, releaseId: Nullable<string>, preferredAudioLang: string): Promise<MovieStreamInfo> {
   const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${movieId}?preferredAudioLang=${preferredAudioLang}&releaseId=${releaseId}`);
   return {
     id: movieId,
@@ -52,8 +52,7 @@ type Props = {
   }
   
   export async function generateMetadata(
-    { params, searchParams}: Props,
-    parent: ResolvingMetadata
+    { params, searchParams}: Props
   ): Promise<Metadata> {
     const locale = (await params).locale;
     const t = await getTranslations({locale, namespace: 'Metadata'});
@@ -95,7 +94,7 @@ export default async function Page({
   const movieId = (await searchParams).id as string;
   const releaseId = (await searchParams).releaseId as string;
   const headersList = await headers();
-  const clientIp = requestIp.getClientIp({ headers: headersList });
+  const clientIp = requestIp.getClientIp({ headers: headersList as unknown as RequestHeaders});
   const preferredAudioLang = await ip2AudioLang(clientIp)
   const movieReleases = await getMovieReleases(movieId, preferredAudioLang);
   if (releaseId != null) movieReleases.defaultReleaseId = releaseId;

@@ -17,7 +17,7 @@ export class ReleaseQuality {
 
   static fromKey(key: Nullable<string>): Nullable<ReleaseQuality> {
     if (key == null) return null;
-    return ReleaseQuality[key];
+    return (ReleaseQuality as any)[key];
   }
   
   static compare(r1: Nullable<ReleaseQuality>, r2: Nullable<ReleaseQuality>) {

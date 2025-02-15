@@ -1,9 +1,9 @@
 import axios from 'axios'; 
-import requestIp from 'request-ip';
+import requestIp, { RequestHeaders } from 'request-ip';
 import { headers } from 'next/headers';
 import { Nullable } from '@/types/Nullable';
-import TvShowPage, { Release, Season } from './tv-show-page';
-import { Metadata, ResolvingMetadata } from 'next';
+import TvShowPage, {  Season } from './tv-show-page';
+import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Locale } from '@/i18n/routing';
 import { searchClient } from '@algolia/client-search';
@@ -19,7 +19,7 @@ async function ip2AudioLang(ip: string | null): Promise<string> {
   return response.data;
 }
 
-export async function getTvShowReleases(id: string, preferredAudioLang: string) {
+async function getTvShowReleases(id: string, preferredAudioLang: string) {
   const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/tv-show/${id}/releases?preferredAudioLang=${preferredAudioLang}`);
   const data = response.data;
   const seasons: Season[] = [];
@@ -43,11 +43,11 @@ export async function getTvShowReleases(id: string, preferredAudioLang: string) 
   return seasons;
 }
 
-export function getDefaultReleaseId(seasons: Season[], season: number, episode: number) {
+function getDefaultReleaseId(seasons: Season[], season: number, episode: number) {
   return seasons.filter((s) => s.seasonNumber === season)[0].episodes.filter((e) => e.episodeNumber === episode)[0].defaultReleaseId;
 }
 
-export async function getPlayerData(id: string, seasonNumber: number, episodeNumber: number, releaseId: Nullable<string>, preferredAudioLang: string): Promise<MovieStreamInfo> {
+async function getPlayerData(id: string, seasonNumber: number, episodeNumber: number, releaseId: Nullable<string>, preferredAudioLang: string): Promise<any> {
   const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getTvShowMetadataForPlayer/${id}/${seasonNumber}/${episodeNumber}?preferredAudioLang=${preferredAudioLang}&releaseId=${releaseId}`);
   return {
     originalTitle: response.data.originalTitle,
@@ -66,8 +66,7 @@ type Props = {
   }
 
 export async function generateMetadata(
-    { params, searchParams}: Props,
-    parent: ResolvingMetadata
+    { params, searchParams}: Props
   ): Promise<Metadata> {
     const locale = (await params).locale;
     const t = await getTranslations({locale, namespace: 'Metadata'});
@@ -79,7 +78,7 @@ export async function generateMetadata(
       indexName: process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!,
       objectID: id
     })
-    const posters = algoliaTvShowObject.posterImagesPortrait;
+    const posters: { [key:string]: string } = algoliaTvShowObject.posterImagesPortrait as { [key:string]: string };
     const poster = `${imageBaseUrl}h=720,f=auto/${(localeKey in posters) ? posters[localeKey] : posters['EN_US']}`;
     return {
       title: title,
@@ -118,7 +117,7 @@ export default async function Page({
   const episode = episodeStr == null ? 1 : Number.parseInt(episodeStr)
   const releaseId = (await searchParams).releaseId as string;
   const headersList = await headers();
-  const clientIp = requestIp.getClientIp({ headers: headersList });
+  const clientIp = requestIp.getClientIp({ headers: headersList as unknown as RequestHeaders });
   const preferredAudioLang = await ip2AudioLang(clientIp)
   const tvShowReleases = await getTvShowReleases(id, preferredAudioLang);
   let currentReleaseId: Nullable<string> = releaseId;

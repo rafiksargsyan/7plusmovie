@@ -7,12 +7,15 @@ import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { TvShowCard } from '@/components/TvShowCard/TvShowCard';
 import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelectButton';
 import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions';
-import { algoliaClient } from '../movies/page';
 import { useSearchParams } from 'next/navigation';
 import { Autocomplete } from '@/components/Autocomplete/Autocomplete';
 import { IconSearch } from '@tabler/icons-react';
+import { searchClient } from '@algolia/client-search';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
+
+const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
+    process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
 
 interface TvShowUpdate {
   id: string
@@ -117,12 +120,12 @@ export default function TvShowsPage(props: TvShowsPageProps) {
               router.replace(`?${params.toString()}`);
             }}
             onStateChange={(e: any) => {
-              !(e.state.isOpen) && controlAutocomplete.close();
+              if (!(e.state.isOpen)) controlAutocomplete.close();
             }}/>
           </Box></>
             }
             <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-            onLocaleSelect={(value) => { value && router.replace(`${pathname}/?${queryParams.toString()}`, {locale: value}); router.refresh(); }}/>
+            onLocaleSelect={(value) => { if (value != null) {router.replace(`${pathname}/?${queryParams.toString()}`, {locale: value}); router.refresh(); }}}/>
             <Button>{t('login')}</Button>
           </Group>
         </Group>
