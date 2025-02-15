@@ -80,13 +80,22 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   if (release == null) {
     release = getOneRelease(Object.values(releases), preferredAudioLang);
   }
+  let releaseSubtitles = release?._subtitles;
+  if (releaseSubtitles == null) releaseSubtitles = {};
+  let subtitles = {};
   if (release != null) {
     mpdFile = release._mpdFile;
     m3u8File = release._m3u8File;
     thumbnailsFile = release._thumbnails.sort((a, b) => a.resolution - b.resolution)[0].thumbnailsFile;
+    Object.entries(releaseSubtitles).forEach(([k, s]) => subtitles[k] = {
+      name: s.name,
+      relativePath: s.relativePath,
+      lang: s.lang.key,
+      type: s.type?.key
+    })
   }
   return {
-    subtitles: {}, // TODO
+    subtitles: subtitles,
     mpdFile: `https://${mediaAssetsDomain}/${mpdFile}`,
     m3u8File: `https://${mediaAssetsDomain}/${m3u8File}`,
     thumbnailsFile: thumbnailsFile !== null ? `https://${cloudflareMediaAssetsCachableDomain}/${thumbnailsFile}` : null,
