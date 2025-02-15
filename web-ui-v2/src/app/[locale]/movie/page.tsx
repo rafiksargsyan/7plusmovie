@@ -7,6 +7,8 @@ import { Metadata, ResolvingMetadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Locale } from '@/i18n/routing';
 
+const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
+
 async function ip2AudioLang(ip: string | null): Promise<string> {
   if (ip == null) ip = '0.0.0.0';
   const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/ip-2-audio-lang/${ip}`);
@@ -66,7 +68,7 @@ type Props = {
       openGraph: {
         title: title,
         description: t('movie.description', {title: title}),
-        images: '/ogImage.jpg',
+        images: `${imageBaseUrl}h=720,f=auto/${movie.backdropImage}`,
       },
       alternates: {
         canonical: '/',

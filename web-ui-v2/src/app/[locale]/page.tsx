@@ -1,8 +1,7 @@
 import { searchClient } from '@algolia/client-search';
 import HomePage from './home-page';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getLocale } from 'next-intl/server';
 import { Locale } from '@/i18n/routing';
-import { Metadata, ResolvingMetadata } from 'next';
 
 const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
     process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
