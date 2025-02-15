@@ -72,6 +72,47 @@ export async function getRecentTVShowUpdates(locale: string) {
   }));
 }
 
+type Props = {
+  params: Promise<{ locale: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"></link>
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"></link>
+<link rel="manifest" href="/site.webmanifest"></link>
+
+
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const locale = (await params).locale;
+  const t = await getTranslations({locale, namespace: 'Metadata'});
+
+  return {
+    title: t('home.title'),
+    description: t('home.description'),
+    openGraph: {
+      title: t('home.title'),
+      description: t('home.description'),
+      images: '/ogImage.jpg',
+    },
+    alternates: {
+      canonical: '/',
+      languages: Object.keys(Locale.FROM_LANG_TAG).reduce((a: {[key:string]: string}, c) => { a[c] = `/${c}`; return a; }, {})
+    },
+    icons: {
+      apple: [
+        { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      ],
+      icon: [
+        { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+        { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      ]
+    }
+  }
+}
+
 export default async function Page() {
   const locale = await getLocale();
   const recentMovieReleases = await getRecentMovieReleases(locale);

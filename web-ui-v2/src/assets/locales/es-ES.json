@@ -79,6 +79,15 @@
     },
     "season": "Temporada {seasonNumber}",
     "episode": "Episodio {episodeNumber}",
-    "emptySearchResultsMessage": "¡Vaya! No encontramos nada. Intenta ajustar tu búsqueda."
+    "emptySearchResultsMessage": "¡Vaya! No encontramos nada. Intenta ajustar tu búsqueda.",
+    "Metadata": {
+      "home": {
+        "title": "Ver películas gratis online",
+        "description": "Las buenas películas son como los buenos libros, son atemporales. Nuestra misión es hacer accesibles las mejores películas de todos los tiempos para todos."
+      },
+      "movie": {
+       "description": "Ver ''{title}\\'' online gratis"
+      }
+    }
   }
   

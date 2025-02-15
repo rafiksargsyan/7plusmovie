@@ -1,7 +1,6 @@
 'use client'
-import { AppShell, Burger, Button, Container, Divider, Group, Select, Space, Stack, Text, Title, UnstyledButton, useMantineTheme } from '@mantine/core';
+import { AppShell, Burger, Button, Container, Divider, Group,  Space, Stack, Text, Title, UnstyledButton, useMantineTheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconLanguage } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
@@ -40,7 +39,6 @@ interface HomePageProps {
 
 export default function HomePage(props: HomePageProps) {
   const [opened, { toggle }] = useDisclosure();
-  const icon = <IconLanguage size={16} />;
   const theme = useMantineTheme();
   const xsOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
   const t = useTranslations();

@@ -79,5 +79,14 @@
   },
   "season": "Season {seasonNumber}",
   "episode": "Episode {episodeNumber}",
-  "emptySearchResultsMessage": "Oops, we couldn't find anything. Try to adjust your search."
+  "emptySearchResultsMessage": "Oops, we couldn't find anything. Try to adjust your search.",
+  "Metadata": {
+    "home": {
+      "title": "Watch Free Movies Online",
+      "description": "Good movies are like good books, they are timeless. Our mission is to make the best movies of all time accessible to everyone."
+    },
+    "movie": {
+      "description": "Watch ''{title}'' online free"
+    }
+  }
 }

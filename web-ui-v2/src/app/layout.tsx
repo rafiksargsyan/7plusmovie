@@ -3,7 +3,13 @@ import '@mantine/carousel/styles.css';
 import './global.css'
 import { ColorSchemeScript, MantineProvider, createTheme } from "@mantine/core";
 import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
+import { getLocale, getMessages, getTranslations } from 'next-intl/server';
+import { Metadata, ResolvingMetadata } from 'next';
+import { Locale } from '@/i18n/routing';
+
+export const metadata: Metadata = {
+  metadataBase: new URL('https://www.q62.xyz'),
+}
 
 const theme = createTheme({
   primaryColor: "violet",

@@ -95,7 +95,7 @@ export default function MoviePage(props: MoviePageProps) {
           <Player movieTitle={`${props.movieStreamInfo.titleL8ns[Locale.FROM_LANG_TAG[locale].key] || props.movieStreamInfo.titleL8ns['EN_US']} (${props.movieStreamInfo.releaseYear})`}
           m3u8File={props.movieStreamInfo.m3u8File}
           backdropImage={props.movieStreamInfo.backdropImage}
-          thumbnailsFile={props.movieStreamInfo.thumbnailsFile}  />
+          thumbnailsFile={props.movieStreamInfo.thumbnailsFile}/>
         </Container>
       </AppShell.Main>
     </AppShell>
