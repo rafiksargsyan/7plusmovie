@@ -1,10 +1,9 @@
 'use client'
-import { AppShell, Burger, Button, Container, Divider, Group,  Space, Stack, Text, Title, UnstyledButton, useMantineTheme } from '@mantine/core';
+import { AppShell, Burger, Container, Divider, Group,  Space, Stack, Text, Title, UnstyledButton, useMantineTheme } from '@mantine/core';
 import { useDisclosure, useHeadroom } from '@mantine/hooks';
 import { useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
-import { Hero } from '@/components/Hero/Hero';
 import { Carousel } from '@mantine/carousel';
 import { MovieCard } from '@/components/MovieCard/MovieCard';
 import { TvShowCard } from '@/components/TvShowCard/TvShowCard';

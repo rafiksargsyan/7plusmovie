@@ -1,7 +1,5 @@
 'use client'
-import { ActionIcon, AppShell, Box, Burger, Button, Container, Divider, Group, SimpleGrid, Space, Stack,
-    Text, UnstyledButton, 
-    useMantineTheme} from '@mantine/core';
+import { AppShell, Box, Burger, Container, Divider, Group, SimpleGrid, Space, Stack, Text, UnstyledButton, useMantineTheme} from '@mantine/core';
 import { useDisclosure, useHeadroom, useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';

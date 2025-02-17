@@ -11,8 +11,8 @@
       }
     },
     "signup": "Գրանցվել",
-    "latest_movie_updates": "Վերջին ֆիլմերի նորությունները",
-    "latest_tvshow_updates": "Վերջին հեռուստաշոուների նորությունները",
+    "latest_movie_updates": "Վերջերս թողարկված ֆիլմեր",
+    "latest_tvshow_updates": "Հեռուստաշոուների վերջին թարմացումները",
     "releaseSelect": {
       "label": "Ընտրել թողարկումը"
     },

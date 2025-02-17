@@ -1,4 +1,3 @@
-
 import { searchClient } from '@algolia/client-search';
 import MoviesPage from './movies-page';
 import { getLocale } from 'next-intl/server';
