@@ -1,6 +1,6 @@
 'use client'
 import { AppShell, Burger, Button, Container, Divider, Group,  Space, Stack, Text, Title, UnstyledButton, useMantineTheme } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useHeadroom } from '@mantine/hooks';
 import { useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
@@ -47,23 +47,28 @@ export default function HomePage(props: HomePageProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const carouselControlMargin = xsOrSmaller ? '-1.7rem' : '-2rem';
+  const pinned = useHeadroom({ fixedAt: 60 });
 
   return (
     <AppShell
       layout="alt"
-      header={{ height: 60 }}
+      header={{ height: 60, collapsed: !pinned, offset: false }}
       navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened, desktop: !opened } }}
       padding="md"
     >
       <AppShell.Header>
         <Group h="100%" px="md" justify='space-between'>
-          <Group h="100%">
-            {!opened && <Burger opened={false} onClick={toggle} size="sm" />}
-          </Group>
-          <Group align="center">
-            <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-            onLocaleSelect={(value) => { if (value != null) {router.replace(`${pathname}?${searchParams.toString()}`, {locale: value}); router.refresh(); }}}/>
-            <Button>{t('login')}</Button>
+          <Group justify="space-between" style={{ flex: 1 }}>
+            {!opened && <Burger opened={false} onClick={toggle} size="sm" hiddenFrom="sm" />}
+            <Group ml="0" gap="md" visibleFrom="sm">    
+              <Link prefetch={true} href="/"><UnstyledButton>{t('home')}</UnstyledButton></Link>
+              <Link prefetch={true} href='/movies'><UnstyledButton>{t('movies')}</UnstyledButton></Link>
+              <Link prefetch={true} href='/tv-shows'><UnstyledButton>{t('tvshows')}</UnstyledButton></Link>
+            </Group>
+            <Group align="center">
+              <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
+              onLocaleSelect={(value) => { if (value != null) {router.replace(`${pathname}?${searchParams.toString()}`, {locale: value}); router.refresh(); }}}/>
+            </Group>
           </Group>
         </Group>
       </AppShell.Header>
@@ -82,7 +87,6 @@ export default function HomePage(props: HomePageProps) {
         <Text fw={700}>tracenoon@gmail.com</Text>
       </AppShell.Navbar>
       <AppShell.Main>
-        <Hero title={t("hero.title")}/>
         <Container size="xl">
           <Space h="xl"/>
           <Space h="xl"/>

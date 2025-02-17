@@ -1,6 +1,6 @@
 'use client'
 import { AppShell, Burger, Button, Container, Divider, Group, Space, Text, UnstyledButton } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useHeadroom } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { ReleaseSelect } from '@/components/ReleaseSelect/ReleaseSelect';
@@ -67,22 +67,28 @@ export default function TvShowPage(props: TvShowPageProps) {
   if (localeKey in episode.nameL8ns && episode.nameL8ns[localeKey] != defaultEpisodeName) {
     playerTitle += ` (${episode.nameL8ns[localeKey]})`;
   }
+  const pinned = useHeadroom({ fixedAt: 60 });
+
   return (
     <AppShell
       layout="alt"
-      header={{ height: 60 }}
+      header={{ height: 60, collapsed: !pinned, offset: false }}
       navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened, desktop: !opened } }}
       padding="md"
     >
       <AppShell.Header>
         <Group h="100%" px="md" justify='space-between'>
-          <Group h="100%">
-            {!opened && <Burger opened={false} onClick={toggle} size="sm" />}
-          </Group>
-          <Group align="center">
-            <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-            onLocaleSelect={(value) => { if (value != null) {router.replace(`${pathname}/?${queryParams.toString()}`, {locale: value}); router.refresh(); }}}/>
-            <Button>{t('login')}</Button>
+          <Group justify="space-between" style={{ flex: 1 }}>
+            {!opened && <Burger opened={false} onClick={toggle} size="sm" hiddenFrom="sm" />}
+            <Group ml="0" gap="md" visibleFrom="sm">    
+              <Link prefetch={true} href="/"><UnstyledButton>{t('home')}</UnstyledButton></Link>
+              <Link prefetch={true} href='/movies'><UnstyledButton>{t('movies')}</UnstyledButton></Link>
+              <Link prefetch={true} href='/tv-shows'><UnstyledButton>{t('tvshows')}</UnstyledButton></Link>
+            </Group>
+            <Group align="center">
+              <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
+              onLocaleSelect={(value) => { if (value != null) {router.replace(`${pathname}?${queryParams.toString()}`, {locale: value}); router.refresh(); }}}/>
+            </Group>
           </Group>
         </Group>
       </AppShell.Header>
@@ -101,6 +107,8 @@ export default function TvShowPage(props: TvShowPageProps) {
         <Text fw={700}>tracenoon@gmail.com</Text>
       </AppShell.Navbar>
       <AppShell.Main>
+        <Space h="xl"/>
+        <Space h="xl"/>
         <Container size="xl">
           <SeasonSelect label={t("seasonSelect.label")} placeholder={t("seasonSelect.label")} defaultSeasonNumber={props.currentSeasonNumber}
           seasons={props.seasons.map((s) => ({

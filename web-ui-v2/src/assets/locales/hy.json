@@ -88,6 +88,7 @@
       "movie": {
         "description": "Դիտեք ''{title}'' առցանց անվճար"
       }
-    }
+    },
+    "searchButtonAriaLabel": "Բացել որոնման դաշտը"
 }
   

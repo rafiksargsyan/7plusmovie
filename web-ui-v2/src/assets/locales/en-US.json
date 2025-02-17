@@ -88,5 +88,6 @@
     "movie": {
       "description": "Watch ''{title}'' online free"
     }
-  }
+  },
+  "searchButtonAriaLabel": "Open search box"
 }

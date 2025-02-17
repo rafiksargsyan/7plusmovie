@@ -2,7 +2,7 @@
 import { ActionIcon, AppShell, Box, Burger, Button, Container, Divider, Group, SimpleGrid, Space, Stack,
     Text, UnstyledButton, 
     useMantineTheme} from '@mantine/core';
-import { useDisclosure, useMediaQuery } from '@mantine/hooks';
+import { useDisclosure, useHeadroom, useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { MovieCard } from '@/components/MovieCard/MovieCard';
@@ -42,6 +42,7 @@ export default function MoviesPage(props: MoviesPageProps) {
   const theme = useMantineTheme();
   const xsOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
   const [autoCompleteOpened, controlAutocomplete] = useDisclosure();
+  const pinned = useHeadroom({ fixedAt: 60 });
  
   const querySuggestionsPlugin = createQuerySuggestionsPlugin({
     searchClient: algoliaClient,
@@ -79,16 +80,20 @@ export default function MoviesPage(props: MoviesPageProps) {
   return (
     <AppShell
       layout="alt"
-      header={{ height: 60 }}
+      header={{ height: 60, collapsed: !pinned, offset: false }}
       navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened, desktop: !opened } }}
       padding="md"
     >
       <AppShell.Header>
         <Group h="100%" px="md" justify='space-between'>
-          <Group h="100%">
-            {!opened && <Burger opened={false} onClick={toggle} size="sm" />}
-          </Group>
-          { !xsOrSmaller &&
+          <Group justify="space-between" style={{ flex: 1 }}>
+            {!opened && <Burger opened={false} onClick={toggle} size="sm" hiddenFrom="sm" />}
+            <Group ml="0" gap="md" visibleFrom="sm">    
+              <Link prefetch={true} href="/"><UnstyledButton>{t('home')}</UnstyledButton></Link>
+              <Link prefetch={true} href='/movies'><UnstyledButton>{t('movies')}</UnstyledButton></Link>
+              <Link prefetch={true} href='/tv-shows'><UnstyledButton>{t('tvshows')}</UnstyledButton></Link>
+            </Group>
+            { !xsOrSmaller &&
           <Box w={{base: 50, xs: 300, md: 350, lg: 500, xl: 500}}>
             <Autocomplete
               placeholder={t("search.placeholder")}
@@ -102,11 +107,11 @@ export default function MoviesPage(props: MoviesPageProps) {
               }}
               />
           </Box> }
-          <Group align="center">
+            <Group align="center">
             {xsOrSmaller &&
-            <><ActionIcon variant="default" size='lg' aria-label="todo" onClick={() => controlAutocomplete.open()}>
+            <><UnstyledButton style={{alignItems: 'center', display: 'inline-flex'}} variant="default" size='lg' aria-label={t('searchButtonAriaLabel')} onClick={() => controlAutocomplete.open()}>
               <IconSearch />
-            </ActionIcon>
+            </UnstyledButton>
             <Box style={{display: (autoCompleteOpened ? undefined : 'none')}}>
             <Autocomplete
             placeholder={t("search.placeholder")}
@@ -124,10 +129,10 @@ export default function MoviesPage(props: MoviesPageProps) {
               if(!(e.state.isOpen)) controlAutocomplete.close();
             }}/>
           </Box></>
-            }
-            <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-            onLocaleSelect={(value) => { if (value != null) {router.replace(`${pathname}/?${queryParams.toString()}`, {locale: value}); router.refresh()}}}/>
-            <Button>{t('login')}</Button>
+            }  
+              <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
+              onLocaleSelect={(value) => { if (value != null) {router.replace(`${pathname}?${queryParams.toString()}`, {locale: value}); router.refresh(); }}}/>
+            </Group>
           </Group>
         </Group>
       </AppShell.Header>
@@ -146,6 +151,8 @@ export default function MoviesPage(props: MoviesPageProps) {
         <Text fw={700}>tracenoon@gmail.com</Text>
       </AppShell.Navbar>
       <AppShell.Main>
+        <Space h="xl"/>
+        <Space h="xl"/>
         <Container size="xl">
           <Stack component="article">
             { props.recentMovieReleases.length === 0 ? <Text style={{textAlign: 'center'}}>{t('emptySearchResultsMessage')}</Text> :

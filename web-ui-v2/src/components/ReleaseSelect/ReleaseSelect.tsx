@@ -19,7 +19,7 @@ interface ReleaseSelectProps {
   onReleaseSelected: (id: string) => void;
 }
 
-const quality2Color: {[key:string]: string} = {
+export const quality2Color: {[key:string]: string} = {
   'CAM': 'red',
   'TELESYNC': 'orange',
   'SD': 'yellow',

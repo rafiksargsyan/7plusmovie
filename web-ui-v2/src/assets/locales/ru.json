@@ -88,5 +88,6 @@
     "movie": {
       "description": "Смотрите ''{title}'' онлайн бесплатно"
     }
-  }
+  },
+  "searchButtonAriaLabel": "Открыть поле поиска"
 }

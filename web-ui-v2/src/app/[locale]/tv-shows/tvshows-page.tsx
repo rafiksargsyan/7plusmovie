@@ -1,6 +1,6 @@
 'use client'
 import { ActionIcon, AppShell, Box, Burger, Button, Container, Divider, Group, SimpleGrid, Space, Stack, Text, UnstyledButton, useMantineTheme } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useHeadroom } from '@mantine/hooks';
 import { useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
@@ -41,6 +41,7 @@ export default function TvShowsPage(props: TvShowsPageProps) {
   const xsOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
   const [autoCompleteOpened, controlAutocomplete] = useDisclosure();
   const queryParams = useSearchParams();
+  const pinned = useHeadroom({ fixedAt: 60 });
 
   const querySuggestionsPlugin = createQuerySuggestionsPlugin({
     searchClient: algoliaClient,
@@ -78,16 +79,20 @@ export default function TvShowsPage(props: TvShowsPageProps) {
   return (
     <AppShell
       layout="alt"
-      header={{ height: 60 }}
+      header={{ height: 60, collapsed: !pinned, offset: false  }}
       navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened, desktop: !opened } }}
       padding="md"
     >
       <AppShell.Header>
-        <Group h="100%" px="md" justify='space-between'>
-          <Group h="100%">
-            {!opened && <Burger opened={false} onClick={toggle} size="sm" />}
-          </Group>
-          { !xsOrSmaller &&
+      <Group h="100%" px="md" justify='space-between'>
+          <Group justify="space-between" style={{ flex: 1 }}>
+            {!opened && <Burger opened={false} onClick={toggle} size="sm" hiddenFrom="sm" />}
+            <Group ml="0" gap="md" visibleFrom="sm">    
+              <Link prefetch={true} href="/"><UnstyledButton>{t('home')}</UnstyledButton></Link>
+              <Link prefetch={true} href='/movies'><UnstyledButton>{t('movies')}</UnstyledButton></Link>
+              <Link prefetch={true} href='/tv-shows'><UnstyledButton>{t('tvshows')}</UnstyledButton></Link>
+            </Group>
+            { !xsOrSmaller &&
           <Box w={{base: 50, xs: 300, md: 350, lg: 500, xl: 500}}>
             <Autocomplete
               placeholder={t("search.placeholder")}
@@ -101,11 +106,11 @@ export default function TvShowsPage(props: TvShowsPageProps) {
               }}
               />
           </Box> }
-          <Group align="center">
-          {xsOrSmaller &&
-            <><ActionIcon variant="default" size='lg' aria-label="todo" onClick={() => controlAutocomplete.open()}>
+            <Group align="center">
+            {xsOrSmaller &&
+            <><UnstyledButton style={{alignItems: 'center', display: 'inline-flex'}} variant="default" size='lg' aria-label={t('searchButtonAriaLabel')} onClick={() => controlAutocomplete.open()}>
               <IconSearch />
-            </ActionIcon>
+            </UnstyledButton>
             <Box style={{display: (autoCompleteOpened ? undefined : 'none')}}>
             <Autocomplete
             placeholder={t("search.placeholder")}
@@ -120,13 +125,13 @@ export default function TvShowsPage(props: TvShowsPageProps) {
               router.replace(`?${params.toString()}`);
             }}
             onStateChange={(e: any) => {
-              if (!(e.state.isOpen)) controlAutocomplete.close();
+              if(!(e.state.isOpen)) controlAutocomplete.close();
             }}/>
           </Box></>
-            }
-            <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
-            onLocaleSelect={(value) => { if (value != null) {router.replace(`${pathname}/?${queryParams.toString()}`, {locale: value}); router.refresh(); }}}/>
-            <Button>{t('login')}</Button>
+            }  
+              <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
+              onLocaleSelect={(value) => { if (value != null) {router.replace(`${pathname}?${queryParams.toString()}`, {locale: value}); router.refresh(); }}}/>
+            </Group>
           </Group>
         </Group>
       </AppShell.Header>
@@ -145,6 +150,8 @@ export default function TvShowsPage(props: TvShowsPageProps) {
         <Text fw={700}>tracenoon@gmail.com</Text>
       </AppShell.Navbar>
       <AppShell.Main>
+        <Space h="xl"/>
+        <Space h="xl"/>
         <Container size="xl">
           <Stack component="article">
             { props.recentTvShowUpdates.length === 0 ? <Text style={{textAlign: 'center'}}>{t('emptySearchResultsMessage')}</Text> :
@@ -152,7 +159,7 @@ export default function TvShowsPage(props: TvShowsPageProps) {
               { 
                 props.recentTvShowUpdates.map(r => 
                   <TvShowCard key={r.title} alt={`${r.title} (${r.year})`} season={r.season} episode={r.episode}
-                  title={r.title} year={r.year} url={`tv-show?id=${r.id}&s=${r.season}&e=${r.episode}`}
+                  title={r.title} year={r.year} url={`tv-show?id=${r.id}${r.season ? `&s=${r.season}` : ""}${r.episode ? `&e=${r.episode}` : ""}`}
                   imageBaseUrl={imageBaseUrl} imagePath={`${r.posterImagePath}`} />
                 )
               }

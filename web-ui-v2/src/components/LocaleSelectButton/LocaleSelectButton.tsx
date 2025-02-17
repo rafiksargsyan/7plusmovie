@@ -1,5 +1,5 @@
 import { Locale } from "@/i18n/routing";
-import { ActionIcon, CheckIcon, Combobox, Group, useCombobox } from "@mantine/core";
+import { ActionIcon, CheckIcon, Combobox, Group, UnstyledButton, useCombobox } from "@mantine/core";
 import { IconLanguage } from "@tabler/icons-react";
 import { useState } from "react";
 
@@ -45,9 +45,9 @@ export function LocaleSelectButton(props: LocaleSelectButtonProps) {
           }}
         >
           <Combobox.Target>
-            <ActionIcon variant="default" size='lg' aria-label="todo" onClick={() => combobox.toggleDropdown()}>
+            <UnstyledButton style={{alignItems: 'center', display: 'inline-flex'}} variant="default" size='lg' aria-label="todo" onClick={() => combobox.toggleDropdown()}>
               <IconLanguage />
-            </ActionIcon>
+            </UnstyledButton>
           </Combobox.Target>
   
           <Combobox.Dropdown>

@@ -88,6 +88,7 @@
       "movie": {
        "description": "Ver ''{title}\\'' online gratis"
       }
-    }
+    },
+    "searchButtonAriaLabel": "Abrir cuadro de búsqueda"
   }
   
