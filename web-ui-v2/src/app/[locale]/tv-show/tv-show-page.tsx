@@ -139,7 +139,7 @@ export default function TvShowPage(props: TvShowPageProps) {
             router.replace(`${pathname}?${params.toString()}`);
           }}/>
           <Space h="xl"/>
-          <Player movieTitle={playerTitle} m3u8File={props.player.m3u8File} backdropImage={props.player.backdropImage} thumbnailsFile={props.player.thumbnailsFile}/>
+          <Player subtitles={{}} movieTitle={playerTitle} m3u8File={props.player.m3u8File} backdropImage={props.player.backdropImage} thumbnailsFile={props.player.thumbnailsFile}/>
         </Container>
       </AppShell.Main>
     </AppShell>

@@ -23,9 +23,11 @@
     "embla-carousel-react": "^8.5.2",
     "hls.js": "^1.5.20",
     "install": "^0.13.0",
+    "media-captions": "^1.0.4",
     "next": "15.1.4",
     "next-intl": "^3.26.3",
     "npm": "^11.1.0",
+    "openai": "^4.85.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "request-ip": "^3.3.0"

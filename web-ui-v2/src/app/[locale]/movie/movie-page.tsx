@@ -10,6 +10,13 @@ import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelect
 import { useSearchParams } from 'next/navigation';
 import { Nullable } from '@/types/Nullable';
 
+export interface Subtitle {
+  name: string,
+  url: string,
+  lang: string,
+  type: Nullable<string>
+}
+
 export interface MovieStreamInfo {
   id: string;
   releaesId: Nullable<string>;
@@ -20,6 +27,7 @@ export interface MovieStreamInfo {
   mpdFile: string;
   m3u8File: string;
   thumbnailsFile: string;
+  subtitles: { [key: string]: Subtitle}
 }
 
 export interface MovieRelease {
@@ -95,7 +103,8 @@ export default function MoviePage(props: MoviePageProps) {
           <Player movieTitle={`${props.movieStreamInfo.titleL8ns[Locale.FROM_LANG_TAG[locale].key] || props.movieStreamInfo.titleL8ns['EN_US']} (${props.movieStreamInfo.releaseYear})`}
           m3u8File={props.movieStreamInfo.m3u8File}
           backdropImage={props.movieStreamInfo.backdropImage}
-          thumbnailsFile={props.movieStreamInfo.thumbnailsFile}/>
+          thumbnailsFile={props.movieStreamInfo.thumbnailsFile}
+          subtitles={props.movieStreamInfo.subtitles}/>
         </Container>
       </AppShell.Main>
     </AppShell>

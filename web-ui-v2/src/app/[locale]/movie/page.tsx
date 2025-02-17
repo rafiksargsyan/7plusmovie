@@ -42,7 +42,8 @@ async function getMovieStreamInfo(movieId: string, releaseId: Nullable<string>, 
     backdropImage: response.data.backdropImage,
     mpdFile: response.data.mpdFile,
     m3u8File: response.data.m3u8File,
-    thumbnailsFile: response.data.thumbnailsFile
+    thumbnailsFile: response.data.thumbnailsFile,
+    subtitles: response.data.subtitles
   }
 }
 
