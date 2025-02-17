@@ -89,7 +89,7 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
     thumbnailsFile = release._thumbnails.sort((a, b) => a.resolution - b.resolution)[0].thumbnailsFile;
     Object.entries(releaseSubtitles).forEach(([k, s]) => subtitles[k] = {
       name: s.name,
-      relativePath: s.relativePath,
+      url: `https://${mediaAssetsDomain}/${s.relativePath}`,
       lang: s.lang.key,
       type: s.type?.key
     })
