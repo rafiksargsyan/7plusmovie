@@ -79,10 +79,9 @@ export async function generateMetadata(
     const tv = await getPlayerData(id, 1, 1, null, 'EN_US');
     const localeKey = Locale.FROM_LANG_TAG[locale].key;
     const title = `${(localeKey in tv.titleL8ns) ? tv.titleL8ns[localeKey] : tv.titleL8ns['EN_US']} (${tv.releaseYear})`;
-    const algoliaTvShowObject = await algoliaClient.getObject({
-      indexName: process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!,
-      objectID: id
-    })
+    const algoliaTvShowObject = await getOrUpdateCache(() => {
+      return algoliaClient.getObject({indexName: process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!, objectID: id})
+    }, `algolia_${id}`, 3600 * 24);
     const posters: { [key:string]: string } = algoliaTvShowObject.posterImagesPortrait as { [key:string]: string };
     const poster = `${imageBaseUrl}h=720,f=auto/${(localeKey in posters) ? posters[localeKey] : posters['EN_US']}`;
     return {
