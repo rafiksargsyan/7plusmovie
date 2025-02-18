@@ -20,6 +20,7 @@ const docClient = DynamoDBDocument.from(new DynamoDB({}));
 interface GetMovieParam {
   movieId: string
   preferredAudioLang: string
+  releaseId: Nullable<string>
 }
 
 interface GetMovieMetadataResponse {
@@ -75,14 +76,26 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
   if (releases == null) releases = {};
   let preferredAudioLang = AudioLang.fromKey(event.preferredAudioLang)
   if (preferredAudioLang == null) preferredAudioLang = AudioLang.RU
-  const release = getOneRelease(Object.values(releases), preferredAudioLang);
+  let release = event.releaseId != null ? getRelease(releases, event.releaseId) : null;
+  if (release == null) {
+    release = getOneRelease(Object.values(releases), preferredAudioLang);
+  }
+  let releaseSubtitles = release?._subtitles;
+  if (releaseSubtitles == null) releaseSubtitles = {};
+  let subtitles = {};
   if (release != null) {
     mpdFile = release._mpdFile;
     m3u8File = release._m3u8File;
     thumbnailsFile = release._thumbnails.sort((a, b) => a.resolution - b.resolution)[0].thumbnailsFile;
+    Object.entries(releaseSubtitles).forEach(([k, s]) => subtitles[k] = {
+      name: s.name,
+      url: `https://${mediaAssetsDomain}/${s.relativePath}`,
+      lang: s.lang.key,
+      type: s.type?.key
+    })
   }
   return {
-    subtitles: {}, // TODO
+    subtitles: subtitles,
     mpdFile: `https://${mediaAssetsDomain}/${mpdFile}`,
     m3u8File: `https://${mediaAssetsDomain}/${m3u8File}`,
     thumbnailsFile: thumbnailsFile !== null ? `https://${cloudflareMediaAssetsCachableDomain}/${thumbnailsFile}` : null,
@@ -192,4 +205,8 @@ export async function getCloudFrontDistro() {
     return undefined;
   }
   return candidate;
+}
+
+export function getRelease(releases: { [id:string]: ReleaseRead }, releaseId: string) {
+  return releases[releaseId];
 }

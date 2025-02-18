@@ -10,7 +10,9 @@ import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
 import { Movie } from "../domain/aggregate/Movie";
 import axios from 'axios';
 import { L8nLangCode } from '../domain/L8nLangCodes';
-import { strIsBlank } from '../../utils';
+import { Nullable, strIsBlank } from '../../utils';
+import { Release } from '../domain/entity/Release';
+import { RipType } from '../domain/RipType';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
@@ -53,6 +55,7 @@ interface MovieRead {
   tmdbId: string | undefined;
   backdropImage: string;
   releases: { [key:string]: any };
+  _releaseTimeInMillis: Nullable<number>;
 }
 
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
@@ -87,6 +90,12 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         if (movie.genres == undefined) movie.genres = [];
         if (movie.actors == undefined) movie.actors = [];
         if (movie.directors == undefined) movie.directors = [];
+        const latestReleaseId = getLatestReleaseId(movie);
+        const latestRelease = latestReleaseId != null ? movie.releases[latestReleaseId] : null;
+        const maxQualityReleaseId = getMaxQualityReleaseId(movie);
+        const maxQualityRelease = maxQualityReleaseId != null ? movie.releases[maxQualityReleaseId] : null;
+        const latestReleaseQuality = (latestRelease?._ripType != null && RipType.fromKey(latestRelease?._ripType?.key)?.isLowQuality() ? latestRelease?._ripType?.key : latestRelease?._resolution?.key);
+        const maxQuality = (maxQualityRelease?._ripType != null && RipType.fromKey(maxQualityRelease?._ripType?.key)?.isLowQuality() ? maxQualityRelease?._ripType?.key : maxQualityRelease?._resolution?.key);
         await algoliaIndex.saveObject({ objectID: movie.id,
                                         creationTime: movie.creationTime,
                                         category: "MOVIE",
@@ -96,7 +105,12 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
                                         releaseYear: movie.releaseYear,
                                         genres: movie.genres.reduce((r, _) => { return { ...r, [_.code] : MovieGenres[_.code] } }, {}),
                                         actors: movie.actors.reduce((r, _) => { return { ...r, [_.code] : Persons[_.code] } }, {}),
-                                        directors: movie.directors.reduce((r, _) => { return { ...r, [_.code] : Persons[_.code] } }, {}) });
+                                        directors: movie.directors.reduce((r, _) => { return { ...r, [_.code] : Persons[_.code] } }, {}),
+                                        releaseTimeInMillis: movie._releaseTimeInMillis,
+                                        latestReleaseId: latestReleaseId,
+                                        latestReleaseQuality: latestReleaseQuality,
+                                        latestReleaseTime: latestRelease?.creationTime,
+                                        maxQuality: maxQuality });
       }
     }
   } catch (e) {
@@ -152,6 +166,7 @@ async function updateBasedOnTmdbId(movieId: string, tmdbId: string, tmdbApiKey: 
   const posterPathEnUs: string = tmdbMovieEnUs.poster_path;
   const posterPathRu: string = tmdbMovieRu.poster_path;
   const backdropPath: string = tmdbMovieEnUs.backdrop_path;
+  const releaseDate = tmdbMovieEnUs.release_date;
 
   if (movieRead.titleL8ns['EN_US'] == undefined && titleEnUs != undefined) {
     movie.addTitleL8n(new L8nLangCode('EN_US'), titleEnUs);
@@ -228,11 +243,35 @@ async function updateBasedOnTmdbId(movieId: string, tmdbId: string, tmdbApiKey: 
       updated = true;
     }
   });
+  
+  if (releaseDate != null && releaseDate.trim() !== "") {
+    const millis = new Date(releaseDate).getTime();
+    if (movie.releaseTimeInMillis !== millis) {
+      movie.releaseTimeInMillis = millis;
+      updated = true;
+    }
+  }
 
   if (updated) {
     await docClient.put({ TableName: dynamodbMovieTableName, Item: movie });
   }
   return updated;
+}
+
+function getLatestReleaseId(m: MovieRead) {
+  if (Object.entries(m.releases).length === 0) return null;
+  return (Object.entries(m.releases).sort((a, b) => {
+    const t1 = a[1].creationTime || 0;
+    const t2 = b[1].creationTime || 0;
+    return t2 - t1;
+  }))[0][0];
+}
+
+function getMaxQualityReleaseId(m: MovieRead) {
+  if (Object.entries(m.releases).length === 0) return null;
+  return (Object.entries(m.releases).sort((a, b) => {
+    return Release.compareQuality(b[1], a[1])
+  }))[0][0]
 }
 
 const tmdbMovieGenreId2MovieGenre = {

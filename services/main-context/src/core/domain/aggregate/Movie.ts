@@ -26,6 +26,7 @@ export class Movie {
   private _monitorReleases: boolean;
   private releaseIndexerContextMovieId: string;
   private _inTranscoding: boolean = false;
+  private _releaseTimeInMillis;
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -192,6 +193,18 @@ export class Movie {
     return this.releaseIndexerContextMovieId;
   }
 
+  get releaseTimeInMillis() {
+    if (this._releaseTimeInMillis != null) return this._releaseTimeInMillis;
+    return new Date(`${this.releaseYear}-01-01`).getTime();
+  }
+
+  set releaseTimeInMillis(millis: number) {
+    if (millis == null) { 
+      throw new NullReleaseTimeError();
+    }
+    this._releaseTimeInMillis = millis;
+  }
+
   public releaseAlreadyExists(ricReleasId: string) {
     for (const k in this.releases) {
       const r = this.releases[k] as unknown as ReleaseRead;
@@ -224,3 +237,5 @@ class InvalidBackdropImageRelativePathError extends Error {}
 class InvalidTmdbIdError extends Error {}
 
 class BlankRICMovieIdError extends Error {}
+
+class NullReleaseTimeError extends Error {};

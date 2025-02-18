@@ -1,6 +1,7 @@
 import { TvShow } from "../core/domain/aggregate/TvShow"
 import { TvShowRepositoryInterface } from "../core/ports/TvShowRepositoryInterface"
 import { DynamoDBDocument, QueryCommandInput, ScanCommandInput } from "@aws-sdk/lib-dynamodb"
+import { Nullable } from "../utils";
 
 const dynamodbTvShowTableName = process.env.DYNAMODB_TV_SHOW_TABLE_NAME!;
 
@@ -9,6 +10,24 @@ export class TvShowRepository implements TvShowRepositoryInterface {
     
   public constructor(docClient: DynamoDBDocument) {
     this.docClient = docClient;
+  }
+
+  async getByIdLazy(id: Nullable<string>): Promise<TvShow> {
+    const tvShowDto = (await this.docClient.get({
+      TableName: dynamodbTvShowTableName,
+      Key: { 'PK': id, 'SK': 'tvshow'  }
+    })).Item;
+    
+    if (tvShowDto == null) {
+      throw new FailedToGetTvShowError();
+    }
+  
+    tvShowDto.id = tvShowDto.PK;
+    
+    const tvShow: TvShow = new TvShow(true);
+    Object.assign(tvShow, tvShowDto);
+
+    return tvShow;
   }
 
   async getTvShowById(id: string | undefined): Promise<TvShow> {
@@ -159,6 +178,36 @@ export class TvShowRepository implements TvShowRepositoryInterface {
     }
     return ret
   }
+
+  async getAllLazy(): Promise<TvShow[]> {
+    const tvShowScanInput : ScanCommandInput = {
+      TableName : dynamodbTvShowTableName,
+      FilterExpression: "#sk = :sk",
+      ExpressionAttributeNames: {
+        '#sk': 'SK'
+      },
+      ExpressionAttributeValues: {
+        ':sk': 'tvshow',
+      }
+    }
+    const tvShowItems: any[] = []
+    let items
+    do {
+      items =  await this.docClient.scan(tvShowScanInput)
+      items.Items.forEach((item) => {
+        tvShowItems.push(item)
+      })
+      tvShowScanInput.ExclusiveStartKey = items.LastEvaluatedKey
+    } while (typeof items.LastEvaluatedKey !== "undefined")
+
+    return tvShowItems.map(i => {
+      i.id = i.PK
+      const tvShow: TvShow = new TvShow(true);
+      Object.assign(tvShow, i);
+      return tvShow;
+    });
+  }
+
 }
 
 class FailedToGetTvShowError extends Error {}

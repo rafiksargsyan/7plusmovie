@@ -13,6 +13,7 @@ interface Episode {
   episodeNumber: number
   monitorReleases: boolean
   inTranscoding: boolean
+  airDateInMillis: Nullable<number>;
 }
 
 interface Season {
@@ -39,7 +40,8 @@ export class TvShow {
   private genres: TvShowGenre[] = [];
   private tmdbId : string;
   private seasons: Season[] = [];
-  private _ricTvShowId: Nullable<string>
+  private _ricTvShowId: Nullable<string>;
+  private _tmdbSyncEnabled: boolean = false;
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -187,8 +189,10 @@ export class TvShow {
       }
     })
     const season = this.getSeasonOrThrow(seasonNumber);
+    if (season.tmdbSeasonNumber != null) return false;
     season.tmdbSeasonNumber = tmdbSeasonNumber;
     this.touch();
+    return true;
   }
 
   public addSeasonNameL8n(seasonNumber: number | undefined, locale: L8nLangCode | undefined, name: string | undefined) {
@@ -225,7 +229,8 @@ export class TvShow {
       nameL8ns: {},
       episodeNumber: episodeNumber,
       inTranscoding: false,
-      monitorReleases: false
+      monitorReleases: false,
+      airDateInMillis: null
     })
     this.touch()
   }
@@ -242,8 +247,10 @@ export class TvShow {
       }
     })
     const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    if (episode.tmdbEpisodeNumber != null) return false;
     episode.tmdbEpisodeNumber = tmdbEpisodeNumber;
     this.touch();
+    return true;
   }
 
   public addEpisodeNameL8n(seasonNumber: number | undefined, episodeNumber: number | undefined,
@@ -362,6 +369,57 @@ export class TvShow {
     }
   }
 
+  setEpisodeAirDateInMillis(seasonNumber: number, episodeNumber: number, airDateInMillis: number) {
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    if (airDateInMillis == null || airDateInMillis <= 0) {
+      throw new InvalidEpisodeAirDateError();
+    }
+    if (episode.airDateInMillis === airDateInMillis) return false;
+    episode.airDateInMillis = airDateInMillis;
+    this.touch();
+    return true;
+  }
+
+  getTmdbId() {
+    return this.tmdbId
+  }
+
+  seasonExists(seasonNumber: number) {
+    return this.getSeason(seasonNumber) != null;
+  }
+
+  private getSeason(seasonNumber: number) {
+    for (const s of this.seasons) {
+      if (s.seasonNumber === seasonNumber) {
+        return s;
+      }
+    }
+    return null;
+  }
+
+  episodeExists(seasonNumber: number, episodeNumber: number) {
+    return this.getEpisode(seasonNumber, episodeNumber) != null;
+  }
+
+  private getEpisode(seasonNumber: number, episodeNumber: number) {
+    const season = this.getSeason(seasonNumber);
+    if (season == null) return null;
+    for (const e of season.episodes) {
+      if (e.episodeNumber === episodeNumber) {
+        return e;
+      }
+    }
+    return null;
+  }
+
+  get tmdbSyncEnabled() {
+    return this._tmdbSyncEnabled;
+  }
+
+  set tmdbSyncEnabled(v: boolean) {
+    if (this._tmdbSyncEnabled != v) this.touch();
+    this._tmdbSyncEnabled = v;
+  }
 }
 
 class InvalidTitleError extends Error {}
@@ -423,3 +481,5 @@ class NullReleaseError extends Error {}
 class ReleaseWithKeyAlreadyExistsError extends Error {}
 
 class BlankRICTvShowIdError extends Error {}
+
+class InvalidEpisodeAirDateError {}

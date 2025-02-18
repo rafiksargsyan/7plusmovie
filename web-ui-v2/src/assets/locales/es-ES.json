@@ -1,0 +1,95 @@
+{
+    "login": "Iniciar sesión",
+    "contact": "Contacto",
+    "home": "Inicio",
+    "movies": "Películas",
+    "tvshows": "Series",
+    "hero": {
+      "title": "Nuestra misión es hacer que las mejores películas y series de todos los tiempos sean accesibles para todos",
+      "image": {
+        "alt": "Imagen de fondo de la sección principal"
+      }
+    },
+    "signup": "Regístrate",
+    "latest_movie_updates": "Últimas actualizaciones de películas",
+    "latest_tvshow_updates": "Últimas actualizaciones de series",
+    "releaseSelect": {
+      "label": "Seleccionar versión"
+    },
+    "seasonSelect": {
+      "label": "Seleccionar temporada"
+    },
+    "episodeSelect": {
+      "label": "Seleccionar episodio"
+    },
+    "audioLang": {
+      "EN": "Inglés",
+      "EN_US": "Inglés (EE.UU.)",
+      "EN_GB": "Inglés (Reino Unido)",
+      "EN_AU": "Inglés (Australia)",
+      "RU": "Ruso",
+      "FR": "Francés",
+      "FR_FR": "Francés (Francia)",
+      "FR_CA": "Francés (Canadá)",
+      "JA": "Japonés",
+      "PT": "Portugués",
+      "PT_BR": "Portugués (Brasil)",
+      "PT_PT": "Portugués (Portugal)",
+      "KO": "Coreano",
+      "DA": "Danés",
+      "HI": "Hindi",
+      "HI_IN": "Hindi (India)",
+      "IT": "Italiano",
+      "RO": "Rumano",
+      "RO_RO": "Rumano (Rumanía)",
+      "FA": "Persa",
+      "FA_IR": "Persa (Irán)",
+      "SV": "Sueco",
+      "SV_SE": "Sueco (Suecia)",
+      "PL": "Polaco",
+      "PL_PL": "Polaco (Polonia)",
+      "ES": "Español",
+      "ES_ES": "Español (España)",
+      "ES_419": "Español (Latinoamérica)",
+      "UK": "Ucraniano",
+      "ZH": "Chino",
+      "DE": "Alemán",
+      "BE": "Bielorruso",
+      "BG": "Búlgaro",
+      "CS": "Checo",
+      "ET": "Estonio",
+      "FI": "Finlandés",
+      "HR": "Croata",
+      "HU": "Húngaro",
+      "HY": "Armenio",
+      "LT": "Lituano",
+      "LV": "Letón",
+      "MK": "Macedonio",
+      "NB": "Noruego (Bokmål)",
+      "NL": "Holandés",
+      "SL": "Esloveno",
+      "SK": "Eslovaco",
+      "SR": "Serbio",
+      "AR": "Árabe",
+      "HE": "Hebreo",
+      "MYN": "Maya"
+    },
+    "search": {
+      "placeholder": "Buscar títulos, géneros, personas"
+    },
+    "season": "Temporada {seasonNumber}",
+    "episode": "Episodio {episodeNumber}",
+    "emptySearchResultsMessage": "¡Vaya! No encontramos nada. Intenta ajustar tu búsqueda.",
+    "Metadata": {
+      "home": {
+        "title": "Ver películas gratis online",
+        "description": "Las buenas películas son como los buenos libros, son atemporales. Nuestra misión es hacer accesibles las mejores películas de todos los tiempos para todos."
+      },
+      "movie": {
+       "description": "Ver ''{title}\\'' online gratis"
+      }
+    },
+    "searchButtonAriaLabel": "Abrir cuadro de búsqueda",
+    "contactUsText": "Contáctanos en"
+  }
+  

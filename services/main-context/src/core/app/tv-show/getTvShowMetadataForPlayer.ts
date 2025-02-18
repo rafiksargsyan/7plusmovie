@@ -5,7 +5,7 @@ import { TvShowRepositoryInterface } from '../../ports/TvShowRepositoryInterface
 import { ReleaseRead } from '../../domain/entity/Release';
 import { AudioLang } from '../../domain/AudioLang';
 import { Nullable } from '../../../utils';
-import { getOneRelease } from '../getMovieMetadataForPlayer';
+import { getOneRelease, getRelease } from '../getMovieMetadataForPlayer';
 
 const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
 const cfDistroRandomSelectionProportion = Number.parseFloat(process.env.CF_DISTRO_RANDOM_SELECTION_PROPORTION!);
@@ -22,6 +22,7 @@ interface GetTvShowParam {
   tvShowId: string
   season: number
   episode: number
+  releaseId: string
   preferredAudioLang: string
 }
 
@@ -103,7 +104,10 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
   if (releases == null) releases = {};
   let preferredAudioLang = AudioLang.fromKey(event.preferredAudioLang)
   if (preferredAudioLang == null) preferredAudioLang = AudioLang.RU
-  const release = getOneRelease(Object.values(releases), preferredAudioLang)
+  let release = event.releaseId != null ? getRelease(releases, event.releaseId) : null;
+  if (release == null) {
+    release = getOneRelease(Object.values(releases), preferredAudioLang);
+  }
   if (release != null) {
     mpdFile = release._mpdFile;
     m3u8File = release._m3u8File;
@@ -111,9 +115,7 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
   }
   return {
     releaseYear: tvShow.releaseYear,
-    // subtitles: Object.keys(episode.subtitles)
-    // .reduce((acc, key) => {acc[key] = `https://${mediaAssetsDomain}/${episode.subtitles[key]}`; return acc;}, {}),
-    subtitles: {},
+    subtitles: {}, //TODO
     mpdFile: `https://${mediaAssetsDomain}/${mpdFile}`,
     m3u8File: `https://${mediaAssetsDomain}/${m3u8File}`,
     thumbnailsFile: thumbnailsFile !== undefined ? `https://${cloudflareMediaAssetsCachableDomain}/${thumbnailsFile}` : undefined,

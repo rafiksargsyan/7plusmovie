@@ -164,7 +164,8 @@ functions:
           request:
             template:
               application/json: '{ "movieId" : "$input.params(''id'')",
-                                   "preferredAudioLang" : "$util.escapeJavaScript($input.params().querystring.get(''preferredAudioLang''))" }'
+                                   "preferredAudioLang" : "$util.escapeJavaScript($input.params().querystring.get(''preferredAudioLang''))",
+                                   "releaseId" : "$util.escapeJavaScript($input.params().querystring.get(''releaseId''))" }'
               application/x-www-form-urlencoded: null
           response:
             headers:
@@ -177,6 +178,42 @@ functions:
                          "titleL8ns": $input.json(''$.titleL8ns''),
                          "releaseYear": $input.json(''$.releaseYear''),
                          "thumbnailsFile": $input.json(''$.thumbnailsFile'') }'
+  
+  getMovieReleases:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/getMovieReleases.handler
+    events:
+      - http:
+          integration: lambda
+          path: /movie/{id}/releases
+          method: get
+          request:
+            template:
+              application/json: '{ "movieId" : "$input.params(''id'')",
+                                   "preferredAudioLang" : "$util.escapeJavaScript($input.params().querystring.get(''preferredAudioLang''))" }'
+              application/x-www-form-urlencoded: null
+          response:
+            headers:
+              Access-Control-Allow-Origin: "'*'"
+  
+  getTvShowReleases:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/getTvShowReleases.handler
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show/{id}/releases
+          method: get
+          request:
+            template:
+              application/json: '{ "id" : "$input.params(''id'')",
+                                   "preferredAudioLang" : "$util.escapeJavaScript($input.params().querystring.get(''preferredAudioLang''))" }'
+              application/x-www-form-urlencoded: null
+          response:
+            headers:
+              Access-Control-Allow-Origin: "'*'"
 
   addBackdropImageToMovie:
     environment:
@@ -428,7 +465,8 @@ functions:
               application/json: '{ "tvShowId" : "$input.params(''id'')",
                                    "season" : $input.params(''season''),
                                    "episode" : $input.params(''episode''),
-                                   "preferredAudioLang" : "$util.escapeJavaScript($input.params().querystring.get(''preferredAudioLang''))" }'
+                                   "preferredAudioLang" : "$util.escapeJavaScript($input.params().querystring.get(''preferredAudioLang''))",
+                                   "releaseId" : "$util.escapeJavaScript($input.params().querystring.get(''releaseId''))" }'
               application/x-www-form-urlencoded: null
           response:
             headers:
@@ -767,6 +805,39 @@ functions:
           response:
             headers:
               Access-Control-Allow-Origin: "'*'"
+
+  tvShowTmdbSyncFanout:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+      TVSHOW_TMDB_SYNC_LAMBDA_NAME: ${env:TVSHOW_TMDB_SYNC_LAMBDA_NAME} 
+    handler: src/core/app/tv-show/tvShowTmdbSyncFanout.handler
+    events:
+      - schedule: rate(${file(./.env.${sls:stage}.yml):TVSHOW_TMDB_SYNC_INTERVAL_IN_MINUTES} minutes)
+    timeout: 900
+
+  tvShowTmdbSync:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+      SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID} 
+    handler: src/core/app/tv-show/tvShowTmdbSync.handler
+    timeout: 120
+
+  tvShowSetTmdbSyncEnabled:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/tvShowSetTmdbSyncEnabled.handler
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show/{id}/  
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : "$input.params(''id'')",
+                                   "tmdbSyncEnabled" : $input.json(''$.tmdbSyncEnabled'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
 resources:
   Resources:

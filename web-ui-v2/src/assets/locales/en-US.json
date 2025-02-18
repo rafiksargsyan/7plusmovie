@@ -1,0 +1,94 @@
+{
+  "login": "Login",
+  "contact": "Contact",
+  "home": "Home",
+  "movies": "Movies",
+  "tvshows": "TV Shows",
+  "hero": {
+    "title" : "Our mission is to make the greatest movies and TV shows of all time accessible to everyone",
+    "image": {
+      "alt": "hero section background image"
+    }
+  },
+  "signup": "Sign Up",
+  "latest_movie_updates": "Latest movie updates",
+  "latest_tvshow_updates": "Latest TV show updates",
+  "releaseSelect": {
+    "label": "Select release"
+  },
+  "seasonSelect": {
+    "label": "Select season"
+  },
+  "episodeSelect": {
+    "label": "Select episode"
+  },
+  "audioLang": {
+    "EN": "English",
+    "EN_US": "English (US)",
+    "EN_GB": "English (GB)",
+    "EN_AU": "English (AU)",
+    "RU": "Russian",
+    "FR": "French",
+    "FR_FR": "French (France)",
+    "FR_CA": "French (Canada)",
+    "JA": "Japanese",
+    "PT": "Portuguese",
+    "PT_BR": "Portuguese (Brazil)",
+    "PT_PT": "Portuguese (Portugal)",
+    "KO": "Korean",
+    "DA": "Danish",
+    "HI": "Hindi",
+    "HI_IN": "Hindi (India)",
+    "IT": "Italian",
+    "RO": "Romanian",
+    "RO_RO": "Romanian (Romania)",
+    "FA": "Farsi",
+    "FA_IR": "Farsi (Iran)",
+    "SV": "Swedish",
+    "SV_SE": "Swedish (Sweden)",
+    "PL": "Polish",
+    "PL_PL": "Polish (Poland)",
+    "ES": "Spanish",
+    "ES_ES": "Spanish (Spain)",
+    "ES_419": "Spanish (Latin American)",
+    "UK": "Ukrainian",
+    "ZH": "Chinese",
+    "DE": "German",
+    "BE": "Belarusian",
+    "BG": "Bulgarian",
+    "CS": "Czech",
+    "ET": "Estonian",
+    "FI": "Finnish",
+    "HR": "Croatian",
+    "HU": "Hungarian",
+    "HY": "Armenian",
+    "LT": "Lithuanian",
+    "LV": "Latvian",
+    "MK": "Macedonian",
+    "NB": "Norwegian (Bokmål)",
+    "NL": "Dutch",
+    "SL": "Slovenian",
+    "SK": "Slovak",
+    "SR": "Serbian",
+    "AR": "Arabic",
+    "HE": "Hebrew",
+    "MYN": "Mayan"
+  },
+  "search": {
+    "placeholder": "Search titles, genres, persons"
+  },
+  "season": "Season {seasonNumber}",
+  "episode": "Episode {episodeNumber}",
+  "emptySearchResultsMessage": "Oops, we couldn't find anything. Try to adjust your search.",
+  "Metadata": {
+    "home": {
+      "title": "Watch Free Movies Online",
+      "description": "Good movies are like good books, they are timeless. Our mission is to make the best movies of all time accessible to everyone."
+    },
+    "movie": {
+      "description": "Watch ''{title}'' online free"
+    }
+  },
+  "searchButtonAriaLabel": "Open search box",
+  "contactUsText": "Contact us on"
+}

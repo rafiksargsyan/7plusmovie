@@ -9,7 +9,7 @@ import axios from 'axios';
 import { L8nLangCode } from '../../domain/L8nLangCodes';
 import { TvShowRepositoryInterface } from '../../ports/TvShowRepositoryInterface';
 import { TvShowRepository } from '../../../adapters/TvShowRepository';
-import { strIsBlank } from '../../../utils';
+import { Nullable, strIsBlank } from '../../../utils';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
@@ -45,7 +45,8 @@ export interface Episode {
   m3u8File: string;
   tmdbEpisodeNumber: number;
   episodeNumber;
-  releases: { [key: string]: any }
+  releases: { [key: string]: any };
+  airDateInMillis: Nullable<number>;
 }
     
 export interface Season {
@@ -118,6 +119,8 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
           return
         }
         if (tvShow.genres == undefined) tvShow.genres = [];
+        const latestEpisode = getLatestEpisode(tvShow.seasons);
+        const latestReleaseId = latestEpisode?.episode == null ? null : getLatestReleaseId(latestEpisode?.episode);
         await algoliaIndex.saveObject({ objectID: tvShow.id,
                                         creationTime: tvShow.creationTime,
                                         category: "TV_SHOW",
@@ -125,13 +128,47 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
                                         posterImagesPortrait: tvShow.posterImagesPortrait,
                                         titleL8ns: tvShow.titleL8ns,
                                         releaseYear: tvShow.releaseYear,
-                                        genres: tvShow.genres.reduce((r, _) => { return { ...r, [_.code] : TvShowGenres[_.code] } }, {})});
+                                        genres: tvShow.genres.reduce((r, _) => { return { ...r, [_.code] : TvShowGenres[_.code] } }, {}),
+                                        latestSeason: latestEpisode?.seasonNumber,
+                                        latestEpisode: latestEpisode?.episode?.episodeNumber,
+                                        latestAirDateMillis: latestEpisode?.episode?.airDateInMillis,
+                                        latestReleaseId: latestReleaseId,
+                                        latestReleaseTime: latestReleaseId != null ? latestEpisode?.episode?.releases[latestReleaseId].creationTime : null });
       }
     }
   } catch (e) {
     console.error(e);
   } 
 };
+
+function getLatestEpisode(seasons: Season[]) {
+  let seasonNumber = -1;
+  let episodeNumber = -1;
+  let episode;
+  seasons.forEach((s) => {
+    s.episodes.forEach((e) => {
+      if ((s.seasonNumber > seasonNumber || (s.seasonNumber === seasonNumber && e.episodeNumber > episodeNumber))
+        && e.releases != null && Object.keys(e.releases).length !== 0) {
+        seasonNumber = s.seasonNumber;
+        episodeNumber = e.episodeNumber;
+        episode = e;
+      }
+    })
+  })
+  return {
+    seasonNumber: seasonNumber === -1 ? null : seasonNumber,
+    episode: episode
+  }
+}
+
+function getLatestReleaseId(e: Episode) {
+  if (Object.entries(e.releases).length === 0) return null;
+  return (Object.entries(e.releases).sort((a, b) => {
+    const t1 = a[1].creationTime || 0;
+    const t2 = b[1].creationTime || 0;
+    return t2 - t1;
+  }))[0][0];
+}
 
 async function emptyS3Directory(bucket, dir: string) {
   if (strIsBlank(dir)) return;
@@ -319,6 +356,12 @@ async function updateBasedOnTmdbId(tvShowId: string, tmdbId: string, tmdbApiKey:
               await s3.putObject(s3Params);
               tvShow.addStillImage(_.seasonNumber, episode.episodeNumber, objectKey);
               updated = true;
+            }
+          }
+          if (!strIsBlank(tmdbEpisodeEnUs.air_date)) {
+            const airDateMillis = new Date(tmdbEpisodeEnUs.air_date).getTime();
+            if (tvShow.setEpisodeAirDateInMillis(_.seasonNumber, episode.episodeNumber, airDateMillis)) {
+              updated = true
             }
           }
         }
