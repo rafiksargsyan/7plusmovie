@@ -1,0 +1,95 @@
+{
+    "login": "Accedi",
+    "contact": "Contatto",
+    "home": "Home",
+    "movies": "Film",
+    "tvshows": "Serie TV",
+    "hero": {
+      "title": "La nostra missione è rendere i migliori film e serie TV di tutti i tempi accessibili a tutti",
+      "image": {
+        "alt": "Immagine di sfondo della sezione hero"
+      }
+    },
+    "signup": "Registrati",
+    "latest_movie_updates": "Ultimi aggiornamenti sui film",
+    "latest_tvshow_updates": "Ultimi aggiornamenti sulle serie TV",
+    "releaseSelect": {
+      "label": "Seleziona versione"
+    },
+    "seasonSelect": {
+      "label": "Seleziona stagione"
+    },
+    "episodeSelect": {
+      "label": "Seleziona episodio"
+    },
+    "audioLang": {
+      "EN": "Inglese",
+      "EN_US": "Inglese (US)",
+      "EN_GB": "Inglese (GB)",
+      "EN_AU": "Inglese (AU)",
+      "RU": "Russo",
+      "FR": "Francese",
+      "FR_FR": "Francese (Francia)",
+      "FR_CA": "Francese (Canada)",
+      "JA": "Giapponese",
+      "PT": "Portoghese",
+      "PT_BR": "Portoghese (Brasile)",
+      "PT_PT": "Portoghese (Portogallo)",
+      "KO": "Coreano",
+      "DA": "Danese",
+      "HI": "Hindi",
+      "HI_IN": "Hindi (India)",
+      "IT": "Italiano",
+      "RO": "Rumeno",
+      "RO_RO": "Rumeno (Romania)",
+      "FA": "Persiano",
+      "FA_IR": "Persiano (Iran)",
+      "SV": "Svedese",
+      "SV_SE": "Svedese (Svezia)",
+      "PL": "Polacco",
+      "PL_PL": "Polacco (Polonia)",
+      "ES": "Spagnolo",
+      "ES_ES": "Spagnolo (Spagna)",
+      "ES_419": "Spagnolo (America Latina)",
+      "UK": "Ucraino",
+      "ZH": "Cinese",
+      "DE": "Tedesco",
+      "BE": "Bielorusso",
+      "BG": "Bulgaro",
+      "CS": "Ceco",
+      "ET": "Estone",
+      "FI": "Finlandese",
+      "HR": "Croato",
+      "HU": "Ungherese",
+      "HY": "Armeno",
+      "LT": "Lituano",
+      "LV": "Lettone",
+      "MK": "Macedone",
+      "NB": "Norvegese (Bokmål)",
+      "NL": "Olandese",
+      "SL": "Sloveno",
+      "SK": "Slovacco",
+      "SR": "Serbo",
+      "AR": "Arabo",
+      "HE": "Ebraico",
+      "MYN": "Maya"
+    },
+    "search": {
+      "placeholder": "Cerca titoli, generi, persone"
+    },
+    "season": "Stagione {seasonNumber}",
+    "episode": "Episodio {episodeNumber}",
+    "emptySearchResultsMessage": "Ops, non abbiamo trovato nulla. Prova a modificare la ricerca.",
+    "Metadata": {
+      "home": {
+        "title": "Guarda film gratis online",
+        "description": "I bei film sono come i bei libri, sono senza tempo. La nostra missione è rendere i migliori film di tutti i tempi accessibili a tutti."
+      },
+      "movie": {
+        "description": "Guarda ''{title}'' online gratis"
+      }
+    },
+    "searchButtonAriaLabel": "Apri la casella di ricerca",
+    "contactUsText": "Contattaci a"
+  }
+  

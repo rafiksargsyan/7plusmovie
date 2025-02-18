@@ -1,5 +1,5 @@
 import { Locale } from "@/i18n/routing";
-import { ActionIcon, CheckIcon, Combobox, Group, UnstyledButton, useCombobox } from "@mantine/core";
+import { CheckIcon, Combobox, Group, UnstyledButton, useCombobox } from "@mantine/core";
 import { IconLanguage } from "@tabler/icons-react";
 import { useState } from "react";
 

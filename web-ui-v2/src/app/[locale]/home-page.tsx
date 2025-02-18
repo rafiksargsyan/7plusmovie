@@ -1,5 +1,5 @@
 'use client'
-import { AppShell, Burger, Container, Divider, Group,  Space, Stack, Text, Title, UnstyledButton, useMantineTheme } from '@mantine/core';
+import { AppShell, Burger, Container, Group,  Space, Stack, Title, UnstyledButton, useMantineTheme } from '@mantine/core';
 import { useDisclosure, useHeadroom } from '@mantine/hooks';
 import { useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
@@ -9,6 +9,8 @@ import { MovieCard } from '@/components/MovieCard/MovieCard';
 import { TvShowCard } from '@/components/TvShowCard/TvShowCard';
 import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelectButton';
 import { useSearchParams } from 'next/navigation';
+import { hotjar } from 'react-hotjar';
+import { useEffect } from 'react';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
@@ -47,6 +49,10 @@ export default function HomePage(props: HomePageProps) {
   const searchParams = useSearchParams();
   const carouselControlMargin = xsOrSmaller ? '-1.7rem' : '-2rem';
   const pinned = useHeadroom({ fixedAt: 60 });
+
+  useEffect(() => {
+    hotjar.initialize({id: 3841658, sv: 6});
+  }, []);
 
   return (
     <AppShell
@@ -97,7 +103,10 @@ export default function HomePage(props: HomePageProps) {
             styles={{
               control: {
                 marginLeft: carouselControlMargin,
-                marginRight: carouselControlMargin
+                marginRight: carouselControlMargin,
+                backgroundColor: 'var(--mantine-color-white) !important',
+                color: 'var(--mantine-color-black) !important',
+                border: '1px solid var(--mantine-color-gray-3) !important'
               }
             }}>
               { 
@@ -116,7 +125,10 @@ export default function HomePage(props: HomePageProps) {
              styles={{
               control: {
                 marginLeft: carouselControlMargin,
-                marginRight: carouselControlMargin
+                marginRight: carouselControlMargin,
+                backgroundColor: 'var(--mantine-color-white) !important',
+                color: 'var(--mantine-color-black) !important',
+                border: '1px solid var(--mantine-color-gray-3) !important'
               } 
             }}>
               {

@@ -26,6 +26,7 @@ export async function getOrUpdateCache(f: () => Promise<any>, key: string, timeo
     
     await redis.connect();
   } catch (e) {
+    console.error('Failed to initialize redis client', e);
     redis = null;
   }
   let payload = null;

@@ -1,6 +1,7 @@
 import { Locale } from "@/i18n/routing";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import Script from "next/script";
 
 type Props = {
   params: Promise<{ locale: string }>
@@ -42,5 +43,21 @@ export default function HomePageLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <>{children}</>
+  return (
+    <>
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-9F6DBJPMHW"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){window.dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-9F6DBJPMHW');
+        `}
+      </Script>
+      {children}
+    </>)
 }

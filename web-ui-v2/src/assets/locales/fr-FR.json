@@ -1,0 +1,95 @@
+{
+    "login": "Connexion",
+    "contact": "Contact",
+    "home": "Accueil",
+    "movies": "Films",
+    "tvshows": "Séries TV",
+    "hero": {
+      "title": "Notre mission est de rendre les meilleurs films et séries TV de tous les temps accessibles à tous",
+      "image": {
+        "alt": "Image d'arrière-plan de la section héros"
+      }
+    },
+    "signup": "S'inscrire",
+    "latest_movie_updates": "Dernières mises à jour des films",
+    "latest_tvshow_updates": "Dernières mises à jour des séries TV",
+    "releaseSelect": {
+      "label": "Sélectionner une version"
+    },
+    "seasonSelect": {
+      "label": "Sélectionner une saison"
+    },
+    "episodeSelect": {
+      "label": "Sélectionner un épisode"
+    },
+    "audioLang": {
+      "EN": "Anglais",
+      "EN_US": "Anglais (US)",
+      "EN_GB": "Anglais (GB)",
+      "EN_AU": "Anglais (AU)",
+      "RU": "Russe",
+      "FR": "Français",
+      "FR_FR": "Français (France)",
+      "FR_CA": "Français (Canada)",
+      "JA": "Japonais",
+      "PT": "Portugais",
+      "PT_BR": "Portugais (Brésil)",
+      "PT_PT": "Portugais (Portugal)",
+      "KO": "Coréen",
+      "DA": "Danois",
+      "HI": "Hindi",
+      "HI_IN": "Hindi (Inde)",
+      "IT": "Italien",
+      "RO": "Roumain",
+      "RO_RO": "Roumain (Roumanie)",
+      "FA": "Persan",
+      "FA_IR": "Persan (Iran)",
+      "SV": "Suédois",
+      "SV_SE": "Suédois (Suède)",
+      "PL": "Polonais",
+      "PL_PL": "Polonais (Pologne)",
+      "ES": "Espagnol",
+      "ES_ES": "Espagnol (Espagne)",
+      "ES_419": "Espagnol (Amérique latine)",
+      "UK": "Ukrainien",
+      "ZH": "Chinois",
+      "DE": "Allemand",
+      "BE": "Biélorusse",
+      "BG": "Bulgare",
+      "CS": "Tchèque",
+      "ET": "Estonien",
+      "FI": "Finnois",
+      "HR": "Croate",
+      "HU": "Hongrois",
+      "HY": "Arménien",
+      "LT": "Lituanien",
+      "LV": "Letton",
+      "MK": "Macédonien",
+      "NB": "Norvégien (Bokmål)",
+      "NL": "Néerlandais",
+      "SL": "Slovène",
+      "SK": "Slovaque",
+      "SR": "Serbe",
+      "AR": "Arabe",
+      "HE": "Hébreu",
+      "MYN": "Maya"
+    },
+    "search": {
+      "placeholder": "Rechercher des titres, genres, personnes"
+    },
+    "season": "Saison {seasonNumber}",
+    "episode": "Épisode {episodeNumber}",
+    "emptySearchResultsMessage": "Oups, nous n'avons rien trouvé. Essayez d'affiner votre recherche.",
+    "Metadata": {
+      "home": {
+        "title": "Regarder des films gratuits en ligne",
+        "description": "Les bons films sont comme les bons livres, ils sont intemporels. Notre mission est de rendre les meilleurs films de tous les temps accessibles à tous."
+      },
+      "movie": {
+        "description": "Regarder ''{title}'' en ligne gratuitement"
+      }
+    },
+    "searchButtonAriaLabel": "Ouvrir la boîte de recherche",
+    "contactUsText": "Contactez-nous à"
+  }
+  
