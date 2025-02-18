@@ -54,7 +54,7 @@ export async function getOrUpdateCache(f: () => Promise<any>, key: string, timeo
 }
 
 async function getRecentMovieReleasesCached(locale: string) {
-  return getOrUpdateCache(() => getRecentMovieReleases(locale), 'recentMovieReleases', 3600); 
+  return getOrUpdateCache(() => getRecentMovieReleases(locale), `recentMovieReleases_${locale}`, 3600); 
 }
 
 export async function getRecentMovieReleases(locale: string) {
@@ -87,7 +87,7 @@ export async function getRecentMovieReleases(locale: string) {
 }
 
 async function getRecentTVShowUpdatesCached(locale: string) {
-  return getOrUpdateCache(() => getRecentTVShowUpdates(locale), 'recentTVShowUpdates', 3600); 
+  return getOrUpdateCache(() => getRecentTVShowUpdates(locale), `recentTVShowUpdates_${locale}`, 3600); 
 }
 
 export async function getRecentTVShowUpdates(locale: string) {

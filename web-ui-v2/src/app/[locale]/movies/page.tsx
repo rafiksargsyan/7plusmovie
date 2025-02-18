@@ -9,7 +9,7 @@ const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
     process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
 
 async function getMovieReleasesCached(locale: string, query: string) {
-  return getOrUpdateCache(() => getMovieReleases(locale, query), `movies_${query}`, 3600); 
+  return getOrUpdateCache(() => getMovieReleases(locale, query), `movies_${locale}_${query}`, 3600); 
 }
 
 async function getMovieReleases(locale: string, query: string) {

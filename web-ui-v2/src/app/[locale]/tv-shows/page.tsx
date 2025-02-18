@@ -10,7 +10,7 @@ const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
     process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
 
 async function getRecentTVShowUpdatesCached(locale: string, query: string) {
-  return getOrUpdateCache(() => getRecentTVShowUpdates(locale, query), `tvshows_${query}`, 3600); 
+  return getOrUpdateCache(() => getRecentTVShowUpdates(locale, query), `tvshows_${locale}_${query}`, 3600); 
 }
 
 async function getRecentTVShowUpdates(locale: string, query: string) { 
