@@ -5,6 +5,7 @@ import { AudioLang } from '../domain/AudioLang';
 import { Nullable } from '../../utils';
 import { RipType } from '../domain/RipType';
 import { Resolution } from '../domain/Resolution';
+import { L8nLangCode } from '../domain/L8nLangCodes';
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
 const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
@@ -32,6 +33,7 @@ interface GetMovieMetadataResponse {
   originalTitle: string;
   titleL8ns: { [key: string]: string };
   releaseYear: number;
+  originalLocale: string;
 }
 
 interface Movie {
@@ -45,6 +47,7 @@ interface Movie {
   titleL8ns: { [key: string]: string };
   releaseYear: number;
   releases: { [key: string]: ReleaseRead };
+  originalLocale: L8nLangCode;
 }
 
 interface CloudFrontDistro {
@@ -101,6 +104,7 @@ export const handler = async (event: GetMovieParam): Promise<GetMovieMetadataRes
     thumbnailsFile: thumbnailsFile !== null ? `https://${cloudflareMediaAssetsCachableDomain}/${thumbnailsFile}` : null,
     backdropImage: movie.backdropImage,
     originalTitle: movie.originalTitle,
+    originalLocale: movie.originalLocale.code,
     titleL8ns: movie.titleL8ns,
     releaseYear: movie.releaseYear
   };

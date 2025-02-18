@@ -6,6 +6,7 @@ import { ReleaseRead } from '../../domain/entity/Release';
 import { AudioLang } from '../../domain/AudioLang';
 import { Nullable } from '../../../utils';
 import { getOneRelease, getRelease } from '../getMovieMetadataForPlayer';
+import { L8nLangCode } from '../../domain/L8nLangCodes';
 
 const dynamodbCFDistroMetadataTableName = process.env.DYNAMODB_CF_DISTRO_METADATA_TABLE_NAME!;
 const cfDistroRandomSelectionProportion = Number.parseFloat(process.env.CF_DISTRO_RANDOM_SELECTION_PROPORTION!);
@@ -39,6 +40,7 @@ interface GetTvShowMetadataResponse {
   episodeOriginalName: string;
   episodeNameL8ns: { [key: string]: string };
   releaseYear: number;
+  originalLocale: string;
 }
 
 interface TvShow {
@@ -47,6 +49,7 @@ interface TvShow {
   titleL8ns: { [key: string]: string };
   seasons: Season[];
   releaseYear: number;
+  originalLocale: L8nLangCode;
 }
 
 interface Episode {
@@ -108,14 +111,23 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
   if (release == null) {
     release = getOneRelease(Object.values(releases), preferredAudioLang);
   }
+  let releaseSubtitles = release?._subtitles;
+  if (releaseSubtitles == null) releaseSubtitles = {};
+  let subtitles = {};
   if (release != null) {
     mpdFile = release._mpdFile;
     m3u8File = release._m3u8File;
     thumbnailsFile = release._thumbnails.sort((a, b) => a.resolution - b.resolution)[0].thumbnailsFile;
+    Object.entries(releaseSubtitles).forEach(([k, s]) => subtitles[k] = {
+      name: s.name,
+      url: `https://${mediaAssetsDomain}/${s.relativePath}`,
+      lang: s.lang.key,
+      type: s.type?.key
+    })
   }
   return {
     releaseYear: tvShow.releaseYear,
-    subtitles: {}, //TODO
+    subtitles: subtitles,
     mpdFile: `https://${mediaAssetsDomain}/${mpdFile}`,
     m3u8File: `https://${mediaAssetsDomain}/${m3u8File}`,
     thumbnailsFile: thumbnailsFile !== undefined ? `https://${cloudflareMediaAssetsCachableDomain}/${thumbnailsFile}` : undefined,
@@ -125,7 +137,8 @@ export const handler = async (event: GetTvShowParam): Promise<GetTvShowMetadataR
     seasonOriginalName: season.originalName,
     seasonNameL8ns: season.nameL8ns,
     episodeOriginalName: episode.originalName,
-    episodeNameL8ns: episode.nameL8ns
+    episodeNameL8ns: episode.nameL8ns,
+    originalLocale: tvShow.originalLocale.code
   };
 };
 
