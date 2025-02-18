@@ -89,5 +89,6 @@
       "description": "Смотрите ''{title}'' онлайн бесплатно"
     }
   },
-  "searchButtonAriaLabel": "Открыть поле поиска"
+  "searchButtonAriaLabel": "Открыть поле поиска",
+  "contactUsText": "Свяжитесь с нами по адресу"
 }

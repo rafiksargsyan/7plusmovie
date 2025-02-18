@@ -89,6 +89,7 @@
        "description": "Ver ''{title}\\'' online gratis"
       }
     },
-    "searchButtonAriaLabel": "Abrir cuadro de búsqueda"
+    "searchButtonAriaLabel": "Abrir cuadro de búsqueda",
+    "contactUsText": "Contáctanos en"
   }
   

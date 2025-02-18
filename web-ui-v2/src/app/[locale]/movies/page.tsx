@@ -2,11 +2,15 @@ import { searchClient } from '@algolia/client-search';
 import MoviesPage from './movies-page';
 import { getLocale } from 'next-intl/server';
 import { Locale } from '@/i18n/routing';
-import { yearToEpochMillis } from '../page';
+import { getOrUpdateCache, yearToEpochMillis } from '../page';
 import '@algolia/autocomplete-theme-classic';
 
 const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
     process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
+
+async function getMovieReleasesCached(locale: string, query: string) {
+  return getOrUpdateCache(() => getMovieReleases(locale, query), 'movies', 3600); 
+}
 
 async function getMovieReleases(locale: string, query: string) {
   const langKey = Locale.FROM_LANG_TAG[locale].key || 'EN_US';
@@ -37,5 +41,5 @@ export default async function Page({
 }) {
   const locale = await getLocale();
   const query = (await searchParams).q as string;
-  return <MoviesPage recentMovieReleases={await getMovieReleases(locale, query)} query={query}/>
+  return <MoviesPage recentMovieReleases={await getMovieReleasesCached(locale, query)} query={query}/>
 }

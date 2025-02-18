@@ -58,6 +58,7 @@ export default function MoviePage(props: MoviePageProps) {
               <Link prefetch={true} href="/"><UnstyledButton>{t('home')}</UnstyledButton></Link>
               <Link prefetch={true} href='/movies'><UnstyledButton>{t('movies')}</UnstyledButton></Link>
               <Link prefetch={true} href='/tv-shows'><UnstyledButton>{t('tvshows')}</UnstyledButton></Link>
+              <Link prefetch={true} href='/contact'><UnstyledButton>{t('contact')}</UnstyledButton></Link>
             </Group>
             <Group align="center">
               <LocaleSelectButton defaultLocaleDisplayName={Locale.FROM_LANG_TAG[locale].nativeDisplayName}
@@ -77,8 +78,8 @@ export default function MoviePage(props: MoviePageProps) {
         <Space h="xl" />
         <Link href='/tv-shows'><UnstyledButton>{t('tvshows')}</UnstyledButton></Link>
         <Space h="xl" />
-        <Divider my="md" label={t('contact')} labelPosition="center"/>
-        <Text fw={700}>tracenoon@gmail.com</Text>
+        <Link prefetch={true} href='/contact'><UnstyledButton>{t('contact')}</UnstyledButton></Link>
+        <Space h="xl" />
       </AppShell.Navbar>
       <AppShell.Main>
         <Space h="xl"/>

@@ -89,5 +89,6 @@
       "description": "Watch ''{title}'' online free"
     }
   },
-  "searchButtonAriaLabel": "Open search box"
+  "searchButtonAriaLabel": "Open search box",
+  "contactUsText": "Contact us on"
 }

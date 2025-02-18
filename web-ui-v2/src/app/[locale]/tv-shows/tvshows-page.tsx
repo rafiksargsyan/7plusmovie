@@ -91,6 +91,7 @@ export default function TvShowsPage(props: TvShowsPageProps) {
               <Link prefetch={true} href="/"><UnstyledButton>{t('home')}</UnstyledButton></Link>
               <Link prefetch={true} href='/movies'><UnstyledButton>{t('movies')}</UnstyledButton></Link>
               <Link prefetch={true} href='/tv-shows'><UnstyledButton>{t('tvshows')}</UnstyledButton></Link>
+              <Link prefetch={true} href='/contact'><UnstyledButton>{t('contact')}</UnstyledButton></Link>
             </Group>
             { !xsOrSmaller &&
           <Box w={{base: 50, xs: 300, md: 350, lg: 500, xl: 500}}>
@@ -146,8 +147,8 @@ export default function TvShowsPage(props: TvShowsPageProps) {
         <Space h="xl" />
         <Link href='/tv-shows'><UnstyledButton>{t('tvshows')}</UnstyledButton></Link>
         <Space h="xl" />
-        <Divider my="md" label={t('contact')} labelPosition="center"/>
-        <Text fw={700}>tracenoon@gmail.com</Text>
+        <Link prefetch={true} href='/contact'><UnstyledButton>{t('contact')}</UnstyledButton></Link>
+        <Space h="xl" />
       </AppShell.Navbar>
       <AppShell.Main>
         <Space h="xl"/>

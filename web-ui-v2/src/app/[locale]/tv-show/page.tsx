@@ -7,6 +7,7 @@ import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Locale } from '@/i18n/routing';
 import { searchClient } from '@algolia/client-search';
+import { getOrUpdateCache } from '../page';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
@@ -17,6 +18,10 @@ async function ip2AudioLang(ip: string | null): Promise<string> {
   if (ip == null) ip = '0.0.0.0';
   const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/ip-2-audio-lang/${ip}`);
   return response.data;
+}
+
+async function getTvShowReleasesCached(id: string, preferredAudioLang: string) {
+  return getOrUpdateCache(() => getTvShowReleases(id, preferredAudioLang), `tvShowReleases_${id}_${preferredAudioLang}`, 3600);
 }
 
 async function getTvShowReleases(id: string, preferredAudioLang: string) {
@@ -119,7 +124,7 @@ export default async function Page({
   const headersList = await headers();
   const clientIp = requestIp.getClientIp({ headers: headersList as unknown as RequestHeaders });
   const preferredAudioLang = await ip2AudioLang(clientIp)
-  const tvShowReleases = await getTvShowReleases(id, preferredAudioLang);
+  const tvShowReleases = await getTvShowReleasesCached(id, preferredAudioLang);
   let currentReleaseId: Nullable<string> = releaseId;
   if (currentReleaseId == null) currentReleaseId = getDefaultReleaseId(tvShowReleases, season, episode);
   const playerData = await getPlayerData(id, season, episode, currentReleaseId, preferredAudioLang);

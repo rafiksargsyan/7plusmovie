@@ -6,6 +6,7 @@ import { Nullable } from '@/types/Nullable';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Locale } from '@/i18n/routing';
+import { getOrUpdateCache } from '../page';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
@@ -13,6 +14,10 @@ async function ip2AudioLang(ip: string | null): Promise<string> {
   if (ip == null) ip = '0.0.0.0';
   const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/ip-2-audio-lang/${ip}`);
   return response.data;
+}
+
+async function getMovieReleasesCached(id: string, preferredAudioLang: string) {
+  return getOrUpdateCache(() => getMovieReleases(id, preferredAudioLang), `movieReleases_${id}_${preferredAudioLang}`, 3600);
 }
 
 async function getMovieReleases(movieId: string, preferredAudioLang: string) {
@@ -96,7 +101,7 @@ export default async function Page({
   const headersList = await headers();
   const clientIp = requestIp.getClientIp({ headers: headersList as unknown as RequestHeaders});
   const preferredAudioLang = await ip2AudioLang(clientIp)
-  const movieReleases = await getMovieReleases(movieId, preferredAudioLang);
+  const movieReleases = await getMovieReleasesCached(movieId, preferredAudioLang);
   if (releaseId != null) movieReleases.defaultReleaseId = releaseId;
   const movieStreamInfo = await getMovieStreamInfo(movieId, movieReleases.defaultReleaseId, preferredAudioLang);
   return <MoviePage {...movieReleases} movieStreamInfo={movieStreamInfo} />

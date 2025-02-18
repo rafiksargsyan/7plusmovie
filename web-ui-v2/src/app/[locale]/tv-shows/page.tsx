@@ -3,11 +3,15 @@ import { searchClient } from '@algolia/client-search';
 import TvShowsPage from './tvshows-page';
 import { getLocale } from 'next-intl/server';
 import { Locale } from '@/i18n/routing';
-import { yearToEpochMillis } from '../page';
+import { getOrUpdateCache, yearToEpochMillis } from '../page';
 import '@algolia/autocomplete-theme-classic';
 
 const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
     process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
+
+async function getRecentTVShowUpdatesCached(locale: string, query: string) {
+  return getOrUpdateCache(() => getRecentTVShowUpdates(locale, query), 'tvshows', 3600); 
+}
 
 async function getRecentTVShowUpdates(locale: string, query: string) { 
   const langKey = Locale.FROM_LANG_TAG[locale].key || 'EN_US';
@@ -39,6 +43,6 @@ export default async function Page({
 }) {
   const locale = await getLocale();
   const query = (await searchParams).q as string;
-  const recentTvShowUpdates = await getRecentTVShowUpdates(locale, query);
+  const recentTvShowUpdates = await getRecentTVShowUpdatesCached(locale, query);
   return <TvShowsPage recentTvShowUpdates={recentTvShowUpdates} query={query}/>
 }
