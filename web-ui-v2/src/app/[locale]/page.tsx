@@ -50,6 +50,13 @@ export async function getOrUpdateCache(f: () => Promise<any>, key: string, timeo
   } else {
    payload = await f();
   }
+  if (redis != null) {
+    try {
+      await redis.disconnect();
+    } catch (e) {
+      console.error('Failed to disconnect redis', e);
+    }
+  }
   return payload;
 }
 

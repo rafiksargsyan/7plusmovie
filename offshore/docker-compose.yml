@@ -1,7 +1,7 @@
 services:
   web-ui:
     container_name: web-ui
-    image: q62xyz/web-ui-v2:1.0.1
+    image: q62xyz/web-ui-v2:1.0.2
     restart: "unless-stopped"
     environment:
       - REDIS_URL=redis://redis:6379
