@@ -177,7 +177,8 @@ functions:
                          "originalTitle": $input.json(''$.originalTitle''),
                          "titleL8ns": $input.json(''$.titleL8ns''),
                          "releaseYear": $input.json(''$.releaseYear''),
-                         "thumbnailsFile": $input.json(''$.thumbnailsFile'') }'
+                         "thumbnailsFile": $input.json(''$.thumbnailsFile''),
+                         "originalLocale": $input.json(''$.originalLocale'') }'
   
   getMovieReleases:
     environment:
@@ -482,7 +483,8 @@ functions:
                          "seasonNameL8ns": $input.json(''$.seasonNameL8ns''),
                          "episodeOriginalName": $input.json(''$.episodeOriginalName''),
                          "episodeNameL8ns": $input.json(''$.episodeNameL8ns''),
-                         "thumbnailsFile": $input.json(''$.thumbnailsFile'') }'
+                         "thumbnailsFile": $input.json(''$.thumbnailsFile''),
+                         "originalLocale": $input.json(''$.originalLocale'') }'
   
   getTvShowForSeasonsListPage:
     environment:
