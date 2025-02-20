@@ -5,6 +5,7 @@ services:
     restart: "unless-stopped"
     environment:
       - REDIS_URL=redis://redis:6379
+      - REDIS_TIMEOUT=300
 
   reverse-proxy:
     container_name: reverse-proxy
