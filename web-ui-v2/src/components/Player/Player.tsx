@@ -111,7 +111,8 @@ function Player(props: {movieTitle: string, m3u8File: string, thumbnailsFile?: s
   const onAudioTrackChange = (at: AudioTrack | null) => {
     if (at == null) return;
     if (at?.label in audiosWithAiSupport) {
-      parseResponse(fetch(`${props.subtitles[audiosWithAiSupport[at.label]].url!}`)).then((value) => { setCurAudioSubs(() => value.cues)});
+      parseResponse(fetch(`${props.subtitles[audiosWithAiSupport[at.label]].url!}`))
+      .then((value) => { setCurAudioSubs(() => value.cues)});
     } else {
       setCurAudioSubs(() => null);
     }
@@ -129,9 +130,18 @@ function Player(props: {movieTitle: string, m3u8File: string, thumbnailsFile?: s
       }
       return acc;
     }, {});
+    player.audioTracks.toArray().forEach((at: AudioTrack) => {
+      if (at.selected) {
+        if (at?.label in audiosWithAiSupport) {
+          parseResponse(fetch(`${props.subtitles[audiosWithAiSupport[at.label]].url!}`))
+          .then((value) => { setCurAudioSubs(() => value.cues)});
+        } else {
+          setCurAudioSubs(() => null);
+        }
+      }
+    });
     setAudiosWithAiSupport(() => audiosWithAiSupport);
   }
-
   const onAiButtonClick = (time: number, maxWords: number) => (() => {
     setAiResponseModalConfig(() => ({ time: time, maxWords: maxWords }));
     aiResponseModalControl.open();
