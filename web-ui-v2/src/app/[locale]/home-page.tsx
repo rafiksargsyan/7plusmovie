@@ -118,6 +118,7 @@ export default function HomePage(props: HomePageProps) {
             </Carousel>
           </Stack>
           <Space h="xl"/>
+          <div id="container-896becda8e20a6d0e0feb77cc7e72f11"></div>
           <Stack component="article">
             <Title order={2}>{t("latest_tvshow_updates")}</Title>
             <Carousel height={'auto'} dragFree={true} slideSize={{ base: "10%"}} slideGap="md" align="start"

@@ -63,12 +63,13 @@ interface AiResponseModalProps {
   onClose: () => void;
   opened: boolean;
   audioSrc: PlayerSrc | undefined;
+  loading: boolean;
 }
 
 function AiResponseModal(props: AiResponseModalProps) {
   return (
     <Modal mih={500} opened={props.opened} onClose={props.onClose} size='xl'>
-      {props.text && props.audioSrc ? <Stack>
+      {!props.loading ? <Stack>
         <Text>{props.text}</Text>
         <MediaPlayer paused={false} crossOrigin={true} controls title="AI explanation"
         src={{src: props.audioSrc as any, type: "audio/mp3"}} viewType="audio">
@@ -102,9 +103,10 @@ function Player(props: {movieTitle: string, m3u8File: string, thumbnailsFile?: s
   const [aiResponseModalText, setAiResponseModalText] = useState<string | null>(null);
   const [aiResponseModalAudioSource, setAiResponseModalAudioSource] = useState<PlayerSrc | undefined>(undefined);
   const [aiResponseModalOpened, aiResponseModalControl] = useDisclosure();
+  const [aiResponseModalConfig, setAiResponseModalConfig] = useState<{time: number, maxWords: number} | null>(null);
   const [aiExplanationLanguage, setAiExplanationLanguage] = useState<string>("Armenian");
   const [languageLevel, setLanguageLevel] = useState<string>("Intermediate");
-  const [showAiResponse, setShowAiResponse] = useState<boolean>(false);
+  const [aiModalLoading, setAiModalLoading] = useState<boolean>(false);
 
   const onAudioTrackChange = (at: AudioTrack | null) => {
     if (at == null) return;
@@ -131,45 +133,17 @@ function Player(props: {movieTitle: string, m3u8File: string, thumbnailsFile?: s
   }
 
   const onAiButtonClick = (time: number, maxWords: number) => (() => {
-    setShowAiResponse(() => true);
-    setAiResponseModalAudioSource(() => undefined);
-    setAiResponseModalText(() => null);
-//     aiResponseModalControl.open();
-//     const arr = getLastWithContext(media.currentTime, curAudioSubs, 10, time, 0);
-//     if (arr != null) {
-//       const content = `Imagine you are a language teacher and explain phrases from
-//  '${arr[0]}' to ${languageLevel} level listener whose native language is ${aiExplanationLanguage}. Please be concise (not more than ${maxWords} words overall) and 
-//  imagine you are speaking directly to the listener. Don't use any other language than the phrase itself and ${aiExplanationLanguage} for explanation. First
-//   say the phrase, then explain. Also explain separate words that might be difficult for the level of listener to understand`;
-//       openai.chat.completions.create({
-//         messages: [{
-//           role: 'user',
-//           content: content
-//         }],
-//         model: 'gpt-4o'
-//       }).then((value) => {
-//         const content = value.choices[0].message.content;
-//         openai.audio.speech.create({
-//             model: "tts-1",
-//             voice: "alloy",
-//             input: content!
-//           }).then((value2) => {
-//             value2.blob().then((value3) => {
-//               setAiResponseModalText(() => content);  
-//               setAiResponseModalAudioSource(() => URL.createObjectURL(value3));
-//             })
-//           });
-//       });
-//     }
+    setAiResponseModalConfig(() => ({ time: time, maxWords: maxWords }));
+    aiResponseModalControl.open();
   });
 
   useEffect(() => {
-    if (showAiResponse && !aiResponseModalAudioSource && !aiResponseModalText) {
-      aiResponseModalControl.open();
-      const arr = getLastWithContext(media.currentTime, curAudioSubs, 10, 1.5, 0);
+      let ignore = false
+      setAiModalLoading(true);
+      const arr = getLastWithContext(media.currentTime, curAudioSubs, 10, aiResponseModalConfig?.time || 1.5, 0);
     if (arr != null) {
       const content = `Imagine you are a language teacher and explain phrases from
- '${arr[0]}' to ${languageLevel} level listener whose native language is ${aiExplanationLanguage}. Please be concise (not more than 50 words overall) and 
+ '${arr[0]}' to ${languageLevel} level listener whose native language is ${aiExplanationLanguage}. Please be concise (not more than ${aiResponseModalConfig?.maxWords || 50} words overall) and 
  imagine you are speaking directly to the listener. Don't use any other language than the phrase itself and ${aiExplanationLanguage} for explanation. First
   say the phrase, then explain. Also explain separate words that might be difficult for the level of listener to understand`;
       openai.chat.completions.create({
@@ -186,14 +160,17 @@ function Player(props: {movieTitle: string, m3u8File: string, thumbnailsFile?: s
             input: content!
           }).then((value2) => {
             value2.blob().then((value3) => {
-              setAiResponseModalText(() => content);  
-              setAiResponseModalAudioSource(() => URL.createObjectURL(value3));
+              if (!ignore) {
+                setAiResponseModalText(() => content);  
+                setAiResponseModalAudioSource(() => URL.createObjectURL(value3));
+                setAiModalLoading(false);
+              }
             })
           });
       });
     }
-    }
-  }, [showAiResponse, aiResponseModalAudioSource, aiResponseModalText])
+    return () => { ignore = true };
+  }, [aiResponseModalOpened])
 
   useEffect(() => {
     const player = playerRef.current;
@@ -224,13 +201,15 @@ function Player(props: {movieTitle: string, m3u8File: string, thumbnailsFile?: s
           <ActionIcon size='md' radius='xl' onClick={onAiButtonClick(1.5, 30)}>
             <IconWand/>
           </ActionIcon>
-          {showAiResponse && <AiResponseModal text={aiResponseModalText} onClose={function (): void {
+          {<AiResponseModal text={aiResponseModalText} onClose={function (): void {
                      aiResponseModalControl.close();
-                     setShowAiResponse(() => false);
-                  } } opened={aiResponseModalOpened} audioSrc={aiResponseModalAudioSource} />}
+                     setAiResponseModalAudioSource(() => undefined);
+                     setAiResponseModalText(() => null);
+                  } } opened={aiResponseModalOpened} loading={aiModalLoading} audioSrc={aiResponseModalAudioSource} />}
         </Group>
       </Stack>
-	  <MediaPlayer paused={aiResponseModalOpened} onAudioTrackChange={onAudioTrackChange} onLoadedMetadata={onLoadedMetadata} ref={playerRef} title={`${props.movieTitle}`} src={`${props.m3u8File}`} preferNativeHLS={isSafari}>
+	  <MediaPlayer paused={aiResponseModalOpened} onAudioTrackChange={onAudioTrackChange} onLoadedMetadata={onLoadedMetadata}
+      ref={playerRef} title={`${props.movieTitle}`} src={`${props.m3u8File}`} preferNativeHLS={isSafari}>
         <MediaProvider />
         <DefaultVideoLayout icons={defaultLayoutIcons} thumbnails={`${props.thumbnailsFile}`}/>
         <Poster className="vds-poster" src={`${imageBaseUrl}h=720,f=auto/${props.backdropImage}`} />
