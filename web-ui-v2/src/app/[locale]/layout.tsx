@@ -58,8 +58,6 @@ export default function HomePageLayout({
           gtag('config', 'G-9F6DBJPMHW');
         `}
       </Script>
-      <Script async={true} data-cfasync="false" src="//pl25728000.effectiveratecpm.com/896becda8e20a6d0e0feb77cc7e72f11/invoke.js">
-      </Script>
       {children}
     </>)
 }

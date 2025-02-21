@@ -68,7 +68,7 @@ interface AiResponseModalProps {
 
 function AiResponseModal(props: AiResponseModalProps) {
   return (
-    <Modal mih={500} opened={props.opened} onClose={props.onClose} size='xl'>
+    <Modal mih={500} opened={props.opened} onClose={props.onClose} size='xl' zIndex={2000}>
       {!props.loading ? <Stack>
         <Text>{props.text}</Text>
         <MediaPlayer paused={false} crossOrigin={true} controls title="AI explanation"
@@ -202,7 +202,7 @@ function Player(props: {movieTitle: string, m3u8File: string, thumbnailsFile?: s
           onChange={(value) => setLanguageLevel(() => value!)}/>
         </Group>
         <Group>
-          <ActionIcon size='xl' radius='xl' onClick={onAiButtonClick(5, 100)}>
+          {/* <ActionIcon size='xl' radius='xl' onClick={onAiButtonClick(5, 100)}>
             <IconWand/>
           </ActionIcon>
           <ActionIcon size='lg' radius='xl' onClick={onAiButtonClick(3, 50)}>
@@ -210,7 +210,7 @@ function Player(props: {movieTitle: string, m3u8File: string, thumbnailsFile?: s
           </ActionIcon>
           <ActionIcon size='md' radius='xl' onClick={onAiButtonClick(1.5, 30)}>
             <IconWand/>
-          </ActionIcon>
+          </ActionIcon> */}
           {<AiResponseModal text={aiResponseModalText} onClose={function (): void {
                      aiResponseModalControl.close();
                      setAiResponseModalAudioSource(() => undefined);
@@ -220,6 +220,17 @@ function Player(props: {movieTitle: string, m3u8File: string, thumbnailsFile?: s
       </Stack>
 	  <MediaPlayer paused={aiResponseModalOpened} onAudioTrackChange={onAudioTrackChange} onLoadedMetadata={onLoadedMetadata}
       ref={playerRef} title={`${props.movieTitle}`} src={`${props.m3u8File}`} preferNativeHLS={isSafari}>
+        <Group pos='absolute' top={40} left={40} style={{zIndex: 100}}>
+          <ActionIcon size='xl' radius='xl' onClick={onAiButtonClick(5, 100)}>
+            <IconWand/>
+          </ActionIcon>
+          <ActionIcon size='lg' radius='xl' onClick={onAiButtonClick(3, 50)}>
+            <IconWand/>  
+          </ActionIcon>
+          <ActionIcon size='md' radius='xl' onClick={onAiButtonClick(1.5, 30)}>
+            <IconWand/>
+          </ActionIcon>
+        </Group>
         <MediaProvider />
         <DefaultVideoLayout icons={defaultLayoutIcons} thumbnails={`${props.thumbnailsFile}`}/>
         <Poster className="vds-poster" src={`${imageBaseUrl}h=720,f=auto/${props.backdropImage}`} />
