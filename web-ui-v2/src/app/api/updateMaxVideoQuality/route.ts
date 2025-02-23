@@ -8,7 +8,7 @@ function dayOfMonth() {
     const today = new Date()
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
     
-    const daysPassed = Math.floor((today.getMilliseconds() - firstDay.getMilliseconds()) / (1000 * 60 * 60 * 24));
+    const daysPassed = Math.floor((today.getTime() - firstDay.getTime()) / (1000 * 60 * 60 * 24));
     
     return daysPassed;
 }
@@ -55,17 +55,17 @@ export async function GET() {
       maxVideoQuality = 1080;  
     }
 
-
-
+    const videoQualityBreakpoints = [360, 480, 720, 1080];
+    const i = videoQualityBreakpoints.indexOf(maxVideoQuality);
     if (mediaAssetsBucketSize * cfBandwidthToStorageFactor / 30 * dayOfMonth() < monthToDateBytes) {
-      // lower quality
+      if (i != 0) {
+        await redis.set('maxVideoQuality', videoQualityBreakpoints[i-1]);
+      }
     } else {
-      // higher quality
+      if (i != videoQualityBreakpoints.length - 1) {
+        await redis.set('maxVideoQuality', videoQualityBreakpoints[i+1]);
+      }
     }
-
-    
-    
-    await redis.set('cloudflareMonthToDateBandwidthUsage', monthToDateBytes)
 
     await redis.disconnect();
     return NextResponse.json({ message: "Bandwidth updated successfully" });
