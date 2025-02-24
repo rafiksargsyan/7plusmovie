@@ -26,5 +26,3 @@ services:
     image: redis:7.4.1-alpine
     container_name: redis
     restart: unless-stopped
-    environment:
-      - REDIS_TIMEOUT=300
