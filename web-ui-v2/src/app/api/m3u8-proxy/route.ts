@@ -6,6 +6,7 @@ async function getQualityLimit() {
   const redis = createClient({ url: process.env.REDIS_URL, socket: {
     reconnectStrategy: () => Error("Don't retry")
   } });
+  await redis.connect();
   const maxVideoQualityStr = await redis.get('maxVideoQuality');
   let maxVideoQuality = maxVideoQualityStr != null ? Number.parseInt(maxVideoQualityStr) : Number.NaN;
   if (Number.isNaN(maxVideoQuality)) {
@@ -24,10 +25,11 @@ export async function GET(req: NextRequest) {
   let qualityLimit;
   try {
     qualityLimit = await getQualityLimit();
-  } catch {
+  } catch (e) {
+    console.error('Got error while getting quality limit from redis', e);
     qualityLimit = 1080;
   }
-
+  console.log(qualityLimit);
   const filteredPlaylist = [];
   let skipNextLine = false;
 
@@ -41,7 +43,7 @@ export async function GET(req: NextRequest) {
       const resolutionMatch = playlist[i].match(/RESOLUTION=(\d+)x(\d+)/);
       if (resolutionMatch) {
         const height = parseInt(resolutionMatch[2], 10);
-        if (height > qualityLimit) {
+        if (height > qualityLimit && height != 540) {
           skipNextLine = true;
           continue;
         }
