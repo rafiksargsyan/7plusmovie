@@ -1,0 +1,15 @@
+name: Trigger max video quality calculation
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  curl_request:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: get request to max video quality updater endpoint
+        run: |
+          curl -X GET "https://www.q62.xyz/api/updateMaxVideoQuality"
