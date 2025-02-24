@@ -1,11 +1,15 @@
 services:
   web-ui:
     container_name: web-ui
-    image: q62xyz/web-ui-v2:1.0.2
+    image: q62xyz/web-ui-v2:1.1.0
     restart: "unless-stopped"
     environment:
       - REDIS_URL=redis://redis:6379
-      - REDIS_TIMEOUT=300
+      - CLOUDFLARE_ANALYTICS_READ_TOKEN=${CLOUDFLARE_ANALYTICS_READ_TOKEN:?}
+      - CLOUDFLARE_ZONE_ID=${CLOUDFLARE_ZONE_ID:?}
+      - CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID:?}
+      - CLOUDFLARE_MEDIA_ASSETS_BUCKET_NAME=${CLOUDFLARE_MEDIA_ASSETS_BUCKET_NAME:?} 
+      - MEDIA_ASSETS_BASE_URL=${MEDIA_ASSETS_BASE_URL:?}
 
   reverse-proxy:
     container_name: reverse-proxy
@@ -22,3 +26,5 @@ services:
     image: redis:7.4.1-alpine
     container_name: redis
     restart: unless-stopped
+    environment:
+      - REDIS_TIMEOUT=300
