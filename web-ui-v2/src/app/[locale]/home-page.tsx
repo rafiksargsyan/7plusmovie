@@ -117,6 +117,8 @@ export default function HomePage(props: HomePageProps) {
               }
             </Carousel>
           </Stack>
+          <script async={true} data-cfasync="false" src="//pl25728000.effectiveratecpm.com/896becda8e20a6d0e0feb77cc7e72f11/invoke.js"></script>
+          <div id="container-896becda8e20a6d0e0feb77cc7e72f11"></div>
           <Space h="xl"/>
           <Stack component="article">
             <Title order={2}>{t("latest_tvshow_updates")}</Title>

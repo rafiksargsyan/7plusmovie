@@ -9,6 +9,7 @@ import Player from '@/components/Player/Player';
 import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelectButton';
 import { useSearchParams } from 'next/navigation';
 import { Nullable } from '@/types/Nullable';
+import AdsterraBanner from '@/components/AdsterraBanner/AdsterraBanner';
 
 export interface MovieStreamInfo {
   id: string;
@@ -85,6 +86,7 @@ export default function MoviePage(props: MoviePageProps) {
         <Space h="xl"/>
         <Space h="xl"/>
         <Container size="xl">
+          <AdsterraBanner />  
           <ReleaseSelect label={t("releaseSelect.label")} placeholder={t("releaseSelect.label")}
           defaultReleaseId={props.defaultReleaseId} releases={Object.values(props.releases).reduce((a: any, c) => {
             a[c['id']] = { 
