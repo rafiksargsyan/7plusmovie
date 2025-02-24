@@ -18,7 +18,8 @@ async function getQualityLimit() {
 
 export async function GET(req: NextRequest) {
   const {searchParams} = new URL(req.url);
-  const m3u8RelativePath = searchParams.get("m3u8RelativePath");
+  let m3u8RelativePath = searchParams.get("m3u8RelativePath") || "";
+  m3u8RelativePath = m3u8RelativePath.startsWith("/") ? m3u8RelativePath.slice(1) : m3u8RelativePath;
   const m3u8Url = `${process.env.MEDIA_ASSETS_BASE_URL}/${m3u8RelativePath}`;
   const response = await axios.get(m3u8Url);
   const playlist = response.data.split("\n");
