@@ -9,6 +9,7 @@ import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelect
 import { useSearchParams } from 'next/navigation';
 import { SeasonSelect } from '@/components/SeasonSelect/SeasonSelect';
 import { EpisodeSelect } from '@/components/EpisodeSelect/EpisodeSelect';
+import AdsterraBanner from '@/components/AdsterraBanner/AdsterraBanner';
 
 export function getDefaultReleaseId(seasons: Season[], season: number, episode: number) {
   return seasons.filter((s) => s.seasonNumber === season)[0].episodes.filter((e) => e.episodeNumber === episode)[0].defaultReleaseId;
@@ -111,6 +112,7 @@ export default function TvShowPage(props: TvShowPageProps) {
         <Space h="xl"/>
         <Space h="xl"/>
         <Container size="xl">
+          <AdsterraBanner />   
           <SeasonSelect label={t("seasonSelect.label")} placeholder={t("seasonSelect.label")} defaultSeasonNumber={props.currentSeasonNumber}
           seasons={props.seasons.map((s) => ({
             seasonNumber: s.seasonNumber,
