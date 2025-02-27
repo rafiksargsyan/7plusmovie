@@ -1,6 +1,6 @@
 'use client'
-import { AppShell, Burger, Container, Group, Space, UnstyledButton } from '@mantine/core';
-import { useDisclosure, useHeadroom } from '@mantine/hooks';
+import { AppShell, Burger, Container, Group, Space, UnstyledButton, useMantineTheme } from '@mantine/core';
+import { useDisclosure, useHeadroom, useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { ReleaseQuality } from '@/constants/ReleaseQuality';
@@ -43,6 +43,9 @@ export default function MoviePage(props: MoviePageProps) {
   const pathname = usePathname();
   const queryParams = useSearchParams();
   const pinned = useHeadroom({ fixedAt: 60 });
+  const theme = useMantineTheme();
+  const xsOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
+  const smOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
   return (
     <AppShell
@@ -86,7 +89,11 @@ export default function MoviePage(props: MoviePageProps) {
         <Space h="xl"/>
         <Space h="xl"/>
         <Container size="xl">
-          <AdsterraBanner />  
+          <Group justify='center'>
+            {!smOrSmaller && <AdsterraBanner adKey={'65485502e263f33728c73d35f0a0a5ac'} height={90} width={728} /> }
+            {!xsOrSmaller && smOrSmaller && <AdsterraBanner adKey={'3d22ee119d4fa58249ae5cf94ce0b2f9'} height={60} width={468} /> }
+            {xsOrSmaller && <AdsterraBanner adKey={'9ec37fad29fe000a6f28be4cb07fef02'} height={50} width={320} /> }
+          </Group>   
           <ReleaseSelect label={t("releaseSelect.label")} placeholder={t("releaseSelect.label")}
           defaultReleaseId={props.defaultReleaseId} releases={Object.values(props.releases).reduce((a: any, c) => {
             a[c['id']] = { 

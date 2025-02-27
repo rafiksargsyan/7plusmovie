@@ -1,12 +1,19 @@
 import { JSX, useEffect, useRef } from 'react'
-export default function AdsterraBanner(): JSX.Element {
+
+interface AdsterraBannerProps {
+  adKey: string;
+  height: number;
+  width: number;  
+}
+
+export default function AdsterraBanner(props: AdsterraBannerProps): JSX.Element {
     const banner = useRef<HTMLDivElement>(null)
 
     const atOptions = {
-        key: '65485502e263f33728c73d35f0a0a5ac',
+        key: props.adKey,
         format: 'iframe',
-        height: 90,
-        width: 728,
+        height: props.height,
+        width: props.width,
         params: {},
     }
     useEffect(() => {
