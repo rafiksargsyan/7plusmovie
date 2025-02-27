@@ -1,6 +1,6 @@
 'use client'
-import { AppShell, Burger, Container, Group, Space, UnstyledButton } from '@mantine/core';
-import { useDisclosure, useHeadroom } from '@mantine/hooks';
+import { AppShell, Burger, Container, Group, Space, UnstyledButton, useMantineTheme } from '@mantine/core';
+import { useDisclosure, useHeadroom, useMediaQuery } from '@mantine/hooks';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { ReleaseSelect } from '@/components/ReleaseSelect/ReleaseSelect';
@@ -9,6 +9,7 @@ import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelect
 import { useSearchParams } from 'next/navigation';
 import { SeasonSelect } from '@/components/SeasonSelect/SeasonSelect';
 import { EpisodeSelect } from '@/components/EpisodeSelect/EpisodeSelect';
+import AdsterraBanner from '@/components/AdsterraBanner/AdsterraBanner';
 
 export function getDefaultReleaseId(seasons: Season[], season: number, episode: number) {
   return seasons.filter((s) => s.seasonNumber === season)[0].episodes.filter((e) => e.episodeNumber === episode)[0].defaultReleaseId;
@@ -68,6 +69,9 @@ export default function TvShowPage(props: TvShowPageProps) {
     playerTitle += ` (${episode.nameL8ns[localeKey]})`;
   }
   const pinned = useHeadroom({ fixedAt: 60 });
+  const theme = useMantineTheme();
+  const xsOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
+  const smOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
   return (
     <AppShell
@@ -110,7 +114,12 @@ export default function TvShowPage(props: TvShowPageProps) {
       <AppShell.Main>
         <Space h="xl"/>
         <Space h="xl"/>
-        <Container size="xl">
+        <Container size="xl"> 
+          <Group justify='center'>
+            {!smOrSmaller && <AdsterraBanner adKey={'65485502e263f33728c73d35f0a0a5ac'} height={90} width={728} /> }
+            {!xsOrSmaller && smOrSmaller && <AdsterraBanner adKey={'3d22ee119d4fa58249ae5cf94ce0b2f9'} height={60} width={468} /> }
+            {xsOrSmaller && <AdsterraBanner adKey={'9ec37fad29fe000a6f28be4cb07fef02'} height={50} width={320} /> }
+          </Group>   
           <SeasonSelect label={t("seasonSelect.label")} placeholder={t("seasonSelect.label")} defaultSeasonNumber={props.currentSeasonNumber}
           seasons={props.seasons.map((s) => ({
             seasonNumber: s.seasonNumber,

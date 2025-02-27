@@ -11,6 +11,7 @@ import { useSearchParams } from 'next/navigation';
 import { Autocomplete } from '@/components/Autocomplete/Autocomplete';
 import { IconSearch } from '@tabler/icons-react';
 import { searchClient } from '@algolia/client-search';
+import AdsterraBanner from '@/components/AdsterraBanner/AdsterraBanner';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
@@ -42,6 +43,7 @@ export default function TvShowsPage(props: TvShowsPageProps) {
   const [autoCompleteOpened, controlAutocomplete] = useDisclosure();
   const queryParams = useSearchParams();
   const pinned = useHeadroom({ fixedAt: 60 });
+  const smOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
   const querySuggestionsPlugin = createQuerySuggestionsPlugin({
     searchClient: algoliaClient,
@@ -154,6 +156,11 @@ export default function TvShowsPage(props: TvShowsPageProps) {
         <Space h="xl"/>
         <Space h="xl"/>
         <Container size="xl">
+          <Group justify='center'>
+            {!smOrSmaller && <AdsterraBanner adKey={'65485502e263f33728c73d35f0a0a5ac'} height={90} width={728} /> }
+            {!xsOrSmaller && smOrSmaller && <AdsterraBanner adKey={'3d22ee119d4fa58249ae5cf94ce0b2f9'} height={60} width={468} /> }
+            {xsOrSmaller && <AdsterraBanner adKey={'9ec37fad29fe000a6f28be4cb07fef02'} height={50} width={320} /> }
+          </Group>  
           <Stack component="article">
             { props.recentTvShowUpdates.length === 0 ? <Text style={{textAlign: 'center'}}>{t('emptySearchResultsMessage')}</Text> :
             <SimpleGrid cols={{base: 1, xs: 2, sm: 3, md: 4, lg: 5, xl: 5}}>

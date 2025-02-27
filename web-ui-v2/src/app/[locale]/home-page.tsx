@@ -11,6 +11,8 @@ import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelect
 import { useSearchParams } from 'next/navigation';
 import { hotjar } from 'react-hotjar';
 import { useEffect } from 'react';
+import AdsterraBanner from '@/components/AdsterraBanner/AdsterraBanner';
+import AdsterraNativeBanner from '@/components/AdsterraNativeBanner/AdsterraNativeBanner';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
@@ -42,6 +44,7 @@ export default function HomePage(props: HomePageProps) {
   const [opened, { toggle }] = useDisclosure();
   const theme = useMantineTheme();
   const xsOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
+  const smOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
@@ -96,6 +99,11 @@ export default function HomePage(props: HomePageProps) {
         <Container size="xl">
           <Space h="xl"/>
           <Space h="xl"/>
+          <Group justify='center'>
+            {!smOrSmaller && <AdsterraBanner adKey={'65485502e263f33728c73d35f0a0a5ac'} height={90} width={728} /> }
+            {!xsOrSmaller && smOrSmaller && <AdsterraBanner adKey={'3d22ee119d4fa58249ae5cf94ce0b2f9'} height={60} width={468} /> }
+            {xsOrSmaller && <AdsterraBanner adKey={'9ec37fad29fe000a6f28be4cb07fef02'} height={50} width={320} /> }
+          </Group>
           <Stack component="article">
             <Title order={2}>{t("latest_movie_updates")}</Title>
             <Carousel height={'auto'} dragFree={true} slideSize={{ base: "10%"}} slideGap="md" align="start"
@@ -117,6 +125,7 @@ export default function HomePage(props: HomePageProps) {
               }
             </Carousel>
           </Stack>
+          <AdsterraNativeBanner />
           <Space h="xl"/>
           <Stack component="article">
             <Title order={2}>{t("latest_tvshow_updates")}</Title>
