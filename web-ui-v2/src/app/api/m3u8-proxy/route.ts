@@ -31,13 +31,20 @@ export async function GET(req: NextRequest) {
     qualityLimit = 1080;
   }
   const filteredPlaylist = [];
+  let skipNextLine = false;
 
   for (let i = 0; i < playlist.length; i++) {
+    if (skipNextLine) {
+      skipNextLine = false;
+      continue;
+    }
+
     if (playlist[i].startsWith("#EXT-X-STREAM-INF")) {
       const resolutionMatch = playlist[i].match(/RESOLUTION=(\d+)x(\d+)/);
       if (resolutionMatch) {
         const height = parseInt(resolutionMatch[2], 10);
         if (height > qualityLimit && height != 540) {
+          skipNextLine = true;
           continue;
         }
       }
