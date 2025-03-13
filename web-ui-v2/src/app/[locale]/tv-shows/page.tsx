@@ -1,13 +1,10 @@
-
-import { searchClient } from '@algolia/client-search';
 import TvShowsPage from './tvshows-page';
 import { getLocale } from 'next-intl/server';
 import { Locale } from '@/i18n/routing';
 import { getOrUpdateCache, yearToEpochMillis } from '../page';
 import '@algolia/autocomplete-theme-classic';
+import { searchTvShows } from '@/service/SearchService';
 
-const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
-    process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
 
 async function getRecentTVShowUpdatesCached(locale: string, query: string) {
   return getOrUpdateCache(() => getRecentTVShowUpdates(locale, query), `tvshows_${locale}_${query}`, 3600); 
@@ -15,14 +12,7 @@ async function getRecentTVShowUpdatesCached(locale: string, query: string) {
 
 async function getRecentTVShowUpdates(locale: string, query: string) { 
   const langKey = Locale.FROM_LANG_TAG[locale].key || 'EN_US';
-  const algoliaResponse = await algoliaClient.search({
-        requests: [ {
-          indexName: process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!,
-          query: query,
-          filters: 'category:TV_SHOW',
-          hitsPerPage: 1000
-        }]});
-  return (algoliaResponse.results[0] as any).hits.sort((a: any, b: any) => {
+  return (await searchTvShows(query)).sort((a: any, b: any) => {
     const aLatestAirDateMillis = a.latestAirDateMillis || yearToEpochMillis(a.releaseYear);
     const bLatestAirDateMillis = b.latestAirDateMillis || yearToEpochMillis(b.releaseYear);
     return bLatestAirDateMillis - aLatestAirDateMillis;
