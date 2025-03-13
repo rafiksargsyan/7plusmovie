@@ -28,6 +28,10 @@ variable "algolia_admin_key" {
   type = string
 }
 
+variable "typesense_admin_key" {
+  type = string
+}
+
 variable "cookie_signing_private_key_base64_encoded" {
   type = string
 }
