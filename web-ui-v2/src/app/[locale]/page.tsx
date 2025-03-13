@@ -3,6 +3,7 @@ import { getLocale } from 'next-intl/server';
 import { Locale } from '@/i18n/routing';
 import HomePage from './home-page';
 import { createClient } from 'redis';
+import { searchMovies } from '@/service/SearchService';
 
 const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
     process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
@@ -66,14 +67,7 @@ async function getRecentMovieReleasesCached(locale: string) {
 
 export async function getRecentMovieReleases(locale: string) {
   const langKey = Locale.FROM_LANG_TAG[locale].key || 'EN_US';
-  const algoliaResponse = await algoliaClient.search({
-        requests: [ {
-          indexName: process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!,
-          query: '',
-          filters: 'category:MOVIE',
-          hitsPerPage: 1000
-        }]});
-  return (algoliaResponse.results[0] as any).hits.filter((m: any) => { return new Date().getFullYear() - m.releaseYear < 2 }).sort((a: any, b: any) => {
+  return (await searchMovies('')).filter((m: any) => { return new Date().getFullYear() - m.releaseYear < 2 }).sort((a: any, b: any) => {
     const currentTime = Date.now();
     const aReleaseTimeInMillis = a.releaseTimeInMillis || yearToEpochMillis(a.releaseYear);
     const bReleaseTimeInMillis = b.releaseTimeInMillis || yearToEpochMillis(b.releaseYear);
@@ -84,7 +78,7 @@ export async function getRecentMovieReleases(locale: string) {
     }
     return bLatestReleaseTime - aLatestReleaseTime;
   }).slice(0, 15).map((h: any) => ({
-    id: h.objectID,
+    id: h.id,
     title: h.titleL8ns[langKey] || h.titleL8ns['EN_US'],
     year: `${h.releaseYear}`,
     quality: h.latestReleaseQuality,
