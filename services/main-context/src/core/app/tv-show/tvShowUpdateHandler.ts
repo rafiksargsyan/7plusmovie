@@ -10,6 +10,7 @@ import { L8nLangCode } from '../../domain/L8nLangCodes';
 import { TvShowRepositoryInterface } from '../../ports/TvShowRepositoryInterface';
 import { TvShowRepository } from '../../../adapters/TvShowRepository';
 import { Nullable, strIsBlank } from '../../../utils';
+import Typesense from 'typesense';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
@@ -79,6 +80,14 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
     const secret = JSON.parse(secretStr.SecretString!);
     const algoliaClient = algoliasearch(process.env.ALGOLIA_APP_ID!, secret.ALGOLIA_ADMIN_KEY!);
     const algoliaIndex = algoliaClient.initIndex(process.env.ALGOLIA_ALL_INDEX!);
+    let typesenseClient = new Typesense.Client({
+      'nodes': [{
+        'host': 'typesense.q62.xyz',
+        'port': 8108,
+        'protocol': 'http'
+      }],
+      'apiKey': secret.TYPESENSE_ADMIN_KEY
+    })
     const tmdbApiKey = secret.TMDB_API_KEY!;
   
     for (const record of event.Records) {
@@ -121,19 +130,25 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         if (tvShow.genres == undefined) tvShow.genres = [];
         const latestEpisode = getLatestEpisode(tvShow.seasons);
         const latestReleaseId = latestEpisode?.episode == null ? null : getLatestReleaseId(latestEpisode?.episode);
+        const payload = { 
+          creationTime: tvShow.creationTime,
+          category: "TV_SHOW",
+          originalTitle: tvShow.originalTitle,
+          posterImagesPortrait: tvShow.posterImagesPortrait,
+          titleL8ns: tvShow.titleL8ns,
+          releaseYear: tvShow.releaseYear,
+          genres: tvShow.genres.reduce((r, _) => { return { ...r, [_.code] : TvShowGenres[_.code] } }, {}),
+          latestSeason: latestEpisode?.seasonNumber,
+          latestEpisode: latestEpisode?.episode?.episodeNumber,
+          latestAirDateMillis: latestEpisode?.episode?.airDateInMillis,
+          latestReleaseId: latestReleaseId,
+          latestReleaseTime: latestReleaseId != null ? latestEpisode?.episode?.releases[latestReleaseId].creationTime : null }
         await algoliaIndex.saveObject({ objectID: tvShow.id,
-                                        creationTime: tvShow.creationTime,
-                                        category: "TV_SHOW",
-                                        originalTitle: tvShow.originalTitle,
-                                        posterImagesPortrait: tvShow.posterImagesPortrait,
-                                        titleL8ns: tvShow.titleL8ns,
-                                        releaseYear: tvShow.releaseYear,
-                                        genres: tvShow.genres.reduce((r, _) => { return { ...r, [_.code] : TvShowGenres[_.code] } }, {}),
-                                        latestSeason: latestEpisode?.seasonNumber,
-                                        latestEpisode: latestEpisode?.episode?.episodeNumber,
-                                        latestAirDateMillis: latestEpisode?.episode?.airDateInMillis,
-                                        latestReleaseId: latestReleaseId,
-                                        latestReleaseTime: latestReleaseId != null ? latestEpisode?.episode?.releases[latestReleaseId].creationTime : null });
+                                        ...payload });
+        await typesenseClient.collections(process.env.TYPESENSE_COLLECTION_TVSHOWS!).documents().upsert({
+          id: tvShow.id,
+          ...payload
+        });
       }
     }
   } catch (e) {
@@ -358,7 +373,7 @@ async function updateBasedOnTmdbId(tvShowId: string, tmdbId: string, tmdbApiKey:
               updated = true;
             }
           }
-          if (!strIsBlank(tmdbEpisodeEnUs.air_date)) {
+          if (!strIsBlank(tmdbEpisodeEnUs?.air_date)) {
             const airDateMillis = new Date(tmdbEpisodeEnUs.air_date).getTime();
             if (tvShow.setEpisodeAirDateInMillis(_.seasonNumber, episode.episodeNumber, airDateMillis)) {
               updated = true

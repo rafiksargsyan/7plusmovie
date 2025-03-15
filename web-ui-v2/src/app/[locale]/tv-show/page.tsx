@@ -6,13 +6,10 @@ import TvShowPage, {  Season } from './tv-show-page';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Locale } from '@/i18n/routing';
-import { searchClient } from '@algolia/client-search';
 import { getOrUpdateCache } from '../page';
+import { getTvShowById } from '@/service/SearchService';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
-
-const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
-    process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
 
 async function ip2AudioLang(ip: string | null): Promise<string> {
   if (ip == null) ip = '0.0.0.0';
@@ -80,7 +77,7 @@ export async function generateMetadata(
     const localeKey = Locale.FROM_LANG_TAG[locale].key;
     const title = `${(localeKey in tv.titleL8ns) ? tv.titleL8ns[localeKey] : tv.titleL8ns['EN_US']} (${tv.releaseYear})`;
     const algoliaTvShowObject = await getOrUpdateCache(() => {
-      return algoliaClient.getObject({indexName: process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!, objectID: id})
+      return getTvShowById(id);
     }, `algolia_${id}`, 3600 * 24);
     const posters: { [key:string]: string } = algoliaTvShowObject.posterImagesPortrait as { [key:string]: string };
     const poster = `${imageBaseUrl}h=720,f=auto/${(localeKey in posters) ? posters[localeKey] : posters['EN_US']}`;

@@ -13,6 +13,7 @@ import { L8nLangCode } from '../domain/L8nLangCodes';
 import { Nullable, strIsBlank } from '../../utils';
 import { Release } from '../domain/entity/Release';
 import { RipType } from '../domain/RipType';
+import Typesense from 'typesense';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
@@ -64,6 +65,14 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
     const secret = JSON.parse(secretStr.SecretString!);
     const algoliaClient = algoliasearch(process.env.ALGOLIA_APP_ID!, secret.ALGOLIA_ADMIN_KEY!);
     const algoliaIndex = algoliaClient.initIndex(process.env.ALGOLIA_ALL_INDEX!);
+    let typesenseClient = new Typesense.Client({
+      'nodes': [{
+        'host': 'typesense.q62.xyz',
+        'port': 8108,
+        'protocol': 'http'
+      }],
+      'apiKey': secret.TYPESENSE_ADMIN_KEY
+    })
     const tmdbApiKey = secret.TMDB_API_KEY!;
   
     for (const record of event.Records) {
@@ -96,21 +105,27 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         const maxQualityRelease = maxQualityReleaseId != null ? movie.releases[maxQualityReleaseId] : null;
         const latestReleaseQuality = (latestRelease?._ripType != null && RipType.fromKey(latestRelease?._ripType?.key)?.isLowQuality() ? latestRelease?._ripType?.key : latestRelease?._resolution?.key);
         const maxQuality = (maxQualityRelease?._ripType != null && RipType.fromKey(maxQualityRelease?._ripType?.key)?.isLowQuality() ? maxQualityRelease?._ripType?.key : maxQualityRelease?._resolution?.key);
+        const payload = {
+          creationTime: movie.creationTime,
+          category: "MOVIE",
+          originalTitle: movie.originalTitle,
+          posterImagesPortrait: movie.posterImagesPortrait,
+          titleL8ns: movie.titleL8ns,
+          releaseYear: movie.releaseYear,
+          genres: movie.genres.reduce((r, _) => { return { ...r, [_.code] : MovieGenres[_.code] } }, {}),
+          actors: movie.actors.reduce((r, _) => { return { ...r, [_.code] : Persons[_.code] } }, {}),
+          directors: movie.directors.reduce((r, _) => { return { ...r, [_.code] : Persons[_.code] } }, {}),
+          releaseTimeInMillis: movie._releaseTimeInMillis,
+          latestReleaseId: latestReleaseId,
+          latestReleaseQuality: latestReleaseQuality,
+          latestReleaseTime: latestRelease?.creationTime,
+          maxQuality: maxQuality };
         await algoliaIndex.saveObject({ objectID: movie.id,
-                                        creationTime: movie.creationTime,
-                                        category: "MOVIE",
-                                        originalTitle: movie.originalTitle,
-                                        posterImagesPortrait: movie.posterImagesPortrait,
-                                        titleL8ns: movie.titleL8ns,
-                                        releaseYear: movie.releaseYear,
-                                        genres: movie.genres.reduce((r, _) => { return { ...r, [_.code] : MovieGenres[_.code] } }, {}),
-                                        actors: movie.actors.reduce((r, _) => { return { ...r, [_.code] : Persons[_.code] } }, {}),
-                                        directors: movie.directors.reduce((r, _) => { return { ...r, [_.code] : Persons[_.code] } }, {}),
-                                        releaseTimeInMillis: movie._releaseTimeInMillis,
-                                        latestReleaseId: latestReleaseId,
-                                        latestReleaseQuality: latestReleaseQuality,
-                                        latestReleaseTime: latestRelease?.creationTime,
-                                        maxQuality: maxQuality });
+                                        ...payload });
+        await typesenseClient.collections(process.env.TYPESENSE_COLLECTION_MOVIES!).documents().upsert({
+          id: movie.id,
+          ...payload
+        });
       }
     }
   } catch (e) {

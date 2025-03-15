@@ -112,6 +112,7 @@ resource "aws_secretsmanager_secret_version" "secrets_version" {
   secret_string = jsonencode(
     tomap({
       ALGOLIA_ADMIN_KEY: var.algolia_admin_key
+      TYPESENSE_ADMIN_KEY: var.typesense_admin_key
       COOKIE_SIGNING_PRIVATE_KEY_BASE64_ENCODED: var.cookie_signing_private_key_base64_encoded
       TMDB_API_KEY: var.tmdb_api_key
       R2_ACCESS_KEY_ID: var.r2_access_key_id
