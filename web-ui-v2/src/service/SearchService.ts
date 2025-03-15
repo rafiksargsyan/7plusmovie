@@ -46,7 +46,7 @@ export async function searchMovies(query: Nullable<string>) {
     while (lastPageSize === 250) {
       const tsResponse = await typesenseSearchClient.collections(process.env.NEXT_PUBLIC_TYPESENSE_COLLECTION_MOVIES!).documents().search({
         'q': query || '',
-        'query_by': '*',
+        'query_by': 'originalTitle,titleL8ns,genres,actors,directors',
         'per_page': pageSize,
         'page': page
       }, {})
@@ -80,7 +80,7 @@ export async function searchTvShows(query: Nullable<string>) {
     while (lastPageSize === 250) {
       const tsResponse = await typesenseSearchClient.collections(process.env.NEXT_PUBLIC_TYPESENSE_COLLECTION_TVSHOWS!).documents().search({
         'q': query || '',
-        'query_by': '*',
+        'query_by': 'originalTitle,titleL8ns,genres',
         'per_page': pageSize,
         'page': page
       }, {})
