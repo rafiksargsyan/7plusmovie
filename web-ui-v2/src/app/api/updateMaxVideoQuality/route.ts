@@ -2,7 +2,7 @@ import axios from "axios";
 import { NextResponse } from "next/server";
 import { createClient } from "redis";
 
-const cfBandwidthToStorageFactor = 5;
+const cfBandwidthToStorageFactor = 10;
 
 function dayOfMonth() {
     const today = new Date()

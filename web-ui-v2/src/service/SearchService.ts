@@ -53,7 +53,7 @@ export async function searchMovies(query: Nullable<string>) {
       lastPageSize = tsResponse.hits?.length;
       ++page;
       const hits = tsResponse.hits?.map((h: any) => h.document);
-      hits != null && ret.push(...hits);
+      if (hits != null) ret.push(...hits);
     }
     return ret;
   }
@@ -87,7 +87,7 @@ export async function searchTvShows(query: Nullable<string>) {
       lastPageSize = tsResponse.hits?.length;
       ++page;
       const hits = tsResponse.hits?.map((h: any) => h.document);
-      hits != null && ret.push(...hits);
+      if (hits != null) ret.push(...hits);
     }
     return ret;
   }
