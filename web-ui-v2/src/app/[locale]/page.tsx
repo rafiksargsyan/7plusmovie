@@ -100,7 +100,7 @@ export async function getRecentTVShowUpdates(locale: string) {
     }
     return bLatestReleasetime - aLatestReleasetime;
   }).slice(0, 10).map((h: any) => ({
-    id: h.objectID,
+    id: h.id,
     title: h.titleL8ns[langKey] || h.titleL8ns['EN_US'],
     year: `${h.releaseYear}`,
     releaseId: h.latestReleaseId,

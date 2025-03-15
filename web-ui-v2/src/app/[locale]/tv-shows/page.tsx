@@ -17,7 +17,7 @@ async function getRecentTVShowUpdates(locale: string, query: string) {
     const bLatestAirDateMillis = b.latestAirDateMillis || yearToEpochMillis(b.releaseYear);
     return bLatestAirDateMillis - aLatestAirDateMillis;
   }).map((h: any) => ({
-    id: h.objectID,
+    id: h.id,
     title: h.titleL8ns[langKey] || h.titleL8ns['EN_US'],
     year: `${h.releaseYear}`,
     season: h.latestSeason,
