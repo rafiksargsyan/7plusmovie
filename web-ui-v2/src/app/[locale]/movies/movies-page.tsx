@@ -10,7 +10,6 @@ import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query
 import { useSearchParams } from 'next/navigation';
 import { IconSearch } from '@tabler/icons-react';
 import { searchClient } from '@algolia/client-search';
-import AdsterraBanner from '@/components/AdsterraBanner/AdsterraBanner';
 
 const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
     process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
@@ -42,7 +41,6 @@ export default function MoviesPage(props: MoviesPageProps) {
   const xsOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
   const [autoCompleteOpened, controlAutocomplete] = useDisclosure();
   const pinned = useHeadroom({ fixedAt: 60 });
-  const smOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
  
   const querySuggestionsPlugin = createQuerySuggestionsPlugin({
     searchClient: algoliaClient,
@@ -154,12 +152,7 @@ export default function MoviesPage(props: MoviesPageProps) {
       <AppShell.Main>
         <Space h="xl"/>
         <Space h="xl"/>
-        <Container size="xl">
-          <Group justify='center'>
-            {!smOrSmaller && <AdsterraBanner adKey={'65485502e263f33728c73d35f0a0a5ac'} height={90} width={728} /> }
-            {!xsOrSmaller && smOrSmaller && <AdsterraBanner adKey={'3d22ee119d4fa58249ae5cf94ce0b2f9'} height={60} width={468} /> }
-            {xsOrSmaller && <AdsterraBanner adKey={'9ec37fad29fe000a6f28be4cb07fef02'} height={50} width={320} /> }
-          </Group>  
+        <Container size="xl"> 
           <Stack component="article">
             { props.recentMovieReleases.length === 0 ? <Text style={{textAlign: 'center'}}>{t('emptySearchResultsMessage')}</Text> :
             <SimpleGrid cols={{base: 1, xs: 2, sm: 3, md: 4, lg: 5, xl: 5}}>
