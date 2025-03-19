@@ -14,4 +14,3 @@ jobs:
         run: |
           curl --header 'Host: www.q62.xyz' -X GET "https://ovh1.q62.xyz/api/updateMaxVideoQuality"
           curl --header 'Host: www.q62.xyz' -X GET "https://ovh2.q62.xyz/api/updateMaxVideoQuality"
-          curl --header 'Host: www.q62.xyz' -X GET "https://ovh3.q62.xyz/api/updateMaxVideoQuality"
