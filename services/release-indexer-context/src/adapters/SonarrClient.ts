@@ -35,7 +35,7 @@ export class SonarrClient implements ISonarr {
       console.error(e);
       throw new ISonarrApiError();
     }
-    if (response == null || response.length !== 1) {
+    if (response == null) {
       return null;
     }
     return response[0].id;
