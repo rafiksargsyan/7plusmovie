@@ -98,10 +98,6 @@ jobs:
           outputFolder: "./${{ env.TRANSCODING_OUTPUT_DIR_NAME }}/${{ env.THUMBNAILS_DIR_NAME }}"
           resolutionsBase64Encoded: ${{ env.THUMBNAIL_RESOLUTIONS_BASE64_ENCODED }}
 
-      - name: Upload transcoding results to S3
-        run: |
-          for i in 1 2 3; do aws s3 cp "${TRANSCODING_OUTPUT_DIR_NAME}" "s3://${MEDIA_FILES_S3_BUCKET}/${OUTPUT_S3_FOLDER_KEY}" --recursive && break; done
-
       - name: Upload transcoding results to R2
         run: |
           for i in 1 2 3; do aws s3 cp "${TRANSCODING_OUTPUT_DIR_NAME}" "s3://${MEDIA_FILES_R2_BUCKET}/${OUTPUT_S3_FOLDER_KEY}" --endpoint-url  ${CF_ENDPOINT} --recursive  && break; done

@@ -191,14 +191,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "raw_media_assets_lifecycle_con
   rule {
     id = "default"
 
-    transition {
-      days          = 30
-      storage_class = "GLACIER_IR"
-    }
-
-    transition {
-      days          = 120
-      storage_class = "DEEP_ARCHIVE"
+    expiration {
+      days = 30
     }
 
     status = "Enabled"
