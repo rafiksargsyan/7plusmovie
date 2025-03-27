@@ -1,4 +1,5 @@
 resource "aws_s3_bucket" "media_assets_backup" {
+  force_destroy = true
   bucket = "media-assets-backup"
 }
 
@@ -17,6 +18,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "media_assets_backup_lifecycle_
 }
 
 resource "aws_s3_bucket" "dynamodb_backup" {
+  force_destroy = true
   bucket = "q62-dynamodb-backup"
 }
 
