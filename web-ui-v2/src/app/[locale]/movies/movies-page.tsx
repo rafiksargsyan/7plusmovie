@@ -6,13 +6,8 @@ import { Link, Locale, usePathname, useRouter } from '@/i18n/routing';
 import { MovieCard } from '@/components/MovieCard/MovieCard';
 import { LocaleSelectButton } from '@/components/LocaleSelectButton/LocaleSelectButton';
 import { Autocomplete } from '@/components/Autocomplete/Autocomplete';
-import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions';
 import { useSearchParams } from 'next/navigation';
 import { IconSearch } from '@tabler/icons-react';
-import { searchClient } from '@algolia/client-search';
-
-const algoliaClient = searchClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
-    process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_ONLY_KEY!, {});
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
 
@@ -41,39 +36,6 @@ export default function MoviesPage(props: MoviesPageProps) {
   const xsOrSmaller = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
   const [autoCompleteOpened, controlAutocomplete] = useDisclosure();
   const pinned = useHeadroom({ fixedAt: 60 });
- 
-  const querySuggestionsPlugin = createQuerySuggestionsPlugin({
-    searchClient: algoliaClient,
-    indexName: process.env.NEXT_PUBLIC_ALGOLIA_QUERY_SUGGESTIONS_ALL_INDEX!,
-    getSearchParams({ state }) {
-      return { hitsPerPage: state.query ? 10 : 0 };
-    },
-    categoryAttribute: [
-      process.env.NEXT_PUBLIC_ALGOLIA_ALL_INDEX!,
-      'facets',
-      'exact_matches',
-      'category',
-    ],
-    itemsWithCategories: 10,
-    categoriesPerItem: 2,
-    transformSource({ source }) {
-      return {
-        ...source,
-        onSelect(e: any) {
-          controlAutocomplete.close();  
-          if (e.item.__autocomplete_qsCategory === "TV_SHOW") {
-            const params = new URLSearchParams(queryParams.toString());
-            params.set('q', e.item.query);
-            router.push(`tv-shows?${params.toString()}`);
-          } else {
-            const params = new URLSearchParams(queryParams.toString());
-            params.set('q', e.state.query);
-            router.replace(`?${params.toString()}`);
-          }
-        }
-      };
-    },
-  });
 
   return (
     <AppShell
@@ -97,7 +59,6 @@ export default function MoviesPage(props: MoviesPageProps) {
             <Autocomplete
               placeholder={t("search.placeholder")}
               initialState={{query: props.query}}
-              plugins={[querySuggestionsPlugin]}
               openOnFocus={true}
               onSubmit={(e: any) => {
                 const params = new URLSearchParams(queryParams.toString());
@@ -116,7 +77,6 @@ export default function MoviesPage(props: MoviesPageProps) {
             placeholder={t("search.placeholder")}
             detachedMediaQuery=''
             initialState={{query: props.query, isOpen: autoCompleteOpened}}
-            plugins={[querySuggestionsPlugin]}
             openOnFocus={true}
             onSubmit={(e: any) => {
               controlAutocomplete.close();

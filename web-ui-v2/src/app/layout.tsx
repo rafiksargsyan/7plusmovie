@@ -33,7 +33,7 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning>
       <head>
         <ColorSchemeScript defaultColorScheme="dark" />
-        <Script async type="text/javascript" src="https://s0-greate.net/p/1494520"></Script>
+        {/* <Script async type="text/javascript" src="https://s0-greate.net/p/1494520"></Script>
         <Script async data-cfasync="false" id="rollerads-push">
           {`(function() {
               const url = new URL(window.location.href);
@@ -54,7 +54,13 @@ export default async function RootLayout({
               };
               document.head.appendChild(s);
             })()`}
-        </Script>
+        </Script> */}
+          <Script async id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></Script>
+          <Script id='acAutotag' type="text/javascript">
+            {`aclib.runAutoTag({
+             zoneId: 'edhmiryyry',
+            });`}
+          </Script>
       </head>
       <body data-theme="dark">
         <MantineProvider theme={theme} defaultColorScheme="dark" forceColorScheme='dark'>
