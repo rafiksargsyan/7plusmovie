@@ -31,6 +31,7 @@ export class TvShow {
   public readonly id: string;
   private _creationTime: number;
   private _tmdbId: Nullable<string>;
+  private _tvdbId: Nullable<string>;
   private _originalLocale: L8nLang;
   private _originalTitle: string;
   private _releaseYear: number;
@@ -101,6 +102,20 @@ export class TvShow {
     return true;
   }
   
+  /**
+   * @param tvdbId
+   * 
+   * @throws {TvShow_BlankTvdbIdError}
+   */
+  setTvdbId(tvdbId: string) {
+    if (strIsBlank(tvdbId)) {
+      throw new TvShow_BlankTvdbIdError();
+    }
+    if (tvdbId == this._tvdbId) return false;
+    this._tvdbId = tvdbId;
+    return true;
+  }
+
   private getSeason(seasonNumber: number) {
     for (const s of this._seasons) {
       if (s.seasonNumber === seasonNumber) {
@@ -221,6 +236,10 @@ export class TvShow {
 
   get tmdbId() {
     return this._tmdbId;
+  }
+
+  get tvdbId() {
+    return this._tvdbId;
   }
 
   setEpisodeRuntime(seasonNumber: number, episodeNumber: number, runtimeSeconds: number) {
@@ -446,6 +465,7 @@ export class TvShow_NullOriginalLocaleError {}
 export class TvShow_BlankOriginalTitleError {}
 export class TvShow_InvalidReleaseYearError {}
 export class TvShow_BlankTmdbIdError {}
+export class TvShow_BlankTvdbIdError {}
 export class TvShow_InvalidSeasonNumberError {}
 export class TvShow_SeasonAlreadyExistsError {}
 export class TvShow_SeasonNotFoundError {}

@@ -44,7 +44,7 @@ export const handler = async (event: { tvShowId: string, seasonNumber: number })
   const sonarrApiKey = secret.SONARR_API_KEY!;
   const sonarrClient = new SonarrClient(sonarrApiBaseUrl, sonarrApiKey);
   const tvShow = await tvShowRepo.getSeason(event.tvShowId, event.seasonNumber);
-  const sonarrReleases = await sonarrClient.getAll(tvShow.tmdbId!, tvShow.getSeasonOrThrow(event.seasonNumber).tmdbSeasonNumber!);
+  const sonarrReleases = await sonarrClient.getAll(tvShow.tmdbId!, tvShow.tvdbId, tvShow.getSeasonOrThrow(event.seasonNumber).tmdbSeasonNumber!);
   let allReleasesProcessed = true;
   for (let sr of sonarrReleases) {
     // Exit before lambda times out
