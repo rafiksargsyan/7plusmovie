@@ -14,3 +14,4 @@ services:
       - TYPESENSE_API_PORT=8108
       - TYPESENSE_ENABLE_CORS=true
       - TYPESENSE_CORS_DOMAINS='https://www.q62.xyz,https://q62.xyz,http://localhost:3000'
+      - TYPESENSE_ANALYTICS_FLUSH_INTERVAL=60
