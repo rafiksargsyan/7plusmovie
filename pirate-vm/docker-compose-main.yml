@@ -1,7 +1,7 @@
 services:
   vpn:
     container_name: vpn
-    image: qmcgaw/gluetun:v3.36.0
+    image: qmcgaw/gluetun:v3.40.0
     cap_add: [ 'NET_ADMIN' ]
     environment:
       - VPN_SERVICE_PROVIDER=protonvpn
