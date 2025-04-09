@@ -5,11 +5,11 @@ import { Nullable } from '../Nullable'
 import jwt from 'jsonwebtoken';
 
 export class TvdbClient implements ITvdbClient {
-  private _restClient: AxiosInstance
-  private _apiKey: string
-  private _apiBaseUrl: string
-  private _authToken: Nullable<string>
-  private _authTokenExpSeconds: number = 0
+  private _restClient: AxiosInstance;
+  private _apiKey: string;
+  private _apiBaseUrl: string;
+  private _authToken: Nullable<string>;
+  private _authTokenExpSeconds: number = 0;
 
   constructor(apiBaseUrl: string, apiKey: string) {
     this._apiKey = apiKey
@@ -21,24 +21,31 @@ export class TvdbClient implements ITvdbClient {
   }
 
   private async login() {
-    let loginResponse;
-    try {
-      loginResponse = await this._restClient.post('/login', {
-        apiKey: this._apiKey
-      })
-    } catch (e) {
-      const msg = `Failed to login: ${(e as Error).message}`
-      throw new TvdbRuntimeError(msg);  
-    }
+    let loginResponse = await this._restClient.post('/login', {
+      apiKey: this._apiKey
+    });
     this._authToken = loginResponse.data.token;
     this._authTokenExpSeconds = jwt.decode(this._authToken).exp;
   }
 
-  private async checkAndLogin() {
-    if (this._authTokenExpSeconds * 1000 - Date.now() < 60 * 60 * 1000) {
-      await this.login();
-    }
+  private tokenExpired() {
+    return this._authTokenExpSeconds * 1000 - Date.now() < 60 * 60 * 1000;
   }
 
+  private async checkAndLogin() {
+    if (this.tokenExpired()) {
+      await this.login();
+      return true;
+    }
+    return false;
+  }
+
+  private async refreshAuthHeader() {
+    if (await this.checkAndLogin()) {
+      this._restClient.defaults.headers.common['Authorization'] = `Bearer ${this._authToken}`;  
+    }
+  }
+ 
   
+
 }
