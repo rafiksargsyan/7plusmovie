@@ -3,7 +3,7 @@ import { Resolution } from "../domain/value-object/Resolution"
 import { RipType } from "../domain/value-object/RipType"
 
 export interface ISonarr {
-  getAll(tmdbId: string, tvdbId: Nullable<string>, seasonNumber: number): Promise<SonarrRelease[]>
+  getAll(tmdbId: string, tvdbId: Nullable<number>, seasonNumber: number): Promise<SonarrRelease[]>
 }
 
 export interface SonarrRelease {

@@ -4,6 +4,7 @@ import { TvShowRepository } from '../../adapters/TvShowRepository';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import axios, { AxiosInstance } from 'axios';
 import { strIsBlank } from '../../utils';
+import { TvdbClient } from '../../adapters/TvdbClient';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
@@ -26,11 +27,13 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
   const secretStr = await secretsManager.getSecretValue({ SecretId: secretManagerSecretId});
   const secret = JSON.parse(secretStr.SecretString!);
   const tmdbApiKey = secret.TMDB_API_KEY!;
+  const tvdbApiKey = secret.TVDB_API_KEY!;
   tmdbClient.interceptors.request.use((config) => {
     config.params = config.params || {};
     config.params['api_key'] = tmdbApiKey;
     return config;
   });
+  const tvdbClient = new TvdbClient('https://api4.thetvdb.com/v4/', tvdbApiKey);
   const tvShow = await tvShowRepo.getById(event.tvShowId);
   if (tvShow.tvdbId != null) {
     // get tmdbId using tvdbId and set if not set
@@ -52,7 +55,13 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
     })
   }
   if (tvShow.tvdbId != null) {
-    // populate names from TVDB
+    const tvdbTvShow = await tvdbClient.getTvShowById(tvShow.tvdbId);
+    for (const l of ['eng', 'rus', 'spa', 'fra', 'ita']) {
+      if (tvdbTvShow.nameTranslations.includes(l)) {
+        const tvdbTvShowTranslation = await tvdbClient.getTvShowTranslation(tvShow.tvdbId, l);
+        rootUpdated = tvShow.addName(tvdbTvShowTranslation.name) || rootUpdated;
+      }
+    }
   }
   if (tvShow.tvdbId == null) {
     // tvShowTmdbEn can't be null

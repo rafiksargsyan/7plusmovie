@@ -1,5 +1,5 @@
 import axiosRetry from 'axios-retry'
-import { ITvdbClient } from '../core/ports/ITvdbClient'
+import { ITvdbClient, TvShow, TvShowTranslation } from '../core/ports/ITvdbClient'
 import axios, { AxiosInstance } from "axios"
 import { Nullable } from '../Nullable'
 import jwt from 'jsonwebtoken';
@@ -18,6 +18,25 @@ export class TvdbClient implements ITvdbClient {
       baseURL: this._apiBaseUrl,
     })
     axiosRetry(this._restClient, { retryDelay: axiosRetry.exponentialDelay, retries: 3 })
+  }
+  
+  async getTvShowById(id: number): Promise<TvShow> {
+    await this.refreshAuthHeader();
+    const response = await this._restClient.get(`series/${id}`);
+    return {
+      id: id,
+      name: response.data.name,
+      nameTranslations: response.data.nameTranslations || []
+    }
+  }
+  
+  // Will throw exception if a translation for lang is not available
+  async getTvShowTranslation(id: number, lang: string): Promise<TvShowTranslation> {
+    await this.refreshAuthHeader();
+    const response = await this._restClient.get(`series/${id}/translations/${lang}`);
+    return {
+      name: response.data.name
+    }
   }
 
   private async login() {
@@ -45,7 +64,5 @@ export class TvdbClient implements ITvdbClient {
       this._restClient.defaults.headers.common['Authorization'] = `Bearer ${this._authToken}`;  
     }
   }
- 
-  
 
 }

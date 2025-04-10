@@ -27,7 +27,7 @@ export class SonarrClient implements ISonarr {
     );
   }
   
-  private async getIdByTvdbId(tvdbId: string) {
+  private async getIdByTvdbId(tvdbId: number) {
     let response: any = null;
     try {
       response = (await this._restClient.get(`series/lookup/?term=tvdb:${tvdbId}`)).data;
@@ -55,7 +55,7 @@ export class SonarrClient implements ISonarr {
     return response[0].id;
   }
 
-  async getAll(tmdbId: string, tvdbId: Nullable<string>, tmdbSeasonNumber: number): Promise<SonarrRelease[]> {
+  async getAll(tmdbId: string, tvdbId: Nullable<number>, tmdbSeasonNumber: number): Promise<SonarrRelease[]> {
     const id = tvdbId != null ? await this.getIdByTvdbId(tvdbId) : await this.getIdByTmdbId(tmdbId);
     if (id == null) {
       throw new ISonarrTvShowNotFoundError();

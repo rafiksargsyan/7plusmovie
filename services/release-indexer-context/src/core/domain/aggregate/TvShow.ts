@@ -31,7 +31,7 @@ export class TvShow {
   public readonly id: string;
   private _creationTime: number;
   private _tmdbId: Nullable<string>;
-  private _tvdbId: Nullable<string>;
+  private _tvdbId: Nullable<number>;
   private _originalLocale: L8nLang;
   private _originalTitle: string;
   private _releaseYear: number;
@@ -107,8 +107,8 @@ export class TvShow {
    * 
    * @throws {TvShow_BlankTvdbIdError}
    */
-  setTvdbId(tvdbId: string) {
-    if (strIsBlank(tvdbId)) {
+  setTvdbId(tvdbId: number) {
+    if (tvdbId == null) {
       throw new TvShow_BlankTvdbIdError();
     }
     if (tvdbId == this._tvdbId) return false;

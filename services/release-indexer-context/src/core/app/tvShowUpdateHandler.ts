@@ -46,7 +46,6 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
       return config;
     });
     sonarrClient.defaults.headers.common['x-api-key'] = sonarrApiKey;
-
     for (const record of event.Records) {
       let SK = record.dynamodb?.Keys?.SK.S;
       if (SK !== 'tvshow') {
