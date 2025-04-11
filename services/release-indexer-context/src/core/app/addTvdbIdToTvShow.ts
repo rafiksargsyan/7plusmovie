@@ -13,7 +13,7 @@ const tvShowRepo = new TvShowRepository(docClient);
 
 interface AddTmdbIdParam {
   tvShowId: string;
-  tvdbId: string;
+  tvdbId: number;
 }
 
 export const handler = async (event: AddTmdbIdParam): Promise<void> => {
