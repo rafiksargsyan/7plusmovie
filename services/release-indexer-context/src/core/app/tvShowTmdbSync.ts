@@ -63,7 +63,7 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
       }
     }
   }
-  if (tvShow.tvdbId == null) {
+  if (!tvShow.useTvdb || tvShow.tvdbId == null) {
     // tvShowTmdbEn can't be null
     const seasons: any[] = (tvShowTmdbEn as any).seasons;
     if (seasons == null) return;
@@ -115,7 +115,48 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
      return aggr;
     }, {}))
   } else {
-    // create seasons/episodes from TVDB
+    const tvdbEpisodes = await tvdbClient.getTvShowEpisodes(tvShow.tvdbId);
+    for (const te of tvdbEpisodes) {
+      const updatedSeasons: Set<number> = new Set();
+      const updatedEpisodes: { [key:number] : Set<number> } = {};
+      const seasonNumber = te.seasonNumber;
+      if (seasonNumber == null || seasonNumber <= 0) continue;
+      if (!tvShow.seasonExists(seasonNumber)) {
+        tvShow.createSeason(seasonNumber);
+        updatedSeasons.add(seasonNumber);
+      }
+      if (tvShow.setTvdbSeasonNumber(seasonNumber, seasonNumber)) {
+        updatedSeasons.add(seasonNumber);  
+      }
+      const episodeNumber = te.number;
+      if (episodeNumber == null || episodeNumber <= 0) continue;
+      if (!tvShow.episodeExists(seasonNumber, episodeNumber)) {
+        tvShow.createEpisode(seasonNumber, episodeNumber);
+        if (updatedEpisodes[seasonNumber] == null) updatedEpisodes[seasonNumber] = new Set();
+        updatedEpisodes[seasonNumber].add(episodeNumber); 
+      }
+      if (tvShow.setTvdbEpisodeNumber(seasonNumber, episodeNumber, episodeNumber)) {
+        if (updatedEpisodes[seasonNumber] == null) updatedEpisodes[seasonNumber] = new Set();
+        updatedEpisodes[seasonNumber].add(episodeNumber);   
+      }
+      if (te.runtimeMinutes != null && te.runtimeMinutes > 0) {
+        if (tvShow.setEpisodeRuntime(seasonNumber, episodeNumber, te.runtimeMinutes * 60)) {
+          if (updatedEpisodes[seasonNumber] == null) updatedEpisodes[seasonNumber] = new Set();
+          updatedEpisodes[seasonNumber].add(episodeNumber);
+        }
+      }
+      if (!strIsBlank(te.aired)) {
+        const airDateMillis = new Date(te.aired!).getTime();
+        if (tvShow.setEpisodeAirDateInMillis(seasonNumber, episodeNumber, airDateMillis)) {
+          if (updatedEpisodes[seasonNumber] == null) updatedEpisodes[seasonNumber] = new Set();
+          updatedEpisodes[seasonNumber].add(episodeNumber);
+        }  
+      }
+      await tvShowRepo.save(tvShow, rootUpdated, Array.from(updatedSeasons), Object.keys(updatedEpisodes).reduce((aggr, k) => {
+        aggr[k] = Array.from(updatedEpisodes[k]);
+        return aggr;
+      }, {}))
+    }
   }
 };
 

@@ -1,5 +1,5 @@
 import axiosRetry from 'axios-retry'
-import { ITvdbClient, TvShow, TvShowTranslation } from '../core/ports/ITvdbClient'
+import { Episode, ITvdbClient, TvShow, TvShowTranslation } from '../core/ports/ITvdbClient'
 import axios, { AxiosInstance } from "axios"
 import { Nullable } from '../Nullable'
 import jwt from 'jsonwebtoken';
@@ -18,6 +18,22 @@ export class TvdbClient implements ITvdbClient {
       baseURL: this._apiBaseUrl,
     })
     axiosRetry(this._restClient, { retryDelay: axiosRetry.exponentialDelay, retries: 3 })
+  }
+
+  async getTvShowEpisodes(id: number): Promise<Episode[]> {
+    await this.refreshAuthHeader();
+    const ret: Episode[] = [];
+    const response = await this._restClient.get(`series/${id}/episodes/default`);
+    for (const e of response.data.episodes) {
+      ret.push({
+          id: e.id,
+          aired: e.aired,
+          runtimeMinutes: e.runtime,
+          seasonNumber: e.seasonNumber,
+          number: e.number
+      })
+    }
+    return ret;
   }
   
   async getTvShowById(id: number): Promise<TvShow> {
