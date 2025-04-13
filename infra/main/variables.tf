@@ -40,6 +40,10 @@ variable "tmdb_api_key" {
   type = string
 }
 
+variable "tvdb_api_key" {
+  type = string
+}
+
 variable "github_webhook_secret" {
   type = string
 }

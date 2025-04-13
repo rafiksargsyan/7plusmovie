@@ -23,7 +23,7 @@ export class TvdbClient implements ITvdbClient {
   async getTvShowEpisodes(id: number): Promise<Episode[]> {
     await this.refreshAuthHeader();
     const ret: Episode[] = [];
-    const response = await this._restClient.get(`series/${id}/episodes/default`);
+    const response = (await this._restClient.get(`series/${id}/episodes/default`)).data;
     for (const e of response.data.episodes) {
       ret.push({
           id: e.id,
@@ -38,7 +38,7 @@ export class TvdbClient implements ITvdbClient {
   
   async getTvShowById(id: number): Promise<TvShow> {
     await this.refreshAuthHeader();
-    const response = await this._restClient.get(`series/${id}`);
+    const response = (await this._restClient.get(`series/${id}`)).data;
     return {
       id: id,
       name: response.data.name,
@@ -49,16 +49,16 @@ export class TvdbClient implements ITvdbClient {
   // Will throw exception if a translation for lang is not available
   async getTvShowTranslation(id: number, lang: string): Promise<TvShowTranslation> {
     await this.refreshAuthHeader();
-    const response = await this._restClient.get(`series/${id}/translations/${lang}`);
+    const response = (await this._restClient.get(`series/${id}/translations/${lang}`)).data;
     return {
       name: response.data.name
     }
   }
 
   private async login() {
-    let loginResponse = await this._restClient.post('/login', {
+    let loginResponse = (await this._restClient.post('/login', {
       apiKey: this._apiKey
-    });
+    })).data;
     this._authToken = loginResponse.data.token;
     this._authTokenExpSeconds = jwt.decode(this._authToken).exp;
   }

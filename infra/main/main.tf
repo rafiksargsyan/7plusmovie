@@ -257,6 +257,7 @@ resource "aws_secretsmanager_secret_version" "ric_context_secrets_version" {
   secret_string = jsonencode(
     tomap({
       TMDB_API_KEY: var.tmdb_api_key
+      TVDB_API_KEY: var.tvdb_api_key
       RADARR_API_KEY: var.radarr_api_key
       QBITTORRENT_PASSWORD: var.qbittorrent_password
       SONARR_API_KEY: var.sonarr_api_key
