@@ -10,6 +10,7 @@ interface Episode {
   stillImage?: string
   releases: { [key: string]: Release }
   tmdbEpisodeNumber?: number
+  tvdbEpisodeNumber?: number
   episodeNumber: number
   monitorReleases: boolean
   inTranscoding: boolean
@@ -22,6 +23,7 @@ interface Season {
   originalName: string;
   nameL8ns: { [key: string]: string };
   tmdbSeasonNumber?: number;
+  tvdbSeasonNumber?: number;
   episodes: Episode[];
   seasonNumber: number;
 }
@@ -38,10 +40,12 @@ export class TvShow {
   private backdropImage: string;
   private releaseYear: number;
   private genres: TvShowGenre[] = [];
-  private tmdbId : string;
+  private tmdbId: string;
   private seasons: Season[] = [];
   private _ricTvShowId: Nullable<string>;
   private _tmdbSyncEnabled: boolean = false;
+  private _tvdbId: number;
+  private _useTvdb: boolean = false;
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -138,6 +142,14 @@ export class TvShow {
       throw new InvalidTmdbIdError();
     }
     this.tmdbId = tmdbId;
+    this.touch();
+  }
+  
+  set tvdbId(v: number) {
+    if (v == null) {
+      throw new NullTvdbIdError();
+    }
+    this._tvdbId = v;
     this.touch();
   }
 
@@ -384,6 +396,10 @@ export class TvShow {
     return this.tmdbId
   }
 
+  get tvdbId() {
+    return this._tvdbId;
+  }
+
   seasonExists(seasonNumber: number) {
     return this.getSeason(seasonNumber) != null;
   }
@@ -419,6 +435,16 @@ export class TvShow {
   set tmdbSyncEnabled(v: boolean) {
     if (this._tmdbSyncEnabled != v) this.touch();
     this._tmdbSyncEnabled = v;
+  }
+
+  set useTvdb(v: boolean) {
+    if (v == null) throw new NullUseTvdbError();
+    this._useTvdb = v;
+    this.touch();
+  }
+
+  get useTvdb() {
+    return this._useTvdb;
   }
 }
 
@@ -482,4 +508,8 @@ class ReleaseWithKeyAlreadyExistsError extends Error {}
 
 class BlankRICTvShowIdError extends Error {}
 
-class InvalidEpisodeAirDateError {}
+class InvalidEpisodeAirDateError extends Error {}
+
+class NullTvdbIdError extends Error {}
+
+class NullUseTvdbError extends Error {}
