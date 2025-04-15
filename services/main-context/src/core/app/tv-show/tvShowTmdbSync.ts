@@ -80,7 +80,7 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
         tvShow.addSeason(seasonOriginalName, seasonNumber);
         updated = true;
       }
-      if (tvShow.addTmdbSeasonNumberToSeason(seasonNumber, seasonNumber)) {
+      if (tvShow.addTvdbSeasonNumberToSeason(seasonNumber, seasonNumber, te.seasonId)) {
         updated = true;
       }
       const episodeNumber = te.number;
@@ -92,7 +92,7 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
         tvShow.setMonitorReleases(seasonNumber, episodeNumber, true);
         updated = true;
       }
-      if (tvShow.addTmdbEpisodeNumber(seasonNumber, episodeNumber, episodeNumber)) {
+      if (tvShow.addTvdbEpisodeNumber(seasonNumber, episodeNumber, episodeNumber, te.id)) {
         updated = true;  
       }
     }

@@ -2,7 +2,7 @@ import axiosRetry from 'axios-retry'
 import { Episode, ITvdbClient, TvShow, TvShowTranslation } from '../core/ports/ITvdbClient'
 import axios, { AxiosInstance } from "axios"
 import jwt from 'jsonwebtoken';
-import { Nullable } from '../utils';
+import { Nullable, strIsBlank } from '../utils';
 
 export class TvdbClient implements ITvdbClient {
   private _restClient: AxiosInstance;
@@ -39,7 +39,10 @@ export class TvdbClient implements ITvdbClient {
         number: e.number,
         name: episodeDetailsResponse.name,
         seasonId: officialSeason.id,
-        seasonName: seasonDetialsResponse.name
+        seasonName: strIsBlank(seasonDetialsResponse.name) ? `Season ${e.seasonNumber}` : seasonDetialsResponse.name,
+        image: e.image,
+        seasonImage: seasonDetialsResponse.image,
+        nameTranslations: e.nameTranslations
       })
     }
     return ret;

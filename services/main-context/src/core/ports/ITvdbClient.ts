@@ -19,7 +19,10 @@ export type Episode = {
   seasonId: number,
   seasonName: Nullable<string>,
   number: number,
-  name: Nullable<string>
+  name: Nullable<string>,
+  image: Nullable<string>,
+  seasonImage: Nullable<string>,
+  nameTranslations: string[]
 }
 
 export interface ITvdbClient {

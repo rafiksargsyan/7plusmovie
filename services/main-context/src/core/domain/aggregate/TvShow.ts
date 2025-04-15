@@ -11,6 +11,7 @@ interface Episode {
   releases: { [key: string]: Release }
   tmdbEpisodeNumber?: number
   tvdbEpisodeNumber?: number
+  tvdbEpisodeId?: number
   episodeNumber: number
   monitorReleases: boolean
   inTranscoding: boolean
@@ -24,6 +25,7 @@ interface Season {
   nameL8ns: { [key: string]: string };
   tmdbSeasonNumber?: number;
   tvdbSeasonNumber?: number;
+  tvdbSeasonId?: number;
   episodes: Episode[];
   seasonNumber: number;
 }
@@ -207,6 +209,27 @@ export class TvShow {
     return true;
   }
 
+  public addTvdbSeasonNumberToSeason(seasonNumber: number | undefined, tvdbSeasonNumber: number | undefined,
+    tvdbSeasonId: number | undefined) {
+    if (tvdbSeasonNumber == undefined) {
+      throw new InvalidTvdbSeasonNumberError();
+    }
+    if (tvdbSeasonId == null) {
+      throw new InvalidTvdbSeasonIdError();
+    }
+    this.seasons.forEach((_, i) => {
+      if (_.seasonNumber != seasonNumber && _.tvdbSeasonNumber == tvdbSeasonNumber) {
+        throw new DuplicateTvdbSeasonNumberError();
+      }
+    })
+    const season = this.getSeasonOrThrow(seasonNumber);
+    if (season.tvdbSeasonNumber != null) return false;
+    season.tvdbSeasonNumber = tvdbSeasonNumber;
+    season.tvdbSeasonId = tvdbSeasonId;
+    this.touch();
+    return true;
+  }
+
   public addSeasonNameL8n(seasonNumber: number | undefined, locale: L8nLangCode | undefined, name: string | undefined) {
     if (locale == undefined) {
       throw new InvalidLocaleError();
@@ -261,6 +284,28 @@ export class TvShow {
     const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
     if (episode.tmdbEpisodeNumber != null) return false;
     episode.tmdbEpisodeNumber = tmdbEpisodeNumber;
+    this.touch();
+    return true;
+  }
+
+  public addTvdbEpisodeNumber(seasonNumber: number | undefined, episodeNumber: number | undefined,
+                              tvdbEpisodeNumber: number | undefined, tvdbEpisodeId: number | undefined) {
+    if (tvdbEpisodeNumber == undefined) {
+      throw new InvalidTvdbEpisodeNumberError();
+    }
+    if (tvdbEpisodeId == undefined) {
+      throw new InvalidTvdbEpisodeIdError();
+    }
+    const season = this.getSeasonOrThrow(seasonNumber);
+    season.episodes.forEach((_, i) => {
+      if (_.episodeNumber != episodeNumber && _.tvdbEpisodeNumber == tvdbEpisodeNumber) {
+        throw new DuplicateTvdbEpisodeNumberError();
+      }
+    })
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    if (episode.tvdbEpisodeNumber != null) return false;
+    episode.tvdbEpisodeNumber = tvdbEpisodeNumber;
+    episode.tvdbEpisodeId = tvdbEpisodeId;
     this.touch();
     return true;
   }
@@ -513,3 +558,15 @@ class InvalidEpisodeAirDateError extends Error {}
 class NullTvdbIdError extends Error {}
 
 class NullUseTvdbError extends Error {}
+
+class InvalidTvdbSeasonNumberError extends Error {}
+
+class DuplicateTvdbSeasonNumberError extends Error {}
+
+class InvalidTvdbEpisodeNumberError extends Error {}
+
+class DuplicateTvdbEpisodeNumberError extends Error {}
+
+class InvalidTvdbSeasonIdError extends Error {}
+
+class InvalidTvdbEpisodeIdError extends Error {}
