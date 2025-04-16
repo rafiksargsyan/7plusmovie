@@ -25,14 +25,14 @@ export class TvdbClient implements ITvdbClient {
     const ret: Season[] = [];
     const response = (await this._restClient.get(`series/${id}/episodes/default`)).data;
     for (const e of response.data.episodes) {
-      const episodeDetailsResponse = (await this._restClient.get(`episodes/${e.id}`)).data;
+      const episodeDetailsResponse = (await this._restClient.get(`episodes/${e.id}`)).data.data;
       const tvdbSeasons = episodeDetailsResponse.seasons;
       if (tvdbSeasons == null) continue;
       const officialSeason = (tvdbSeasons.filter(s => s.type.type === 'official'))[0];
       if (officialSeason == null) continue;
       let season = ret.filter(s => s.id === officialSeason.id)[0];
       if (season == null) {
-        const seasonDetails = (await this._restClient.get(`seasons/${officialSeason.id}`)).data;
+        const seasonDetails = (await this._restClient.get(`seasons/${officialSeason.id}`)).data.data;
         season = {
           id: officialSeason.id,
           number: e.seasonNumber,

@@ -3,7 +3,6 @@ import { DynamoDBDocument} from '@aws-sdk/lib-dynamodb';
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import axios, { AxiosInstance } from 'axios';
 import { TvShowRepository } from '../../../adapters/TvShowRepository';
-import { TmdbClient } from '../../../adapters/TmdbClient';
 import { TvdbClient } from '../../../adapters/TvdbClient';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
