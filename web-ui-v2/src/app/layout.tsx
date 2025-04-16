@@ -33,29 +33,7 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning>
       <head>
         <ColorSchemeScript defaultColorScheme="dark" />
-        {/* <Script async type="text/javascript" src="https://s0-greate.net/p/1494520"></Script>
-        <Script async data-cfasync="false" id="rollerads-push">
-          {`(function() {
-              const url = new URL(window.location.href);
-              const clickID = url.searchParams.get("click_id");
-              const sourceID = url.searchParams.get("source_id");
-        
-              const s = document.createElement("script");
-              s.dataset.cfasync = "false";
-              s.src = "https://push-sdk.com/f/sdk.js?z=1492986";
-              s.onload = (opts) => {
-                  opts.zoneID = 1492986;
-                  opts.extClickID = clickID;
-                  opts.subID1 = sourceID;
-                  opts.actions.onPermissionGranted = () => {};
-                  opts.actions.onPermissionDenied = () => {};
-                  opts.actions.onAlreadySubscribed = () => {};
-                  opts.actions.onError = () => {};
-              };
-              document.head.appendChild(s);
-            })()`}
-        </Script> */}
-          <Script async id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></Script>
+          <Script async id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js" strategy='beforeInteractive'></Script>
           <Script id='acAutotag' type="text/javascript">
             {`aclib.runAutoTag({
              zoneId: 'edhmiryyry',

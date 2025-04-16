@@ -11,6 +11,8 @@ import { TvShowRepositoryInterface } from '../../ports/TvShowRepositoryInterface
 import { TvShowRepository } from '../../../adapters/TvShowRepository';
 import { Nullable, strIsBlank } from '../../../utils';
 import Typesense from 'typesense';
+import { TvdbClient } from '../../../adapters/TvdbClient';
+import { TmdbClient } from '../../../adapters/TmdbClient';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
@@ -45,6 +47,8 @@ export interface Episode {
   mpdFile: string;
   m3u8File: string;
   tmdbEpisodeNumber: number;
+  tvdbEpisodeNumber: number;
+  tvdbEpisodeId: number;
   episodeNumber;
   releases: { [key: string]: any };
   airDateInMillis: Nullable<number>;
@@ -55,6 +59,8 @@ export interface Season {
   nameL8ns: { [key: string]: string };
   episodes: Episode[];
   tmdbSeasonNumber: number;
+  tvdbSeasonNumber: number;
+  tvdbSeasonId: number;
   posterImagesPortrait: { [key: string]: string };
   seasonNumber;
 }
@@ -89,7 +95,9 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
       'apiKey': secret.TYPESENSE_ADMIN_KEY
     })
     const tmdbApiKey = secret.TMDB_API_KEY!;
-  
+    const tvdbApiKey = secret.TVDB_API_KEY!;
+    const tvdbClient = new TvdbClient('https://api4.thetvdb.com/v4/', tvdbApiKey);
+    const tmdbClient2 = new TmdbClient('https://api.themoviedb.org/3/', tmdbApiKey);
     for (const record of event.Records) {
       let SK = record.dynamodb?.Keys?.SK.S;
       if (SK !== 'tvshow') {
@@ -106,7 +114,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         let tvShow: TvShowRead = (await tvShowRepo.getTvShowById(record.dynamodb?.Keys?.PK.S)) as unknown as TvShowRead;
         let updated: boolean = false;
         if (tvShow.tmdbId != undefined) {
-          updated = await updateBasedOnTmdbId(tvShow.id, tvShow.tmdbId, tmdbApiKey, tvShow);
+          updated = await updateBasedOnTmdbId(tvShow.id, tvShow.tmdbId, tmdbApiKey, tvShow, tvdbClient, tmdbClient2);
         } 
         if (updated) {
           return;
@@ -213,7 +221,8 @@ async function emptyS3Directory(bucket, dir: string) {
   if (listedObjects.IsTruncated) await emptyS3Directory(bucket, dir);
 }
 
-async function updateBasedOnTmdbId(tvShowId: string, tmdbId: string, tmdbApiKey: string, tvShowRead: TvShowRead) {
+async function updateBasedOnTmdbId(tvShowId: string, tmdbId: string, tmdbApiKey: string,
+  tvShowRead: TvShowRead, tvdbClient: TvdbClient, tmdbClient2: TmdbClient) {
   let tvShow = await tvShowRepo.getTvShowById(tvShowId);
   let updated: boolean = false;
 
@@ -288,95 +297,200 @@ async function updateBasedOnTmdbId(tvShowId: string, tmdbId: string, tmdbApiKey:
     }
   });
 
-  for (let _ of tvShowRead.seasons) {
-    if (_.tmdbSeasonNumber != undefined) {
-      const tmdbSeasonEnUs = (await tmdbClient.get(`tv/${tmdbId}/season/${_.tmdbSeasonNumber}?api_key=${tmdbApiKey}&language=en-US`)).data;
-      const tmdbSeasonRu = (await tmdbClient.get(`tv/${tmdbId}/season/${_.tmdbSeasonNumber}?api_key=${tmdbApiKey}&language=ru`)).data;
+  if (tvShow.tvdbId == null) {
+    const externalIds = await tmdbClient2.getTvShowExternalIds(Number.parseInt(tmdbId));
+    if (externalIds.tvdbId != null) {
+      tvShow.tvdbId = externalIds.tvdbId;
+      updated = true;
+    }
+  }
 
-      const seasonNameEnUs: string = tmdbSeasonEnUs.name;
-      const seasonNameRu: string = tmdbSeasonRu.name;
-      const seasonPosterPathEnUs: string = tmdbSeasonEnUs.poster_path;
-      const seasonPosterPathRu: string = tmdbSeasonRu.poster_path;
-       
-      if (_.nameL8ns['EN_US'] == undefined && seasonNameEnUs != undefined) {
-        tvShow.addSeasonNameL8n(_.seasonNumber, new L8nLangCode('EN_US'), seasonNameEnUs);
-        updated = true;
-      }
-      if (_.nameL8ns['RU'] == undefined && seasonNameRu != undefined) {
-        tvShow.addSeasonNameL8n(_.seasonNumber, new L8nLangCode('RU'), seasonNameRu);
-        updated = true;
-      }
+  if (!tvShow.useTvdb || tvShow.tvdbId == null) {
+    for (let _ of tvShowRead.seasons) {
+      if (_.tmdbSeasonNumber != undefined) {
+        const tmdbSeasonEnUs = (await tmdbClient.get(`tv/${tmdbId}/season/${_.tmdbSeasonNumber}?api_key=${tmdbApiKey}&language=en-US`)).data;
+        const tmdbSeasonRu = (await tmdbClient.get(`tv/${tmdbId}/season/${_.tmdbSeasonNumber}?api_key=${tmdbApiKey}&language=ru`)).data;
 
-      if (_.posterImagesPortrait['EN_US'] == undefined && seasonPosterPathEnUs != undefined) {
-        const posterImagePortraitEnUs = (await tmdbImageClient.get(seasonPosterPathEnUs)).data;
-        if (posterImagePortraitEnUs != undefined) {
-          const objectKey = `${tvShowId}/${_.seasonNumber}/posterImagePortrait-EN_US.jpg`;
-          const s3Params = {
-            Bucket: mediaAssetsS3Bucket,
-            Key: objectKey,
-            Body: posterImagePortraitEnUs,
-            ContentType: 'image/jpg'
-          };
-          await s3.putObject(s3Params);
-          tvShow.addPosterImagePortraitToSeason(_.seasonNumber, new L8nLangCode('EN_US'), objectKey);
+        const seasonNameEnUs: string = tmdbSeasonEnUs.name;
+        const seasonNameRu: string = tmdbSeasonRu.name;
+        const seasonPosterPathEnUs: string = tmdbSeasonEnUs.poster_path;
+        const seasonPosterPathRu: string = tmdbSeasonRu.poster_path;
+         
+        if (_.nameL8ns['EN_US'] == undefined && seasonNameEnUs != undefined) {
+          tvShow.addSeasonNameL8n(_.seasonNumber, new L8nLangCode('EN_US'), seasonNameEnUs);
           updated = true;
         }
-      }
-      if (_.posterImagesPortrait['RU'] == undefined && seasonPosterPathRu != undefined) {
-        const posterImagePortraitRu = (await tmdbImageClient.get(seasonPosterPathRu)).data;
-        if (posterImagePortraitRu != undefined) {
-          const objectKey = `${tvShowId}/${_.seasonNumber}/posterImagePortrait-RU.jpg`;
-          const s3Params = {
-            Bucket: mediaAssetsS3Bucket,
-            Key: objectKey,
-            Body: posterImagePortraitRu,
-            ContentType: 'image/jpg'
-          };
-          await s3.putObject(s3Params);
-          tvShow.addPosterImagePortraitToSeason(_.seasonNumber, new L8nLangCode('RU'), objectKey);
+        if (_.nameL8ns['RU'] == undefined && seasonNameRu != undefined) {
+          tvShow.addSeasonNameL8n(_.seasonNumber, new L8nLangCode('RU'), seasonNameRu);
           updated = true;
         }
-      }
-      const tmdbEpisodeNumber2TmdbEpisodeEnUs = tmdbSeasonEnUs.episodes.reduce((acc, cur) => {
-        acc[cur.episode_number] = cur;
-        return acc;
-      }, [])
-      const tmdbEpisodeNumber2TmdbEpisodeRu = tmdbSeasonRu.episodes.reduce((acc, cur) => {
-        acc[cur.episode_number] = cur;
-        return acc;
-      }, [])
-
-      for (let episode of _.episodes) {
-        if (episode.tmdbEpisodeNumber != undefined) {
-          const tmdbEpisodeEnUs = tmdbEpisodeNumber2TmdbEpisodeEnUs[episode.tmdbEpisodeNumber];
-          const tmdbEpisodeRu = tmdbEpisodeNumber2TmdbEpisodeRu[episode.tmdbEpisodeNumber];
-          if (episode.nameL8ns['EN_US'] == undefined && tmdbEpisodeEnUs.name != undefined) {
-            tvShow.addEpisodeNameL8n(_.seasonNumber, episode.episodeNumber, new L8nLangCode('EN_US'), tmdbEpisodeEnUs.name);
+  
+        if (_.posterImagesPortrait['EN_US'] == undefined && seasonPosterPathEnUs != undefined) {
+          const posterImagePortraitEnUs = (await tmdbImageClient.get(seasonPosterPathEnUs)).data;
+          if (posterImagePortraitEnUs != undefined) {
+            const objectKey = `${tvShowId}/${_.seasonNumber}/posterImagePortrait-EN_US.jpg`;
+            const s3Params = {
+              Bucket: mediaAssetsS3Bucket,
+              Key: objectKey,
+              Body: posterImagePortraitEnUs,
+              ContentType: 'image/jpg'
+            };
+            await s3.putObject(s3Params);
+            tvShow.addPosterImagePortraitToSeason(_.seasonNumber, new L8nLangCode('EN_US'), objectKey);
             updated = true;
           }
-          if (episode.nameL8ns['RU'] == undefined && tmdbEpisodeRu.name != undefined) {
-            tvShow.addEpisodeNameL8n(_.seasonNumber, episode.episodeNumber, new L8nLangCode('RU'), tmdbEpisodeRu.name);
+        }
+        if (_.posterImagesPortrait['RU'] == undefined && seasonPosterPathRu != undefined) {
+          const posterImagePortraitRu = (await tmdbImageClient.get(seasonPosterPathRu)).data;
+          if (posterImagePortraitRu != undefined) {
+            const objectKey = `${tvShowId}/${_.seasonNumber}/posterImagePortrait-RU.jpg`;
+            const s3Params = {
+              Bucket: mediaAssetsS3Bucket,
+              Key: objectKey,
+              Body: posterImagePortraitRu,
+              ContentType: 'image/jpg'
+            };
+            await s3.putObject(s3Params);
+            tvShow.addPosterImagePortraitToSeason(_.seasonNumber, new L8nLangCode('RU'), objectKey);
             updated = true;
           }
-          if (episode.stillImage == undefined && tmdbEpisodeEnUs.still_path != undefined) {
-            const stillImage = (await tmdbImageClient.get(tmdbEpisodeEnUs.still_path)).data;
-            if (stillImage != undefined) {
-              const objectKey = `${tvShowId}/${_.seasonNumber}/${episode.episodeNumber}/stillImage.jpg`;
-              const s3Params = {
-                Bucket: mediaAssetsS3Bucket,
-                Key: objectKey,
-                Body: stillImage,
-                ContentType: 'image/jpg'
-              };
-              await s3.putObject(s3Params);
-              tvShow.addStillImage(_.seasonNumber, episode.episodeNumber, objectKey);
+        }
+        const tmdbEpisodeNumber2TmdbEpisodeEnUs = tmdbSeasonEnUs.episodes.reduce((acc, cur) => {
+          acc[cur.episode_number] = cur;
+          return acc;
+        }, [])
+        const tmdbEpisodeNumber2TmdbEpisodeRu = tmdbSeasonRu.episodes.reduce((acc, cur) => {
+          acc[cur.episode_number] = cur;
+          return acc;
+        }, [])
+  
+        for (let episode of _.episodes) {
+          if (episode.tmdbEpisodeNumber != undefined) {
+            const tmdbEpisodeEnUs = tmdbEpisodeNumber2TmdbEpisodeEnUs[episode.tmdbEpisodeNumber];
+            const tmdbEpisodeRu = tmdbEpisodeNumber2TmdbEpisodeRu[episode.tmdbEpisodeNumber];
+            if (episode.nameL8ns['EN_US'] == undefined && tmdbEpisodeEnUs.name != undefined) {
+              tvShow.addEpisodeNameL8n(_.seasonNumber, episode.episodeNumber, new L8nLangCode('EN_US'), tmdbEpisodeEnUs.name);
               updated = true;
             }
+            if (episode.nameL8ns['RU'] == undefined && tmdbEpisodeRu.name != undefined) {
+              tvShow.addEpisodeNameL8n(_.seasonNumber, episode.episodeNumber, new L8nLangCode('RU'), tmdbEpisodeRu.name);
+              updated = true;
+            }
+            if (episode.stillImage == undefined && tmdbEpisodeEnUs.still_path != undefined) {
+              const stillImage = (await tmdbImageClient.get(tmdbEpisodeEnUs.still_path)).data;
+              if (stillImage != undefined) {
+                const objectKey = `${tvShowId}/${_.seasonNumber}/${episode.episodeNumber}/stillImage.jpg`;
+                const s3Params = {
+                  Bucket: mediaAssetsS3Bucket,
+                  Key: objectKey,
+                  Body: stillImage,
+                  ContentType: 'image/jpg'
+                };
+                await s3.putObject(s3Params);
+                tvShow.addStillImage(_.seasonNumber, episode.episodeNumber, objectKey);
+                updated = true;
+              }
+            }
+            if (!strIsBlank(tmdbEpisodeEnUs?.air_date)) {
+              const airDateMillis = new Date(tmdbEpisodeEnUs.air_date).getTime();
+              if (tvShow.setEpisodeAirDateInMillis(_.seasonNumber, episode.episodeNumber, airDateMillis)) {
+                updated = true
+              }
+            }
           }
-          if (!strIsBlank(tmdbEpisodeEnUs?.air_date)) {
-            const airDateMillis = new Date(tmdbEpisodeEnUs.air_date).getTime();
-            if (tvShow.setEpisodeAirDateInMillis(_.seasonNumber, episode.episodeNumber, airDateMillis)) {
-              updated = true
+        }
+      }
+    }
+  } else {
+    const tvdbSeasons = await tvdbClient.getTvShowSeasons(tvShow.tvdbId);
+    for (let _ of tvShowRead.seasons) {
+      if (_.tvdbSeasonNumber != undefined) {
+        const tvdbSeason = tvdbSeasons.filter(x => x.id === _.tvdbSeasonId)[0];
+        if (tvdbSeason == null) continue;
+
+        const seasonNameEnUs: string = `Season ${_.tvdbSeasonNumber}`;
+        const seasonNameRu: string = `Сезон ${_.tvdbSeasonNumber}`;
+         
+        if (_.nameL8ns['EN_US'] == undefined) {
+          tvShow.addSeasonNameL8n(_.seasonNumber, new L8nLangCode('EN_US'), seasonNameEnUs);
+          updated = true;
+        }
+        if (_.nameL8ns['RU'] == undefined) {
+          tvShow.addSeasonNameL8n(_.seasonNumber, new L8nLangCode('RU'), seasonNameRu);
+          updated = true;
+        }
+  
+        if (_.posterImagesPortrait['EN_US'] == undefined && tvdbSeason.image != null) {
+          const posterImagePortraitEnUs = (await axios.get(tvdbSeason.image, { responseType: 'arraybuffer'})).data;
+          if (posterImagePortraitEnUs != undefined) {
+            const objectKey = `${tvShowId}/${_.seasonNumber}/posterImagePortrait-EN_US.jpg`;
+            const s3Params = {
+              Bucket: mediaAssetsS3Bucket,
+              Key: objectKey,
+              Body: posterImagePortraitEnUs,
+              ContentType: 'image/jpg'
+            };
+            await s3.putObject(s3Params);
+            tvShow.addPosterImagePortraitToSeason(_.seasonNumber, new L8nLangCode('EN_US'), objectKey);
+            updated = true;
+          }
+        }
+        if (_.posterImagesPortrait['RU'] == undefined && tvdbSeason.image != null) {
+          const posterImagePortraitRu = (await axios.get(tvdbSeason.image, { responseType: 'arraybuffer'})).data;
+          if (posterImagePortraitRu != undefined) {
+            const objectKey = `${tvShowId}/${_.seasonNumber}/posterImagePortrait-RU.jpg`;
+            const s3Params = {
+              Bucket: mediaAssetsS3Bucket,
+              Key: objectKey,
+              Body: posterImagePortraitRu,
+              ContentType: 'image/jpg'
+            };
+            await s3.putObject(s3Params);
+            tvShow.addPosterImagePortraitToSeason(_.seasonNumber, new L8nLangCode('RU'), objectKey);
+            updated = true;
+          }
+        }
+  
+        for (let episode of _.episodes) {
+          if (episode.tvdbEpisodeNumber != undefined) {
+            const tvdbEpisode = tvdbSeason.episodes.filter(x => x.id === episode.tvdbEpisodeId)[0];
+            if (tvdbEpisode == null) continue;
+            let tvdbEpisodeNameEnUs;
+            if (tvdbEpisode.nameTranslations.includes('eng')) {
+              tvdbEpisodeNameEnUs = await tvdbClient.getEpisodeNameTranslation(tvdbEpisode.id, 'eng');
+            }
+            if (episode.nameL8ns['EN_US'] == undefined && tvdbEpisodeNameEnUs != null) {
+              tvShow.addEpisodeNameL8n(_.seasonNumber, episode.episodeNumber, new L8nLangCode('EN_US'), tvdbEpisodeNameEnUs);
+              updated = true;
+            }
+            let tvdbEpisodeNameRu;
+            if (tvdbEpisode.nameTranslations.includes('rus')) {
+              tvdbEpisodeNameRu = await tvdbClient.getEpisodeNameTranslation(tvdbEpisode.id, 'rus');
+            }
+            if (episode.nameL8ns['RU'] == undefined && tvdbEpisodeNameRu != null) {
+              tvShow.addEpisodeNameL8n(_.seasonNumber, episode.episodeNumber, new L8nLangCode('RU'), tvdbEpisodeNameRu);
+              updated = true;
+            }
+            if (episode.stillImage == undefined && tvdbEpisode.image != null) {
+              const stillImage = (await axios.get(tvdbEpisode.image, { responseType: 'arraybuffer'})).data;
+              if (stillImage != undefined) {
+                const objectKey = `${tvShowId}/${_.seasonNumber}/${episode.episodeNumber}/stillImage.jpg`;
+                const s3Params = {
+                  Bucket: mediaAssetsS3Bucket,
+                  Key: objectKey,
+                  Body: stillImage,
+                  ContentType: 'image/jpg'
+                };
+                await s3.putObject(s3Params);
+                tvShow.addStillImage(_.seasonNumber, episode.episodeNumber, objectKey);
+                updated = true;
+              }
+            }
+            if (!strIsBlank(tvdbEpisode.aired)) {
+              const airDateMillis = new Date(tvdbEpisode.aired!).getTime();
+              if (tvShow.setEpisodeAirDateInMillis(_.seasonNumber, episode.episodeNumber, airDateMillis)) {
+                updated = true
+              }
             }
           }
         }

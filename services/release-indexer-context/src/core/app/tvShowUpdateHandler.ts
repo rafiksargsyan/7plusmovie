@@ -46,7 +46,6 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
       return config;
     });
     sonarrClient.defaults.headers.common['x-api-key'] = sonarrApiKey;
-
     for (const record of event.Records) {
       let SK = record.dynamodb?.Keys?.SK.S;
       if (SK !== 'tvshow') {
@@ -58,8 +57,14 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         await emptyS3Directory(torrentFilesS3Bucket, tvShowId);
       } else {
         let tvShow = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as Omit<TvShowLazy, 'id'>;
-        if (tvShow._tmdbId == null) return;
-        const tvShowLookupResponse: any[] = (await sonarrClient.get(`series/lookup/?term=tmdb${tvShow._tmdbId}`)).data;
+        let tvShowLookupResponse: any[];
+        if (tvShow._tvdbId != null) {
+          tvShowLookupResponse = (await sonarrClient.get(`series/lookup/?term=tvdb:${tvShow._tvdbId}`)).data;
+        } else if (tvShow._tmdbId != null) {
+          tvShowLookupResponse = (await sonarrClient.get(`series/lookup/?term=tmdb${tvShow._tmdbId}`)).data;
+        } else {
+          return;
+        }
         // We expect to get exactly one record regardless if the tv show already exists in sonarr or not
         if (tvShowLookupResponse.length !== 1) {
           return;

@@ -10,6 +10,8 @@ interface Episode {
   stillImage?: string
   releases: { [key: string]: Release }
   tmdbEpisodeNumber?: number
+  tvdbEpisodeNumber?: number
+  tvdbEpisodeId?: number
   episodeNumber: number
   monitorReleases: boolean
   inTranscoding: boolean
@@ -22,6 +24,8 @@ interface Season {
   originalName: string;
   nameL8ns: { [key: string]: string };
   tmdbSeasonNumber?: number;
+  tvdbSeasonNumber?: number;
+  tvdbSeasonId?: number;
   episodes: Episode[];
   seasonNumber: number;
 }
@@ -38,10 +42,12 @@ export class TvShow {
   private backdropImage: string;
   private releaseYear: number;
   private genres: TvShowGenre[] = [];
-  private tmdbId : string;
+  private tmdbId: string;
   private seasons: Season[] = [];
   private _ricTvShowId: Nullable<string>;
   private _tmdbSyncEnabled: boolean = false;
+  private _tvdbId: number;
+  private _useTvdb: boolean = false;
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -140,6 +146,14 @@ export class TvShow {
     this.tmdbId = tmdbId;
     this.touch();
   }
+  
+  set tvdbId(v: number) {
+    if (v == null) {
+      throw new NullTvdbIdError();
+    }
+    this._tvdbId = v;
+    this.touch();
+  }
 
   public addSeason(originalName?: string, seasonNumber?: number) {
     if (originalName == undefined || ! /\S/.test(originalName)) {
@@ -191,6 +205,27 @@ export class TvShow {
     const season = this.getSeasonOrThrow(seasonNumber);
     if (season.tmdbSeasonNumber != null) return false;
     season.tmdbSeasonNumber = tmdbSeasonNumber;
+    this.touch();
+    return true;
+  }
+
+  public addTvdbSeasonNumberToSeason(seasonNumber: number | undefined, tvdbSeasonNumber: number | undefined,
+    tvdbSeasonId: number | undefined) {
+    if (tvdbSeasonNumber == undefined) {
+      throw new InvalidTvdbSeasonNumberError();
+    }
+    if (tvdbSeasonId == null) {
+      throw new InvalidTvdbSeasonIdError();
+    }
+    this.seasons.forEach((_, i) => {
+      if (_.seasonNumber != seasonNumber && _.tvdbSeasonNumber == tvdbSeasonNumber) {
+        throw new DuplicateTvdbSeasonNumberError();
+      }
+    })
+    const season = this.getSeasonOrThrow(seasonNumber);
+    if (season.tvdbSeasonNumber != null) return false;
+    season.tvdbSeasonNumber = tvdbSeasonNumber;
+    season.tvdbSeasonId = tvdbSeasonId;
     this.touch();
     return true;
   }
@@ -249,6 +284,28 @@ export class TvShow {
     const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
     if (episode.tmdbEpisodeNumber != null) return false;
     episode.tmdbEpisodeNumber = tmdbEpisodeNumber;
+    this.touch();
+    return true;
+  }
+
+  public addTvdbEpisodeNumber(seasonNumber: number | undefined, episodeNumber: number | undefined,
+                              tvdbEpisodeNumber: number | undefined, tvdbEpisodeId: number | undefined) {
+    if (tvdbEpisodeNumber == undefined) {
+      throw new InvalidTvdbEpisodeNumberError();
+    }
+    if (tvdbEpisodeId == undefined) {
+      throw new InvalidTvdbEpisodeIdError();
+    }
+    const season = this.getSeasonOrThrow(seasonNumber);
+    season.episodes.forEach((_, i) => {
+      if (_.episodeNumber != episodeNumber && _.tvdbEpisodeNumber == tvdbEpisodeNumber) {
+        throw new DuplicateTvdbEpisodeNumberError();
+      }
+    })
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    if (episode.tvdbEpisodeNumber != null) return false;
+    episode.tvdbEpisodeNumber = tvdbEpisodeNumber;
+    episode.tvdbEpisodeId = tvdbEpisodeId;
     this.touch();
     return true;
   }
@@ -384,6 +441,10 @@ export class TvShow {
     return this.tmdbId
   }
 
+  get tvdbId() {
+    return this._tvdbId;
+  }
+
   seasonExists(seasonNumber: number) {
     return this.getSeason(seasonNumber) != null;
   }
@@ -419,6 +480,16 @@ export class TvShow {
   set tmdbSyncEnabled(v: boolean) {
     if (this._tmdbSyncEnabled != v) this.touch();
     this._tmdbSyncEnabled = v;
+  }
+
+  set useTvdb(v: boolean) {
+    if (v == null) throw new NullUseTvdbError();
+    this._useTvdb = v;
+    this.touch();
+  }
+
+  get useTvdb() {
+    return this._useTvdb;
   }
 }
 
@@ -482,4 +553,20 @@ class ReleaseWithKeyAlreadyExistsError extends Error {}
 
 class BlankRICTvShowIdError extends Error {}
 
-class InvalidEpisodeAirDateError {}
+class InvalidEpisodeAirDateError extends Error {}
+
+class NullTvdbIdError extends Error {}
+
+class NullUseTvdbError extends Error {}
+
+class InvalidTvdbSeasonNumberError extends Error {}
+
+class DuplicateTvdbSeasonNumberError extends Error {}
+
+class InvalidTvdbEpisodeNumberError extends Error {}
+
+class DuplicateTvdbEpisodeNumberError extends Error {}
+
+class InvalidTvdbSeasonIdError extends Error {}
+
+class InvalidTvdbEpisodeIdError extends Error {}

@@ -203,6 +203,40 @@ functions:
               application/x-www-form-urlencoded: null
           authorizer:
             arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+  
+  addTvdbIdToTvShow:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    handler: src/core/app/addTvdbIdToTvShow.handler
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show/{id}/tvdbId
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : "$input.params(''id'')",
+                                   "tvdbId" : $input.json(''$.tvdbId'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+
+  tvShowSetUseTvdb:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    handler: src/core/app/tvShowSetUseTvdb.handler
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show/{id}/useTvdb
+          method: patch
+          request:
+            template:
+              application/json: '{ "tvShowId" : "$input.params(''id'')",
+                                   "value" : $input.json(''$.value'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
 
   tvShowUpdateHandler:
     handler: src/core/app/tvShowUpdateHandler.handler

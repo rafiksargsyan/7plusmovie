@@ -7,6 +7,7 @@ import { v4 as uuid } from 'uuid';
 
 export interface Season {
   tmdbSeasonNumber: Nullable<number>;
+  tvdbSeasonNumber: Nullable<number>;
   episodes: Episode[];
   seasonNumber: number;
   alreadyAddedSonarrReleaseGuidList: string[];
@@ -18,6 +19,7 @@ export interface Episode {
   creationTime: number;
   releases: { [releaseId:string]: { release: Release, replacedReleaseIds: string[] } }
   tmdbEpisodeNumber: Nullable<number>;
+  tvdbEpisodeNumber: Nullable<number>;
   episodeNumber: number;
   airDateInMillis: Nullable<number>;
   forceScan: boolean;
@@ -31,6 +33,8 @@ export class TvShow {
   public readonly id: string;
   private _creationTime: number;
   private _tmdbId: Nullable<string>;
+  private _tvdbId: Nullable<number>;
+  private _useTvdb: boolean = false;
   private _originalLocale: L8nLang;
   private _originalTitle: string;
   private _releaseYear: number;
@@ -101,6 +105,31 @@ export class TvShow {
     return true;
   }
   
+  /**
+   * @param tvdbId
+   * 
+   * @throws {TvShow_BlankTvdbIdError}
+   */
+  setTvdbId(tvdbId: number) {
+    if (tvdbId == null) {
+      throw new TvShow_BlankTvdbIdError();
+    }
+    if (tvdbId == this._tvdbId) return false;
+    this._tvdbId = tvdbId;
+    return true;
+  }
+
+  set useTvdb(value: boolean) {
+    if (value == null) {
+      throw new TvShow_NullUseTvdbError();
+    }
+    this._useTvdb = value;
+  } 
+
+  get useTvdb() {
+    return this._useTvdb;
+  }
+
   private getSeason(seasonNumber: number) {
     for (const s of this._seasons) {
       if (s.seasonNumber === seasonNumber) {
@@ -137,6 +166,7 @@ export class TvShow {
       seasonNumber: seasonNumber,
       episodes: [],
       tmdbSeasonNumber: null,
+      tvdbSeasonNumber: null,
       alreadyAddedSonarrReleaseGuidList: [],
       lastReleaseCandidateScanTimeMillis: 0,
       readyToBeProcessed: false
@@ -150,6 +180,18 @@ export class TvShow {
     }
     if (season.tmdbSeasonNumber !== tmdbSeasonNumber) {
       season.tmdbSeasonNumber = tmdbSeasonNumber;
+      return true;
+    }
+    return false;
+  }
+
+  setTvdbSeasonNumber(seasonNumber: number, tvdbSeasonNumber: number) {
+    const season: Season = this.getSeasonOrThrow(seasonNumber);
+    if (tvdbSeasonNumber == null || tvdbSeasonNumber < 0 || !Number.isInteger(tvdbSeasonNumber)) {
+      throw new TvShow_InvalidTvdbSeasonNumberError();  
+    }
+    if (season.tvdbSeasonNumber !== tvdbSeasonNumber) {
+      season.tvdbSeasonNumber = tvdbSeasonNumber;
       return true;
     }
     return false;
@@ -197,6 +239,7 @@ export class TvShow {
       creationTime: Date.now(),
       releases: {},
       tmdbEpisodeNumber: null,
+      tvdbEpisodeNumber: null,
       episodeNumber: episodeNumber,
       airDateInMillis: null,
       forceScan: false,
@@ -219,8 +262,24 @@ export class TvShow {
     return false;
   }
 
+  setTvdbEpisodeNumber(seasonNumber: number, episodeNumber: number, tvdbEpisodeNumber: number) {
+    const episode = this.getEpisodeOrThrow(seasonNumber, episodeNumber);
+    if (tvdbEpisodeNumber == null || tvdbEpisodeNumber < 0 || !Number.isInteger(tvdbEpisodeNumber)) {
+      throw new TvShow_InvalidTvdbEpisodeNumberError();  
+    }
+    if (episode.tvdbEpisodeNumber !== tvdbEpisodeNumber) {
+      episode.tvdbEpisodeNumber = tvdbEpisodeNumber;
+      return true;
+    }
+    return false;
+  }
+
   get tmdbId() {
     return this._tmdbId;
+  }
+
+  get tvdbId() {
+    return this._tvdbId;
   }
 
   setEpisodeRuntime(seasonNumber: number, episodeNumber: number, runtimeSeconds: number) {
@@ -446,6 +505,7 @@ export class TvShow_NullOriginalLocaleError {}
 export class TvShow_BlankOriginalTitleError {}
 export class TvShow_InvalidReleaseYearError {}
 export class TvShow_BlankTmdbIdError {}
+export class TvShow_BlankTvdbIdError {}
 export class TvShow_InvalidSeasonNumberError {}
 export class TvShow_SeasonAlreadyExistsError {}
 export class TvShow_SeasonNotFoundError {}
@@ -465,3 +525,6 @@ export class TvShow_BlankReleaseIdError {}
 export class TvShow_NullReleaseError {}
 export class TvShow_NoAudioReleaseError {}
 export class TvShow_ReleaseWithIdAlreadyExistsError {}
+export class TvShow_NullUseTvdbError {}
+export class TvShow_InvalidTvdbEpisodeNumberError {}
+export class TvShow_InvalidTvdbSeasonNumberError {}

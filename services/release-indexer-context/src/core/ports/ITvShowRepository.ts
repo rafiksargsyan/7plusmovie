@@ -27,6 +27,7 @@ export interface TvShowLazy {
   id: string;
   _creationTime: number;
   _tmdbId: Nullable<string>;
+  _tvdbId: Nullable<string>;
   _originalLocale: L8nLang;
   _originalTitle: string;
   _releaseYear: number;

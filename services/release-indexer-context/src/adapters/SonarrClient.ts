@@ -27,6 +27,20 @@ export class SonarrClient implements ISonarr {
     );
   }
   
+  private async getIdByTvdbId(tvdbId: number) {
+    let response: any = null;
+    try {
+      response = (await this._restClient.get(`series/lookup/?term=tvdb:${tvdbId}`)).data;
+    } catch (e) {
+      console.error(e);
+      throw new ISonarrApiError();
+    }
+    if (response == null) {
+      return null;
+    }
+    return response[0].id;
+  }
+
   private async getIdByTmdbId(tmdbId: string) {
     let response: any = null;
     try {
@@ -41,8 +55,8 @@ export class SonarrClient implements ISonarr {
     return response[0].id;
   }
 
-  async getAll(tmdbId: string, tmdbSeasonNumber: number): Promise<SonarrRelease[]> {
-    const id = await this.getIdByTmdbId(tmdbId);
+  async getAll(tmdbId: string, tvdbId: Nullable<number>, tmdbSeasonNumber: number): Promise<SonarrRelease[]> {
+    const id = tvdbId != null ? await this.getIdByTvdbId(tvdbId) : await this.getIdByTmdbId(tmdbId);
     if (id == null) {
       throw new ISonarrTvShowNotFoundError();
     }
