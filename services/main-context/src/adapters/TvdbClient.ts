@@ -1,5 +1,5 @@
 import axiosRetry from 'axios-retry'
-import { Episode, ITvdbClient, TvShow, TvShowTranslation } from '../core/ports/ITvdbClient'
+import { Episode, ITvdbClient, Season, TvShow, TvShowTranslation } from '../core/ports/ITvdbClient'
 import axios, { AxiosInstance } from "axios"
 import jwt from 'jsonwebtoken';
 import { Nullable, strIsBlank } from '../utils';
@@ -20,9 +20,9 @@ export class TvdbClient implements ITvdbClient {
     axiosRetry(this._restClient, { retryDelay: axiosRetry.exponentialDelay, retries: 3 })
   }
 
-  async getTvShowEpisodes(id: number): Promise<Episode[]> {
+  async getTvShowSeasons(id: number): Promise<Season[]> {
     await this.refreshAuthHeader();
-    const ret: Episode[] = [];
+    const ret: Season[] = [];
     const response = (await this._restClient.get(`series/${id}/episodes/default`)).data;
     for (const e of response.data.episodes) {
       const episodeDetailsResponse = (await this._restClient.get(`episodes/${e.id}`)).data;
@@ -30,20 +30,27 @@ export class TvdbClient implements ITvdbClient {
       if (tvdbSeasons == null) continue;
       const officialSeason = (tvdbSeasons.filter(s => s.type.type === 'official'))[0];
       if (officialSeason == null) continue;
-      const seasonDetialsResponse = (await this._restClient.get(`seasons/${officialSeason.id}`)).data;
-      ret.push({
+      let season = ret.filter(s => s.id === officialSeason.id)[0];
+      if (season == null) {
+        const seasonDetails = (await this._restClient.get(`seasons/${officialSeason.id}`)).data;
+        season = {
+          id: officialSeason.id,
+          number: e.seasonNumber,
+          name: strIsBlank(seasonDetails.name) ? `Season ${e.seasonNumber}` : seasonDetails.name,
+          image: seasonDetails.image,
+          episodes: []
+        }
+        ret.push(season);
+      }
+      season.episodes.push({
         id: e.id,
         aired: e.aired,
         runtimeMinutes: e.runtime,
-        seasonNumber: e.seasonNumber,
         number: e.number,
         name: episodeDetailsResponse.name,
-        seasonId: officialSeason.id,
-        seasonName: strIsBlank(seasonDetialsResponse.name) ? `Season ${e.seasonNumber}` : seasonDetialsResponse.name,
         image: e.image,
-        seasonImage: seasonDetialsResponse.image,
         nameTranslations: e.nameTranslations
-      })
+      });
     }
     return ret;
   }
@@ -65,6 +72,12 @@ export class TvdbClient implements ITvdbClient {
     return {
       name: response.data.name
     }
+  }
+
+  async getEpisodeNameTranslation(id: number, lang: string): Promise<Nullable<string>> {
+    await this.refreshAuthHeader();
+    const response = (await this._restClient.get(`episodes/${id}/translations/${lang}`)).data;
+    return response.data.name;
   }
 
   private async login() {

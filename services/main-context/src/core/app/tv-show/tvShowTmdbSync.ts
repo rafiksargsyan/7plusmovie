@@ -70,30 +70,32 @@ export const handler = async (event: { tvShowId: string }): Promise<void> => {
       }
     }
   } else {
-    const tvdbEpisodes = await tvdbClient.getTvShowEpisodes(tvShow.tvdbId);
-    for (let te of tvdbEpisodes) {
-      const seasonNumber = te.seasonNumber;
-      if (seasonNumber == null || seasonNumber <= 0) continue;
-      if (!tvShow.seasonExists(seasonNumber)) {
-        const seasonOriginalName = te.seasonName;
-        if (seasonOriginalName == null) continue;
-        tvShow.addSeason(seasonOriginalName, seasonNumber);
-        updated = true;
-      }
-      if (tvShow.addTvdbSeasonNumberToSeason(seasonNumber, seasonNumber, te.seasonId)) {
-        updated = true;
-      }
-      const episodeNumber = te.number;
-      if (episodeNumber == null || episodeNumber <= 0) continue;
-      if (!tvShow.episodeExists(seasonNumber, episodeNumber)) {
-        const episodeOriginalName = te.name;
-        if (episodeOriginalName == null) continue;
-        tvShow.addEpisodeToSeason(seasonNumber, episodeOriginalName, episodeNumber);
-        tvShow.setMonitorReleases(seasonNumber, episodeNumber, true);
-        updated = true;
-      }
-      if (tvShow.addTvdbEpisodeNumber(seasonNumber, episodeNumber, episodeNumber, te.id)) {
-        updated = true;  
+    const tvdbSeasons = await tvdbClient.getTvShowSeasons(tvShow.tvdbId);
+    for (let ts of tvdbSeasons) {
+      for (let te of ts.episodes) {
+        const seasonNumber = ts.number;
+        if (seasonNumber == null || seasonNumber <= 0) continue;
+        if (!tvShow.seasonExists(seasonNumber)) {
+          const seasonOriginalName = ts.name;
+          if (seasonOriginalName == null) continue;
+          tvShow.addSeason(seasonOriginalName, seasonNumber);
+          updated = true;
+        }
+        if (tvShow.addTvdbSeasonNumberToSeason(seasonNumber, seasonNumber, ts.id)) {
+          updated = true;
+        }
+        const episodeNumber = te.number;
+        if (episodeNumber == null || episodeNumber <= 0) continue;
+        if (!tvShow.episodeExists(seasonNumber, episodeNumber)) {
+          const episodeOriginalName = te.name;
+          if (episodeOriginalName == null) continue;
+          tvShow.addEpisodeToSeason(seasonNumber, episodeOriginalName, episodeNumber);
+          tvShow.setMonitorReleases(seasonNumber, episodeNumber, true);
+          updated = true;
+        }
+        if (tvShow.addTvdbEpisodeNumber(seasonNumber, episodeNumber, episodeNumber, te.id)) {
+          updated = true;  
+        }
       }
     }
   }

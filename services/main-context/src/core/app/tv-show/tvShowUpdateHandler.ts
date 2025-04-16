@@ -399,6 +399,7 @@ async function updateBasedOnTmdbId(tvShowId: string, tmdbId: string, tmdbApiKey:
       }
     }
   } else {
+    const tvdbSeasons = tvdbClient.getTvShowSeasons(tvShow.tvdbId);
     for (let _ of tvShowRead.seasons) {
       if (_.tvdbSeasonNumber != undefined) {
         const seasonNameEnUs: string = `Season ${_.tvdbSeasonNumber}`;

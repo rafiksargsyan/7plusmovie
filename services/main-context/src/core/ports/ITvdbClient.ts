@@ -15,18 +15,23 @@ export type Episode = {
   id: number,
   aired: Nullable<string>, // e.g "1987-06-21"
   runtimeMinutes: Nullable<number>,
-  seasonNumber: number,
-  seasonId: number,
-  seasonName: Nullable<string>,
   number: number,
   name: Nullable<string>,
   image: Nullable<string>,
-  seasonImage: Nullable<string>,
   nameTranslations: string[]
+}
+
+export type Season = {
+  id: number,
+  number: number,
+  name: Nullable<string>,
+  image: Nullable<string>,
+  episodes: Episode[]
 }
 
 export interface ITvdbClient {
   getTvShowById(id: number): Promise<TvShow>;
   getTvShowTranslation(id: number, lang: string): Promise<TvShowTranslation>;
-  getTvShowEpisodes(id: number): Promise<Episode[]>
+  getTvShowSeasons(id: number): Promise<Season[]>
+  getEpisodeNameTranslation(id: number, lang: string): Promise<Nullable<string>>
 };
