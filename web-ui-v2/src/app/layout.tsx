@@ -33,12 +33,8 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning>
       <head>
         <ColorSchemeScript defaultColorScheme="dark" />
-          <Script async id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js" strategy='beforeInteractive'></Script>
-          <Script id='acAutotag' type="text/javascript">
-            {`aclib.runAutoTag({
-             zoneId: 'edhmiryyry',
-            });`}
-          </Script>
+          <Script id='monetag'>{`(function(s,u,z,p){s.src=u,s.setAttribute('data-zone',z),p.appendChild(s);})(document.createElement('script'),
+          'https://paupsoborofoow.net/tag.min.js',9188321,document.body||document.documentElement)`}</Script>
       </head>
       <body data-theme="dark">
         <MantineProvider theme={theme} defaultColorScheme="dark" forceColorScheme='dark'>
