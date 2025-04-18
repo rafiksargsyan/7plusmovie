@@ -380,6 +380,44 @@ functions:
     handler: src/core/app/getTvShowSeason.handler
     timeout: 30
 
+  movieReleaseSubtitleDelete:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/movieReleaseSubtitleDelete.handler
+    events:
+      - http:
+          integration: lambda
+          path: /movie/{id}/releases/{releaseId}/subs/{stream}
+          method: delete
+          request:
+            template:
+              application/json: '{ "movieId" : "$input.params(''id'')",
+                                   "releaseId" : "$input.params(''releaseId'')",
+                                   "stream" : $input.params(''stream'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+
+  tvShowReleaseSubtitleDelete:
+    environment:
+      DYNAMODB_TVSHOW_TABLE_NAME: ${env:DYNAMODB_TVSHOW_TABLE_NAME}
+    handler: src/core/app/tvShowReleaseSubtitleDelete.handler
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show/{id}/seasons/{season}/episodes/{episode}/releases/{releaseId}/subs/{stream}
+          method: delete
+          request:
+            template:
+              application/json: '{ "tvShowId" : "$input.params(''id'')",
+                                   "season" : $input.params(''season''),
+                                   "episode" : $input.params(''episode''),
+                                   "releaseId" : "$input.params(''releaseId'')",
+                                   "stream" : $input.params(''stream'') }'
+              application/x-www-form-urlencoded: null
+          authorizer:
+            arn: ${file(./.env.${sls:stage}.yml):ADMIN_USERPOOL}
+
 resources:
   Resources:
     movieReleaseCandidateUpdaterFanoutTopic:

@@ -499,6 +499,23 @@ export class TvShow {
     }
     return true;
   }
+
+  private getReleaseById(season: number, episode: number, id: string) {
+    const e = this.getEpisodeOrThrow(season, episode);
+    const release = e.releases[id];
+    return release;
+  }
+  
+  private getReleaseByIdOrThrow(season: number, episode: number, id: string) {
+    const release = this.getReleaseById(season, episode, id);
+    if (release == null) throw new TvShow_ReleaseNotFoundError();
+    return release;
+  }
+
+  deleteSub(season: number, episode: number, releaseId: string, stream: number) {
+    const release = this.getReleaseByIdOrThrow(season, episode,releaseId);
+    release.release.deleteSub(stream);
+  }
 }
 
 export class TvShow_NullOriginalLocaleError {}
@@ -528,3 +545,4 @@ export class TvShow_ReleaseWithIdAlreadyExistsError {}
 export class TvShow_NullUseTvdbError {}
 export class TvShow_InvalidTvdbEpisodeNumberError {}
 export class TvShow_InvalidTvdbSeasonNumberError {}
+export class TvShow_ReleaseNotFoundError {}

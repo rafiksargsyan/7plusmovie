@@ -59,8 +59,10 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
     for (const record of event.Records) {
       if (record.eventName === 'REMOVE') {
         let movieId = record.dynamodb?.Keys?._id.S;
-        await emptyS3Directory(rawMediaFilesS3Bucket, movieId);
-        await emptyS3Directory(torrentFilesS3Bucket, movieId);
+        if (movieId != null) {
+          await emptyS3Directory(rawMediaFilesS3Bucket, movieId);
+          await emptyS3Directory(torrentFilesS3Bucket, movieId);
+        }
       } else {
         let movieRead: MovieRead = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as MovieRead;
         if (movieRead._tmdbId == null) return;
