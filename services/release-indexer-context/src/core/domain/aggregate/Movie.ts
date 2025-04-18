@@ -284,6 +284,22 @@ export class Movie {
     }
     return Math.max(...scores);
   }
+
+  private getReleaseById(id: string) {
+    const release = this._releases[id];
+    return release;
+  }
+
+  private getReleaseByIdOrThrow(id: string) {
+    const release = this.getReleaseById(id);
+    if (release == null) throw new ReleaseNotFoundError();
+    return release;
+  }
+
+  deleteSub(releaseId: string, stream: number) {
+    const release = this.getReleaseByIdOrThrow(releaseId);
+    release.release.deleteSub(stream);
+  }
 }
 
 export class NullReleaseIdError extends Error {};
@@ -317,3 +333,5 @@ export class NullReleaseTimeError extends Error {};
 export class InvalidRuntimeError extends Error {};
 
 export class NullAlternativeTitlesError extends Error {};
+
+export class ReleaseNotFoundError extends Error {};

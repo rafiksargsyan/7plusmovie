@@ -130,6 +130,10 @@ export class Release {
     this._subs.push(sm);
   }
 
+  public deleteSub(stream: number) {
+    this._subs = this._subs.filter(x => x.stream === stream);
+  }
+
   private static compareSubs(s1: SubsMetadata, s2: SubsMetadata) {
     if (!SubsLang.equals(s1.lang, s2.lang) || !SubsType.equals(s1.type, s2.type)) return null;
     let subsAuthorPriorityList = SubsLang.subsAuthorPriorityList[s1.lang.key];
