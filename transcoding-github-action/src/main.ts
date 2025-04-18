@@ -137,14 +137,21 @@ async function run(): Promise<void> {
       'master.m3u8'
     )}`
 
-    execSync(`eval "${shakaPackagerCommand}"`)
+    execSync(`eval "${shakaPackagerCommand}"`, {
+      maxBuffer: 10 * 1024 * 1024 // 10 MB
+    })
 
     if (textTranscodeSpecs.length !== 0) {
       execSync('sed -i "/shaka-packager/d" ./*.vtt')
     }
     execSync('sed -i "/shaka-packager/d" ./*.mpd')
     execSync('sed -i "/shaka-packager/d" ./*.m3u8')
-    core.setOutput("videoFileName", (videoTranscodeSpec.resolutions.sort((a, b) => b.resolution - a.resolution)).at(0)?.fileName);
+    core.setOutput(
+      'videoFileName',
+      videoTranscodeSpec.resolutions
+        .sort((a, b) => b.resolution - a.resolution)
+        .at(0)?.fileName
+    )
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

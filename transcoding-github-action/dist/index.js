@@ -174,7 +174,9 @@ function run() {
                 shakaPackagerCommand += `in=${path_1.default.resolve(workdirAbsolutePath, _.fileName)},stream=text,output=${_.fileName},lang=${Lang_1.Lang.fromKeyOrThrow(_.lang).lang},hls_group_id=subtitle,hls_name='${_.name}',dash_label='${_.name}' `;
             });
             shakaPackagerCommand += `--mpd_output ${path_1.default.resolve(vodFolderAbsolutePath, 'manifest.mpd')} --hls_master_playlist_output ${path_1.default.resolve(vodFolderAbsolutePath, 'master.m3u8')}`;
-            (0, child_process_1.execSync)(`eval "${shakaPackagerCommand}"`);
+            (0, child_process_1.execSync)(`eval "${shakaPackagerCommand}"`, {
+                maxBuffer: 10 * 1024 * 1024 // 10 MB
+            });
             if (textTranscodeSpecs.length !== 0) {
                 (0, child_process_1.execSync)('sed -i "/shaka-packager/d" ./*.vtt');
             }
