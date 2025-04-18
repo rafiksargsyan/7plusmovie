@@ -131,7 +131,7 @@ export class Release {
   }
 
   public deleteSub(stream: number) {
-    this._subs = this._subs.filter(x => x.stream === stream);
+    this._subs = this._subs.filter(x => x.stream !== stream);
   }
 
   private static compareSubs(s1: SubsMetadata, s2: SubsMetadata) {
