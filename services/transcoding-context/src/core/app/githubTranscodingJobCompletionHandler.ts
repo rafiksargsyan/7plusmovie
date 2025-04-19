@@ -87,8 +87,6 @@ export const handler = async (event: HandlerParam) => {
         isSuccess: true
       }
     } else if (conclusion === 'failure') {
-      // find conflicting VTT file if any
-
       const octokit = new Octokit({
         auth: secret.GITHUB_PAT!,
       });
