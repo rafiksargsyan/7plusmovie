@@ -8,12 +8,18 @@ import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
+import { Octokit } from '@octokit/rest';
+import * as unzipper from "unzipper";
+import { Nullable } from '../domain/Nullable';
+import axios from 'axios';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const githubWorkflowId = process.env.TRANSCODING_GITHUB_WORKFLOW_ID!;
 const dynamodbTranscodingJobTableName = process.env.DYNAMODB_TRANSCODING_JOB_TABLE_NAME!;
 const lambdaHook = process.env.LAMBDA_HOOK!;
 const OK = { statusCode: 200 };
+const githubOwner = process.env.GITHUB_OWNER!;
+const githubRepo = process.env.GITHUB_REPO!;
 
 const secretsManager = new SecretsManager({});
 const lambdaClient = new LambdaClient({});
@@ -74,16 +80,63 @@ export const handler = async (event: HandlerParam) => {
   Object.assign(transcodingJobRead, data.Items[0]);
 
   if (status == 'completed' && conclusion == 'success') {
+    let payload;
+    if (conclusion === 'success') {
+      payload = {
+        transcodingContextJobId: transcodingJobRead.id,
+        isSuccess: true
+      }
+    } else if (conclusion === 'failure') {
+      // find conflicting VTT file if any
+
+      const octokit = new Octokit({
+        auth: secret.GITHUB_PAT!,
+      });
+      payload = {
+        transcodingContextJobId: transcodingJobRead.id,
+        isSuccess: false,
+        invalidVttFileName: await findInvalidVttFile(octokit, githubOwner, githubRepo, workflowRunId)
+      }
+    }
     const transcodingJobParams = {
       FunctionName: lambdaHook,
       InvocationType: 'RequestResponse',
-      Payload: JSON.stringify({ transcodingContextJobId: transcodingJobRead.id })
+      Payload: JSON.stringify(payload)
     };
     const invokeCommand = new InvokeCommand(transcodingJobParams);
     await lambdaClient.send(invokeCommand);
   } 
   return OK;
 };
+
+async function findInvalidVttFile(octokit: Octokit, githubOwner: string,
+  githubRepo: string, workflowRunId: number): Promise<Nullable<string>> {
+  let ret;
+  try {
+    const { url } = await octokit.request(`GET /repos/${githubOwner}/${githubRepo}/actions/runs/${workflowRunId}/logs`)
+    const response = await axios.get(url, { responseType: 'arraybuffer' });
+
+    const directory = await unzipper.Open.buffer(Buffer.from(response.data));
+
+    for (const file of directory.files) {
+      if (
+        file.path.includes('7_Transcode.txt') ||
+        file.path.includes('get-transcode-and-publish.txt')
+      ) {
+        const content = await file.buffer();
+        const text = content.toString('utf-8');
+        const match = text.match(/E\d+\s.*\(PARSER_FAILURE\): Cannot parse media file .*\/([^\/]+\.vtt)/);
+        if (match) {
+          ret = match[1];
+          break;
+        }
+      }
+    }
+  } catch (e) {
+    console.error(`Failed while trying to find invalid VTT file: ${JSON.stringify(e)}`);
+  }
+  return ret;
+}
 
 class InvalidContentTypeError extends Error {}
 

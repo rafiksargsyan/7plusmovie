@@ -11,7 +11,7 @@ import { TvShowRepository } from "../../adapters/TvShowRepository";
 import { MovieTranscodingJobRead } from "../domain/MovieTranscodingJob";
 import { Audio, AudioRead, Release, ReleaseRead, Resolution, Subtitle, Thumbnail, Video } from "../domain/entity/Release";
 import { S3 } from '@aws-sdk/client-s3';
-import { strIsBlank } from "../../utils";
+import { Nullable, strIsBlank } from "../../utils";
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import { TvShowTranscodingJobRead } from "../domain/TvShowTranscodingJob";
 import { AudioLang } from "../domain/AudioLang";
@@ -41,6 +41,8 @@ const s3 = new S3({});
 
 interface HandlerParam {
   transcodingContextJobId: string;
+  isSuccess: boolean;
+  invalidVttFileName: Nullable<string>;
 }
 
 export const handler = async (event: HandlerParam): Promise<void> => {
