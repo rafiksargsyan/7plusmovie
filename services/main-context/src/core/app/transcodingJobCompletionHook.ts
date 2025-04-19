@@ -89,7 +89,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     let movie = new Movie(true);
     Object.assign(movie, movieData.Item);
 
-    if (event.isSuccess) {
+    if (event.isSuccess == null || event.isSuccess) {
       const subtitles = {};
       movieTranscodingJobRead.textTranscodeSpecs.forEach(_ => subtitles[_.name!] =
         Subtitle.create(_.name!, `${movieTranscodingJobRead.outputFolderKey}/subtitles/${_.fileName}`, _.lang, _.type));
@@ -208,7 +208,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
 
     // This is not right way to update tvShow model as there might be extra application logic for validation, etc.
     // Right way would be calling corresponding lambda to the job and avoid app logic duplication. 
-    if (event.isSuccess) {
+    if (event.isSuccess == null || event.isSuccess) {
       const subtitles = {};
       tvShowTranscodingJobRead.textTranscodeSpecs.forEach(_ => subtitles[_.name!] =
         Subtitle.create(_.name!, `${tvShowTranscodingJobRead.outputFolderKey}/subtitles/${_.fileName}`, _.lang, _.type));

@@ -107,3 +107,5 @@ custom:
   esbuild:
     bundle: true
     minify: false
+    external:
+      - '@aws-sdk/client-s3'
