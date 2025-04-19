@@ -70,6 +70,7 @@ functions:
       - http:
           path: /githubTranscodingJobCompletionHandler
           method: post 
+    timeout: 120
   
   githubWorkflowRunIdProviderHook:
     handler: src/core/app/githubWorkflowRunIdProviderHook.handler
