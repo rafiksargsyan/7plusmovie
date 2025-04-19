@@ -21,7 +21,6 @@ const cloudflareAccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
 const dynamodbMovieTranscodingJobTableName = process.env.DYNAMODB_MOVIE_TRANSCODING_JOB_TABLE_NAME!;
 const dynamodbTvShowTranscodingJobTableName = process.env.DYNAMODB_TV_SHOW_TRANSCODING_JOB_TABLE_NAME!;
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
-const mediaAssetsS3Bucket = process.env.MEDIA_ASSETS_S3_BUCKET!;
 const mediaAssetsR2Bucket = process.env.ClOUDFLARE_MEDIA_ASSETS_R2_BUCKET!;
 const mediaAssetsCachableR2Bucket = process.env.ClOUDFLARE_MEDIA_ASSETS_CACHABLE_R2_BUCKET!;
 const cloudflareCachableAccountId = process.env.CLOUDFLARE_CACHABLE_ACCOUNT_ID;
@@ -88,72 +87,76 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     let movie = new Movie(true);
     Object.assign(movie, movieData.Item);
 
-    const subtitles = {};
-    movieTranscodingJobRead.textTranscodeSpecs.forEach(_ => subtitles[_.name!] =
-      Subtitle.create(_.name!, `${movieTranscodingJobRead.outputFolderKey}/subtitles/${_.fileName}`, _.lang, _.type));
-    const audios = {};
-    movieTranscodingJobRead.audioTranscodeSpecs.forEach(_ => audios[_.name!] =
-      Audio.create(_.name!, `${movieTranscodingJobRead.outputFolderKey}/vod/${_.fileName}`, _.lang, _.channels))
-    const resolutions: Resolution[] = [];
-    for (let r of movieTranscodingJobRead.videoTranscodeSpec.resolutions) {
-      const relativePath = `${movieTranscodingJobRead.outputFolderKey}/vod/${r.fileName}`;
-      const size = await getS3ObjectSize(mediaAssetsS3Bucket, relativePath);
-      resolutions.push({ resolution: r.resolution, relativePath: relativePath, size: size })
-    }
-    const video = Video.create(resolutions);
-
-    const thumbnails: Thumbnail[] = movieTranscodingJobRead.thumbnailResolutions
-    .map(r => ({ resolution: r, thumbnailsFile: `${movieTranscodingJobRead.outputFolderKey}/thumbnails/${r}/thumbnails.vtt`}));
-    movie.addRelease(movieTranscodingJobRead.releaseId, Release.create(subtitles, audios, video,
-      `${movieTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`,
-      `${movieTranscodingJobRead.outputFolderKey}/vod/master.m3u8`,
-      movieTranscodingJobRead.releaseIndexerContextReleaseId, movieTranscodingJobRead.outputFolderKey,
-      movieTranscodingJobRead.ripType, movieTranscodingJobRead.resolution, thumbnails));
-    
-    const rootFolders: string[] = [];
-    movieTranscodingJobRead.releasesToBeRemoved.forEach(k => {
-      const rootFolder = (movie.getRelease(k) as { _rootFolder: string } | null)?._rootFolder;
-      if (!strIsBlank(rootFolder)) {
-        rootFolders.push(rootFolder!);
+    if (event.isSuccess) {
+      const subtitles = {};
+      movieTranscodingJobRead.textTranscodeSpecs.forEach(_ => subtitles[_.name!] =
+        Subtitle.create(_.name!, `${movieTranscodingJobRead.outputFolderKey}/subtitles/${_.fileName}`, _.lang, _.type));
+      const audios = {};
+      movieTranscodingJobRead.audioTranscodeSpecs.forEach(_ => audios[_.name!] =
+        Audio.create(_.name!, `${movieTranscodingJobRead.outputFolderKey}/vod/${_.fileName}`, _.lang, _.channels))
+      const resolutions: Resolution[] = [];
+      for (let r of movieTranscodingJobRead.videoTranscodeSpec.resolutions) {
+        const relativePath = `${movieTranscodingJobRead.outputFolderKey}/vod/${r.fileName}`;
+        const size = await getR2ObjectSize(r2, mediaAssetsR2Bucket, relativePath);
+        resolutions.push({ resolution: r.resolution, relativePath: relativePath, size: size })
       }
-    });  
-    movieTranscodingJobRead.releasesToBeRemoved.forEach(r => movie.removeRelease(r));
-    movie.transcodingFinished();
-
-    const migrationRelease = movie.getRelease("migration");
-    let removeMigrationRelease = false;
-    if (migrationRelease != null) {
-      removeMigrationRelease = checkReleaseAudios(migrationRelease, Object.values(audios));
+      const video = Video.create(resolutions);
+  
+      const thumbnails: Thumbnail[] = movieTranscodingJobRead.thumbnailResolutions
+      .map(r => ({ resolution: r, thumbnailsFile: `${movieTranscodingJobRead.outputFolderKey}/thumbnails/${r}/thumbnails.vtt`}));
+      movie.addRelease(movieTranscodingJobRead.releaseId, Release.create(subtitles, audios, video,
+        `${movieTranscodingJobRead.outputFolderKey}/vod/manifest.mpd`,
+        `${movieTranscodingJobRead.outputFolderKey}/vod/master.m3u8`,
+        movieTranscodingJobRead.releaseIndexerContextReleaseId, movieTranscodingJobRead.outputFolderKey,
+        movieTranscodingJobRead.ripType, movieTranscodingJobRead.resolution, thumbnails));
+      
+      const rootFolders: string[] = [];
+      movieTranscodingJobRead.releasesToBeRemoved.forEach(k => {
+        const rootFolder = (movie.getRelease(k) as { _rootFolder: string } | null)?._rootFolder;
+        if (!strIsBlank(rootFolder)) {
+          rootFolders.push(rootFolder!);
+        }
+      });  
+      movieTranscodingJobRead.releasesToBeRemoved.forEach(r => movie.removeRelease(r));
+      movie.transcodingFinished();
+  
+      const migrationRelease = movie.getRelease("migration");
+      let removeMigrationRelease = false;
+      if (migrationRelease != null) {
+        removeMigrationRelease = checkReleaseAudios(migrationRelease, Object.values(audios));
+        if (removeMigrationRelease) {
+          movie.removeRelease("migration");
+        }
+      }
+  
+      await docClient.put({ TableName: dynamodbMovieTableName, Item: movie });
+  
+      for (let rf of rootFolders) {
+        try {
+          await emptyS3Directory(r2, mediaAssetsR2Bucket, rf);
+          await emptyS3Directory(r2Cachable, mediaAssetsCachableR2Bucket, rf);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+  
       if (removeMigrationRelease) {
-        movie.removeRelease("migration");
+        const rootFolder = `${movie.id}`;
+        try {
+          await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/vod`);
+          await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/thumbnails`);
+          await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/subtitles`);
+          await emptyS3Directory(r2Cachable, mediaAssetsCachableR2Bucket, `${rootFolder}/thumbnails`);
+          await emptyS3Directory(r2Cachable, mediaAssetsCachableR2Bucket, `${rootFolder}/subtitles`);
+        } catch (e) {
+          console.error(e);
+        }
       }
-    } 
-
-    await docClient.put({ TableName: dynamodbMovieTableName, Item: movie });
-
-    for (let rf of rootFolders) {
-      try {
-        await emptyS3Directory(s3, mediaAssetsS3Bucket, rf);
-        await emptyS3Directory(r2, mediaAssetsR2Bucket, rf);
-        await emptyS3Directory(r2Cachable, mediaAssetsCachableR2Bucket, rf);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    if (removeMigrationRelease) {
-      const rootFolder = `${movie.id}`;
-      try {
-        await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/vod`);
-        await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/thumbnails`);
-        await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/subtitles`);
-        await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/vod`);
-        await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/thumbnails`);
-        await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/subtitles`);
-        await emptyS3Directory(r2Cachable, mediaAssetsCachableR2Bucket, `${rootFolder}/thumbnails`);
-        await emptyS3Directory(r2Cachable, mediaAssetsCachableR2Bucket, `${rootFolder}/subtitles`);
-      } catch (e) {
-        console.error(e);
+    } else {
+      movie.transcodingFinished();
+      await docClient.put({ TableName: dynamodbMovieTableName, Item: movie });
+      if (event.invalidVttFileName == null) {
+        // create a new transcoding job based on existing one, just remove conflicting vtt file 
       }
     }
 
@@ -187,7 +190,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     const resolutions: Resolution[] = [];
     for (let r of tvShowTranscodingJobRead.videoTranscodeSpec.resolutions) {
       const relativePath = `${tvShowTranscodingJobRead.outputFolderKey}/vod/${r.fileName}`;
-      const size = await getS3ObjectSize(mediaAssetsS3Bucket, relativePath);
+      const size = await getR2ObjectSize(r2, mediaAssetsR2Bucket, relativePath);
       resolutions.push({ resolution: r.resolution, relativePath: relativePath, size: size })
     }
     const video = Video.create(resolutions);
@@ -223,7 +226,6 @@ export const handler = async (event: HandlerParam): Promise<void> => {
 
     for (let rf of rootFolders) {
       try {
-        await emptyS3Directory(s3, mediaAssetsS3Bucket, rf);
         await emptyS3Directory(r2, mediaAssetsR2Bucket, rf);
         await emptyS3Directory(r2Cachable, mediaAssetsCachableR2Bucket, rf);
       } catch (e) {
@@ -234,9 +236,6 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     if (removeMigrationRelease) {
       const rootFolder = `${tvShow.id}/${season}/${episode}`;
       try {
-        await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/vod`);
-        await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/thumbnails`);
-        await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/subtitles`);
         await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/vod`);
         await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/thumbnails`);
         await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/subtitles`);
@@ -273,10 +272,10 @@ function checkReleaseAudios(r: Release, audios: Audio[]) {
   return true;
 }
 
-const getS3ObjectSize = async (bucketName: string, path: string): Promise<number | undefined> => {
+const getR2ObjectSize = async (r2: S3, bucketName: string, path: string): Promise<number | undefined> => {
   let objectData;
   try {
-    objectData = await s3.headObject({
+    objectData = await r2.headObject({
       Bucket: bucketName,
       Key: path
     })
