@@ -66,6 +66,11 @@ export const handler = async (event: HandlerParam) => {
   const status = payloadObject?.workflow_run?.status;
   const conclusion = payloadObject?.workflow_run?.conclusion;
 
+  if (workflowRunId == null) {
+    console.warn(`Null workflow run id received: status=${status}, conclusion=${conclusion}`);
+    return OK;
+  }
+
   const scanParams = {
     TableName: dynamodbTranscodingJobTableName,
     FilterExpression: '#githubWorkflowRunId = :value',
