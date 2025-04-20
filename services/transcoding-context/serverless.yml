@@ -66,10 +66,13 @@ functions:
       TRANSCODING_GITHUB_WORKFLOW_ID: ${env:TRANSCODING_GITHUB_WORKFLOW_ID}
       SECRET_MANAGER_SECRETS_ID: ${env:SECRET_MANAGER_SECRETS_ID}
       LAMBDA_HOOK: ${env:LAMBDA_HOOK}
+      GITHUB_OWNER: ${env:GITHUB_OWNER}
+      GITHUB_REPO: ${env:GITHUB_REPO}
     events:
       - http:
           path: /githubTranscodingJobCompletionHandler
           method: post 
+    timeout: 120
   
   githubWorkflowRunIdProviderHook:
     handler: src/core/app/githubWorkflowRunIdProviderHook.handler
@@ -106,3 +109,5 @@ custom:
   esbuild:
     bundle: true
     minify: false
+    external:
+      - '@aws-sdk/client-s3'
