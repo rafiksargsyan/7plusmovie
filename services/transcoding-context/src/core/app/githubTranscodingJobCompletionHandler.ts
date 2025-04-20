@@ -79,7 +79,7 @@ export const handler = async (event: HandlerParam) => {
   let transcodingJobRead: TranscodingJobRead = {};
   Object.assign(transcodingJobRead, data.Items[0]);
 
-  if (status == 'completed' && conclusion == 'success') {
+  if (status == 'completed') {
     let payload;
     if (conclusion === 'success') {
       payload = {
