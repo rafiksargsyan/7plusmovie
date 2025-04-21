@@ -329,6 +329,36 @@ resource "aws_dynamodb_table" "tv_show_v2" {
     name = "SK"
     type = "S"
   }
+
+  attribute {
+    name = "tmdbId"
+    type = "S"
+  }
+  attribute {
+    name = "_imdbId"
+    type = "S"
+  }
+  attribute {
+    name = "_tvdbId"
+    type = "N"
+  }
+
+  global_secondary_index {
+    name               = "tmdb-id"
+    hash_key           = "tmdbId"
+    projection_type    = "KEYS_ONLY"
+  }
+  global_secondary_index {
+    name               = "imdb-id"
+    hash_key           = "_imdbId"
+    projection_type    = "KEYS_ONLY"
+  }
+  global_secondary_index {
+    name               = "tvdb-id"
+    hash_key           = "_tvdbId"
+    projection_type    = "KEYS_ONLY"
+  }
+
   stream_enabled   = true
   stream_view_type = "NEW_IMAGE"
   billing_mode     = "PAY_PER_REQUEST"
