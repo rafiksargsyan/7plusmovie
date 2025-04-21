@@ -305,6 +305,14 @@ async function updateBasedOnTmdbId(tvShowId: string, tmdbId: string, tmdbApiKey:
     }
   }
 
+  if (tvShow.imdbId == null) {
+    const externalIds = await tmdbClient2.getTvShowExternalIds(Number.parseInt(tmdbId));
+    if (externalIds.imdbId != null) {
+      tvShow.imdbId = externalIds.imdbId;
+      updated = true;
+    }
+  }
+
   if (!tvShow.useTvdb || tvShow.tvdbId == null) {
     for (let _ of tvShowRead.seasons) {
       if (_.tmdbSeasonNumber != undefined) {
