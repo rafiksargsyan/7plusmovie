@@ -208,6 +208,17 @@ export class TvShowRepository implements TvShowRepositoryInterface {
     });
   }
 
+  findTvShowByTvdbId(id: number): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
+
+  findTvShowByTmdbId(id: number): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
+
+  findTvShowByImdbId(id: string): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
 }
 
 class FailedToGetTvShowError extends Error {}
