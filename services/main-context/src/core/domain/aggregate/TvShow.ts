@@ -48,6 +48,7 @@ export class TvShow {
   private _tmdbSyncEnabled: boolean = false;
   private _tvdbId: number;
   private _useTvdb: boolean = false;
+  private _imdbId: Nullable<string>;
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -152,6 +153,14 @@ export class TvShow {
       throw new NullTvdbIdError();
     }
     this._tvdbId = v;
+    this.touch();
+  }
+
+  set imdbId(v: string) {
+    if (v == null) {
+      throw new NullImdbIdError();
+    }
+    this._imdbId = v;
     this.touch();
   }
 
@@ -445,6 +454,10 @@ export class TvShow {
     return this._tvdbId;
   }
 
+  get imdbId(): Nullable<string> {
+    return this._imdbId;
+  }
+
   seasonExists(seasonNumber: number) {
     return this.getSeason(seasonNumber) != null;
   }
@@ -570,3 +583,5 @@ class DuplicateTvdbEpisodeNumberError extends Error {}
 class InvalidTvdbSeasonIdError extends Error {}
 
 class InvalidTvdbEpisodeIdError extends Error {}
+
+class NullImdbIdError extends Error {}

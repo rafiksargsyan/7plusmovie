@@ -1,6 +1,6 @@
 import axiosRetry from 'axios-retry'
 import axios, { AxiosInstance } from "axios"
-import { ITmdbClient, TvShowExternalIds } from '../core/ports/ITmdbClient';
+import { ITmdbClient, MovieExternalIds, TvShowExternalIds } from '../core/ports/ITmdbClient';
 
 export class TmdbClient implements ITmdbClient {
   private _restClient: AxiosInstance;
@@ -32,5 +32,12 @@ export class TmdbClient implements ITmdbClient {
   async getIdByTvdbId(id: number): Promise<number> {
     const response = (await this._restClient.get(`find/${id}?external_source=tvdb_id`)).data;
     return response.tv_results[0]?.id
-  }  
+  }
+
+  async getMovieExternalIds(id: number): Promise<MovieExternalIds> {
+    const response = (await this._restClient.get(`movie/${id}/external_ids`)).data;
+    return {
+      imdbId: response.imdb_id
+    }
+  }
 }
