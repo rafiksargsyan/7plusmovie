@@ -217,7 +217,7 @@ export class TvShowRepository implements TvShowRepositoryInterface {
         "#tvdbId": "_tvdbId"
       },
       ExpressionAttributeValues: {
-        ":tvdbId": `${id}`
+        ":tvdbId": id
       }
     };
     let data = await this.docClient.query(queryParams);
