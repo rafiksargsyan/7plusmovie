@@ -1,7 +1,8 @@
-import { DynamoDBDocument } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocument} from "@aws-sdk/lib-dynamodb";
 import { Movie } from "../core/domain/aggregate/Movie";
 import { IMovieRepository } from "../core/ports/IMovieRepository";
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
+import { Nullable } from "../utils";
 
 export class MovieRepository implements IMovieRepository {
   private _docClient;
@@ -27,12 +28,36 @@ export class MovieRepository implements IMovieRepository {
     return movie;
   }
 
-  findMoviByTmdbId(id: number): Promise<string> {
-    throw new Error("Method not implemented.");
+  async findMovieByTmdbId(id: number): Promise<Nullable<string>> {
+    const queryParams = {
+      TableName: this._movieTableName,
+      IndexName: 'tmdb-id',
+      KeyConditionExpression: "#tmdbId = :tmdbId",
+      ExpressionAttributeNames:{
+        "#tmdbId": "tmdbId"
+      },
+      ExpressionAttributeValues: {
+        ":tmdbId": `${id}`
+      }
+    };
+    let data = await this._docClient.query(queryParams);
+    return data.Items[0]?.id;
   }
 
-  findMovieByImdbId(id: string): Promise<string> {
-    throw new Error("Method not implemented.");
+  async findMovieByImdbId(id: string): Promise<Nullable<string>> {
+    const queryParams = {
+    TableName: this._movieTableName,
+    IndexName: 'imdb-id',
+      KeyConditionExpression: "#imdbId = :imdbId",
+      ExpressionAttributeNames:{
+        "#imdbId": "_imdbId"
+      },
+      ExpressionAttributeValues: {
+        ":imdbId": id
+      }
+    };
+    let data = await this._docClient.query(queryParams);
+    return data.Items[0]?.id;
   }
 
   async saveMovie(m: Movie) {

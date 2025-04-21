@@ -208,16 +208,52 @@ export class TvShowRepository implements TvShowRepositoryInterface {
     });
   }
 
-  findTvShowByTvdbId(id: number): Promise<string> {
-    throw new Error("Method not implemented.");
+  async findTvShowByTvdbId(id: number): Promise<Nullable<string>> {
+    const queryParams = {
+      TableName: dynamodbTvShowTableName,
+      IndexName: 'tvdb-id',
+      KeyConditionExpression: "#tvdbId = :tvdbId",
+      ExpressionAttributeNames:{
+        "#tvdbId": "_tvdbId"
+      },
+      ExpressionAttributeValues: {
+        ":tvdbId": `${id}`
+      }
+    };
+    let data = await this.docClient.query(queryParams);
+    return data.Items?.[0]?.PK;
   }
 
-  findTvShowByTmdbId(id: number): Promise<string> {
-    throw new Error("Method not implemented.");
+  async findTvShowByTmdbId(id: number): Promise<Nullable<string>> {
+    const queryParams = {
+      TableName: dynamodbTvShowTableName,
+      IndexName: 'tmdb-id',
+      KeyConditionExpression: "#tmdbId = :tmdbId",
+      ExpressionAttributeNames:{
+        "#tmdbId": "tmdbId"
+      },
+      ExpressionAttributeValues: {
+        ":tmdbId": `${id}`
+      }
+    };
+    let data = await this.docClient.query(queryParams);
+    return data.Items?.[0]?.PK;
   }
 
-  findTvShowByImdbId(id: string): Promise<string> {
-    throw new Error("Method not implemented.");
+  async findTvShowByImdbId(id: string): Promise<Nullable<string>> {
+    const queryParams = {
+      TableName: dynamodbTvShowTableName,
+      IndexName: 'imdb-id',
+      KeyConditionExpression: "#imdbId = :imdbId",
+      ExpressionAttributeNames:{
+        "#imdbId": "_imdbId"
+      },
+      ExpressionAttributeValues: {
+        ":imdbId": id
+      }
+    };
+    let data = await this.docClient.query(queryParams);
+    return data.Items?.[0]?.PK;
   }
 }
 
