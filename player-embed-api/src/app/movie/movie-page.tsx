@@ -1,6 +1,5 @@
 'use client'
-import Player from '@/components/Player/Player';
-import { Nullable } from '@/types/Nullable';
+import Player from '../../../components/Player/Player';
 
 export interface MoviePageProps {
   id: string;

@@ -1,6 +1,5 @@
 import axios from 'axios'; 
 import MoviePage, { MoviePageProps } from './movie-page';
-import { Nullable } from '@/types/Nullable';
 import { Metadata } from 'next';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
