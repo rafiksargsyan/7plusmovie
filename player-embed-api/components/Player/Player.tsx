@@ -17,7 +17,7 @@ function Player(props: {movieTitle: string, m3u8File: string, thumbnailsFile?: s
   }, [props.m3u8File]);
 
   return (
-	<MediaPlayer ref={playerRef} title={`${props.movieTitle}`} src={`${props.m3u8File}`} preferNativeHLS={isSafari}>
+	  <MediaPlayer ref={playerRef} title={`${props.movieTitle}`} src={`${props.m3u8File}`} preferNativeHLS={isSafari}>
       <MediaProvider />
       <DefaultVideoLayout icons={defaultLayoutIcons} thumbnails={`${props.thumbnailsFile}`}/>
       <Poster className="vds-poster" src={`${imageBaseUrl}h=720,f=auto/${props.backdropImage}`} />

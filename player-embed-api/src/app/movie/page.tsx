@@ -24,7 +24,7 @@ type Props = {
 }
   
 export async function generateMetadata(
-  { params, searchParams}: Props
+  { searchParams}: Props
 ): Promise<Metadata> {
   const id = (await searchParams).id as string;
   const movie = await getMovieStreamInfo(id, 'EN_US');
