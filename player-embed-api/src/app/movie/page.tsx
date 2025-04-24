@@ -1,8 +1,16 @@
 import axios from 'axios'; 
 import MoviePage, { MoviePageProps } from './movie-page';
 import { Metadata } from 'next';
+import { Nullable } from '../../../types/Nullable';
 
 const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL!;
+
+async function findMovieByExternalId(tmdbId: Nullable<string>, imdbId: Nullable<string>) {
+  if (tmdbId == null) tmdbId = '';
+  if (imdbId == null) imdbId = '';
+  const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod//movie/find/external-ids?imdbId=${imdbId}&tmdbId=${tmdbId}`);
+  return response.data;
+}
 
 async function getMovieStreamInfo(movieId: string, preferredAudioLang: string): Promise<MoviePageProps> {
   const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getMovieMetadataForPlayer/${movieId}?preferredAudioLang=${preferredAudioLang}`);
@@ -55,7 +63,9 @@ export default async function Page({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const movieId = (await searchParams).id as string;
+  const tmdbId = (await searchParams).tmdbId as Nullable<string>;
+  const imdbId = (await searchParams).imdbId as Nullable<string>;
+  const movieId = await findMovieByExternalId(tmdbId, imdbId); // Handle null movieId case, show meaningfull message
   const preferredAudioLang = "TODO"; // get from search params
   const moviePageProps = await getMovieStreamInfo(movieId, preferredAudioLang);
   return <MoviePage {...moviePageProps} />

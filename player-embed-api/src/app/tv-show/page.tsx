@@ -1,6 +1,15 @@
 import axios from 'axios'; 
 import TvShowPage from './tv-show-page';
 import { Metadata } from 'next';
+import { Nullable } from '../../../types/Nullable';
+
+async function findTvShowByExternalId(tmdbId: Nullable<string>, imdbId: Nullable<string>, tvdbId: Nullable<string>) {
+  if (tmdbId == null) tmdbId = '';
+  if (imdbId == null) imdbId = '';
+  if (tvdbId == null) tvdbId = '';
+  const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod//tv-show/find/external-ids?imdbId=${imdbId}&tmdbId=${tmdbId}&tvdbId${tvdbId}`);
+  return response.data;
+}
 
 async function getPlayerData(id: string, seasonNumber: number, episodeNumber: number, preferredAudioLang: string): Promise<any> {
   const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod/getTvShowMetadataForPlayer/${id}/${seasonNumber}/${episodeNumber}?preferredAudioLang=${preferredAudioLang}`);
@@ -50,7 +59,10 @@ export default async function Page({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const id = (await searchParams).id as string;
+  const tmdbId = (await searchParams).tmdbId as Nullable<string>;
+  const imdbId = (await searchParams).imdbId as Nullable<string>;
+  const tvdbId = (await searchParams).tvdbId as Nullable<string>;
+  const id = await findTvShowByExternalId(tmdbId, imdbId, tvdbId); // TODO: Handle null id case
   const seasonStr = (await searchParams).s as string;
   const season = seasonStr == null ? 1 : Number.parseInt(seasonStr);
   const episodeStr = (await searchParams).e as string;
