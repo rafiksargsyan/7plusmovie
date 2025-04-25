@@ -67,8 +67,8 @@ export default async function Page({
   const season = seasonStr == null ? 1 : Number.parseInt(seasonStr);
   const episodeStr = (await searchParams).e as string;
   const episode = episodeStr == null ? 1 : Number.parseInt(episodeStr)
-  const preferredAudioLang = 'TODO'; //get from search params
-  const playerData = await getPlayerData(id, season, episode, preferredAudioLang);
+  const preferredAudioLang = (await searchParams).preferredAudioLang as Nullable<string>;
+  const playerData = await getPlayerData(id, season, episode, preferredAudioLang != null ? preferredAudioLang.replace('-', '_').toUpperCase() : 'EN_US');
   return <TvShowPage
       titleL8ns={playerData.titleL8ns}
       releaseYear={playerData.releaseYear}

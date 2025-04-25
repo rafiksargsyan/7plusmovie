@@ -66,7 +66,7 @@ export default async function Page({
   const tmdbId = (await searchParams).tmdbId as Nullable<string>;
   const imdbId = (await searchParams).imdbId as Nullable<string>;
   const movieId = await findMovieByExternalId(tmdbId, imdbId); // Handle null movieId case, show meaningfull message
-  const preferredAudioLang = "TODO"; // get from search params
-  const moviePageProps = await getMovieStreamInfo(movieId, preferredAudioLang);
+  const preferredAudioLang = (await searchParams).preferredAudioLang as Nullable<string>;
+  const moviePageProps = await getMovieStreamInfo(movieId, preferredAudioLang != null ? preferredAudioLang.replace('-', '_').toUpperCase() : 'EN_US');
   return <MoviePage {...moviePageProps} />
 }
