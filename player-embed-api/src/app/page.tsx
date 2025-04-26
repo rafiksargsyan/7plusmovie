@@ -4,8 +4,8 @@ import styles from "./page.module.css";
 export default function Home() {
   return (
     <div className={styles.page}>
-      <header>
-        <a href="/">YAMBED</a>
+      <header id="header">
+        <a href="#header">YAMBED</a>
         <nav>
           <ul>
             <li><a href="#api">API</a></li>
@@ -13,7 +13,8 @@ export default function Home() {
           </ul>
         </nav>
         <section>
-          <h1>YAMBED - Yet Another Video Embedding API</h1>
+          <h1>YAMBED</h1>
+          <p>Yet Another Video Embedding API</p>
         </section>
       </header>
       <main>
