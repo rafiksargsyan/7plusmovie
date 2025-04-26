@@ -40,3 +40,11 @@ a {
     color-scheme: dark;
   }
 }
+
+[data-media-player]:not([data-view-type="audio"]) [data-media-provider] {
+  height: 100vh !important;
+}
+
+:where(.vds-poster) {
+  object-fit: contain !important;
+}
