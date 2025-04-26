@@ -5,13 +5,15 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <header id="header">
-        <a href="#header">YAMBED</a>
-        <nav>
-          <ul>
-            <li><a href="#api">API</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-        </nav>
+        <div className={styles.appbar}>
+          <a href="#header">YAMBED</a>
+          <nav className={styles.nav}>
+            <ul>
+              <li><a href="#api">API</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </nav>
+        </div>
         <section>
           <h1>YAMBED</h1>
           <p>Yet Another Video Embedding API</p>
@@ -22,11 +24,11 @@ export default function Home() {
           <h2>API DOCUMENTATION</h2>
           <article>
             <h3>Movie API</h3>
-            <ClientIFrame src="http://localhost:3000/movie?tmdbId=278" width={720} aspectRatio={16 / 9}/>
+            <ClientIFrame src={`${process.env.NEXT_PUBLIC_BASE_URL}movie?tmdbId=278`} width={720} aspectRatio={16 / 9}/>
           </article>
           <article>
             <h3>Tv Show API</h3>
-          <ClientIFrame src="http://localhost:3000/tv-show?tmdbId=1399&s=1&e=1" width={720} aspectRatio={16 / 9}/>
+          <ClientIFrame src={`${process.env.NEXT_PUBLIC_BASE_URL}tv-show?tmdbId=1399&s=1&e=1`} width={720} aspectRatio={16 / 9}/>
           </article>
         </section>
         <section id="contact">Contact</section>
