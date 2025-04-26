@@ -14,7 +14,7 @@ export default function Home() {
             </ul>
           </nav>
         </div>
-        <section>
+        <section className={styles.hero}>
           <h1>YAMBED</h1>
           <p>Yet Another Video Embedding API</p>
         </section>
