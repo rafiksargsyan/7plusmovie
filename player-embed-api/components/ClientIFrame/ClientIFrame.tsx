@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-export default function ClientIframe({ src }: { src: string }) {
+export default function ClientIframe({ src, width, aspectRatio }: { src: string, width: number, aspectRatio: number }) {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -16,12 +16,11 @@ export default function ClientIframe({ src }: { src: string }) {
   return (
     <iframe
       src={src}
-      width="100%"
-      height="100%"
-      style={{ border: 'none' }}
+      width={width}
+      height={Math.round(width / aspectRatio)}
+      style={{ border: 'none', overflow: 'hidden' }}
       allowFullScreen
       loading="lazy"
-      scrolling="no"
     ></iframe>
   );
 }

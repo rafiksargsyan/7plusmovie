@@ -17,11 +17,16 @@ export default function Home() {
         </section>
       </header>
       <main>
-        <section id="api">API DOCUMENTATION
-          <article>Movie Api
-            <ClientIFrame src="http://localhost:3000/movie?tmdbId=278" />
+        <section id="api">
+          <h2>API DOCUMENTATION</h2>
+          <article>
+            <h3>Movie API</h3>
+            <ClientIFrame src="http://localhost:3000/movie?tmdbId=278" width={720} aspectRatio={16 / 9}/>
           </article>
-          <article>TvShow Api</article>
+          <article>
+            <h3>Tv Show API</h3>
+          <ClientIFrame src="http://localhost:3000/tv-show?tmdbId=1399&s=1&e=1" width={720} aspectRatio={16 / 9}/>
+          </article>
         </section>
         <section id="contact">Contact</section>
       </main>
