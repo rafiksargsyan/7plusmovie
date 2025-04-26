@@ -41,7 +41,7 @@ a {
   }
 }
 
-[data-media-player]:not([data-view-type="audio"]) [data-media-provider] {
+[data-media-player]:not([data-view-type="audio"]) {
   height: 100vh !important;
 }
 
