@@ -14,6 +14,7 @@ export default function Home() {
             </ul>
           </nav>
         </div>
+        <div className="sharethis-inline-share-buttons"></div>
         <section className={styles.hero}>
           <h1>YAMBED</h1>
           <p>Yet Another Video Embedding API</p>
