@@ -208,6 +208,53 @@ export class TvShowRepository implements TvShowRepositoryInterface {
     });
   }
 
+  async findTvShowByTvdbId(id: number): Promise<Nullable<string>> {
+    const queryParams = {
+      TableName: dynamodbTvShowTableName,
+      IndexName: 'tvdb-id',
+      KeyConditionExpression: "#tvdbId = :tvdbId",
+      ExpressionAttributeNames:{
+        "#tvdbId": "_tvdbId"
+      },
+      ExpressionAttributeValues: {
+        ":tvdbId": id
+      }
+    };
+    let data = await this.docClient.query(queryParams);
+    return data.Items?.[0]?.PK;
+  }
+
+  async findTvShowByTmdbId(id: number): Promise<Nullable<string>> {
+    const queryParams = {
+      TableName: dynamodbTvShowTableName,
+      IndexName: 'tmdb-id',
+      KeyConditionExpression: "#tmdbId = :tmdbId",
+      ExpressionAttributeNames:{
+        "#tmdbId": "tmdbId"
+      },
+      ExpressionAttributeValues: {
+        ":tmdbId": `${id}`
+      }
+    };
+    let data = await this.docClient.query(queryParams);
+    return data.Items?.[0]?.PK;
+  }
+
+  async findTvShowByImdbId(id: string): Promise<Nullable<string>> {
+    const queryParams = {
+      TableName: dynamodbTvShowTableName,
+      IndexName: 'imdb-id',
+      KeyConditionExpression: "#imdbId = :imdbId",
+      ExpressionAttributeNames:{
+        "#imdbId": "_imdbId"
+      },
+      ExpressionAttributeValues: {
+        ":imdbId": id
+      }
+    };
+    let data = await this.docClient.query(queryParams);
+    return data.Items?.[0]?.PK;
+  }
 }
 
 class FailedToGetTvShowError extends Error {}

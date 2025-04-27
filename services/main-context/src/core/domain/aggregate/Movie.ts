@@ -3,7 +3,7 @@ import { L8nLangCode } from '../L8nLangCodes';
 import { MovieGenre } from '../MovieGenres';
 import { Person } from '../Persons';
 import { Release, ReleaseRead } from '../entity/Release';
-import { strIsBlank } from '../../../utils';
+import { Nullable, strIsBlank } from '../../../utils';
 
 type RelativePath = string;
 
@@ -27,6 +27,7 @@ export class Movie {
   private releaseIndexerContextMovieId: string;
   private _inTranscoding: boolean = false;
   private _releaseTimeInMillis;
+  private _imdbId: Nullable<string>;
 
   public constructor(createEmptyObject: boolean, originalLocale?: L8nLangCode, originalTitle?: string, releaseYear?: number) {
     if (!createEmptyObject) {
@@ -214,6 +215,18 @@ export class Movie {
     }
     return false;
   }
+
+  set imdbId(v: string) {
+    if (v == null) {
+      throw new NullImdbIdError();
+    }
+    this._imdbId = v;
+    this.touch();
+  }
+
+  get imdbId(): Nullable<string> {
+    return this._imdbId;
+  }
 }
 
 class NullReleaseKeyError extends Error {}
@@ -239,3 +252,5 @@ class InvalidTmdbIdError extends Error {}
 class BlankRICMovieIdError extends Error {}
 
 class NullReleaseTimeError extends Error {};
+
+class NullImdbIdError extends Error {};

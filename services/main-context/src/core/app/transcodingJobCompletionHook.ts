@@ -157,7 +157,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     } else {
       movie.transcodingFinished();
       await docClient.put({ TableName: dynamodbMovieTableName, Item: movie });
-      if (event.invalidVttFileName !== null) {
+      if (event.invalidVttFileName != null) {
         const createMovieTranscodingJobParam: CreateMovieTranscodingJobParam = {
           movieId: movieTranscodingJobRead.movieId,
           mkvHttpUrl: movieTranscodingJobRead.mkvHttpUrl!,
@@ -276,7 +276,7 @@ export const handler = async (event: HandlerParam): Promise<void> => {
     } else {
       tvShow.transcodingFinished(season, episode);
       await tvShowRepo.saveSeason(tvShow, false, season);
-      if (event.invalidVttFileName !== null) {
+      if (event.invalidVttFileName != null) {
         const createTvShowTranscodingJobParam: CreateTvShowTranscodingJobParam = {
           tvShowId: tvShowTranscodingJobRead.tvShowId,
           season: tvShowTranscodingJobRead.season,

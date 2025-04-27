@@ -860,6 +860,43 @@ functions:
           authorizer:
             arn: arn:aws:cognito-idp:eu-west-3:003200941285:userpool/eu-west-3_K4C2mQvl6
 
+  movieFindByExternalIds:
+    environment:
+      DYNAMODB_MOVIE_TABLE_NAME: ${env:DYNAMODB_MOVIE_TABLE_NAME}
+    handler: src/core/app/movieFindByExternalIds.handler
+    events:
+      - http:
+          integration: lambda
+          path: /movie/find/external-ids
+          method: get
+          request:
+            template:
+              application/json: >
+                {
+                  "tmdbId": #if($input.params().querystring.get('tmdbId') != "") $util.escapeJavaScript($input.params().querystring.get('tmdbId')) #else null #end,
+                  "imdbId": #if($input.params().querystring.get('imdbId') != "") "$util.escapeJavaScript($input.params().querystring.get('imdbId'))" #else null #end
+                }
+              application/x-www-form-urlencoded: null
+  
+  tvShowFindByExternalIds:
+    environment:
+      DYNAMODB_TV_SHOW_TABLE_NAME: ${env:DYNAMODB_TV_SHOW_TABLE_NAME}
+    handler: src/core/app/tv-show/findByExternalIds.handler
+    events:
+      - http:
+          integration: lambda
+          path: /tv-show/find/external-ids
+          method: get
+          request:
+            template:
+              application/json: >
+                {
+                  "tmdbId": #if($input.params().querystring.get('tmdbId') != "") $util.escapeJavaScript($input.params().querystring.get('tmdbId')) #else null #end,
+                  "imdbId": #if($input.params().querystring.get('imdbId') != "") "$util.escapeJavaScript($input.params().querystring.get('imdbId'))" #else null #end,
+                  "tvdbId": #if($input.params().querystring.get('tvdbId') != "") $util.escapeJavaScript($input.params().querystring.get('tvdbId')) #else null #end
+                }
+              application/x-www-form-urlencoded: null
+
 resources:
   Resources:
     createCloudFrontDistroMetadataRole:

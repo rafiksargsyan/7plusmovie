@@ -3,6 +3,9 @@ import { TvShow } from "../domain/aggregate/TvShow"
 
 export interface TvShowRepositoryInterface {
   getTvShowById(id: string | undefined) : Promise<TvShow>
+  findTvShowByTvdbId(id: number) : Promise<Nullable<string>>
+  findTvShowByTmdbId(id: number) : Promise<Nullable<string>>
+  findTvShowByImdbId(id: string) : Promise<Nullable<string>>
   getByIdLazy(id: Nullable<string>) : Promise<TvShow>
   saveTvShow(tvShow: TvShow)
   saveSeason(tvShow: TvShow, saveRoot: boolean, seasonNumber: number)

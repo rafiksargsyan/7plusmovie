@@ -14,6 +14,8 @@ import { Nullable, strIsBlank } from '../../utils';
 import { Release } from '../domain/entity/Release';
 import { RipType } from '../domain/RipType';
 import Typesense from 'typesense';
+import { TmdbClient } from '../../adapters/TmdbClient';
+import { ITmdbClient } from '../ports/ITmdbClient';
 
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 
@@ -74,6 +76,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
       'apiKey': secret.TYPESENSE_ADMIN_KEY
     })
     const tmdbApiKey = secret.TMDB_API_KEY!;
+    const tmdbClient2 = new TmdbClient('https://api.themoviedb.org/3/', tmdbApiKey);
   
     for (const record of event.Records) {
       if (record.eventName === 'REMOVE') {
@@ -87,7 +90,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         let movie: MovieRead = marshaller.unmarshallItem(record.dynamodb?.NewImage!) as unknown as MovieRead;
         let updated: boolean = false;
         if (movie.tmdbId != undefined) {
-          updated = await updateBasedOnTmdbId(movie.id, movie.tmdbId, tmdbApiKey, movie);
+          updated = await updateBasedOnTmdbId(movie.id, movie.tmdbId, tmdbApiKey, movie, tmdbClient2);
         } 
         if (updated) {
           return;
@@ -160,7 +163,8 @@ async function emptyS3Directory(bucket, dir: string) {
   if (listedObjects.IsTruncated) await emptyS3Directory(bucket, dir);
 }
 
-async function updateBasedOnTmdbId(movieId: string, tmdbId: string, tmdbApiKey: string, movieRead: MovieRead) {
+async function updateBasedOnTmdbId(movieId: string, tmdbId: string, tmdbApiKey: string,
+  movieRead: MovieRead, tmdbClient2: ITmdbClient) {
   const queryParams = {
     TableName: dynamodbMovieTableName,
     Key: { 'id': movieId }
@@ -172,6 +176,14 @@ async function updateBasedOnTmdbId(movieId: string, tmdbId: string, tmdbApiKey: 
   let movie = new Movie(true);
   Object.assign(movie, data.Item);
   let updated: boolean = false;
+
+  if (movie.imdbId == null) {
+    const externalIds = await tmdbClient2.getMovieExternalIds(Number.parseInt(tmdbId));
+    if (externalIds.imdbId != null) {
+      movie.imdbId = externalIds.imdbId;
+      updated = true;
+    }
+  }
 
   const tmdbMovieEnUs = (await tmdbClient.get(`movie/${tmdbId}?api_key=${tmdbApiKey}&language=en-US`)).data;
   const tmdbMovieRu = (await tmdbClient.get(`movie/${tmdbId}?api_key=${tmdbApiKey}&language=ru`)).data;
