@@ -6,6 +6,7 @@
   padding-bottom: 1em;
   padding-left: 1.5em;
   padding-right: 1.5em;
+  min-height: 4em;
 }
 
 .nav ul {
@@ -14,15 +15,38 @@
   gap: 1em;
 }
 
+.nav a {
+  font-size: 1.2em;
+}
+
 .hero h1, .hero p {
   text-align: center;
 }
 
 .hero {
-  padding-top: 2em;
-  padding-bottom: 2em;
+  padding-top: 5em;
+  padding-bottom: 5em;
+  background-color: var(--hero-background-color);
+}
+
+.hero h1 {
+  font-weight: 900;
+  font-size: 4em;
 }
 
 .hero p {
-  margin-top: 1em;
+  margin-top: 0.5em;
+  font-size: 2.5em;
+  font-weight: 500;
+}
+
+.logo {
+  color: blueviolet;
+  font-weight: 700;
+  font-size: 1.25em;
+}
+
+.container {
+  margin-left: 20em;
+  margin-right: 20em;
 }

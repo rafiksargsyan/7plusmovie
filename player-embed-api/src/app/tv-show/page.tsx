@@ -7,7 +7,7 @@ async function findTvShowByExternalId(tmdbId: Nullable<string>, imdbId: Nullable
   if (tmdbId == null) tmdbId = '';
   if (imdbId == null) imdbId = '';
   if (tvdbId == null) tvdbId = '';
-  const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod//tv-show/find/external-ids?imdbId=${imdbId}&tmdbId=${tmdbId}&tvdbId${tvdbId}`);
+  const response = await axios.get(`https://olz10v4b25.execute-api.eu-west-3.amazonaws.com/prod//tv-show/find/external-ids?imdbId=${imdbId}&tmdbId=${tmdbId}&tvdbId=${tvdbId}`);
   return response.data;
 }
 
