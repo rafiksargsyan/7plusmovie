@@ -34,7 +34,7 @@ interface TvShowPageProps {
 }
 
 export default function TvShowPage(props: TvShowPageProps) {
-  let playerTitle = `${props.titleL8ns['EN_US']} (${props.releaseYear}) • S${props.seasonNumber} • E${props.episodeNumber}`;
+  const playerTitle = `${props.titleL8ns['EN_US']} (${props.releaseYear}) • S${props.seasonNumber} • E${props.episodeNumber}`;
   return (
     <Player movieTitle={playerTitle}
       m3u8File={props.player.m3u8File}
