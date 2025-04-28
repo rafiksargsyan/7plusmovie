@@ -11,6 +11,12 @@ export function resolveAudioLang(code: Nullable<string>,
                                  numAudioStreams: number,
                                  radarrLanguages: string[]) {
   if (numUndefinedAudios > 1) return null;
+
+  const ruAudioAuthorList = AudioLang.audioAuthorPriorityList[AudioLang.RU.key];
+  for (let a of ruAudioAuthorList) {
+    if (AudioAuthor.equals(author, a)) return AudioLang.RU;
+  }
+
   if (numAudioStreams === 1 && radarrLanguages.length === 1) {
     if (radarrLanguages.includes("portuguese (brazil)")) return AudioLang.PT_BR;
     if (radarrLanguages.includes("spanish (latino)")) return AudioLang.ES_419;
@@ -47,9 +53,5 @@ export function resolveAudioLang(code: Nullable<string>,
   if (AudioLang.equals(audioLang, AudioLang.FR) && (title.includes("france") || title.includes("vff"))) return AudioLang.FR_FR;
   if (AudioLang.equals(audioLang, AudioLang.PT) && (title.includes("brazil") || titleOriginal.includes("BR"))) return AudioLang.PT_BR;
   if (AudioLang.equals(audioLang, AudioLang.PT) && title.includes("portugal")) return AudioLang.PT_PT;
-  const ruAudioAuthorList = AudioLang.audioAuthorPriorityList[AudioLang.RU.key];
-  for (let a of ruAudioAuthorList) {
-    if (AudioAuthor.equals(author, a)) return AudioLang.RU;
-  }
   return audioLang;
 }

@@ -7,7 +7,6 @@ import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 import { ReleaseRead } from "../domain/entity/Release";
 
 const dynamodbMovieTableName = process.env.DYNAMODB_MOVIE_TABLE_NAME!;
-const mediaAssetsS3Bucket = process.env.MEDIA_ASSETS_S3_BUCKET!;
 const mediaAssetsR2Bucket = process.env.ClOUDFLARE_MEDIA_ASSETS_R2_BUCKET!;
 const secretManagerSecretId = process.env.SECRET_MANAGER_SECRETS_ID!;
 const cloudflareAccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
@@ -57,9 +56,6 @@ export const handler = async (event: Param): Promise<void> => {
   if (event.releaseId === "migration") {
     const rootFolder = movie.id;
     try {
-      await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/vod`);
-      await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/thumbnails`);
-      await emptyS3Directory(s3, mediaAssetsS3Bucket, `${rootFolder}/subtitles`);
       await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/vod`);
       await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/thumbnails`);
       await emptyS3Directory(r2, mediaAssetsR2Bucket, `${rootFolder}/subtitles`);
@@ -68,7 +64,6 @@ export const handler = async (event: Param): Promise<void> => {
     }
   } else {
     try {
-      await emptyS3Directory(s3, mediaAssetsS3Bucket, release._rootFolder);
       await emptyS3Directory(r2, mediaAssetsR2Bucket, release._rootFolder);
     } catch (e) {
       console.error(e);
