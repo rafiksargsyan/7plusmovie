@@ -41,6 +41,9 @@ export default async function RootLayout({
             zoneId: '9838474',
           });`}
         </Script>
+        <Script
+          type='text/javascript'
+          src='https://platform-api.sharethis.com/js/sharethis.js#property=68163c5bbfa7c90013226c38&product=sop'/>
       </head>
       <body data-theme="dark">
         <MantineProvider theme={theme} defaultColorScheme="dark" forceColorScheme='dark'>

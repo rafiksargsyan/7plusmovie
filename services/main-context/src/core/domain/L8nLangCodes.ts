@@ -19,7 +19,9 @@ export const L8nLangCodes = {
   SV : { langTag: "sv" },
   SV_SE : { langTag: "sv-SE" },
   PL : { langTag: "pl" },
-  PL_PL : { langTag: "pl-PL" }
+  PL_PL : { langTag: "pl-PL" },
+  DE : { langTag: "de" },
+  DE_DE: { langTag: "de-DE"}
 } as const;
 
 export class L8nLangCode {
